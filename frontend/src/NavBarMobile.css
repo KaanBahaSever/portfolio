@@ -1,0 +1,34 @@
+
+.navbar-mobile {
+    height: 50px;
+    display: none;
+    position: fixed;
+    border-top: 1px solid #0000001c;
+    background-color: rgb(255, 255, 255);
+    width: 100%;
+    bottom: 0;
+
+    overflow-x: hidden;
+}
+
+.navbar-mobile a {
+    display: flex;
+    flex: 1;
+    cursor: pointer;
+    padding: 16px;
+    border-radius: 12px;
+    justify-content: center;
+    align-items: center;
+    font-size: large;
+}
+
+.active {
+    /* background-color: unset; */
+}
+
+@media only screen and (max-width: 1000px) {
+    .navbar-mobile {
+        display: flex;
+    }
+}
+

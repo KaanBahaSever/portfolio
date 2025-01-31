@@ -1,0 +1,264 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+
+.App {
+  /* font-family: "Open Sans", sans-serif; */
+}
+
+.home {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+}
+
+#root{
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+.post {
+  border: 1px solid #c4c4c469;
+  box-shadow: rgba(99, 99, 99, 0.4) 0px 0px 2px 0px;
+  border-radius: 12px;
+  
+  column-gap: 16px;
+  width: -webkit-fill-available;
+}
+
+.post-body{
+  display: flex;
+  padding: 16px;
+}
+
+.post-content {
+  width: 100%;
+  margin-left: 12px;
+}
+
+.post-footer{
+  display: flex;
+  border-top: 1px solid red;
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 80px;
+}
+
+.profile img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px solid #c4c4c469;
+}
+
+
+textarea {
+  width: 99%;
+  resize: none;
+}
+
+.text-area-container {
+  margin: 20px 0px 15px 0px;
+}
+
+.feed-container {
+  border: 1px solid #c4c4c469;
+  border-width: 0px 1px 0 1px;
+  padding: 0 10px 0 10px;
+  width: 580px;
+  height: 100%;
+}
+
+.menu {
+  position: sticky;
+  top: 10px;
+  margin-top: 10px;
+  width: 300px;
+  gap: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-item {
+  cursor: pointer;
+  padding: 16px;
+  width: 50%;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: large;
+}
+
+.menu-item:hover {
+  background-color: aliceblue;
+}
+
+.ant-input-data-count {
+  bottom: -32px !important;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.submit-button {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.active {
+  background-color: aliceblue;
+}
+
+.profile-container {
+  background-color: rgb(134, 182, 224);
+  padding: 10px;
+  margin-bottom: 15px;
+  margin-top: 16px;
+  border-radius: 16px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 110px;
+}
+
+.profile-container img {
+  width: 100px;
+  border: 4px solid white;
+  border-radius: 50%;
+  box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+}
+
+.settings-container {
+  width: 600px;
+}
+
+.avatar-container {
+  position: relative;
+}
+
+.overlay {
+  cursor: pointer;
+  border-radius: 50%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  transition: .3s ease;
+  background-color: rgba(42, 114, 148, 0.308);
+}
+
+.icon {
+  color: white;
+  font-size: 50px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.avatar-container:hover .overlay {
+  opacity: 1;
+}
+
+.modal-img {
+  width: 100%;
+}
+
+.cropper-view-box {
+  border-radius: 50% !important;
+}
+
+@media only screen and (max-width: 1000px) {
+  .menu {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 650px) {
+  .feed-container {
+    width: 95%;
+  }
+
+  .home-container {
+    display: unset !important;
+  }
+
+  .main-icon {
+    width: 70px;
+  }
+}
+
+.home-container {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+}
+
+.ant-upload-list.ant-upload-list-text {
+  max-width: 240px;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.error-login {
+  display: none;
+  color: red;
+}
+
+.main-icon {
+  width: 90px;
+}
+
+.social-title{
+  text-align: center;
+  font-family: "Pacifico", cursive;
+  font-size: 32px;
+  color: darkblue;
+}
+
+.ant-form-item.css-1r287do{
+  margin-bottom: 12px !important;
+}
+
+.avatar-skeleton{
+  width: 100px !important;
+  height: 100px !important;
+}
+
+.avatar-skeleton span{
+  width: 100px !important;
+  height: 100px !important;
+}
+
+.ant-skeleton.ant-skeleton-element.ant-skeleton-active.css-dev-only-do-not-override-1r287do{
+  width: 100px !important;
+  height: 100px !important;
+}
+
+.ant-skeleton-avatar.ant-skeleton-avatar-circle{
+  width: 100px !important;
+  height: 100px !important;
+}

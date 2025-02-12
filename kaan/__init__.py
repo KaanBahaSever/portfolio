@@ -23,7 +23,7 @@ app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = ''
 app.config['MAIL_PASSWORD'] = ''
 app.config['MAIL_DEFAULT_SENDER'] = ''
-app.config['USER_EMAIL_SENDER_EMAIL'] = ''
+app.config['USER_EMAIL_SENDER_EMAIL'] = 'dummy@gmail.com'
 
 executor = Executor(app)
 db = SQLAlchemy(app) # Create a ReCaptcha object by passing in 'app' as parameter

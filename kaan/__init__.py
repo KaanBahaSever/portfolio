@@ -11,7 +11,7 @@ from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = ''
+app.config['SECRET_KEY'] = 'dummy'
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///social.db"

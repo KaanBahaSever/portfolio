@@ -1,0 +1,28 @@
+name: Deploy Flask App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_SERVER }}
+          username: ${{ secrets.DEPLOY_USER }}
+          password: ${{ secrets.DEPLOY_PASSWORD }}
+          port: 22
+          script: |
+            # Change to your app directory; adjust as necessary.
+            cd /home/kaanbahasever/htdocs/kaanbahasever.com
+            # Pull the latest changes from your repo.
+            git pull
+            

@@ -1,0 +1,14 @@
+{
+  "files": {
+    "main.css": "/static/css/main.15512de6.css",
+    "main.js": "/static/js/main.8264809e.js",
+    "static/media/cylone.svg": "/static/media/cylone.4fdd302105336837127e271c5fbfab45.svg",
+    "index.html": "/index.html",
+    "main.15512de6.css.map": "/static/css/main.15512de6.css.map",
+    "main.8264809e.js.map": "/static/js/main.8264809e.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.15512de6.css",
+    "static/js/main.8264809e.js"
+  ]
+}

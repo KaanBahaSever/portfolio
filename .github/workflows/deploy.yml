@@ -27,8 +27,8 @@ jobs:
             git pull
 
             source venv/bin/activate
+
             # Restart the Flask app.
             pkill gunicorn
-
-            gunicorn run:app
+            gunicorn run:app --daemon &
             

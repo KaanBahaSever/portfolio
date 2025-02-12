@@ -26,8 +26,9 @@ jobs:
             # Pull the latest changes from your repo.
             git pull
 
+            source venv/bin/activate
             # Restart the Flask app.
             pkill gunicorn
 
-            venv/bin/gunicorn gunicorn run:app
+            gunicorn run:app
             

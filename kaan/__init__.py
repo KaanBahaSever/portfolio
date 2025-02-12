@@ -16,6 +16,15 @@ app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///social.db"
 
+#email config
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = ''
+app.config['MAIL_PASSWORD'] = ''
+app.config['MAIL_DEFAULT_SENDER'] = ''
+app.config['USER_EMAIL_SENDER_EMAIL'] = ''
+
 executor = Executor(app)
 db = SQLAlchemy(app) # Create a ReCaptcha object by passing in 'app' as parameter
 Session(app)

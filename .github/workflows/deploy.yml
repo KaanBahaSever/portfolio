@@ -29,5 +29,5 @@ jobs:
             # Restart the Flask app.
             pkill gunicorn
 
-            gunicorn run:app
+            venv/bin/gunicorn gunicorn run:app
             

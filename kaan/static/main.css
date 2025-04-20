@@ -3,18 +3,18 @@ body {
     margin: 0;
 }
 
-h1{
+h1 {
     margin: 0;
 }
 
 header {
-    background: red;
+    background: #ece9e970;
     padding: .5rem 1rem;
 }
 
 footer {
     min-height: 50px;
-    background: PapayaWhip;
+    background: #ece9e970;
     text-align: center;
 }
 
@@ -48,28 +48,29 @@ a {
 nav a {
     padding: .5rem;
     border-radius: 12px;
-    background-color: aliceblue;
 }
 
 nav a:hover {
-    background-color: aquamarine;
+    background-color: rgba(183, 183, 183, 0.501);
 }
 
-.avatar{
+.avatar {
     border-radius: 50%;
     width: 150px;
     height: 150px;
 }
 
-.landing{
+.landing {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: max-content;
+    gap: 1.5rem;
+    margin-top: 2rem;
 }
 
-.download-cv{
+.download-cv {
     background-color: rgb(6, 6, 190);
     color: white;
     border: 1px solid rgb(6, 6, 190);
@@ -78,6 +79,17 @@ nav a:hover {
     cursor: pointer;
 }
 
-.download-cv:hover{
+.download-cv:hover {
     background-color: rgba(6, 6, 190, 0.797);
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.buttons a{
+    width: auto;
 }

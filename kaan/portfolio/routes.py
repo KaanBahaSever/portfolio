@@ -9,4 +9,4 @@ portfolio_bp = Blueprint('portfolio_bp', __name__)
 
 @portfolio_bp.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return render_template('welcome.html')

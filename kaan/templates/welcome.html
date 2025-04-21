@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/main.css?x=32352">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <title>Kaan Baha Sever</title>
 </head>
 
@@ -15,21 +15,23 @@
                 <h1>kaani</h1>
             </div>
             <nav>
-                <a href="#">Home</a>
-                <a href="#">About</a>
-                <a href="#">Projects</a>
-                <a href="#">Blog</a>
+                <a href="{{ url_for('home') }}">Home</a>
+                <a href="{{ url_for('about') }}">About</a>
+                <a href="{{ url_for('projects') }}">Projects</a>
+                <a href="{{ url_for('blog') }}">Blog</a>
             </nav>
         </div>
     </header>
 
     <main>
         <div class="landing">
-            <img class="avatar" src="static/profile.png" alt="kaan">
+            <img class="avatar" src="{{ url_for('static', filename='profile.png') }}" alt="kaan">
             <h1>Hello! I'am Kaan Baha Sever</h1>
             <div class="buttons">
-                <a class="my-github" href="https://github.com/KaanBahaSever" target="_blank"><img src="static/github.svg"></a>
-                <a class="download-cv" href="static/kaan_resume.pdf" target="_blank" >My Resume</a>
+                <a class="my-github" href="https://github.com/KaanBahaSever" target="_blank">
+                    <img src="{{ url_for('static', filename='github.svg') }}">
+                </a>
+                <a class="download-cv" href="{{ url_for('static', filename='kaan_resume.pdf') }}" target="_blank">My Resume</a>
                 <a><img src=""></a>
             </div>
         </div>

@@ -1,6 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
+
 body {
     min-height: 100vh;
     margin: 0;
+
+    font-family: poppins, sans-serif;
 }
 
 h1 {
@@ -8,14 +12,26 @@ h1 {
 }
 
 header {
-    background: #ece9e970;
-    padding: .5rem 1rem;
+    /* background: #ece9e970; */
+    padding: .5rem 0;
+
+    border-bottom: 1px solid #ece9e9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+    display: flex;
+    justify-content: center;
+}
+
+main {
+    display: flex;
+    justify-content: center;
 }
 
 footer {
     min-height: 50px;
-    background: #ece9e970;
+    background: #ffffff70;
     text-align: center;
+    border-top: 1px solid #ece9e9;
 }
 
 body {
@@ -27,9 +43,12 @@ main {
     flex: 1;
 }
 
-.container {
+header .container {
     display: flex;
     align-items: center;
+    padding: 0 16rem;
+
+    width: 50%;
 }
 
 #branding {
@@ -46,12 +65,13 @@ a {
 }
 
 nav a {
-    padding: .5rem;
+    padding: 1rem;
     border-radius: 12px;
 }
 
 nav a:hover {
     background-color: rgba(183, 183, 183, 0.501);
+    padding: .6rem 1rem;
 }
 
 .avatar {
@@ -68,19 +88,23 @@ nav a:hover {
     height: max-content;
     gap: 1.5rem;
     margin-top: 2rem;
+
+    width: 50%;
 }
 
-.download-cv {
-    background-color: rgb(6, 6, 190);
-    color: white;
-    border: 1px solid rgb(6, 6, 190);
+.social-button {
+    background-color: rgb(255 255 255);
+    border: 1px solid rgb(226 226 255);
     padding: 10px;
     border-radius: 12px;
     cursor: pointer;
+
+    display: flex;
+    gap: 8px;
 }
 
-.download-cv:hover {
-    background-color: rgba(6, 6, 190, 0.797);
+.social-button:hover {
+    background-color: rgba(189, 189, 189, 0.797);
 }
 
 .buttons {
@@ -93,3 +117,4 @@ nav a:hover {
 .buttons a{
     width: auto;
 }
+

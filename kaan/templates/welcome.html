@@ -26,13 +26,24 @@
     <main>
         <div class="landing">
             <img class="avatar" src="{{ url_for('static', filename='profile.png') }}" alt="kaan">
-            <h1>Hello! I'am Kaan Baha Sever</h1>
+            <h1>Hello! I am Kaan Baha Sever</h1>
             <div class="buttons">
-                <a class="my-github" href="https://github.com/KaanBahaSever" target="_blank">
-                    <img src="{{ url_for('static', filename='github.svg') }}">
+                <a class="social-button" href="https://github.com/KaanBahaSever" target="_blank">
+                    <img width="24px" src="{{ url_for('static', filename='github.svg') }}">
+                    <!-- <span>My GitHub</span> -->
                 </a>
-                <a class="download-cv" href="{{ url_for('static', filename='kaan_resume.pdf') }}" target="_blank">My Resume</a>
-                <a><img src=""></a>
+                <a class="social-button" href="https://www.linkedin.com/in/kaan-baha-sever" target="_blank">
+                    <img width="24px" src="{{ url_for('static', filename='linkedin.png') }}">
+                    <!-- <span>My Linkedin</span> -->
+                </a>
+                <a class="social-button" href="https://medium.com/@KaanBahaSever" target="_blank">
+                    <img width="24px" src="{{ url_for('static', filename='medium.png') }}">
+                    <!-- <span>My Linkedin</span> -->
+                </a>
+                <a class="social-button" href="{{ url_for('static', filename='kaan_resume.pdf') }}" target="_blank">
+                    <img style="width: 1.5rem;" src="{{ url_for('static', filename='resume-icon.png') }}">
+                    <span>My Resume</span>
+                </a>
             </div>
         </div>
         </div>

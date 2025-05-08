@@ -25,3 +25,7 @@ def projects():
 @portfolio_bp.route('/blog')
 def blog():
     return 'blog'
+
+@portfolio_bp.route('/live')
+def live():
+    return render_template('live.html')

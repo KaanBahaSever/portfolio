@@ -6,6 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}?v={{ timestamp }}">
     <title>Kaan Baha Sever</title>
+
+    <script>
+        function toggleMenu() {
+            const menuButton = document.getElementById('menu-button');
+            const nav = document.querySelector('.navbar-container-mobile');
+
+            if (nav.style.display === 'block') {
+                nav.style.display = 'none';
+                menuButton.classList.remove('active');
+            } else {
+                nav.style.display = 'block';
+                menuButton.classList.add('active');
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -29,12 +44,15 @@
             <button id="menu-button" class="menu-button" onclick="toggleMenu()">
                 <img src="{{ url_for('static', filename='menu.png') }}" alt="Menu">
             </button>
-            <!-- <nav>
-                <a href="{{ url_for('portfolio_bp.home') }}">Home</a>
-                <a href="{{ url_for('portfolio_bp.about') }}">About</a>
-                <a href="{{ url_for('portfolio_bp.projects') }}">Projects</a>
-                <a href="{{ url_for('portfolio_bp.blog') }}">Blog</a>
-            </nav> -->
+
+            <div class="navbar-container-mobile">
+                <nav>
+                    <a href="{{ url_for('portfolio_bp.home') }}">Home</a>
+                    <a href="{{ url_for('portfolio_bp.about') }}">About</a>
+                    <a href="{{ url_for('portfolio_bp.projects') }}">Projects</a>
+                    <a href="{{ url_for('portfolio_bp.blog') }}">Blog</a>
+                </nav>
+            </div>
         </div>
     </header>
 
@@ -55,7 +73,8 @@
                     <img width="24px" src="{{ url_for('static', filename='medium.png') }}">
                     <!-- <span>My Linkedin</span> -->
                 </a>
-                <a class="social-button" style="max-width: unset;" href="{{ url_for('static', filename='kaan_resume.pdf') }}" target="_blank">
+                <a class="social-button" style="max-width: unset;"
+                    href="{{ url_for('static', filename='kaan_resume.pdf') }}" target="_blank">
                     <img style="width: 1.5rem;" src="{{ url_for('static', filename='resume-icon.png') }}">
                     <span>My Resume</span>
                 </a>

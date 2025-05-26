@@ -11,19 +11,8 @@ from sqlalchemy import create_engine
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-app.config['SESSION_TYPE'] = os.getenv('SESSION_TYPE')
-app.config['SESSION_PERMANENT'] = os.getenv('SESSION_PERMANENT')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('SQLALCHEMY_DATABASE_URI')
-
-#email config
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
-app.config['MAIL_USE_SSL'] = os.getenv('MAIL_USE_SSL')
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER')
-app.config['USER_EMAIL_SENDER_EMAIL'] = os.getenv('USER_EMAIL_SENDER_EMAIL')
+# Load all configuration from config.py
+app.config.from_object('config')
 
 executor = Executor(app)
 db = SQLAlchemy(app) # Create a ReCaptcha object by passing in 'app' as parameter

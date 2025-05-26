@@ -175,3 +175,5 @@ profile_picsx
 
 flask_session
 social.db
+
+config.py

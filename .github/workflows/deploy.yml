@@ -26,9 +26,6 @@ jobs:
             # Pull the latest changes from your repo.
             git pull
 
-            source venv/bin/activate
-
-            # Restart the Flask app.
-            pkill gunicorn
-            gunicorn run:app --daemon &
-            
+            # Restart the Flask app portfilo service.
+            sudo systemctl restart portfilo
+                      

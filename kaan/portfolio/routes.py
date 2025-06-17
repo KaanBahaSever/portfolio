@@ -29,3 +29,7 @@ def blog():
 @portfolio_bp.route('/live')
 def live():
     return render_template('live.html')
+
+@portfolio_bp.route('/motivation')
+def motivation():
+    return render_template('motivation.html')

@@ -26,6 +26,6 @@ jobs:
             # Pull the latest changes from your repo.
             git pull
 
-            # Restart the Flask app portfilo service.
-            sudo systemctl restart portfilo
+            # Restart the Flask app portfolio service.
+            sudo systemctl restart portfolio
                       

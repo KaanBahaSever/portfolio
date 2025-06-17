@@ -38,3 +38,5 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(api_bp)
 app.register_blueprint(profile_bp)
 app.register_blueprint(portfolio_bp)
+
+# git pull is working?

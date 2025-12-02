@@ -38,10 +38,3 @@ body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helve
 
 .site-footer { border-top: 1px solid var(--border); text-align: center; padding: 24px; color: var(--muted); }
 .back-to-top { display: inline-block; margin-top: 8px; text-decoration: none; color: var(--primary); }
-
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #0b0f14; --text: #e5e7eb; --muted: #9ca3af; --border: #1f2937; }
-  body { background: var(--bg); color: var(--text); }
-  .project-card { border-color: var(--border); }
-  .site-header, .site-footer { border-color: var(--border); }
-}

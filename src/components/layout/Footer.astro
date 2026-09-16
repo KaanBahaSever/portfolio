@@ -1,0 +1,41 @@
+---
+import { SITE } from '../../config/site';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-zinc-200 dark:border-zinc-800">
+  <div
+    class="px-safe mx-auto flex max-w-5xl flex-col gap-4 py-8 pb-[max(2rem,env(safe-area-inset-bottom))] text-sm text-zinc-600 sm:flex-row sm:items-center sm:justify-between dark:text-zinc-400"
+  >
+    <div class="space-y-1">
+      <p>&copy; {year} {SITE.name}</p>
+      <p>Static site · tools run entirely in your browser</p>
+    </div>
+    <ul class="-mx-2 flex flex-wrap items-center gap-x-1" aria-label="Social links">
+      {
+        SITE.socials.map((social) => (
+          <li>
+            <a
+              href={social.href}
+              target="_blank"
+              rel="me noopener noreferrer"
+              class="flex min-h-11 items-center rounded-lg px-2 font-medium hover:text-emerald-700 dark:hover:text-emerald-400"
+            >
+              {social.label}
+              <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          </li>
+        ))
+      }
+      <li>
+        <a
+          href={`mailto:${SITE.email}`}
+          class="flex min-h-11 items-center rounded-lg px-2 font-medium hover:text-emerald-700 dark:hover:text-emerald-400"
+        >
+          Email
+        </a>
+      </li>
+    </ul>
+  </div>
+</footer>

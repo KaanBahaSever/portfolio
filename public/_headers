@@ -1,0 +1,10 @@
+# Cloudflare Pages custom headers: https://developers.cloudflare.com/pages/configuration/headers/
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Fingerprinted build assets never change, so cache them for a year.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable

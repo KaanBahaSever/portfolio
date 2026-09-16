@@ -1,0 +1,27 @@
+---
+title: Hello, world
+description: Why this site exists and what you can expect to find here.
+pubDate: 2026-08-28
+tags: [meta]
+---
+
+import { SITE } from '../../config/site';
+import Badge from '../../components/ui/Badge.astro';
+
+export const topics = ['Projects I have built', 'Notes on web development', 'Small tools that respect your privacy'];
+
+{/* Placeholder post: replace with your own introduction. */}
+
+Welcome to the personal site of **{SITE.name}**. This first post is written in
+MDX, so it can mix Markdown with components and expressions.
+
+<Badge variant="accent">Written in MDX</Badge>
+
+## What you will find here
+
+<ul>
+  {topics.map((topic) => <li>{topic}</li>)}
+</ul>
+
+Everything on this site is static, and the tools run entirely in your browser.
+Thanks for stopping by!

@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/ui/PostList.astro';
+import { getPublishedPosts } from '../../utils/content';
+
+const posts = await getPublishedPosts();
+---
+
+<BaseLayout title="Blog" description="Notes on web development, projects and building privacy-friendly tools.">
+  <header class="pt-2 sm:pt-6">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Blog</h1>
+    <p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
+      Notes on web development, the projects I build and what I learn along the way.
+    </p>
+  </header>
+
+  <div class="mt-10">
+    {
+      posts.length > 0 ? (
+        <PostList posts={posts} showTags />
+      ) : (
+        <p class="text-zinc-600 dark:text-zinc-400">No posts published yet.</p>
+      )
+    }
+  </div>
+</BaseLayout>

@@ -1,0 +1,38 @@
+---
+import FormattedDate from './FormattedDate.astro';
+import TagList from './TagList.astro';
+import type { BlogPost } from '../../utils/content';
+
+interface Props {
+  posts: BlogPost[];
+  headingLevel?: 'h2' | 'h3';
+  showDescription?: boolean;
+  showTags?: boolean;
+}
+
+const { posts, headingLevel: Heading = 'h2', showDescription = true, showTags = false } = Astro.props;
+---
+
+<ul class="divide-y divide-zinc-200 dark:divide-zinc-800">
+  {
+    posts.map((post) => (
+      <li class="py-5 first:pt-0 last:pb-0">
+        <article class="group relative space-y-1.5">
+          <FormattedDate date={post.data.pubDate} format="short" class="text-sm text-zinc-600 tabular-nums dark:text-zinc-400" />
+          <Heading class="text-lg leading-snug font-semibold">
+            <a
+              href={`/blog/${post.id}/`}
+              class="rounded-sm text-zinc-900 group-hover:text-emerald-700 after:absolute after:-inset-y-2 after:inset-x-0 dark:text-zinc-100 dark:group-hover:text-emerald-400"
+            >
+              {post.data.title}
+            </a>
+          </Heading>
+          {showDescription && (
+            <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{post.data.description}</p>
+          )}
+          {showTags && <TagList items={post.data.tags} label="Tags" class="pt-1" />}
+        </article>
+      </li>
+    ))
+  }
+</ul>

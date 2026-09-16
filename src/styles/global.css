@@ -1,0 +1,126 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/*
+ * Horizontal padding that respects device safe areas (notches, rounded corners)
+ * when the page uses viewport-fit=cover. Equivalent to px-4 / sm:px-6 otherwise.
+ */
+@utility px-safe {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+
+  @variant sm {
+    padding-left: max(1.5rem, env(safe-area-inset-left));
+    padding-right: max(1.5rem, env(safe-area-inset-right));
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    /* Fragment links and focus scrolling land below the sticky header (h-14 / sm:h-16). */
+    scroll-padding-top: 4.5rem;
+    /*
+     * Nothing may widen the page sideways, e.g. SortableJS's dragged card on iOS, which is
+     * positioned inside the page and would otherwise make autoscroll run away horizontally.
+     * clip (unlike hidden) creates no scroll container; hidden is the fallback before Safari 16.
+     * Set on <html> only: it applies to the viewport, so position: sticky keeps working.
+     */
+    overflow-x: clip;
+  }
+
+  /* A separate rule: the CSS minifier merges two overflow-x declarations into one. */
+  @supports not (overflow-x: clip) {
+    html {
+      overflow-x: hidden;
+    }
+  }
+
+  body {
+    @apply bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+    overflow-wrap: break-word;
+  }
+
+  /* emerald-700 on light and emerald-500 on dark backgrounds both exceed 3:1 contrast. */
+  :focus-visible {
+    outline: 2px solid var(--color-emerald-700);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :focus-visible {
+      outline-color: var(--color-emerald-500);
+    }
+  }
+
+  summary {
+    cursor: pointer;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/*
+ * Typography tweaks: long words and URLs wrap, while code blocks and tables
+ * scroll inside their own box so the page never overflows horizontally.
+ */
+@layer components {
+  .prose :where(p, li, a, blockquote, h1, h2, h3, h4, figcaption):not(:where(.not-prose, .not-prose *)) {
+    overflow-wrap: anywhere;
+  }
+
+  .prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *)) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /*
+   * Inside tables, break only between words: `anywhere` would shrink every column to one
+   * character, so the table would squeeze instead of scrolling inside its own box.
+   */
+  .prose :where(table) :where(a, code):not(:where(.not-prose, .not-prose *)) {
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .prose :where(pre):not(:where(.not-prose, .not-prose *)) {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .prose :where(pre code):not(:where(.not-prose, .not-prose *)) {
+    overflow-wrap: normal;
+    word-break: normal;
+    white-space: pre;
+  }
+
+  .prose :where(table):not(:where(.not-prose, .not-prose *)) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .prose :where(img, video):not(:where(.not-prose, .not-prose *)) {
+    max-width: 100%;
+    height: auto;
+  }
+}

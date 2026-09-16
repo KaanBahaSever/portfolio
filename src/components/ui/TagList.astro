@@ -1,0 +1,24 @@
+---
+import Tag from './Tag.astro';
+
+interface Props {
+  items: readonly string[];
+  /** Accessible label for the list, e.g. "Tags" or "Tech stack". */
+  label: string;
+  class?: string;
+}
+
+const { items, label, class: className } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <ul class:list={['flex flex-wrap gap-1.5', className]} aria-label={label}>
+      {items.map((item) => (
+        <li>
+          <Tag label={item} />
+        </li>
+      ))}
+    </ul>
+  )
+}

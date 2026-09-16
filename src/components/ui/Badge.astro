@@ -1,0 +1,25 @@
+---
+/** Small status pill ("Open source", "Private", "Coming soon"). */
+interface Props {
+  variant?: 'accent' | 'muted';
+  class?: string;
+}
+
+const { variant = 'muted', class: className } = Astro.props;
+
+const variants = {
+  accent:
+    'bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-500/25',
+  muted: 'bg-zinc-100 text-zinc-600 ring-zinc-500/15 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-400/15',
+} as const;
+---
+
+<span
+  class:list={[
+    'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset',
+    variants[variant],
+    className,
+  ]}
+>
+  <slot />
+</span>

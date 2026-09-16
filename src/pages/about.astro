@@ -1,0 +1,73 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
+import { getTimeline } from '../utils/content';
+
+const entries = await Promise.all(
+  (await getTimeline()).map(async (entry) => ({ entry, ...(await render(entry)) })),
+);
+---
+
+<BaseLayout title="About" description={`About ${SITE.name}: background, story and milestones.`}>
+  <header class="pt-2 sm:pt-6">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">About</h1>
+    {/* TODO: replace this placeholder introduction with your own. */}
+    <p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
+      I'm {SITE.name}, a {SITE.role.toLowerCase()} who likes calm interfaces, clear code and tools that respect the
+      people using them. Here are a few moments that shaped how I got here.
+    </p>
+  </header>
+
+  <section aria-labelledby="timeline-heading" class="mt-12 sm:mt-16">
+    <h2 id="timeline-heading" class="sr-only">Timeline</h2>
+    <ol class="relative ms-1.5 border-s border-zinc-200 dark:border-zinc-800">
+      {
+        entries.map(({ entry, Content }) => {
+          const { title, date, dateLabel, photos } = entry.data;
+          const hasPhotos = photos.length > 0;
+          return (
+            <li class="relative ps-6 pb-12 last:pb-0 sm:ps-8">
+              <span
+                class="absolute top-1.5 -start-[5px] size-2.5 rounded-full bg-emerald-600 ring-4 ring-zinc-50 dark:bg-emerald-500 dark:ring-zinc-950"
+                aria-hidden="true"
+              />
+              <div class:list={['min-w-0', hasPhotos && 'md:grid md:grid-cols-2 md:gap-8']}>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                    {dateLabel ?? <time datetime={String(date.getUTCFullYear())}>{date.getUTCFullYear()}</time>}
+                  </p>
+                  <h3 class="mt-1 text-lg font-semibold tracking-tight sm:text-xl">{title}</h3>
+                  <div class="prose prose-zinc mt-3 max-w-none dark:prose-invert">
+                    <Content />
+                  </div>
+                </div>
+                {hasPhotos && (
+                  <div class="mt-5 min-w-0 space-y-4 md:mt-1">
+                    {photos.map((photo) => (
+                      <figure>
+                        <Image
+                          src={photo.src}
+                          alt={photo.alt}
+                          widths={[320, 640, 960]}
+                          sizes="(min-width: 768px) 340px, calc(100vw - 4rem)"
+                          loading="lazy"
+                          decoding="async"
+                          class="h-auto w-full rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900"
+                        />
+                        {photo.caption && (
+                          <figcaption class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{photo.caption}</figcaption>
+                        )}
+                      </figure>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </section>
+</BaseLayout>

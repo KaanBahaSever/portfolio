@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/ui/Icon.astro';
+import PostList from '../components/ui/PostList.astro';
+import ProjectCard from '../components/ui/ProjectCard.astro';
+import { SITE } from '../config/site';
+import { getProjects, getPublishedPosts } from '../utils/content';
+
+const featuredProjects = (await getProjects()).filter((project) => project.data.featured).slice(0, 3);
+const recentPosts = (await getPublishedPosts()).slice(0, 3);
+
+const textLink =
+  'inline-flex min-h-11 items-center gap-1.5 rounded-lg font-medium text-zinc-700 underline decoration-zinc-300 underline-offset-4 hover:text-emerald-700 hover:decoration-emerald-600 dark:text-zinc-300 dark:decoration-zinc-700 dark:hover:text-emerald-400 dark:hover:decoration-emerald-500';
+const sectionLink =
+  'inline-flex min-h-11 items-center rounded-lg text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline underline-offset-4 dark:text-emerald-400 dark:hover:text-emerald-300';
+---
+
+<BaseLayout title={SITE.name} description={SITE.description}>
+  <section aria-labelledby="intro-heading" class="pt-2 sm:pt-6">
+    <p class="text-sm font-medium tracking-wide text-emerald-700 uppercase dark:text-emerald-400">{SITE.role}</p>
+    <h1 id="intro-heading" class="mt-2 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
+      {SITE.name}
+    </h1>
+
+    {/* TODO: replace this placeholder bio with your own. */}
+    <div class="mt-6 max-w-2xl space-y-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
+      <p>
+        I build fast, accessible web applications with a focus on clear interfaces and maintainable code. I enjoy
+        turning fuzzy ideas into small, reliable products.
+      </p>
+      <p>
+        Lately I have been exploring privacy-friendly tools that run entirely in the browser, and writing about what I
+        learn along the way.
+      </p>
+    </div>
+
+    <p class="mt-6 flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <Icon name="map-pin" class="mt-0.5 size-4 shrink-0" />
+      {/* TODO: update your availability. */}
+      <span>Based in {SITE.location} · Open to new opportunities</span>
+    </p>
+
+    <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+      <a
+        href={SITE.cvPath}
+        download
+        class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-emerald-700 px-6 text-base font-semibold text-white shadow-sm transition-colors hover:bg-emerald-800 sm:w-auto dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+      >
+        <Icon name="download" class="size-5" />
+        Download CV
+        <span class="sr-only">(PDF)</span>
+      </a>
+
+      <ul class="flex flex-wrap items-center gap-x-5 gap-y-1" aria-label="Contact and profiles">
+        <li>
+          <a href={`mailto:${SITE.email}`} class={textLink}>Email</a>
+        </li>
+        {
+          SITE.socials.map((social) => (
+            <li>
+              <a href={social.href} target="_blank" rel="me noopener noreferrer" class={textLink}>
+                {social.label}
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    featuredProjects.length > 0 && (
+      <section aria-labelledby="projects-heading" class="mt-16 sm:mt-24">
+        <div class="flex items-baseline justify-between gap-4">
+          <h2 id="projects-heading" class="text-xl font-semibold tracking-tight sm:text-2xl">
+            Selected projects
+          </h2>
+          <a href="/projects/" class={sectionLink}>
+            All projects&nbsp;→
+          </a>
+        </div>
+        <ul class="mt-6 grid gap-4 sm:grid-cols-2">
+          {featuredProjects.map((project) => (
+            <li class="min-w-0">
+              <ProjectCard project={project} headingLevel="h3" />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    recentPosts.length > 0 && (
+      <section aria-labelledby="writing-heading" class="mt-16 sm:mt-24">
+        <div class="flex items-baseline justify-between gap-4">
+          <h2 id="writing-heading" class="text-xl font-semibold tracking-tight sm:text-2xl">
+            Recent writing
+          </h2>
+          <a href="/blog/" class={sectionLink}>
+            All posts&nbsp;→
+          </a>
+        </div>
+        <div class="mt-6">
+          <PostList posts={recentPosts} headingLevel="h3" />
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>

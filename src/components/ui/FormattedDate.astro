@@ -1,0 +1,24 @@
+---
+/**
+ * Renders a <time> element. Dates from frontmatter are parsed as UTC midnight,
+ * so format in UTC to avoid off-by-one days in other build time zones.
+ */
+interface Props {
+  date: Date;
+  format?: 'long' | 'short' | 'year';
+  class?: string;
+}
+
+const { date, format = 'long', class: className } = Astro.props;
+
+const options: Record<NonNullable<Props['format']>, Intl.DateTimeFormatOptions> = {
+  long: { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' },
+  short: { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' },
+  year: { year: 'numeric', timeZone: 'UTC' },
+};
+
+const label = new Intl.DateTimeFormat('en-US', options[format]).format(date);
+const datetime = format === 'year' ? String(date.getUTCFullYear()) : date.toISOString().slice(0, 10);
+---
+
+<time datetime={datetime} class={className}>{label}</time>

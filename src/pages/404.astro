@@ -1,27 +1,56 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config/site';
+
+const links = [
+  { href: '/projects/', label: 'Projects', description: 'Açık Matematik, Karecik and more' },
+  { href: '/blog/', label: 'Blog', description: 'Notes on the things I build' },
+  { href: '/tools/', label: 'Tools', description: 'Private utilities that run in your browser' },
+  { href: '/about/', label: 'About', description: 'Background and milestones' },
+];
 ---
 
-<BaseLayout title="Page not found" description="The page you were looking for could not be found.">
+<BaseLayout title="Page not found" description="The page you were looking for could not be found." noindex>
   <section class="flex flex-col items-start pt-6 sm:pt-12">
     <p class="font-mono text-sm font-medium text-emerald-700 dark:text-emerald-400">404</p>
     <h1 class="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Page not found</h1>
     <p class="mt-4 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      Sorry, this page doesn't exist or has moved. Let's get you back on track.
+      Sorry, this page doesn't exist or has moved. You might find what you were looking for below.
     </p>
-    <div class="mt-8 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-      <a
-        href="/"
-        class="inline-flex min-h-12 items-center justify-center rounded-lg bg-emerald-700 px-6 text-base font-semibold text-white hover:bg-emerald-800 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
-      >
-        Go to the homepage
-      </a>
-      <a
-        href="/tools/"
-        class="inline-flex min-h-12 items-center justify-center rounded-lg border border-zinc-200 bg-white px-6 text-base font-medium text-zinc-900 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-      >
-        Browse tools
-      </a>
-    </div>
+    <a
+      href="/"
+      class="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-emerald-700 px-6 text-base font-semibold text-white hover:bg-emerald-800 sm:w-auto dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+    >
+      Go to the homepage
+    </a>
   </section>
+
+  <nav aria-label="Popular pages" class="mt-10">
+    <ul class="grid gap-3 sm:grid-cols-2">
+      {
+        links.map((link) => (
+          <li class="min-w-0">
+            <a
+              href={link.href}
+              class="group flex h-full min-h-11 flex-col gap-0.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-emerald-600/40 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-500/40"
+            >
+              <span class="font-semibold text-zinc-900 group-hover:text-emerald-700 dark:text-zinc-100 dark:group-hover:text-emerald-400">
+                {link.label}
+              </span>
+              <span class="text-sm text-zinc-600 dark:text-zinc-400">{link.description}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <p class="mt-10 text-sm text-zinc-600 dark:text-zinc-400">
+    Followed a broken link? Let me know by{' '}
+    <a
+      href={`mailto:${SITE.email}`}
+      class="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-emerald-700 hover:decoration-emerald-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-emerald-400 dark:hover:decoration-emerald-500"
+      >email</a
+    >.
+  </p>
 </BaseLayout>

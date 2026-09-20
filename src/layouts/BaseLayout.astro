@@ -9,13 +9,18 @@ interface Props {
   description?: string;
   /** Use a wider content column (max-w-5xl) for grids and tools. */
   wide?: boolean;
+  /**
+   * Keep the page out of search engines (robots noindex, nofollow; no canonical link or og:url,
+   * e.g. 404.html is served at any missing URL, so its own path would be wrong).
+   */
+  noindex?: boolean;
 }
 
-const { title, description = SITE.description, wide = false } = Astro.props;
+const { title, description = SITE.description, wide = false, noindex = false } = Astro.props;
 
 const pageTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
-// Canonical/og:url need an absolute origin: only emitted once `site` is set in astro.config.mjs.
-const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+// Canonical/og:url need an absolute origin: only emitted when `site` is set in astro.config.mjs.
+const pageURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
 ---
 
 <!doctype html>
@@ -25,16 +30,19 @@ const canonicalURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href :
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    <meta name="author" content={SITE.name} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
-    {canonicalURL && <link rel="canonical" href={canonicalURL} />}
-    {canonicalURL && <meta property="og:url" content={canonicalURL} />}
+    {pageURL && !noindex && <link rel="canonical" href={pageURL} />}
+    {pageURL && !noindex && <meta property="og:url" content={pageURL} />}
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="en_US" />
     <meta name="generator" content={Astro.generator} />
     <slot name="head" />
   </head>

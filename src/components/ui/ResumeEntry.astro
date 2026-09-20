@@ -1,0 +1,86 @@
+---
+/**
+ * One résumé entry (job, degree, volunteering role…). Phones stack everything;
+ * from sm: up the period sits in a narrow left column. The heading comes first in
+ * the DOM so heading navigation lands before the details.
+ */
+import Icon from './Icon.astro';
+import type { ResumePeriod } from '../../data/resume';
+import { formatPeriod } from '../../utils/resume-dates';
+
+interface Props {
+  title: string;
+  /** Organisation name; linked (new tab) when `href` is set. */
+  organization?: string;
+  href?: string;
+  /** Extra facts shown after the organisation, e.g. a location. */
+  details?: readonly string[];
+  period: ResumePeriod;
+  highlights?: readonly string[];
+  headingLevel?: 'h3' | 'h4';
+}
+
+const {
+  title,
+  organization,
+  href,
+  details = [],
+  period,
+  highlights = [],
+  headingLevel: Heading = 'h3',
+} = Astro.props;
+
+const { start, end } = formatPeriod(period);
+const hasMeta = Boolean(organization) || details.length > 0;
+---
+
+<article class="grid grid-cols-1 gap-y-1 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-x-6">
+  <Heading
+    class="text-base leading-snug font-semibold text-zinc-900 sm:col-start-2 sm:row-start-1 dark:text-zinc-100"
+  >
+    {title}
+  </Heading>
+
+  {
+    hasMeta && (
+      <p class="text-sm leading-relaxed text-zinc-600 sm:col-start-2 dark:text-zinc-400">
+        {organization &&
+          (href ? (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="-my-3 inline-flex items-center gap-1 rounded-sm py-3 font-medium text-zinc-800 underline decoration-zinc-300 underline-offset-4 hover:text-emerald-700 hover:decoration-emerald-600 dark:text-zinc-200 dark:decoration-zinc-700 dark:hover:text-emerald-400 dark:hover:decoration-emerald-500"
+            >
+              {organization}
+              <Icon name="external" class="size-3.5 shrink-0" />
+              <span class="sr-only"> (opens in a new tab)</span>
+            </a>
+          ) : (
+            <span class="font-medium text-zinc-800 dark:text-zinc-200">{organization}</span>
+          ))}
+        {details.map((detail, index) => (
+          <>
+            {(organization || index > 0) && <span aria-hidden="true"> · </span>}
+            <span>{detail}</span>
+          </>
+        ))}
+      </p>
+    )
+  }
+
+  {/* Kept on one line: whitespace around the separator would render as extra spaces. */}
+  <p class="text-sm text-zinc-600 tabular-nums sm:col-start-1 sm:row-start-1 sm:pt-0.5 dark:text-zinc-400">
+    <time datetime={start.datetime}>{start.label}</time>{end && <><span aria-hidden="true"> – </span><span class="sr-only"> to </span>{end === 'present' ? 'Present' : <time datetime={end.datetime}>{end.label}</time>}</>}
+  </p>
+
+  {
+    highlights.length > 0 && (
+      <ul class="mt-2 list-disc space-y-1.5 ps-5 text-sm leading-relaxed text-zinc-700 marker:text-zinc-400 sm:col-start-2 dark:text-zinc-300 dark:marker:text-zinc-600">
+        {highlights.map((highlight) => (
+          <li>{highlight}</li>
+        ))}
+      </ul>
+    )
+  }
+</article>

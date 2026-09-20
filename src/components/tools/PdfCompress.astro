@@ -1,0 +1,278 @@
+---
+/**
+ * Compress PDF tool UI. Behaviour lives in src/scripts/tools/pdf-compress/controller.ts;
+ * every hook is a data-* attribute scoped to the root section.
+ */
+import { DEFAULT_LEVEL, LEVELS } from '../../lib/pdf/compress/plan.ts';
+import type { CompressionLevel } from '../../lib/pdf/compress/plan.ts';
+
+const levels: Array<{ value: CompressionLevel; title: string; hint: string }> = [
+  {
+    value: 'light',
+    title: 'Light',
+    hint: `Best quality. Recompresses photos gently; images stay up to ${LEVELS.light.maxDimension} px.`,
+  },
+  {
+    value: 'balanced',
+    title: 'Balanced',
+    hint: `Much smaller, still sharp. Images up to ${LEVELS.balanced.maxDimension} px.`,
+  },
+  {
+    value: 'strong',
+    title: 'Strong',
+    hint: `Smallest file. Images up to ${LEVELS.strong.maxDimension} px; fine detail softens.`,
+  },
+];
+
+const secondaryButtonClass =
+  'inline-flex min-h-11 items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800';
+---
+
+<section data-pdf-compress aria-label="PDF compressor" class="mt-8 flex flex-col gap-4">
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <noscript>
+    <p
+      class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+    >
+      This tool needs JavaScript. It runs entirely in your browser; nothing is uploaded.
+    </p>
+  </noscript>
+
+  <!-- 1. Dropzone / file picker -->
+  <label
+    data-dropzone
+    class="group flex min-h-[40vh] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-zinc-300 bg-white p-6 text-center transition-colors focus-within:ring-2 focus-within:ring-emerald-700 focus-within:ring-offset-2 focus-within:ring-offset-zinc-50 hover:border-emerald-600 sm:min-h-72 data-[compact]:min-h-12 data-[compact]:flex-row data-[compact]:justify-start data-[compact]:gap-3 data-[compact]:px-4 data-[compact]:py-2 data-[compact]:text-left sm:data-[compact]:min-h-12 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:hover:border-zinc-300 data-[dragover]:border-emerald-600 data-[dragover]:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-900 dark:focus-within:ring-emerald-500 dark:focus-within:ring-offset-zinc-950 dark:hover:border-emerald-500 dark:data-[disabled]:hover:border-zinc-700 dark:data-[dragover]:border-emerald-500 dark:data-[dragover]:bg-emerald-500/10"
+  >
+    <input data-file-input type="file" accept="application/pdf,.pdf" class="sr-only" />
+    <span
+      aria-hidden="true"
+      class="flex size-14 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 group-data-[compact]:size-9 dark:bg-emerald-500/10 dark:text-emerald-400"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-7 group-data-[compact]:size-5"
+      >
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+        <path d="M14 3v5h5"></path>
+        <path d="m9 14 3 3 3-3M12 10v7"></path>
+      </svg>
+    </span>
+    <span
+      class="flex flex-col gap-1 group-data-[compact]:flex-row group-data-[compact]:flex-wrap group-data-[compact]:items-baseline group-data-[compact]:gap-x-2"
+    >
+      <span
+        data-dropzone-title
+        class="text-lg font-semibold text-zinc-900 group-data-[compact]:text-base dark:text-zinc-100"
+      >
+        Choose a PDF
+      </span>
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 [@media(pointer:coarse)]:hidden">or drop it here</span>
+    </span>
+    <span class="max-w-sm text-sm leading-relaxed text-zinc-600 group-data-[compact]:hidden dark:text-zinc-400">
+      Your file never leaves your device. Works best on scans and PDFs full of photos.
+    </span>
+  </label>
+
+  <!-- 2. Notices -->
+  <div data-notices class="flex flex-col gap-3 empty:hidden"></div>
+  <template data-notice-template>
+    <div
+      data-notice
+      class="flex items-start gap-2 rounded-xl border border-zinc-200 bg-white py-2 pr-2 pl-4 text-sm data-[tone=warning]:border-amber-300 data-[tone=warning]:bg-amber-50 data-[tone=warning]:text-amber-950 dark:border-zinc-800 dark:bg-zinc-900 dark:data-[tone=warning]:border-amber-500/30 dark:data-[tone=warning]:bg-amber-500/10 dark:data-[tone=warning]:text-amber-100"
+    >
+      <p data-notice-message class="min-w-0 flex-1 py-2 font-medium break-words"></p>
+      <button
+        type="button"
+        data-notice-dismiss
+        aria-label="Dismiss notice"
+        class="flex size-11 shrink-0 items-center justify-center rounded-lg text-current opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="size-5" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </template>
+
+  <!-- 3. Loaded file -->
+  <div
+    data-file-card
+    hidden
+    class="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-3 sm:p-4 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <span
+      aria-hidden="true"
+      class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="size-6">
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+        <path d="M14 3v5h5M9 13h6M9 17h4"></path>
+      </svg>
+    </span>
+    <div class="flex min-w-0 flex-1 flex-col gap-0.5">
+      <p data-file-name class="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-100"></p>
+      <p data-file-meta class="text-sm text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+      <p data-file-images hidden class="text-sm text-zinc-600 dark:text-zinc-400"></p>
+    </div>
+    <button
+      type="button"
+      data-remove-file
+      aria-label="Remove PDF"
+      class="flex size-11 shrink-0 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-100 hover:text-rose-700 disabled:pointer-events-none disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-rose-400"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="size-5" aria-hidden="true">
+        <path d="M18 6 6 18M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- 4. Options -->
+  <fieldset
+    data-options
+    class="min-w-0 rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <legend class="float-left mb-4 w-full text-base font-semibold text-zinc-900 dark:text-zinc-100">Compression</legend>
+    <div class="clear-both flex flex-col gap-5">
+      <fieldset class="min-w-0">
+        <legend class="float-left mb-2 w-full text-sm font-medium text-zinc-900 dark:text-zinc-100">Level</legend>
+        <div class="clear-both grid grid-cols-1 gap-2 md:grid-cols-3">
+          {
+            levels.map((level) => (
+              <label class="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300 has-checked:border-emerald-600 has-checked:bg-emerald-50 has-disabled:cursor-not-allowed has-disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:has-checked:border-emerald-500 dark:has-checked:bg-emerald-500/10">
+                <input
+                  type="radio"
+                  name="pdf-compress-level"
+                  value={level.value}
+                  checked={level.value === DEFAULT_LEVEL}
+                  data-level
+                  aria-describedby={`pdc-level-${level.value}-hint`}
+                  class="mt-0.5 size-5 shrink-0 accent-emerald-700 dark:accent-emerald-500"
+                />
+                <span class="flex min-w-0 flex-col gap-0.5">
+                  <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                    {level.title}
+                    {level.value === DEFAULT_LEVEL && (
+                      <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
+                        Recommended
+                      </span>
+                    )}
+                  </span>
+                  <span id={`pdc-level-${level.value}-hint`} class="text-sm leading-snug text-zinc-600 dark:text-zinc-400">
+                    {level.hint}
+                  </span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <label class="flex min-h-11 cursor-pointer items-start gap-3">
+        <input
+          type="checkbox"
+          data-strip-metadata
+          aria-describedby="pdc-metadata-hint"
+          class="mt-0.5 size-5 shrink-0 accent-emerald-700 dark:accent-emerald-500"
+        />
+        <span class="flex min-w-0 flex-col gap-0.5">
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Remove document metadata</span>
+          <span id="pdc-metadata-hint" class="text-sm leading-snug text-zinc-600 dark:text-zinc-400">
+            Title, author, the app that created the file, dates, XMP data, and camera and location details in photos.
+          </span>
+        </span>
+      </label>
+    </div>
+  </fieldset>
+
+  <!-- 5. Action bar (sticky on phones with enough height; keep it to one row plus status) -->
+  <div
+    data-action-bar
+    class="bottom-0 z-30 flex flex-col gap-3 border-t border-zinc-200 bg-zinc-50/95 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md max-md:[@media(min-height:32rem)]:sticky md:border-t-0 md:bg-transparent md:p-0 md:backdrop-blur-none dark:border-zinc-800 dark:bg-zinc-950/95 md:dark:bg-transparent"
+  >
+    <div class="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+      <button
+        type="button"
+        data-compress
+        disabled
+        class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-emerald-700 px-6 text-base font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none md:w-auto dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
+      >
+        Compress PDF
+      </button>
+      <button
+        type="button"
+        data-cancel
+        hidden
+        class="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-zinc-300 bg-white px-6 text-base font-medium text-zinc-900 hover:bg-zinc-100 md:w-auto dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+      >
+        Cancel
+      </button>
+    </div>
+
+    <div data-progress-block hidden class="flex flex-col gap-1.5">
+      <progress
+        data-progress
+        max="1"
+        aria-label="Compression progress"
+        class="h-2 w-full appearance-none overflow-hidden rounded-full bg-zinc-200 accent-emerald-600 indeterminate:animate-pulse dark:bg-zinc-800 [&::-moz-progress-bar]:bg-emerald-600 [&::-webkit-progress-bar]:bg-zinc-200 [&::-webkit-progress-value]:bg-emerald-600 dark:[&::-moz-progress-bar]:bg-emerald-500 dark:[&::-webkit-progress-bar]:bg-zinc-800 dark:[&::-webkit-progress-value]:bg-emerald-500"
+      ></progress>
+      <p data-progress-text aria-hidden="true" class="text-sm text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+    </div>
+
+    <p
+      data-status
+      class="text-sm text-zinc-600 empty:hidden data-[tone=error]:font-medium data-[tone=error]:text-rose-700 dark:text-zinc-400 dark:data-[tone=error]:text-rose-400"
+    ></p>
+  </div>
+
+  <!-- 6. Result (outside the sticky bar so it never covers the options) -->
+  <div
+    data-result
+    hidden
+    class="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 data-[tone=success]:border-emerald-600/20 data-[tone=success]:bg-emerald-50 dark:border-zinc-800 dark:bg-zinc-900 dark:data-[tone=success]:border-emerald-500/25 dark:data-[tone=success]:bg-emerald-500/10"
+  >
+    <p data-result-title class="text-base font-semibold text-zinc-900 tabular-nums dark:text-zinc-100"></p>
+
+    <div aria-hidden="true" class="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 text-xs">
+      <span class="text-zinc-600 dark:text-zinc-400">Original</span>
+      <span class="h-2.5 overflow-hidden rounded-full bg-zinc-200/70 dark:bg-zinc-800">
+        <span data-bar-original class="block h-full rounded-full bg-zinc-400 dark:bg-zinc-500"></span>
+      </span>
+      <span data-bar-original-label class="text-right text-zinc-700 tabular-nums dark:text-zinc-300"></span>
+
+      <span class="text-zinc-600 dark:text-zinc-400">Compressed</span>
+      <span class="h-2.5 overflow-hidden rounded-full bg-zinc-200/70 dark:bg-zinc-800">
+        <span data-bar-result class="block h-full rounded-full bg-emerald-600 dark:bg-emerald-500"></span>
+      </span>
+      <span data-bar-result-label class="text-right font-medium text-zinc-900 tabular-nums dark:text-zinc-100"></span>
+    </div>
+
+    <p data-result-details class="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300"></p>
+
+    <div class="flex flex-wrap gap-2">
+      <a data-download hidden download="compressed.pdf" class:list={[secondaryButtonClass, 'flex-1 sm:flex-none']}>
+        Download again
+      </a>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* Focus scrolling keeps controls clear of the sticky action bar (height set by the controller). */
+  @media (width < 48rem) and (min-height: 32rem) {
+    html {
+      scroll-padding-bottom: var(--pdc-action-bar-height, 0px);
+    }
+  }
+</style>
+
+<script>
+  import { initPdfCompress } from '../../scripts/tools/pdf-compress/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-pdf-compress]').forEach(initPdfCompress);
+</script>

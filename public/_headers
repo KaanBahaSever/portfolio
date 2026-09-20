@@ -8,3 +8,11 @@
 # Fingerprinted build assets never change, so cache them for a year.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Hidden route: keep it out of search engines (the page also sets <meta name="robots">).
+# '/console' covers the redirect to the trailing-slash URL.
+/console
+  X-Robots-Tag: noindex, nofollow
+
+/console/*
+  X-Robots-Tag: noindex, nofollow

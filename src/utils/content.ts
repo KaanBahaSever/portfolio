@@ -4,7 +4,11 @@ export type BlogPost = CollectionEntry<'blog'>;
 export type Project = CollectionEntry<'projects'>;
 export type TimelineEntry = CollectionEntry<'timeline'>;
 
-/** Drafts are visible in `astro dev` but excluded from production builds. */
+/**
+ * Drafts are visible in `astro dev` but excluded from production builds. In production the
+ * loaders (src/utils/draft-loader.ts) already reduce drafts to `{ draft: true }` placeholders;
+ * this filter keeps those placeholders out of every list.
+ */
 function isVisible(entry: { data: { draft: boolean } }): boolean {
   return import.meta.env.PROD ? !entry.data.draft : true;
 }
@@ -23,9 +27,9 @@ export async function getProjects(): Promise<Project[]> {
   );
 }
 
-/** Timeline entries, oldest first. */
+/** Timeline entries (drafts only in dev), oldest first. */
 export async function getTimeline(): Promise<TimelineEntry[]> {
-  const entries = await getCollection('timeline');
+  const entries = await getCollection('timeline', isVisible);
   return entries.sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
 }
 

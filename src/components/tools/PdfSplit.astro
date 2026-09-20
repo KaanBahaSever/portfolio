@@ -1,0 +1,302 @@
+---
+/**
+ * Split PDF tool UI. Behaviour lives in src/scripts/tools/pdf-split/controller.ts;
+ * every hook is a data-* attribute scoped to the root section.
+ */
+const inputClass =
+  'min-h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900 placeholder:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60 aria-[invalid=true]:border-rose-600 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:aria-[invalid=true]:border-rose-400';
+const labelTextClass = 'text-sm font-medium text-zinc-900 dark:text-zinc-100';
+const hintClass = 'text-sm text-zinc-600 dark:text-zinc-400';
+const errorClass = 'text-sm font-medium text-rose-700 empty:hidden dark:text-rose-400';
+const secondaryButtonClass =
+  'inline-flex min-h-11 items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800 dark:disabled:hover:bg-zinc-900';
+
+const modes = [
+  { value: 'extract', title: 'Extract pages', description: 'Pick pages for one new PDF', checked: true },
+  { value: 'ranges', title: 'Split by ranges', description: 'Each range becomes its own PDF' },
+  { value: 'every', title: 'Every N pages', description: 'Equal parts, such as every 2 pages' },
+  { value: 'single', title: 'One file per page', description: 'Every page becomes its own PDF' },
+];
+---
+
+<section data-pdf-split aria-label="PDF splitter" class="mt-8 flex flex-col gap-4">
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <noscript>
+    <p
+      class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+    >
+      This tool needs JavaScript. It runs entirely in your browser; nothing is uploaded.
+    </p>
+  </noscript>
+
+  <!-- 1. File picker (shown until a PDF is chosen) -->
+  <label
+    data-dropzone
+    class="group flex min-h-[32vh] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-zinc-300 bg-white p-6 text-center transition-colors focus-within:ring-2 focus-within:ring-emerald-700 focus-within:ring-offset-2 focus-within:ring-offset-zinc-50 hover:border-emerald-600 sm:min-h-64 data-[dragover]:border-emerald-600 data-[dragover]:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-900 dark:focus-within:ring-emerald-500 dark:focus-within:ring-offset-zinc-950 dark:hover:border-emerald-500 dark:data-[dragover]:border-emerald-500 dark:data-[dragover]:bg-emerald-500/10"
+  >
+    <input
+      data-file-input
+      type="file"
+      accept="application/pdf,.pdf"
+      class="sr-only"
+      aria-describedby="pds-load-error"
+    />
+    <span
+      aria-hidden="true"
+      class="flex size-14 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-7"
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <path d="M14 2v6h6"></path>
+        <path d="M8 13h8M8 17h5"></path>
+      </svg>
+    </span>
+    <span class="flex flex-col gap-1">
+      <span class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">Choose a PDF</span>
+      <span class="text-sm text-zinc-600 dark:text-zinc-400 [@media(pointer:coarse)]:hidden">or drop it here</span>
+    </span>
+    <span class="max-w-sm text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+      Your file never leaves your device. One PDF at a time.
+    </span>
+  </label>
+
+  <!-- 2. Loaded file (replaces the picker) -->
+  <div
+    data-file-card
+    hidden
+    class="flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-3 transition-colors sm:flex-row sm:items-center sm:p-4 data-[dragover]:border-emerald-600 data-[dragover]:bg-emerald-50 dark:border-zinc-800 dark:bg-zinc-900 dark:data-[dragover]:border-emerald-500 dark:data-[dragover]:bg-emerald-500/10"
+  >
+    <div class="flex min-w-0 flex-1 items-center gap-3">
+      <span
+        aria-hidden="true"
+        class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="size-6">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <path d="M14 2v6h6"></path>
+        </svg>
+      </span>
+      <div class="min-w-0">
+        <p data-file-name tabindex="-1" class="truncate rounded text-base font-medium text-zinc-900 dark:text-zinc-100"></p>
+        <p data-file-meta class="text-sm text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+      </div>
+    </div>
+    <button type="button" data-choose-another aria-describedby="pds-load-error" class={secondaryButtonClass}>
+      Choose another file
+    </button>
+  </div>
+
+  <p id="pds-load-error" data-load-error class={errorClass}></p>
+
+  <!-- 3. Notices -->
+  <div data-notices class="flex flex-col gap-3 empty:hidden"></div>
+  <template data-notice-template>
+    <div
+      data-notice
+      class="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 py-2 pr-2 pl-4 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+    >
+      <p data-notice-message class="min-w-0 flex-1 py-2 font-medium"></p>
+      <button
+        type="button"
+        data-notice-dismiss
+        aria-label="Dismiss notice"
+        class="flex size-11 shrink-0 items-center justify-center rounded-lg text-current opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="size-5" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </template>
+
+  <!-- 4. Options -->
+  <fieldset
+    id="pds-options"
+    data-options
+    class="min-w-0 rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <legend class="float-left mb-4 w-full text-base font-semibold text-zinc-900 dark:text-zinc-100">Split options</legend>
+    <div class="clear-both flex flex-col gap-5">
+      <fieldset class="min-w-0">
+        <legend class="mb-2 text-sm font-medium text-zinc-900 dark:text-zinc-100">Mode</legend>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {
+            modes.map((mode) => (
+              <label class="flex min-h-14 cursor-pointer items-start gap-3 rounded-lg border border-zinc-200 bg-white p-3 hover:border-zinc-300 has-checked:border-emerald-600 has-checked:bg-emerald-50 has-disabled:cursor-not-allowed has-disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:has-checked:border-emerald-500 dark:has-checked:bg-emerald-500/10">
+                <input
+                  type="radio"
+                  name="pds-mode"
+                  value={mode.value}
+                  checked={mode.checked}
+                  data-mode
+                  class="mt-0.5 size-5 shrink-0 accent-emerald-700 dark:accent-emerald-500"
+                />
+                <span class="flex min-w-0 flex-col gap-0.5">
+                  <span class="text-base font-medium text-zinc-900 dark:text-zinc-100">{mode.title}</span>
+                  <span class="text-sm text-zinc-600 dark:text-zinc-400">{mode.description}</span>
+                </span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div data-pages-field class="flex flex-col gap-1.5">
+        <label for="pds-pages" data-pages-label class={labelTextClass}>Pages to extract</label>
+        <input
+          id="pds-pages"
+          data-pages
+          type="text"
+          placeholder="e.g. 1-3, 5, 8-"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="done"
+          aria-describedby="pds-pages-error pds-pages-hint pds-plan"
+          class={inputClass}
+        />
+        <p id="pds-pages-error" data-pages-error class={errorClass}></p>
+        <p id="pds-pages-hint" data-pages-hint class={hintClass}>
+          In the order you want them, e.g. 1-3, 5, 8- (8- means page 8 to the end).
+        </p>
+      </div>
+
+      <div data-every-field hidden class="flex flex-col gap-1.5">
+        <label for="pds-every" class={labelTextClass}>Pages per file</label>
+        <input
+          id="pds-every"
+          data-every
+          type="number"
+          min="1"
+          step="1"
+          value="2"
+          inputmode="numeric"
+          enterkeyhint="done"
+          aria-describedby="pds-every-error pds-plan"
+          class={`${inputClass} sm:max-w-40`}
+        />
+        <p id="pds-every-error" data-every-error class={errorClass}></p>
+      </div>
+
+      <p
+        id="pds-plan"
+        data-plan
+        class="rounded-lg bg-zinc-100 px-3 py-2 text-sm text-zinc-700 tabular-nums empty:hidden dark:bg-zinc-800/60 dark:text-zinc-300"
+      ></p>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="pds-name" class={labelTextClass}>File name</label>
+        <input
+          id="pds-name"
+          data-basename
+          type="text"
+          value="document"
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="done"
+          aria-describedby="pds-name-hint"
+          class={inputClass}
+        />
+        <p id="pds-name-hint" data-name-hint class={`${hintClass} break-all`}></p>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- 5. Action bar (sticky on phones with enough height; keep it to one row plus status) -->
+  <div
+    data-action-bar
+    class="bottom-0 z-30 flex flex-col gap-3 border-t border-zinc-200 bg-zinc-50/95 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md max-md:[@media(min-height:32rem)]:sticky md:border-t-0 md:bg-transparent md:p-0 md:backdrop-blur-none dark:border-zinc-800 dark:bg-zinc-950/95 md:dark:bg-transparent"
+  >
+    <div class="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+      <button
+        type="button"
+        data-run
+        disabled
+        class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-emerald-700 px-6 text-base font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none md:w-auto dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
+      >
+        Extract pages
+      </button>
+      <button
+        type="button"
+        data-cancel
+        hidden
+        class="inline-flex min-h-12 w-full items-center justify-center rounded-lg border border-zinc-300 bg-white px-6 text-base font-medium text-zinc-900 hover:bg-zinc-100 md:w-auto dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+      >
+        Cancel
+      </button>
+    </div>
+
+    <div data-progress-block hidden class="flex flex-col gap-1.5">
+      <progress
+        data-progress
+        max="1"
+        value="0"
+        aria-label="Split progress"
+        class="h-2 w-full appearance-none overflow-hidden rounded-full bg-zinc-200 accent-emerald-600 dark:bg-zinc-800 [&::-moz-progress-bar]:bg-emerald-600 [&::-webkit-progress-bar]:bg-zinc-200 [&::-webkit-progress-value]:bg-emerald-600 dark:[&::-moz-progress-bar]:bg-emerald-500 dark:[&::-webkit-progress-bar]:bg-zinc-800 dark:[&::-webkit-progress-value]:bg-emerald-500"
+      ></progress>
+      <p data-progress-text aria-hidden="true" class="text-sm text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+    </div>
+
+    <p
+      data-status
+      class="text-sm text-zinc-600 empty:hidden data-[tone=error]:font-medium data-[tone=error]:text-rose-700 dark:text-zinc-400 dark:data-[tone=error]:text-rose-400"
+    ></p>
+  </div>
+
+  <!-- 6. Result (outside the sticky bar so it never covers the options) -->
+  <div
+    data-result
+    hidden
+    class="flex flex-col gap-3 rounded-xl border border-emerald-600/20 bg-emerald-50 p-3 sm:p-4 dark:border-emerald-500/25 dark:bg-emerald-500/10"
+  >
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <p data-result-text class="text-sm font-medium text-emerald-900 sm:mr-auto dark:text-emerald-200"></p>
+      <a
+        data-download-again
+        download="document.pdf"
+        class="inline-flex min-h-11 items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+      >
+        Download again
+      </a>
+    </div>
+    <ul
+      data-result-files
+      hidden
+      aria-label="Files in the ZIP"
+      class="flex flex-col divide-y divide-emerald-600/15 rounded-lg bg-white/70 text-sm dark:divide-emerald-500/15 dark:bg-zinc-900/60"
+    ></ul>
+    <template data-result-file-template>
+      <li class="flex items-baseline justify-between gap-3 px-3 py-2">
+        <span data-result-file-name class="min-w-0 truncate text-zinc-900 dark:text-zinc-100"></span>
+        <span data-result-file-meta class="shrink-0 text-zinc-600 tabular-nums dark:text-zinc-400"></span>
+      </li>
+    </template>
+  </div>
+</section>
+
+<style is:global>
+  /* Focus scrolling keeps controls clear of the sticky action bar (height set by the controller). */
+  @media (width < 48rem) and (min-height: 32rem) {
+    html {
+      scroll-padding-bottom: var(--pds-action-bar-height, 0px);
+    }
+  }
+</style>
+
+<script>
+  import { initPdfSplit } from '../../scripts/tools/pdf-split/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-pdf-split]').forEach(initPdfSplit);
+</script>

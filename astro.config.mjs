@@ -6,10 +6,10 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  // TODO: set your production URL. It is required for canonical URLs and
-  // og:url tags (BaseLayout only emits them when `site` is set) and for a
-  // future sitemap/RSS feed. Keep it in sync with SITE.url in src/config/site.ts.
-  // site: 'https://example.com',
+  // Production URL: required for canonical URLs and og:url tags (BaseLayout only
+  // emits them when `site` is set) and for a future sitemap/RSS feed.
+  // Keep it in sync with SITE.url in src/config/site.ts.
+  site: 'https://kaanbahasever.com',
 
   // Pure static output (no adapter): `astro build` writes everything to dist/.
   vite: {

@@ -1,0 +1,38 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { compressedBaseName, looksLikePdf } from '../src/lib/pdf/compress/sniff.ts';
+import { toPdfFilename } from '../src/lib/files/filename.ts';
+
+const bytes = (text: string) => new TextEncoder().encode(text);
+
+test('looksLikePdf finds the header at the start or after a short preamble', () => {
+  assert.equal(looksLikePdf(bytes('%PDF-1.7\n%âãÏÓ')), true);
+  assert.equal(looksLikePdf(bytes('%PDF-')), true);
+  assert.equal(looksLikePdf(bytes('garbage before\r\n%PDF-1.4')), true);
+  const late = new Uint8Array(1100);
+  late.set(bytes('%PDF-1.4'), 1020);
+  assert.equal(looksLikePdf(late), false, 'beyond the first 1024 bytes');
+  const edge = new Uint8Array(1024);
+  edge.set(bytes('%PDF-'), 1019);
+  assert.equal(looksLikePdf(edge), true);
+});
+
+test('looksLikePdf rejects other files', () => {
+  assert.equal(looksLikePdf(new Uint8Array(0)), false);
+  assert.equal(looksLikePdf(bytes('%PDF')), false);
+  assert.equal(looksLikePdf(bytes('%!PS-Adobe-3.0')), false);
+  assert.equal(looksLikePdf(Uint8Array.from([0xff, 0xd8, 0xff, 0xe0])), false);
+  assert.equal(looksLikePdf(bytes('%pdf-1.4')), false);
+});
+
+test('compressedBaseName appends -compressed and keeps names reasonable', () => {
+  assert.equal(compressedBaseName('Report.pdf'), 'Report-compressed.pdf');
+  assert.equal(compressedBaseName('scan.PDF'), 'scan-compressed.pdf');
+  assert.equal(compressedBaseName('notes'), 'notes-compressed.pdf');
+  assert.equal(compressedBaseName('.pdf'), 'document-compressed.pdf');
+  assert.equal(compressedBaseName(''), 'document-compressed.pdf');
+  const long = compressedBaseName(`${'ä'.repeat(150)}.pdf`);
+  assert.ok(long.endsWith('-compressed.pdf'));
+  assert.equal(toPdfFilename(long), long, 'still within the shared filename limit');
+  assert.equal(toPdfFilename(compressedBaseName('a/b:c.pdf')), 'abc-compressed.pdf');
+});

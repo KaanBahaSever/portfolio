@@ -1,16 +1,32 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostList from '../../components/ui/PostList.astro';
+import { SITE } from '../../config/site';
 import { getPublishedPosts } from '../../utils/content';
 
 const posts = await getPublishedPosts();
+const medium = SITE.socials.find((social) => social.label === 'Medium');
+
+const inlineLink =
+  'font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-emerald-700 hover:decoration-emerald-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-emerald-400 dark:hover:decoration-emerald-500';
 ---
 
-<BaseLayout title="Blog" description="Notes on web development, projects and building privacy-friendly tools.">
+<BaseLayout
+  title="Blog"
+  description={`Writing by ${SITE.name}: notes on the projects he builds, web development and privacy-friendly tools.`}
+>
   <header class="pt-2 sm:pt-6">
     <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Blog</h1>
     <p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      Notes on web development, the projects I build and what I learn along the way.
+      Notes on the projects I build and what I learn along the way.{' '}
+      {
+        medium && (
+          <>
+            You can also find me on{' '}
+            <a href={medium.href} target="_blank" rel="me noopener noreferrer" class={inlineLink}>Medium<span class="sr-only"> (opens in a new tab)</span></a>.
+          </>
+        )
+      }
     </p>
   </header>
 
@@ -19,7 +35,7 @@ const posts = await getPublishedPosts();
       posts.length > 0 ? (
         <PostList posts={posts} showTags />
       ) : (
-        <p class="text-zinc-600 dark:text-zinc-400">No posts published yet.</p>
+        <p class="text-zinc-600 dark:text-zinc-400">No posts published yet. Check back soon.</p>
       )
     }
   </div>

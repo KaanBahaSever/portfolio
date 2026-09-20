@@ -1,13 +1,21 @@
 import { defineCollection, reference } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { glob, type Loader } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { withoutDraftsInProduction } from './utils/draft-loader';
+
+/**
+ * Drafts (draft: true) are shown by `astro dev` but excluded from production builds.
+ * Filtering them in getCollection() alone is not enough: Astro would still bundle a
+ * draft's images, so production builds also reduce drafts to placeholders here.
+ */
+const drafts = (loader: Loader): Loader => withoutDraftsInProduction(loader, import.meta.env.PROD);
 
 /**
  * Blog posts: src/content/blog/*.md|mdx
  * The entry id (file name without extension) becomes the URL: /blog/<id>/
  */
 const blog = defineCollection({
-  loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
+  loader: drafts(glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' })),
   schema: ({ image }) =>
     z.object({
       title: z.string().min(1),
@@ -34,7 +42,7 @@ const blog = defineCollection({
  * Closed-source projects may still set repositoryUrl (e.g. a public showcase repo).
  */
 const projects = defineCollection({
-  loader: glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' }),
+  loader: drafts(glob({ base: './src/content/projects', pattern: '**/*.{md,mdx}' })),
   schema: ({ image }) =>
     z
       .object({
@@ -74,9 +82,11 @@ const projects = defineCollection({
 /**
  * Timeline (About page): src/content/timeline/*.md
  * Photos are local images relative to the entry file, optimized at build time.
+ * Drafts (draft: true) are shown by `astro dev` but excluded from production builds,
+ * photos included.
  */
 const timeline = defineCollection({
-  loader: glob({ base: './src/content/timeline', pattern: '**/*.{md,mdx}' }),
+  loader: drafts(glob({ base: './src/content/timeline', pattern: '**/*.{md,mdx}' })),
   schema: ({ image }) =>
     z.object({
       title: z.string().min(1),
@@ -91,6 +101,7 @@ const timeline = defineCollection({
           }),
         )
         .default([]),
+      draft: z.boolean().default(false),
     }),
 });
 

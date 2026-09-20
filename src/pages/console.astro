@@ -3,6 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/ui/Icon.astro';
 import { SITE } from '../config/site';
 
+// Hidden route: not linked anywhere, kept out of search engines with a robots meta tag
+// (noindex below) and an X-Robots-Tag header (public/_headers).
 const promptUser =
   SITE.name
     .toLowerCase()
@@ -13,7 +15,7 @@ const promptUser =
     .replace(/^-|-$/g, '') || 'guest';
 ---
 
-<BaseLayout title="Console" description="An interactive console for exploring this site. Coming soon.">
+<BaseLayout title="Console" description="An interactive console for exploring this site. Coming soon." noindex>
   <header class="pt-2 sm:pt-6">
     <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Console</h1>
     <p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">

@@ -166,18 +166,20 @@ const removeButtonClass = `${cardButtonBase} hover:text-rose-700 dark:hover:text
     No overflow clipping and no stacking context here: SortableJS appends the dragged card to the
     grid (positioned inside this frame on iOS), and it must float above the sticky action bar.
     The graph paper is painted first, so the list after it needs no z-index.
+    Each card must stay at least 134 px wide so its three 44 px buttons fit: hence the thinner
+    frame below 22rem (320 px screens) and three columns only from 31rem.
   -->
   <div
     data-grid-frame
     hidden
-    class="relative rounded-xl border border-zinc-200 bg-zinc-100/50 p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900/40"
+    class="relative rounded-xl border border-zinc-200 bg-zinc-100/50 p-1 min-[22rem]:p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900/40"
   >
     <div class="bg-graph pointer-events-none absolute inset-0 rounded-[inherit]" aria-hidden="true"></div>
     <ol
       data-grid
       role="list"
       aria-label={m.grid.label}
-      class="relative grid grid-cols-2 gap-2 min-[28rem]:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5"
+      class="relative grid grid-cols-2 gap-2 min-[31rem]:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5"
     >
     </ol>
   </div>
@@ -227,17 +229,22 @@ const removeButtonClass = `${cardButtonBase} hover:text-rose-700 dark:hover:text
   <!-- 5. Options -->
   <fieldset id="itp-options" tabindex="-1" data-options class:list={[ui.card, 'mt-2 min-w-0 p-4 sm:p-5']}>
     <legend class="label-mono float-left mb-4 w-full text-zinc-600 dark:text-zinc-400">{m.options.legend}</legend>
+    <!--
+      Hints sit outside the labels so they describe their select instead of joining its name.
+      The controller links a hint (aria-describedby) only while it is shown, because
+      aria-describedby would read a hidden hint too.
+    -->
     <div class="clear-both grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
-      <label class="flex min-w-0 flex-col gap-1.5">
-        <span class={labelTextClass}>{m.options.pageSize}</span>
-        <select data-option="pageSize" class={fieldClass}>
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <label for="itp-page-size" class={labelTextClass}>{m.options.pageSize}</label>
+        <select id="itp-page-size" data-option="pageSize" class={fieldClass}>
           {PAGE_SIZES.map((size) => <option value={size} selected={size === 'a4'}>{m.options.pageSizes[size]}</option>)}
         </select>
-      </label>
+      </div>
 
-      <label class="flex min-w-0 flex-col gap-1.5">
-        <span class={labelTextClass}>{m.options.orientation}</span>
-        <select data-option="orientation" class={fieldClass}>
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <label for="itp-orientation" class={labelTextClass}>{m.options.orientation}</label>
+        <select id="itp-orientation" data-option="orientation" class={fieldClass}>
           {
             ORIENTATIONS.map((orientation) => (
               <option value={orientation} selected={orientation === 'auto'}>
@@ -246,27 +253,28 @@ const removeButtonClass = `${cardButtonBase} hover:text-rose-700 dark:hover:text
             ))
           }
         </select>
-        <span data-orientation-hint hidden class={hintClass}>{m.options.orientationHint}</span>
-      </label>
+        <p id="itp-orientation-hint" data-orientation-hint hidden class={hintClass}>{m.options.orientationHint}</p>
+      </div>
 
-      <label class="flex min-w-0 flex-col gap-1.5">
-        <span class={labelTextClass}>{m.options.margin}</span>
-        <select data-option="margin" class={fieldClass}>
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <label for="itp-margin" class={labelTextClass}>{m.options.margin}</label>
+        <select id="itp-margin" data-option="margin" class={fieldClass}>
           {MARGINS.map((margin) => <option value={margin} selected={margin === 'small'}>{marginLabel(margin)}</option>)}
         </select>
-        <span data-margin-hint hidden class={hintClass}>{m.options.marginHint}</span>
-      </label>
+        <p id="itp-margin-hint" data-margin-hint hidden class={hintClass}>{m.options.marginHint}</p>
+      </div>
 
-      <label class="flex min-w-0 flex-col gap-1.5">
-        <span class={labelTextClass}>{m.options.quality}</span>
-        <select data-option="quality" class={fieldClass}>
+      <div class="flex min-w-0 flex-col gap-1.5">
+        <label for="itp-quality" class={labelTextClass}>{m.options.quality}</label>
+        <select id="itp-quality" data-option="quality" class={fieldClass}>
           {QUALITIES.map((quality) => <option value={quality} selected={quality === 'original'}>{m.options.qualities[quality]}</option>)}
         </select>
-      </label>
+      </div>
 
-      <label class="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
-        <span class={labelTextClass}>{m.options.filename}</span>
+      <div class="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
+        <label for="itp-filename" class={labelTextClass}>{m.options.filename}</label>
         <input
+          id="itp-filename"
           data-filename
           type="text"
           value={m.names.fallbackFilename}
@@ -277,7 +285,7 @@ const removeButtonClass = `${cardButtonBase} hover:text-rose-700 dark:hover:text
           enterkeyhint="done"
           class:list={[ui.field, 'disabled:cursor-not-allowed disabled:opacity-60']}
         />
-      </label>
+      </div>
     </div>
   </fieldset>
 

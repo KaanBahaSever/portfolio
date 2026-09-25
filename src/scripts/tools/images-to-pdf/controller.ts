@@ -66,6 +66,16 @@ function pick<T extends string>(value: string, allowed: readonly T[], fallback: 
   return (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
 }
 
+/**
+ * Shows or hides a field's hint and links it as the field's description only while it is shown:
+ * aria-describedby reads a hidden element's text too.
+ */
+function showHint(field: HTMLElement, hint: HTMLElement, visible: boolean): void {
+  hint.hidden = !visible;
+  if (visible) field.setAttribute('aria-describedby', hint.id);
+  else field.removeAttribute('aria-describedby');
+}
+
 function hasFiles(event: DragEvent): boolean {
   const types = event.dataTransfer?.types;
   return !!types && Array.from(types).includes('Files');
@@ -236,8 +246,8 @@ export function initImagesToPdf(root: HTMLElement): void {
     el.options.disabled = generating;
     const fit = el.pageSize.value === 'fit';
     el.orientation.disabled = fit;
-    el.orientationHint.hidden = !fit;
-    el.marginHint.hidden = !fit;
+    showHint(el.orientation, el.orientationHint, fit);
+    showHint(el.margin, el.marginHint, fit);
 
     el.generate.disabled = count === 0 || phase !== 'idle';
     el.cancel.hidden = !generating;

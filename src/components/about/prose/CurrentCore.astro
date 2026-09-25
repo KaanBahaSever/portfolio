@@ -14,16 +14,17 @@ const novacast = localizePath('/projects/novacast/', locale);
   locale === 'tr' ? (
     <>
       <p>
-        Bugün ağırlıklı olarak modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları ve algoritma
-        odaklı uygulamalar geliştiriyorum. Hepsini <a href={projects} class={ui.inlineLink}>projeler sayfasında</a>{' '}
-        bulabilirsiniz.
+        Bugün zamanımın çoğunu üç tür yazılıma ayırıyorum: sistem araçları, telemetri ve mesajlaşma platformları ile
+        algoritma odaklı uygulamalar. Tam liste <a href={projects} class={ui.inlineLink}>projeler sayfasında</a>;
+        aşağıda iki örnek var.
       </p>
       <p>
         <a href={asion} class={ui.inlineLink}>Asion</a>, macOS, Linux ve Windows için gizliliği öncelikli bir
         üretkenlik ve etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek şekilde tasarlandı. Yerel işletim
-        sistemi olay kancaları (OS event hooks), hafif bir daemon mimarisi ve bileşenleri arasında gRPC üzerine kurulu.{' '}
-        <a href={novacast} class={ui.inlineLink}>Novacast</a> ise Go ve MQTT ile yazılmış; yüksek hacimli, gerçek
-        zamanlı bir mesaj yayını ve cihaz orkestrasyonu platformu. Düşük gecikmeli pub/sub veri akışları için tasarlandı.
+        sistemi olay kancalarına (OS event hooks), hafif bir daemon mimarisine ve bileşenleri arasındaki gRPC
+        iletişimine dayanıyor. <a href={novacast} class={ui.inlineLink}>Novacast</a> ise Go ile yazılmış, MQTT
+        kullanan, yüksek hacimli ve gerçek zamanlı bir mesaj yayını ve cihaz orkestrasyonu platformu. Düşük gecikmeli
+        pub/sub veri akışları için tasarlandı.
       </p>
       <p>
         Bunlarla birlikte İstanbul Üniversitesi’ndeki matematik eğitimimi tamamlıyorum. Reel analiz, soyut cebir ve
@@ -34,15 +35,16 @@ const novacast = localizePath('/projects/novacast/', locale);
   ) : (
     <>
       <p>
-        Today I work mostly in modern C++ and Go, on system tools, telemetry and messaging platforms, and
-        algorithm-driven applications. The <a href={projects} class={ui.inlineLink}>projects page</a> has the full list.
+        Most of my time now goes into three kinds of software: system tools, telemetry and messaging platforms, and
+        algorithm-driven applications. The <a href={projects} class={ui.inlineLink}>projects page</a> has the full list;
+        two examples follow.
       </p>
       <p>
         <a href={asion} class={ui.inlineLink}>Asion</a> is a privacy-first productivity and activity tracker for macOS,
         Linux and Windows, built with self-hosting in mind. It rests on native OS event hooks, a lightweight daemon
         architecture and gRPC between its components. <a href={novacast} class={ui.inlineLink}>Novacast</a> is a
-        high-throughput, real-time message broadcasting and device orchestration platform in Go and MQTT, designed for
-        low-latency pub/sub pipelines.
+        high-throughput, real-time message broadcasting and device orchestration platform, written in Go on top of MQTT
+        and designed for low-latency pub/sub pipelines.
       </p>
       <p>
         Alongside this I am completing my mathematics degree at Istanbul University. Real analysis, abstract algebra and

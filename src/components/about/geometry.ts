@@ -128,6 +128,8 @@ export interface FlightProfileOptions {
   tau: number;
   /** Sampling step. */
   step: number;
+  /** Safety cap on the number of samples (default 10 000). */
+  maxSteps?: number;
 }
 
 export interface FlightProfile {
@@ -143,9 +145,23 @@ export interface FlightProfile {
  * coast (no drag) up to apogee, then a descent that relaxes exponentially to the parachute's
  * steady descent rate. Crude, but it has the right shape: a short powered phase, a long
  * symmetric-looking coast, and a slow, nearly straight descent.
+ *
+ * Throws on parameters that would never bring the rocket back down (a non-positive gravity,
+ * descent rate, time constant or step), and if touchdown takes more than `maxSteps` samples:
+ * the figures run at build time, where a loud failure beats a build that never finishes.
  */
 export function flightProfile(options: FlightProfileOptions): FlightProfile {
-  const { thrust, burn, gravity, descentRate, tau, step } = options;
+  const { thrust, burn, gravity, descentRate, tau, step, maxSteps = 10_000 } = options;
+  for (const [name, value] of [
+    ['gravity', gravity],
+    ['descentRate', descentRate],
+    ['tau', tau],
+    ['step', step],
+  ] as const) {
+    if (!(Number.isFinite(value) && value > 0)) {
+      throw new RangeError(`flightProfile: ${name} must be a positive finite number, got ${value}`);
+    }
+  }
   const burnoutVelocity = thrust * burn;
   const burnoutHeight = 0.5 * thrust * burn * burn;
   const apogeeTime = burn + burnoutVelocity / gravity;
@@ -162,14 +178,19 @@ export function flightProfile(options: FlightProfileOptions): FlightProfile {
   };
 
   const samples: Point[] = [];
-  for (let t = 0; ; t += step) {
+  let landed = false;
+  // t = i * step rather than t += step, so rounding errors do not accumulate over the flight.
+  for (let i = 0; i <= maxSteps; i++) {
+    const t = i * step;
     const h = height(t);
     if (h <= 0 && t > 0) {
       samples.push({ x: t, y: 0 });
+      landed = true;
       break;
     }
     samples.push({ x: t, y: h });
   }
+  if (!landed) throw new RangeError(`flightProfile: no touchdown within ${maxSteps} steps`);
   return {
     samples,
     burnout: { x: burn, y: burnoutHeight },

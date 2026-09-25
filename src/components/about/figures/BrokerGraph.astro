@@ -2,9 +2,17 @@
 /**
  * Publish/subscribe fan-out: three publishers feed one broker (the accent node), which delivers
  * to five subscribers. Small squares are messages in flight, placed along the curves with the
- * Bézier formula so they sit exactly on the edges. Decorative.
+ * Bézier formula so they sit exactly on the edges. Decorative, but its three column labels are
+ * visible text, so they come in localized (and match the caption's terms).
  */
 import { round, type Point } from '../geometry';
+
+interface Props {
+  /** Short labels under the publisher, broker and subscriber columns (set in mono capitals). */
+  labels: { publisher: string; broker: string; subscriber: string };
+}
+
+const { labels } = Astro.props;
 
 const broker: Point = { x: 160, y: 86 };
 const publishers: Point[] = [48, 86, 124].map((y) => ({ x: 40, y }));
@@ -81,8 +89,8 @@ const muted = 'text-zinc-400 dark:text-zinc-600';
   </g>
 
   <g class="font-mono text-zinc-500" fill="currentColor" font-size="8" letter-spacing="0.06em" text-anchor="middle">
-    <text x={publishers[0].x} y="166">PUB</text>
-    <text x={broker.x} y="166">BROKER</text>
-    <text x={subscribers[0].x} y="166">SUB</text>
+    <text x={publishers[0].x} y="166">{labels.publisher}</text>
+    <text x={broker.x} y="166">{labels.broker}</text>
+    <text x={subscribers[0].x} y="166">{labels.subscriber}</text>
   </g>
 </svg>

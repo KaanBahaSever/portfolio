@@ -38,11 +38,14 @@ const value = 'text-sm font-medium text-zinc-900 sm:text-base dark:text-zinc-100
     </div>
     <div class={cell}>
       <dt class={term}>{m.building}</dt>
-      {/* The link keeps a 44px touch target; the negative margins line its text up with the other cells. */}
+      {/*
+        The link keeps a 44×44px touch target (the word alone is about 41px wide); the negative
+        margins line its text up with the other cells.
+      */}
       <dd class:list={[value, '-mt-0.5 -mb-2.5 flex flex-wrap items-center gap-x-2']}>
         <a
           href={localizePath('/projects/asion/', locale)}
-          class:list={[ui.inlineLink, 'inline-flex min-h-11 items-center']}
+          class:list={[ui.inlineLink, 'inline-flex min-h-11 min-w-11 items-center']}
         >
           Asion
         </a>

@@ -54,8 +54,13 @@ const headingId = `${id}-heading`;
       </div>
     </div>
     {
+      /*
+       * Below lg the figure sits under the text in one column. The 28rem cap keeps the
+       * 320-unit drawings at most ~1.4× their size, so hairlines stay hairlines and the figure
+       * never outgrows the 65ch text above it. From lg on, the grid column sets the width.
+       */
       Astro.slots.has('figure') && (
-        <div class="min-w-0 lg:pt-8">
+        <div class="min-w-0 max-w-md lg:max-w-none lg:pt-8">
           <slot name="figure" />
         </div>
       )

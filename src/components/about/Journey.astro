@@ -80,7 +80,7 @@ const { algorithms, avionics, guidance, simulation, core } = m.chapters;
       <Chapter id="journey-core" number="05" label={core.label} title={core.title}>
         <CurrentCore />
         <Figure slot="figure" number={5} caption={core.caption}>
-          <BrokerGraph />
+          <BrokerGraph labels={core.figureLabels} />
         </Figure>
       </Chapter>
     </li>

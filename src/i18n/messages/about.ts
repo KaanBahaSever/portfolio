@@ -26,7 +26,7 @@ const en = {
   journey: {
     title: 'Engineering journey',
     intro:
-      'Five chapters, roughly in chronological order: from the algorithms behind two small games to the systems I build today.',
+      'Five chapters, roughly in chronological order. The figures sketch the idea behind each one; most are computed from a small model of that idea rather than drawn by hand.',
     /** Figure number shown above each caption ("Fig. 2"). */
     figure: (n: number) => `Fig. ${n}`,
     chapters: {
@@ -58,6 +58,8 @@ const en = {
         label: 'Today',
         title: 'Current core: modern C++ and Go',
         caption: 'Publish/subscribe: messages fan out from one broker to many subscribers.',
+        /** The figure's own labels, set in small mono capitals under its three columns. */
+        figureLabels: { publisher: 'PUB', broker: 'BROKER', subscriber: 'SUB' },
       },
     },
   },
@@ -98,7 +100,7 @@ const tr: AboutMessages = {
   journey: {
     title: 'Mühendislik yolculuğu',
     intro:
-      'Kabaca kronolojik sırayla beş bölüm: iki küçük oyunun arkasındaki algoritmalardan bugün geliştirdiğim sistemlere.',
+      'Kabaca kronolojik sırayla beş bölüm. Şekiller her bölümün ardındaki fikri özetliyor; çoğu elle çizilmedi, o fikrin küçük bir modelinden hesaplandı.',
     figure: (n) => `Şekil ${n}`,
     chapters: {
       algorithms: {
@@ -109,14 +111,15 @@ const tr: AboutMessages = {
       },
       avionics: {
         label: 'Roket Kulübü',
-        title: 'Havacılık ve roket aviyoniği',
+        // "Havacılık" alone means aviation; "havacılık ve uzay" is the usual rendering of aerospace.
+        title: 'Havacılık ve uzay: roket aviyoniği',
         caption:
-          'İdealleştirilmiş bir uçuş: motorlu tırmanış, dh/dt = 0 olan tepe noktasına kadar süzülme, ardından paraşütle yavaş iniş. Noktalar kaydedilen örnekleri gösterir.',
+          'İdealleştirilmiş bir uçuş: motorlu tırmanış, dh/dt = 0 olan tepe noktasına kadar süzülme, ardından paraşütle yavaş iniş. Noktalar kaydedilen ölçümleri gösterir.',
       },
       guidance: {
         label: 'Araştırma',
         title: 'Otonom paraşüt güdümü ve hassas iniş',
-        caption: 'İniş hedefinin çevresindeki yönlendirme alanı, yukarıdan görünüm. Vurgulu yol, güdümlü bir inişi gösterir.',
+        caption: 'İniş hedefinin çevresindeki yönlendirme alanı (üstten görünüm). Vurgulu yol, güdümlü bir inişi gösterir.',
       },
       simulation: {
         label: 'Python · C++23',
@@ -126,7 +129,8 @@ const tr: AboutMessages = {
       core: {
         label: 'Bugün',
         title: 'Bugünkü odak: modern C++ ve Go',
-        caption: 'Yayınla/abone ol (pub/sub): mesajlar tek bir aracıdan birçok aboneye dağılır.',
+        caption: 'Yayınla/abone ol (pub/sub): mesajlar tek bir aracıdan (broker) birçok aboneye dağılır.',
+        figureLabels: { publisher: 'YAYINCI', broker: 'ARACI', subscriber: 'ABONE' },
       },
     },
   },

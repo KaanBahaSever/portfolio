@@ -1,0 +1,242 @@
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+
+import { LOCALES } from '../src/i18n/config.ts';
+import { consoleContent } from '../src/i18n/console/content.ts';
+import { consoleMessages } from '../src/i18n/console/messages.ts';
+import { COMMANDS, execute } from '../src/lib/console/commands.ts';
+import type { ShellError } from '../src/lib/console/commands.ts';
+import { buildConsoleData, serializeJson } from '../src/lib/console/data.ts';
+import type { ConsoleProjectInput } from '../src/lib/console/data.ts';
+import { displayUrl, isSafeHref, plainText } from '../src/lib/console/rich.ts';
+import type { Line, Span } from '../src/lib/console/rich.ts';
+import { lookup } from '../src/lib/console/vfs.ts';
+import type { FsNode } from '../src/lib/console/vfs.ts';
+import { describeError, describeNotice } from '../src/scripts/console/describe.ts';
+
+const projects: ConsoleProjectInput[] = [
+  {
+    id: 'karecik',
+    title: 'Karecik',
+    summary: 'Kafe ve restoranlar için QR menü platformu.',
+    lang: 'tr',
+    stack: ['Go', 'PostgreSQL', 'Cloudflare'],
+    isOpenSource: true,
+    stage: 'production',
+    repositoryUrl: 'https://github.com/KaanBahaSever/karecik',
+  },
+  {
+    id: 'asion',
+    title: 'Asion',
+    summary: 'A cross-platform productivity and active window tracking system.',
+    lang: 'en',
+    stack: ['C++', 'Go'],
+    isOpenSource: false,
+    stage: 'early-access',
+    since: 2024,
+    liveUrl: 'https://asion.app',
+  },
+  {
+    id: 'pdf-tool',
+    title: 'PDF tool',
+    summary: 'A tool on this site.',
+    lang: 'tr',
+    stack: ['TypeScript'],
+    isOpenSource: false,
+    liveUrl: '/tools/pdf-split/',
+  },
+];
+
+const build = (locale: 'en' | 'tr') =>
+  buildConsoleData({
+    locale,
+    copy: consoleContent[locale],
+    projects,
+    games: [{ title: 'XOX', algorithm: 'Minimax', href: '/games/tic-tac-toe/' }],
+    contact: {
+      email: 'someone@example.com',
+      socials: [{ label: 'GitHub', href: 'https://github.com/KaanBahaSever' }],
+      location: 'İstanbul, Türkiye',
+      cvPath: '/cv/kaan-cv.pdf',
+    },
+  });
+
+function spansOf(line: Line): readonly Span[] {
+  if (line.type === 'text') return line.spans;
+  if (line.type === 'pair') return [...line.term, ...line.desc];
+  return [];
+}
+
+function allLines(node: FsNode): Line[] {
+  return node.kind === 'file' ? [...node.lines] : node.children.flatMap(allLines);
+}
+
+function hrefs(lines: readonly Line[]): string[] {
+  return lines.flatMap(spansOf).flatMap((span) => (typeof span !== 'string' && span.href ? [span.href] : []));
+}
+
+const fileLines = (data: ReturnType<typeof build>, path: string[]) => {
+  const found = lookup(data.root, path);
+  assert.ok(found.ok && found.node.kind === 'file', path.join('/'));
+  return found.node.lines;
+};
+
+test('the file system has the promised layout, one file per project', () => {
+  const data = build('en');
+  assert.deepEqual(
+    data.root.children.map((child) => child.name),
+    ['projects', 'skills', 'about.txt', 'contact.txt', 'secret.txt'],
+  );
+  const listing = execute('ls projects', {
+    cwd: [],
+    root: data.root,
+    projects: data.projects,
+    history: [],
+    home: data.home,
+  }).output[0];
+  assert.deepEqual(listing, {
+    kind: 'listing',
+    entries: [
+      { name: 'asion.txt', dir: false },
+      { name: 'karecik.txt', dir: false },
+      { name: 'pdf-tool.txt', dir: false },
+    ],
+  });
+  const skills = lookup(data.root, ['skills']);
+  assert.ok(skills.ok && skills.node.kind === 'dir');
+  assert.ok(skills.node.children.length >= 5);
+  assert.ok(skills.node.children.every((child) => child.kind === 'file' && child.name.endsWith('.txt')));
+});
+
+test('site links are localized for Turkish; files and external links are not', () => {
+  const tr = build('tr');
+  assert.equal(tr.home, '/tr/');
+  assert.deepEqual(
+    tr.projects.map((project) => project.page),
+    ['/tr/projects/karecik/', '/tr/projects/asion/', '/tr/projects/pdf-tool/'],
+  );
+  assert.ok(hrefs(fileLines(tr, ['about.txt'])).includes('/tr/games/'));
+  assert.ok(hrefs(fileLines(tr, ['secret.txt'])).includes('/tr/games/tic-tac-toe/'));
+  assert.ok(hrefs(fileLines(tr, ['projects', 'pdf-tool.txt'])).includes('/tr/tools/pdf-split/'));
+  const contact = hrefs(fileLines(tr, ['contact.txt']));
+  assert.ok(contact.includes('/cv/kaan-cv.pdf'), 'the CV is one file for every language');
+  assert.ok(contact.includes('mailto:someone@example.com'));
+  assert.ok(contact.includes('https://github.com/KaanBahaSever'));
+
+  const en = build('en');
+  assert.equal(en.home, '/');
+  assert.ok(hrefs(fileLines(en, ['about.txt'])).includes('/games/'));
+  assert.ok(hrefs(en.docs.projects).includes('/projects/asion/'));
+});
+
+test('every link in the data is one the renderer will create', () => {
+  for (const locale of LOCALES) {
+    const data = build(locale);
+    const lines = [...allLines(data.root), ...data.docs.banner, ...data.docs.whoami, ...data.docs.projects];
+    const links = hrefs(lines);
+    assert.ok(links.length > 5);
+    for (const href of links) assert.ok(isSafeHref(href), `${locale}: ${href}`);
+  }
+});
+
+test('project files show the stack, status, page and links in the page language', () => {
+  const tr = build('tr');
+  const karecik = fileLines(tr, ['projects', 'karecik.txt']).map(plainText).join('\n');
+  assert.match(karecik, /teknolojiler Go · PostgreSQL · Cloudflare/);
+  assert.match(karecik, /durum Açık kaynak · Yayında/);
+  assert.match(karecik, /sayfa \/tr\/projects\/karecik\//);
+  assert.match(karecik, /kaynak kodu github\.com\/KaanBahaSever\/karecik/);
+
+  const asion = fileLines(build('en'), ['projects', 'asion.txt']).map(plainText).join('\n');
+  assert.match(asion, /status Private · Early access/);
+  assert.match(asion, /since 2024/);
+  assert.match(asion, /site asion\.app/);
+});
+
+test('an untranslated project summary is marked as English on the Turkish page', () => {
+  const lines = fileLines(build('tr'), ['projects', 'asion.txt']);
+  const summary = lines.find((line) => line.type === 'text' && plainText(line).startsWith('A cross-platform'));
+  assert.ok(summary && summary.type === 'text');
+  assert.equal(summary.lang, 'en');
+  const translated = fileLines(build('tr'), ['projects', 'karecik.txt'])[1];
+  assert.ok(translated?.type === 'text');
+  assert.equal(translated.lang, undefined);
+});
+
+test('duplicate or unusable project ids fail the build', () => {
+  const base = { copy: consoleContent.en, games: [], contact: { email: 'a@b.c', socials: [], location: '', cvPath: '/cv.pdf' } };
+  assert.throws(() => buildConsoleData({ ...base, locale: 'en', projects: [projects[0]!, projects[0]!] }), /duplicate/);
+  assert.throws(
+    () => buildConsoleData({ ...base, locale: 'en', projects: [{ ...projects[0]!, id: 'a/b' }] }),
+    /unusable/,
+  );
+});
+
+test('serializeJson cannot close its script element and round-trips', () => {
+  const tricky = { text: '</script><!-- &    “ok”', n: 1 };
+  const json = serializeJson(tricky);
+  assert.ok(!json.includes('<') && !json.includes('>') && !json.includes('&'));
+  assert.ok(!json.includes(' ') && !json.includes(' '));
+  assert.deepEqual(JSON.parse(json), tricky);
+  const data = build('tr');
+  assert.deepEqual(JSON.parse(serializeJson(data)), JSON.parse(JSON.stringify(data)));
+});
+
+test('isSafeHref and displayUrl', () => {
+  assert.ok(isSafeHref('/projects/asion/'));
+  assert.ok(isSafeHref('https://asion.app'));
+  assert.ok(isSafeHref('mailto:a@b.c'));
+  assert.ok(!isSafeHref('javascript:alert(1)'));
+  assert.ok(!isSafeHref('//evil.example'));
+  assert.ok(!isSafeHref('/\\evil.example'));
+  assert.ok(!isSafeHref('data:text/html,x'));
+  assert.equal(displayUrl('https://www.asion.app/'), 'asion.app');
+  assert.equal(displayUrl('https://github.com/KaanBahaSever/karecik'), 'github.com/KaanBahaSever/karecik');
+  assert.equal(displayUrl('mailto:a@b.c'), 'a@b.c');
+});
+
+test('both catalogues describe every command, and Turkish is not left in English', () => {
+  for (const command of COMMANDS) {
+    const en = consoleMessages.en.help.describe[command];
+    const tr = consoleMessages.tr.help.describe[command];
+    assert.ok(en && tr, command);
+    assert.notEqual(en, tr, `${command} is translated`);
+    // Command names stay English in both languages.
+    assert.ok(consoleMessages.tr.help.usage[command].startsWith(command));
+  }
+  assert.notDeepEqual(consoleContent.tr.about, consoleContent.en.about);
+  assert.notDeepEqual(consoleContent.tr.whoami, consoleContent.en.whoami);
+  assert.deepEqual(Object.keys(consoleContent.tr.skills), Object.keys(consoleContent.en.skills));
+});
+
+test('every error code has a message in both languages that keeps the values', () => {
+  const errors: ShellError[] = [
+    { code: 'command-not-found', command: 'foo' },
+    { code: 'command-not-found', command: 'hlep', suggestion: 'help' },
+    { code: 'no-such-path', command: 'cat', path: 'x.txt' },
+    { code: 'not-a-directory', command: 'cd', path: 'about.txt' },
+    { code: 'is-a-directory', command: 'cat', path: 'projects' },
+    { code: 'missing-operand', command: 'cat' },
+    { code: 'missing-operand', command: 'open' },
+    { code: 'too-many-arguments', command: 'cd' },
+    { code: 'unterminated-quote', quote: '"' },
+    { code: 'unknown-project', name: 'zeta' },
+    { code: 'unknown-help-topic', topic: 'zeta' },
+  ];
+  for (const locale of LOCALES) {
+    const m = consoleMessages[locale];
+    for (const error of errors) {
+      const message = describeError(error, m);
+      assert.ok(message.length > 0);
+      for (const value of Object.values(error)) {
+        if (value !== error.code) assert.ok(message.includes(String(value)), `${locale} ${error.code}: ${message}`);
+      }
+    }
+    assert.match(describeNotice({ kind: 'notice', notice: 'opening', title: 'Asion' }, m), /Asion/);
+    assert.ok(describeNotice({ kind: 'notice', notice: 'logout' }, m).length > 0);
+  }
+  assert.notEqual(
+    describeError({ code: 'no-such-path', command: 'cat', path: 'x' }, consoleMessages.tr),
+    describeError({ code: 'no-such-path', command: 'cat', path: 'x' }, consoleMessages.en),
+  );
+});

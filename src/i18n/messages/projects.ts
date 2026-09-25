@@ -110,7 +110,7 @@ const tr: ProjectsMessages = {
     novacast:
       'Pub/sub dağıtımı: yayımlanan tek bir mesaj, broker üzerinden konuya abone olan her cihaza ulaşır.',
     karecik: 'QR koddan menüye: kod okutulunca işletmenin menüsü müşterinin telefonunda açılır.',
-    'acik-matematik': 'Birinci sınıf analizinden bir sayfa: bir eğrinin altındaki Riemann toplamı ve bir teğet doğru.',
+    'acik-matematik': 'Analiz I dersinden bir sayfa: bir eğrinin altında Riemann toplamı ve bir teğet doğru.',
     neosmbios: 'Bir SMBIOS kaydı: hiçbir alan, kaydın kendi uzunluk baytıyla karşılaştırılmadan okunmaz.',
     'rocket-up': 'Bir uçuş profili: motorlu tırmanış, tepe noktası ve ardından paraşütle iniş.',
   },

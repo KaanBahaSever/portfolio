@@ -23,6 +23,12 @@ const html = locale === DEFAULT_LOCALE ? undefined : localizeProseLinks(await As
 const classes = [
   // prose-zinc would turn links ink-coloured; links stay in the accent, as everywhere else.
   'prose prose-zinc max-w-[68ch] dark:prose-invert prose-a:text-accent-700 prose-a:underline-offset-4 dark:prose-a:text-accent-400 prose-table:text-sm',
+  // Inline code: the typography plugin wraps it in literal backticks (code::before/::after).
+  // Bodies name components and types (`asion-agent`, `std::span`), so a quiet chip reads
+  // cleaner. Scoped to code outside <pre> so fenced blocks keep their Shiki frame; the
+  // clone keeps the padding and rounding on both halves when a long name wraps.
+  'prose-code:before:content-none prose-code:after:content-none',
+  '[&_:not(pre)>code]:rounded [&_:not(pre)>code]:bg-zinc-100 [&_:not(pre)>code]:px-1 [&_:not(pre)>code]:py-0.5 [&_:not(pre)>code]:font-medium [&_:not(pre)>code]:box-decoration-clone dark:[&_:not(pre)>code]:bg-zinc-800',
   className,
 ];
 ---

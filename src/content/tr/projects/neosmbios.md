@@ -9,7 +9,7 @@ NeoSMBIOS, firmware'in sunduğu SMBIOS/DMI tablolarını (anakart üreticisi, se
 BIOS sürümü, işlemci ve bellek modülleri) okur ve bunların tipli, sınırları denetlenmiş
 görünümlerini döndürür. MIT Lisansı ile yayımlanan tek bir başlık dosyasıdır.
 
-Saf bir çözücüdür: firmware'e hiç dokunmaz. Ona bir `std::span<const std::uint8_t>`
+Yalnızca veriyi çözümleyen bir ayrıştırıcıdır: firmware'e hiç dokunmaz. Ona bir `std::span<const std::uint8_t>`
 verirsiniz; baytlar Win32'den, sysfs'ten, bir bellek eşlemesinden ya da kaydedilmiş bir
 dosyadan gelebilir. Bu, Windows'ta WMI bağımlılığı olmadığı ve hiçbir yerde işletim sistemi
 başlığı gerekmediği anlamına da gelir.
@@ -21,7 +21,7 @@ başlığı gerekmediği anlamına da gelir.
 - **Donanım olmadan test edilebilir**: makineden hiçbir şey okunmadığı için ayrıştırıcı, root
   ya da yönetici yetkisi gerekmeden, kaydedilmiş tablolar üzerinde birim testleriyle
   sınanabilir.
-- **Sürümden bağımsız güvenlik**: her alan önce kaydın kendi uzunluk baytıyla karşılaştırılır;
+- **Sürümler arası güvenli okuma**: her alan önce kaydın kendi uzunluk baytıyla karşılaştırılır;
   eski bir BIOS'tan daha yeni bir alan istendiğinde kaydın sonunun ötesi okunmaz,
   `std::nullopt` döner.
 - **İstisna yok**: ayrıştırma için `std::expected`, firmware'in atlayabileceği alanlar için

@@ -20,7 +20,7 @@ kapalı.
 
 ## Araya girmeden izlemek
 
-Bir etkinlik takipçisi bütün gün çalışır, bu yüzden sisteme maliyeti sıfıra yakın olmalı.
+Bir etkinlik takipçisi bütün gün çalışır; bu yüzden sisteme getirdiği yük sıfıra yakın olmalı.
 Asion **yerel işletim sistemi olay kancalarını** (native OS event hooks) dinler; böylece her
 platform odak değişikliklerini gerçekleştikleri anda bildirir. Toplama işini arka planda
 **hafif bir daemon** üstlenir. Yerel katmanlarda C/C++ ve Objective-C, bunların yanında da Go

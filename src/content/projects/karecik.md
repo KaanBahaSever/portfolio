@@ -37,13 +37,13 @@ zero downtime and low latency.
 Every business is a tenant of one deployment: a request is resolved to its business by
 subdomain, so a new business needs no new infrastructure.
 
-| Layer    | Stack                                                              |
-| -------- | ------------------------------------------------------------------ |
-| API      | Go 1.22, Fiber v2, pgx; in-memory sessions with an HttpOnly cookie |
-| Database | PostgreSQL with embedded SQL migrations applied on startup         |
-| Frontend | React 18, Vite, Tailwind CSS, dnd-kit                              |
-| Tenancy  | Wildcard subdomain resolution with a path-based fallback           |
-| Edge     | Cloudflare                                                         |
+| Layer          | Stack                                                              |
+| -------------- | ------------------------------------------------------------------ |
+| API            | Go 1.22, Fiber v2, pgx; in-memory sessions with an HttpOnly cookie |
+| Database       | PostgreSQL with embedded SQL migrations applied on startup         |
+| Frontend       | React 18, Vite, Tailwind CSS, dnd-kit                              |
+| Tenancy        | Wildcard subdomain resolution with a path-based fallback           |
+| Infrastructure | Cloudflare                                                         |
 
 The code is written in English; the product itself ships in Turkish.
 

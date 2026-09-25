@@ -38,7 +38,7 @@ ilgili işletmeye eşlenir. Dolayısıyla yeni bir işletme için yeni bir altya
 | Veritabanı    | Açılışta uygulanan gömülü SQL migration'larıyla PostgreSQL       |
 | Ön yüz        | React 18, Vite, Tailwind CSS, dnd-kit                            |
 | Kiracılık     | Joker (wildcard) alt alan adı çözümleme, yol tabanlı yedekle     |
-| Uç katman     | Cloudflare                                                       |
+| Altyapı       | Cloudflare                                                       |
 
 Kod İngilizce yazıldı; ürünün kendisi Türkçe.
 

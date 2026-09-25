@@ -5,19 +5,20 @@
  * Self-hosted variable fonts (no third-party requests). Only the latin and latin-ext subsets
  * are declared: Turkish needs both (ı ç ö ü are in latin; ğ ş İ in latin-ext), and browsers
  * download a file only when the page uses a character in its unicode-range.
+ *
+ * Order matters: the two ranges overlap (U+0131 ı and the combining marks U+0304, U+0308,
+ * U+0329), and for a character that several faces of a family cover, the browser tries the face
+ * declared LAST first (CSS Fonts 4, unicode-range). So latin-ext comes first and latin last, as
+ * in Google Fonts' and Fontsource's own CSS: an English page that names "Açık Matematik" gets its
+ * ı from the latin file and does not download latin-ext.
+ *
  *   Sans  — IBM Plex Sans: interface and body text.
- *   Serif — Newsreader (optical sizes): display headings and editorial accents.
+ *   Serif — Newsreader: display headings and editorial accents. Upright text uses the files with
+ *           the optical-size axis (display cuts for large titles); italics appear only at text
+ *           sizes (figure labels, formulas, quotes), so they use the smaller weight-only files,
+ *           whose fixed optical size (18) is the text cut.
  *   Mono  — JetBrains Mono: code, labels, figures and the console.
  */
-@font-face {
-  font-family: "Plex Sans";
-  font-style: normal;
-  font-weight: 100 700;
-  font-display: swap;
-  src: url("@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
-    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 @font-face {
   font-family: "Plex Sans";
   font-style: normal;
@@ -29,10 +30,10 @@
 }
 @font-face {
   font-family: "Plex Sans";
-  font-style: italic;
+  font-style: normal;
   font-weight: 100 700;
   font-display: swap;
-  src: url("@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-italic.woff2") format("woff2");
+  src: url("@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
@@ -46,11 +47,11 @@
     U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-  font-family: "Newsreader";
-  font-style: normal;
-  font-weight: 200 800;
+  font-family: "Plex Sans";
+  font-style: italic;
+  font-weight: 100 700;
   font-display: swap;
-  src: url("@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2") format("woff2");
+  src: url("@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
@@ -65,10 +66,10 @@
 }
 @font-face {
   font-family: "Newsreader";
-  font-style: italic;
+  font-style: normal;
   font-weight: 200 800;
   font-display: swap;
-  src: url("@fontsource-variable/newsreader/files/newsreader-latin-opsz-italic.woff2") format("woff2");
+  src: url("@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
@@ -77,16 +78,16 @@
   font-style: italic;
   font-weight: 200 800;
   font-display: swap;
-  src: url("@fontsource-variable/newsreader/files/newsreader-latin-ext-opsz-italic.woff2") format("woff2");
+  src: url("@fontsource-variable/newsreader/files/newsreader-latin-ext-wght-italic.woff2") format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
     U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
-  font-family: "JetBrains Mono";
-  font-style: normal;
-  font-weight: 100 800;
+  font-family: "Newsreader";
+  font-style: italic;
+  font-weight: 200 800;
   font-display: swap;
-  src: url("@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+  src: url("@fontsource-variable/newsreader/files/newsreader-latin-wght-italic.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
     U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
@@ -98,6 +99,15 @@
   src: url("@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-ext-wght-normal.woff2") format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
     U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 100 800;
+  font-display: swap;
+  src: url("@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 /*
@@ -277,16 +287,6 @@
  * scroll inside their own box so the page never overflows horizontally.
  */
 @layer components {
-  .prose :where(h1, h2, h3):not(:where(.not-prose, .not-prose *)) {
-    font-family: var(--font-serif);
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-
-  .prose :where(h2):not(:where(.not-prose, .not-prose *)) {
-    font-size: 1.6em;
-  }
-
   .prose :where(p, li, a, blockquote, h1, h2, h3, h4, figcaption):not(:where(.not-prose, .not-prose *)) {
     overflow-wrap: anywhere;
   }
@@ -343,6 +343,21 @@
   .prose {
     --tw-prose-links: var(--color-accent-400);
   }
+}
+
+/*
+ * Headings in the serif at weight 500, like every other page and section title (the plugin sets
+ * 600–800). h2 a little larger than the plugin's 1.5em: the serif's small x-height reads smaller
+ * than Plex Sans at the same size.
+ */
+.prose :where(h1, h2, h3):not(:where(.not-prose, .not-prose *)) {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.prose :where(h2):not(:where(.not-prose, .not-prose *)) {
+  font-size: 1.6em;
 }
 
 /* Inline code: a quiet chip instead of the plugin's literal backticks. */

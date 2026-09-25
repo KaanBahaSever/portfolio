@@ -9,13 +9,12 @@ import { getLocale } from '../../i18n/server';
 interface Props {
   /** This page in each locale (site paths), for the language switch. */
   alternates: Partial<Record<Locale, string>>;
-  /** The page's content width, so the header lines up with it (see BaseLayout). */
-  width?: 'prose' | 'wide' | 'full';
 }
 
-const { alternates, width = 'wide' } = Astro.props;
-// Prose pages keep the standard header width; wide and full pages align the header with their content.
-const container = width === 'full' ? 'max-w-screen-2xl' : 'max-w-6xl';
+const { alternates } = Astro.props;
+// One width on every page, whatever the content column below: the brand, navigation and
+// language switch stay in the same place from page to page (full-width tools included).
+const container = 'max-w-6xl';
 const locale = getLocale(Astro);
 const t = common[locale];
 
@@ -108,7 +107,11 @@ const languages = LOCALES.map((l) => ({
         <span class="sr-only">{t.nav.console}</span>
       </a>
 
-      {/* Language switch: works without JavaScript; the script below remembers the choice. */}
+      {/*
+        Language switch: works without JavaScript; the script below remembers the choice. The
+        pill is 36px tall, so the link's hit area reaches past it (::after, 4px sideways and 7px
+        up and down) to 44×44 without covering the menu button beside it.
+      */}
       <div
         role="group"
         aria-label={t.language.label}
@@ -129,7 +132,7 @@ const languages = LOCALES.map((l) => ({
                 hreflang={language.htmlLang}
                 lang={language.htmlLang}
                 data-set-locale={language.locale}
-                class="relative flex h-full min-w-9 items-center justify-center rounded-full px-2 text-zinc-600 transition-colors after:absolute after:-inset-1 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                class="relative flex h-full min-w-9 items-center justify-center rounded-full px-2 text-zinc-600 transition-colors after:absolute after:-inset-x-1 after:-inset-y-[7px] hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
               >
                 {language.short}
                 <span class="sr-only">{`, ${language.label}`}</span>
@@ -139,7 +142,11 @@ const languages = LOCALES.map((l) => ({
         }
       </div>
 
-      {/* Below lg: disclosure menu, works without JavaScript. The nav wraps it so the landmark exists while closed. */}
+      {/*
+        Below lg: disclosure menu, works without JavaScript. The nav wraps it so the landmark
+        exists while closed. The script below closes it when focus leaves it, on Esc and on a
+        press outside, since the open panel covers the top of the page.
+      */}
       <nav aria-label={t.nav.label} class="lg:hidden">
         <details class="group">
           <summary
@@ -192,10 +199,40 @@ const languages = LOCALES.map((l) => ({
 <script>
   import { LOCALE_STORAGE_KEY, isLocale } from '../../i18n/config';
 
+  const menus = () => document.querySelectorAll<HTMLDetailsElement>('header details');
+
   // A page restored from the back/forward cache keeps the menu open after following one of its links.
   window.addEventListener('pageshow', (event) => {
     if (!event.persisted) return;
-    document.querySelectorAll('header details[open]').forEach((menu) => menu.removeAttribute('open'));
+    menus().forEach((menu) => (menu.open = false));
+  });
+
+  // The open menu is a panel over the top of the page, and native <details> stays open until its
+  // button is pressed again. Close it whenever it stops being where the visitor is, so the next
+  // focused control is never hidden underneath it (WCAG 2.4.11).
+  menus().forEach((menu) => {
+    // Tab or Shift+Tab out of the menu. A null relatedTarget (switching windows, a click on
+    // empty space inside the panel) is not a move elsewhere on the page: the menu stays open.
+    menu.addEventListener('focusout', (event) => {
+      const next = event.relatedTarget;
+      if (menu.open && next instanceof Node && !menu.contains(next)) menu.open = false;
+    });
+    // Esc closes it and returns focus to the button. preventDefault marks the key as handled
+    // for page-level Esc shortcuts (the notepad's zen mode ignores a handled Esc).
+    menu.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape' || !menu.open || event.defaultPrevented) return;
+      event.preventDefault();
+      menu.open = false;
+      menu.querySelector('summary')?.focus();
+    });
+  });
+
+  // A press anywhere outside the menu (the page under the panel, the language switch) closes it.
+  document.addEventListener('pointerdown', (event) => {
+    const target = event.target;
+    menus().forEach((menu) => {
+      if (menu.open && !(target instanceof Node && menu.contains(target))) menu.open = false;
+    });
   });
 
   // Remember an explicit language choice (also for middle-click / new-tab opens).
@@ -206,7 +243,9 @@ const languages = LOCALES.map((l) => ({
     try {
       localStorage.setItem(LOCALE_STORAGE_KEY, locale);
     } catch {
-      // Storage blocked (private mode, disabled cookies): the link still switches the page.
+      // Storage blocked (private mode, disabled cookies): the link still switches the page, and
+      // BaseLayout's language script treats a visit from another page of this site as a choice,
+      // so the English home page does not send the visitor back to Turkish.
     }
   }
   document.addEventListener('click', remember);

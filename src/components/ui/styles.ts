@@ -32,9 +32,14 @@ export const ui = {
   /** Card that is (or contains) a stretched link. */
   cardInteractive:
     'rounded-xl border border-zinc-200 bg-white transition-colors hover:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600',
-  /** Text inputs, selects and textareas. 16px on touch screens so iOS does not zoom in. */
+  /**
+   * Text inputs, selects and textareas. 16px on touch screens so iOS does not zoom in.
+   * The border is the field's only outline (its fill matches the card around it), so it keeps
+   * 3:1 against both (WCAG 1.4.11): zinc-500 is 4.8:1 on white, 4.1:1 on zinc-950 and 3.7:1 on
+   * zinc-900. Placeholders are text and keep 4.5:1 (zinc-500 on white, zinc-400 on zinc-950).
+   */
   field:
-    'min-h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900 placeholder:text-zinc-500 sm:pointer-fine:text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500',
+    'min-h-11 w-full rounded-lg border border-zinc-500 bg-white px-3 text-base text-zinc-900 placeholder:text-zinc-500 sm:pointer-fine:text-sm dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-400',
 
   /** Small uppercase mono label above a title. */
   eyebrow: 'label-mono text-accent-700 dark:text-accent-400',

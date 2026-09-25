@@ -100,8 +100,12 @@ const ogURL = noindex ? undefined : canonicalURL;
     {/*
       Language preference, before first paint. Only an explicit choice with the header toggle is
       stored; it sends every later visit to that language's version of the page. Without a stored
-      choice, a first visit to the English home page follows the browser language once. Redirects
-      go to a page that exists (the alternates below), so they cannot loop.
+      choice, arriving at the English home page from outside the site follows the browser
+      language. Reaching it from another page of this site (the EN toggle, the brand link) is a
+      choice in itself: that must hold even when storage is blocked and the toggle could not save
+      it, or a Turkish browser could never get to the English home page. Redirects go to a page
+      that exists (the alternates below), so they cannot loop.
+      tests/i18n-language-redirect.test.ts runs this script with stubbed browser globals.
     */}
     <script is:inline define:vars={{ pageLocale: locale, alternates, storageKey: LOCALE_STORAGE_KEY }}>
       try {
@@ -110,7 +114,11 @@ const ogURL = noindex ? undefined : canonicalURL;
           const stored = localStorage.getItem(storageKey);
           if (stored === 'en' || stored === 'tr') want = stored;
         } catch {}
-        if (!want && pageLocale === 'en' && location.pathname === '/') {
+        let fromThisSite = false;
+        try {
+          fromThisSite = !!document.referrer && new URL(document.referrer).origin === location.origin;
+        } catch {}
+        if (!want && !fromThisSite && pageLocale === 'en' && location.pathname === '/') {
           const langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
           const first = langs.map((l) => String(l).slice(0, 2).toLowerCase()).find((l) => l === 'en' || l === 'tr');
           if (first === 'tr') want = 'tr';
@@ -157,13 +165,21 @@ const ogURL = noindex ? undefined : canonicalURL;
     <slot name="head" />
   </head>
   <body class="flex min-h-dvh flex-col">
-    <a
-      href="#main"
-      class="sr-only rounded-lg bg-accent-700 px-4 py-3 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 dark:bg-accent-500 dark:text-zinc-950"
-    >
-      {t.skipToContent}
-    </a>
-    {!bare && <Header alternates={alternates} width={width} />}
+    {
+      /*
+       * Bare pages have no header to skip: #main comes first anyway. (The link would also be the
+       * console's only text in the sans font, and cost it a font download.)
+       */
+      !bare && (
+        <a
+          href="#main"
+          class="sr-only rounded-lg bg-accent-700 px-4 py-3 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 dark:bg-accent-500 dark:text-zinc-950"
+        >
+          {t.skipToContent}
+        </a>
+      )
+    }
+    {!bare && <Header alternates={alternates} />}
     <main
       id="main"
       class:list={[

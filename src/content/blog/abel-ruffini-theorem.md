@@ -19,7 +19,7 @@ Put that way, it sounds like a verdict on human ingenuity, but it is really a st
 
 ## A short history of a missing formula
 
-Babylonian scribes were solving quadratic problems nearly four thousand years ago, and al-Khwarizmi gave completing the square its systematic form in the ninth century. The next step took much longer: in sixteenth-century Italy, Scipione del Ferro and then Niccolò Tartaglia learned to solve cubics, and Gerolamo Cardano published the method in his *Ars Magna* (1545), together with the solution of the quartic found by his student Lodovico Ferrari.
+Babylonian scribes were solving quadratic problems nearly four thousand years ago, and al-Khwarizmi gave completing the square its systematic form in the ninth century. The next step took much longer: in sixteenth-century Italy, Scipione del Ferro and then Niccolò Tartaglia learned to solve cubics, and Gerolamo Cardano published the method in his <cite lang="la">Ars Magna</cite> (1545), together with the solution of the quartic found by his student Lodovico Ferrari.
 
 Two and a half centuries of failed attempts at the quintic followed. In 1770–71 Joseph-Louis Lagrange changed the question: he asked *why* the old methods work, and found that all of them manipulate permutations of the roots. Building on this, Paolo Ruffini argued in 1799 that the general quintic cannot be solved by radicals; his proof was essentially right, but it took for granted that every radical in a solution is a rational function of the roots. Niels Henrik Abel closed the gap in 1824, in a short memoir printed at his own expense. A few years later Évariste Galois, who died in 1832 at twenty, answered the sharper question of *which* equations are solvable by radicals. His work, published only in 1846, became the theory that bears his name.
 
@@ -74,7 +74,10 @@ where the two cube roots are chosen so that their product is $-p/3$. First a squ
 The same kind of shift reduces a quartic to $x^4 + px^2 + qx + r = 0$. Ferrari's idea is to add an auxiliary unknown $y$ so that the left-hand side becomes a perfect square:
 
 $$
-(x^2 + y)^2 = (2y - p)\,x^2 - qx + (y^2 - r).
+\begin{aligned}
+(x^2 + y)^2 &= (2y - p)\,x^2 - qx \\
+&\quad + (y^2 - r).
+\end{aligned}
 $$
 
 The right-hand side is a quadratic in $x$, and it is a perfect square exactly when its discriminant vanishes: $q^2 = 4(2y - p)(y^2 - r)$. That is a cubic equation for $y$, the *resolvent cubic*
@@ -83,10 +86,10 @@ $$
 8y^3 - 4py^2 - 8ry + 4pr - q^2 = 0.
 $$
 
-Solve it with Cardano's formula. If $q \ne 0$, every root $y$ satisfies $2y \ne p$ (and if $q = 0$ the quartic is simply a quadratic in $x^2$), so both sides are squares and the quartic splits into two quadratics:
+Solve it with Cardano's formula. If $q \ne 0$, every root $y$ satisfies $2y \ne p$ (and if $q = 0$ the quartic is simply a quadratic in $x^2$), so both sides are squares and, with $s = \sqrt{2y - p}$, the quartic splits into two quadratics:
 
 $$
-x^2 + y = \pm\Bigl(\sqrt{2y - p}\;x - \frac{q}{2\sqrt{2y - p}}\Bigr).
+x^2 + y = \pm\Bigl(s\,x - \frac{q}{2s}\Bigr).
 $$
 
 ### Lagrange's resolvents
@@ -105,7 +108,11 @@ The cyclic permutation $r_1 \mapsto r_2 \mapsto r_3 \mapsto r_1$ sends $L$ to $\
 For the quartic, the three quantities
 
 $$
-r_1 r_2 + r_3 r_4, \quad r_1 r_3 + r_2 r_4, \quad r_1 r_4 + r_2 r_3
+\begin{gathered}
+r_1 r_2 + r_3 r_4, \\
+r_1 r_3 + r_2 r_4, \\
+r_1 r_4 + r_2 r_3
+\end{gathered}
 $$
 
 are merely shuffled among themselves by the 24 permutations of the roots, so they are the roots of a cubic with known coefficients; halved, they are exactly the roots of Ferrari's resolvent cubic. The permutations that fix all three form the *Klein four-group* $V_4 = \{e, (1\,2)(3\,4), (1\,3)(2\,4), (1\,4)(2\,3)\}$.
@@ -167,13 +174,13 @@ in which each $G_{i+1}$ is normal in $G_i$ (though not necessarily in $G$) and e
 
 </div>
 
-The extra idea is Lagrange's. To go backwards, refine the series until every factor is cyclic of prime order $p$ and adjoin the needed roots of unity. If $\sigma$ generates the Galois group of such a step and $\zeta$ is a primitive $p$-th root of unity, the Lagrange resolvent
+The extra idea is Lagrange's. To go backwards, refine the series until every factor is cyclic of prime order $p$ and adjoin the needed roots of unity. If $\sigma$ generates the Galois group of such a step, $\theta$ is an element of the larger field and $\zeta$ is a primitive $p$-th root of unity, the Lagrange resolvent
 
 $$
 \ell = \sum_{j=0}^{p-1} \zeta^{-j}\,\sigma^{j}(\theta)
 $$
 
-satisfies $\sigma(\ell) = \zeta\ell$, so $\ell^p$ lies in the smaller field; for a suitable $\theta$, $\ell \ne 0$, and then $\ell$ generates the step as a $p$-th root. The $L$ of the cubic is exactly this construction.
+satisfies $\sigma(\ell) = \zeta\ell$, so $\ell^p$ lies in the smaller field; for a suitable choice of $\theta$, $\ell \ne 0$, and then $\ell$ generates the step as a $p$-th root. The $L$ of the cubic is exactly this construction.
 
 For the general polynomial the Galois group is $S_n$, so the general equation of degree $n$ is solvable by radicals exactly when $S_n$ is a solvable group. A question about formulas has become a question about permutations.
 
@@ -196,7 +203,7 @@ $$
 S_4 \;\triangleright\; A_4 \;\triangleright\; V_4 \;\triangleright\; C_2 \;\triangleright\; \{e\},
 $$
 
-with orders $24, 12, 4, 2, 1$ and factors $C_2, C_3, C_2, C_2$, where $C_2 = \{e, (1\,2)(3\,4)\}$. This $C_2$ is normal in $V_4$ but not in $S_4$, which is allowed: a subnormal series only asks each group to be normal in the one just above it. The ladder is Ferrari's method. The first two rungs solve the resolvent cubic (whose roots are fixed exactly by $V_4$) with a square root and a cube root; the last two are square roots, $\sqrt{2y - p}$ to split the quartic into two quadratics and the quadratic formula to finish.
+with orders $24, 12, 4, 2, 1$ and factors $C_2, C_3, C_2, C_2$, where $C_2 = \{e, (1\,2)(3\,4)\}$. This $C_2$ is normal in $V_4$ but not in $S_4$, which is allowed: a subnormal series only asks each group to be normal in the one just above it. The ladder is Ferrari's method. The first two rungs solve the resolvent cubic (whose roots are fixed exactly by $V_4$) with a square root and a cube root; the last two are square roots, $s = \sqrt{2y - p}$ to split the quartic into two quadratics and the quadratic formula to finish.
 
 ## Five is different: a simple group of order 60
 
@@ -242,51 +249,51 @@ This is the only composition series of $S_5$ (a subnormal series with simple fac
 <figure class="not-prose my-10">
 <div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-3 py-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-graph mask-fade-b"></div>
-<svg class="relative mx-auto block h-auto w-full max-w-sm text-zinc-900 dark:text-zinc-100" viewBox="0 0 340 316" role="img" aria-label="Two ladders on a common logarithmic scale. Degree 4: S4, A4, V4, C2 and the trivial group, with the abelian factors C2, C3, C2 and C2. Degree 5: S5, A5 and the trivial group, with the factors C2 and A5; the long final rung, A5, is not abelian." xmlns="http://www.w3.org/2000/svg">
+<svg class="relative mx-auto block h-auto w-full max-w-xs text-zinc-900 dark:text-zinc-100" viewBox="48 0 288 316" role="img" aria-label="Two ladders on a common logarithmic scale. Degree 4: S4, A4, V4, C2 and the trivial group, with the abelian factors C2, C3, C2 and C2. Degree 5: S5, A5 and the trivial group, with the factors C2 and A5; the long final rung, A5, is not abelian." xmlns="http://www.w3.org/2000/svg">
 <g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
 <text x="100" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 4</text>
-<text x="232" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 5</text>
+<text x="220" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 5</text>
 </g>
 <g stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.6">
 <line x1="100" y1="143.7" x2="100" y2="164.4"/>
 <line x1="100" y1="178.4" x2="100" y2="219.5"/>
 <line x1="100" y1="233.5" x2="100" y2="254.3"/>
 <line x1="100" y1="268.3" x2="100" y2="289"/>
-<line x1="232" y1="63" x2="232" y2="83.8"/>
+<line x1="220" y1="63" x2="220" y2="83.8"/>
 </g>
 <g fill="currentColor">
 <circle cx="100" cy="136.7" r="3.5"/>
 <circle cx="100" cy="171.4" r="3.5"/>
 <circle cx="100" cy="226.5" r="3.5"/>
 <circle cx="100" cy="261.3" r="3.5"/>
-<circle cx="232" cy="56" r="3.5"/>
+<circle cx="220" cy="56" r="3.5"/>
 </g>
 <g fill="none" stroke="currentColor" stroke-width="1.25">
 <circle cx="100" cy="296" r="3.5"/>
-<circle cx="232" cy="296" r="3.5"/>
+<circle cx="220" cy="296" r="3.5"/>
 </g>
 <g fill="currentColor" text-anchor="end" style="font-family: var(--font-serif); font-size: 17px">
-<text x="86" y="142.2"><tspan font-style="italic">S</tspan><tspan font-size="11" dy="4">4</tspan></text>
-<text x="86" y="176.9"><tspan font-style="italic">A</tspan><tspan font-size="11" dy="4">4</tspan></text>
-<text x="86" y="232"><tspan font-style="italic">V</tspan><tspan font-size="11" dy="4">4</tspan></text>
-<text x="86" y="266.8"><tspan font-style="italic">C</tspan><tspan font-size="11" dy="4">2</tspan></text>
+<text x="86" y="142.2"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="176.9"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="232"><tspan font-style="italic">V</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="266.8"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
 <text x="86" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
-<text x="218" y="61.5"><tspan font-style="italic">S</tspan><tspan font-size="11" dy="4">5</tspan></text>
-<text x="218" y="96.3"><tspan font-style="italic">A</tspan><tspan font-size="11" dy="4">5</tspan></text>
-<text x="218" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
+<text x="206" y="61.5"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="96.3"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
 </g>
 <g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
-<text x="114" y="159"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
-<text x="114" y="204"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">3</tspan></text>
-<text x="114" y="249"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
-<text x="114" y="283.6"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
-<text x="246" y="78.4"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
+<text x="114" y="159"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="204"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">3</tspan></text>
+<text x="114" y="249"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="283.6"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="234" y="78.4"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
 </g>
 <g class="text-accent-700 dark:text-accent-400" fill="currentColor">
-<line x1="232" y1="97.8" x2="232" y2="289" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-<circle cx="232" cy="90.8" r="3.5"/>
-<text x="246" y="192" style="font-family: var(--font-serif); font-size: 16px"><tspan font-style="italic">A</tspan><tspan font-size="11" dy="4">5</tspan></text>
-<text x="246" y="210" style="font-family: var(--font-mono); font-size: 10px">non-abelian</text>
+<line x1="220" y1="97.8" x2="220" y2="289" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+<circle cx="220" cy="90.8" r="3.5"/>
+<text x="234" y="192" style="font-family: var(--font-serif); font-size: 17px"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="234" y="212" style="font-family: var(--font-mono); font-size: 13px">non-abelian</text>
 </g>
 </svg>
 </div>
@@ -317,7 +324,7 @@ $$
 x_{k+1} = x_k - \frac{x_k^5 - 4x_k + 2}{5x_k^4 - 4},
 $$
 
-started at $x_0 = 0$ gives $0.5$, then $0.508474\ldots$, $0.508499484435\ldots$ and $0.508499484657\ldots$: the number of correct digits roughly doubles at every step. The other roots are approximately $-1.518512$, $1.243596$ and $-0.116792 \pm 1.438448\,i$.
+started at $x_0 = 0$ gives $0.5$, then $0.508474\ldots$, $0.508499484434\ldots$ and $0.508499484657\ldots$: the number of correct digits roughly doubles at every step. The other roots are approximately $-1.518512$, $1.243596$ and $-0.116792 \pm 1.438448\,i$.
 
 **It does not say that no quintic can be solved by radicals.** Particular quintics can. The roots of $x^5 - 2$ are $\sqrt[5]{2}\,\zeta^k$ for $k = 0, 1, \dots, 4$, where $\zeta = e^{2\pi i/5}$, and $\zeta$ itself is expressible by radicals, for instance through $\cos(2\pi/5) = (\sqrt{5} - 1)/4$. The Galois group of $x^5 - 2$ has order 20 and is solvable: it has a normal cyclic subgroup of order 5 with a cyclic quotient of order 4. The theorem rules out a single formula that works for *every* quintic; Galois's criterion then decides, equation by equation, which ones are solvable.
 
@@ -329,7 +336,7 @@ A formula in radicals is a machine for undoing symmetry. Each radical breaks the
 
 ## Further reading
 
-- David S. Dummit and Richard M. Foote, *Abstract Algebra*, 3rd edition (Wiley, 2004), Chapter 14; Section 14.7 covers solvable and radical extensions and the insolvability of the quintic.
-- Ian Stewart, *Galois Theory* (CRC Press): the theory developed alongside its history.
-- V. B. Alekseev, *Abel's Theorem in Problems and Solutions*, based on the lectures of V. I. Arnold: a problem-driven route through groups, complex functions and Riemann surfaces.
-- Niels Henrik Abel, *Mémoire sur les équations algébriques, où l'on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré* (Christiania, 1824): the original proof, in a famously short pamphlet.
+- David S. Dummit and Richard M. Foote, <cite>Abstract Algebra</cite>, 3rd edition (Wiley, 2004), Chapter 14; Section 14.7 covers solvable and radical extensions and the insolvability of the quintic.
+- Ian Stewart, <cite>Galois Theory</cite> (CRC Press): the theory developed alongside its history.
+- V. B. Alekseev, <cite>Abel's Theorem in Problems and Solutions</cite>, based on the lectures of V. I. Arnold: a problem-driven route through groups, complex functions and Riemann surfaces.
+- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques, où l'on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): the original proof, in a famously short pamphlet.

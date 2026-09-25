@@ -13,13 +13,13 @@ $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
 $$
 
-Daha kalın bir kitapta her derece için benzer bir formül bulunduğunu düşünmek doğaldır. Üçüncü ve dördüncü derece için gerçekten de vardır. Beşinci derece için ise yoktur ve hiçbir kitapta da olmayacaktır: Her beşinci derece denklemin köklerini katsayılarından yalnızca toplama, çıkarma, çarpma, bölme ve $n$-inci kök alma işlemleriyle veren bir formül yoktur. Abel–Ruffini teoremi tam olarak bunu söyler.
+Daha kalın bir kitapta her derece için benzer bir formül bulunduğunu düşünmek doğaldır. Üçüncü ve dördüncü derece için gerçekten de vardır. Beşinci derece için ise yoktur ve hiçbir kitapta da olmayacaktır: Her beşinci derece denklemin köklerini katsayılarından yalnızca toplama, çıkarma, çarpma, bölme ve her dereceden kök alma işlemleriyle veren bir formül yoktur. Abel–Ruffini teoremi tam olarak bunu söyler.
 
-Bu haliyle teorem, insan zekâsının sınırları hakkında verilmiş bir hüküm gibi görünür; oysa asıl söylediği şey simetriyle ilgilidir. Bu yazıda o fikrin izini süreceğiz: Klasik formüllerin neden işe yaradığını, beşinci derecede neyin değiştiğini ve engelin, köklerin bulunmasının zorluğuyla neden hiçbir ilgisi olmadığını göreceğiz.
+Bu hâliyle teorem, insan zekâsının sınırları hakkında verilmiş bir hüküm gibi görünür; oysa asıl söylediği şey simetriyle ilgilidir. Bu yazıda o fikrin izini süreceğiz: Klasik formüllerin neden işe yaradığını, beşinci derecede neyin değiştiğini ve engelin, köklerin bulunmasının zorluğuyla neden hiçbir ilgisi olmadığını göreceğiz.
 
 ## Eksik bir formülün kısa tarihi
 
-Babilli kâtipler ikinci dereceden problemleri neredeyse dört bin yıl önce çözüyordu; tam kareye tamamlama yöntemi ise 9. yüzyılda Harezmî'nin elinde sistematik bir biçim kazandı. Sonraki adım çok daha uzun sürdü: 16. yüzyıl İtalya'sında önce Scipione del Ferro, ardından Niccolò Tartaglia üçüncü dereceden denklemleri çözmeyi başardı. Gerolamo Cardano bu yöntemi 1545'te *Ars Magna* adlı kitabında, öğrencisi Lodovico Ferrari'nin dördüncü derece için bulduğu çözümle birlikte yayımladı.
+Babilli kâtipler ikinci dereceden problemleri neredeyse dört bin yıl önce çözüyordu; tam kareye tamamlama yöntemi ise 9. yüzyılda Harezmî'nin elinde sistematik bir biçim kazandı. Sonraki adım çok daha uzun sürdü: 16. yüzyıl İtalya'sında önce Scipione del Ferro, ardından Niccolò Tartaglia üçüncü dereceden denklemleri çözmeyi başardı. Gerolamo Cardano bu yöntemi 1545'te <cite lang="la">Ars Magna</cite> adlı kitabında, öğrencisi Lodovico Ferrari'nin dördüncü derece için bulduğu çözümle birlikte yayımladı.
 
 Ardından beşinci derece için iki buçuk yüzyıl süren sonuçsuz denemeler geldi. 1770–71'de Joseph-Louis Lagrange soruyu değiştirdi: Eski yöntemlerin *neden* işe yaradığını sordu ve hepsinin köklerin permütasyonları üzerine kurulu olduğunu gördü. Paolo Ruffini bu fikirden yola çıkarak 1799'da genel beşinci derece denklemin radikallerle çözülemeyeceğini savundu. Kanıtı özünde doğruydu, ancak bir çözümde görünen her radikalin köklerin rasyonel bir fonksiyonu olduğunu kanıtlamadan kabul ediyordu. Niels Henrik Abel bu boşluğu 1824'te, basım masrafını kendi cebinden karşıladığı kısa bir risaleyle kapattı. Birkaç yıl sonra, 1832'de henüz yirmi yaşındayken ölen Évariste Galois daha keskin bir soruyu yanıtladı: Hangi denklemler radikallerle çözülebilir? Ancak 1846'da yayımlanabilen çalışmaları, bugün onun adını taşıyan teoriye dönüştü.
 
@@ -52,7 +52,7 @@ $$
 u^3 + v^3 + q + (3uv + p)(u + v) = 0
 $$
 
-haline gelir. İki bilinmeyene karşılık tek denklem olduğundan ikinci bir koşul koyabiliriz: $3uv = -p$. O zaman $u^3 + v^3 = -q$ ve $u^3 v^3 = -p^3/27$ olur; yani $u^3$ ve $v^3$ sayıları
+hâline gelir. İki bilinmeyene karşılık tek denklem olduğundan ikinci bir koşul koyabiliriz: $3uv = -p$. O zaman $u^3 + v^3 = -q$ ve $u^3 v^3 = -p^3/27$ olur; yani $u^3$ ve $v^3$ sayıları
 
 $$
 t^2 + qt - \frac{p^3}{27} = 0
@@ -71,10 +71,13 @@ Burada iki küpkök, çarpımları $-p/3$ olacak biçimde seçilir. Önce bir ka
 
 ### 4. derece: Ferrari'nin çözücü kübiği
 
-Benzer bir kaydırmayla dördüncü derece bir denklem $x^4 + px^2 + qx + r = 0$ biçimine getirilir. Ferrari'nin fikri, sol tarafı tam kare yapacak bir $y$ yardımcı bilinmeyeni eklemektir:
+Benzer bir kaydırmayla dördüncü derece bir denklem $x^4 + px^2 + qx + r = 0$ biçimine getirilir. Ferrari'nin fikri, sol tarafı tam kare yapacak yardımcı bir $y$ bilinmeyeni eklemektir:
 
 $$
-(x^2 + y)^2 = (2y - p)\,x^2 - qx + (y^2 - r).
+\begin{aligned}
+(x^2 + y)^2 &= (2y - p)\,x^2 - qx \\
+&\quad + (y^2 - r).
+\end{aligned}
 $$
 
 Sağ taraf $x$'e göre ikinci derecedendir ve tam olarak diskriminantı sıfır olduğunda, yani $q^2 = 4(2y - p)(y^2 - r)$ iken tam karedir. Bu, $y$ için üçüncü dereceden bir denklemdir ve *çözücü kübik* adını alır:
@@ -83,10 +86,10 @@ $$
 8y^3 - 4py^2 - 8ry + 4pr - q^2 = 0.
 $$
 
-Bu denklemi Cardano formülüyle çözelim. $q \ne 0$ ise her $y$ kökü $2y \ne p$ koşulunu sağlar ($q = 0$ ise denklem zaten $x^2$'ye göre ikinci derecedendir); dolayısıyla iki taraf da tam karedir ve denklem iki ikinci derece denkleme ayrılır:
+Bu denklemi Cardano formülüyle çözelim. $q \ne 0$ ise her $y$ kökü $2y \ne p$ koşulunu sağlar ($q = 0$ ise denklem zaten $x^2$'ye göre ikinci derecedendir); dolayısıyla iki taraf da tam karedir ve $s = \sqrt{2y - p}$ dersek denklem iki ikinci derece denkleme ayrılır:
 
 $$
-x^2 + y = \pm\Bigl(\sqrt{2y - p}\;x - \frac{q}{2\sqrt{2y - p}}\Bigr).
+x^2 + y = \pm\Bigl(s\,x - \frac{q}{2s}\Bigr).
 $$
 
 ### Lagrange çözücüleri
@@ -105,7 +108,11 @@ tanımlayalım. $r_1 \mapsto r_2 \mapsto r_3 \mapsto r_1$ devirli permütasyonu 
 Dördüncü derecede
 
 $$
-r_1 r_2 + r_3 r_4, \quad r_1 r_3 + r_2 r_4, \quad r_1 r_4 + r_2 r_3
+\begin{gathered}
+r_1 r_2 + r_3 r_4, \\
+r_1 r_3 + r_2 r_4, \\
+r_1 r_4 + r_2 r_3
+\end{gathered}
 $$
 
 nicelikleri, köklerin 24 permütasyonu altında yalnızca kendi aralarında yer değiştirir; dolayısıyla katsayıları bilinen bir kübiğin kökleridir. Bu niceliklerin yarıları da tam olarak Ferrari'nin çözücü kübiğinin kökleridir. Üçünü birden sabit bırakan permütasyonlar *Klein dörtlü grubunu* oluşturur: $V_4 = \{e, (1\,2)(3\,4), (1\,3)(2\,4), (1\,4)(2\,3)\}$.
@@ -114,7 +121,7 @@ Lagrange'ın dersi şudur: Her klasik formül, kökler cinsinden bir ifadeler zi
 
 ## Kökler, permütasyonlar ve cisimler
 
-### Simetrik ifadeler bedavadır
+### Simetrik ifadeler katsayılardan hesaplanır
 
 Vieta formüllerine göre $x^n + a_{n-1}x^{n-1} + \dots + a_1 x + a_0 = (x - r_1)\cdots(x - r_n)$ ise
 
@@ -126,7 +133,7 @@ a_0 &= (-1)^n\, r_1 r_2 \cdots r_n
 \end{aligned}
 $$
 
-olur. Bunlar, işaret dışında, temel simetrik polinomlardır. Simetrik polinomların temel teoremine göre kökler cinsinden yazılmış ve köklerin $n!$ permütasyonunun hepsi altında, yani $S_n$ simetrik grubunun tamamı altında değişmeyen her polinom, katsayıların bir polinomudur. Demek ki simetrik ifadeler bedavadır; zorluk, daha az simetriye sahip ifadelerdedir. En uç örnek, yalnızca özdeşlik permütasyonunun sabit bıraktığı kök listesinin kendisidir.
+olur. Bunlar, işaret dışında, temel simetrik polinomlardır. Simetrik polinomların temel teoremine göre kökler cinsinden yazılmış ve köklerin $n!$ permütasyonunun hepsi altında, yani $S_n$ simetrik grubunun tamamı altında değişmeyen her polinom, katsayıların bir polinomudur. Demek ki simetrik ifadeler doğrudan katsayılardan hesaplanır; zorluk, daha az simetriye sahip ifadelerdedir. En uç örnek, yalnızca özdeşlik permütasyonunun sabit bıraktığı kök listesinin kendisidir.
 
 ### Radikallerle çözüm bir cisim kulesidir
 
@@ -141,7 +148,7 @@ $$
 
 Bir $f \in F[x]$ polinomunun bütün köklerini içeren bir cisimde son bulan böyle bir kule varsa, $f$ polinomuna *radikallerle çözülebilir* denir.
 
-Birimin yeterince kökü mevcutsa her adım basittir. Birimin köklerini eklemek zararsızdır, çünkü $F(\zeta)/F$ genişlemesinin Galois grubu değişmelidir. Bu yüzden, $N$ her $m_i$ sayısına bölünecek şekilde, birimin ilkel bir $N$-inci kökü $\zeta$ kulenin en altına konabilir. O zaman $F_{i-1}$ cismini sabit bırakan her $F_i$ otomorfizması, $\alpha_i$ elemanını $x^{m_i} - \alpha_i^{m_i}$ polinomunun başka bir köküne, yani birimin bir $m_i$-inci kökü $\eta$ için $\eta\,\alpha_i$ elemanına götürmek zorundadır; otomorfizmaları bileştirmek de bu birim köklerini çarpmaya karşılık gelir. Demek ki her radikal adım *devirli*, özel olarak da değişmeli bir genişlemedir.
+Birimin yeterince kökü mevcutsa her adım basittir. Birimin köklerini eklemek zararsızdır, çünkü $F(\zeta)/F$ genişlemesinin Galois grubu değişmeli bir gruptur. Bu yüzden, $N$ her $m_i$ sayısına bölünecek şekilde, birimin ilkel bir $N$'inci kökü olan $\zeta$ kulenin en altına eklenebilir. O zaman $F_{i-1}$ cismini sabit bırakan her $F_i$ otomorfizması, $\alpha_i$ elemanını $x^{m_i} - \alpha_i^{m_i}$ polinomunun başka bir köküne, yani $\eta^{m_i} = 1$ olmak üzere $\eta\,\alpha_i$ biçiminde bir elemana götürmek zorundadır; otomorfizmaları bileştirmek de birimin bu köklerini çarpmaya karşılık gelir. Demek ki her radikal adım *devirli*, özel olarak da değişmeli bir genişlemedir.
 
 ### Galois grubu ve temel teorem
 
@@ -149,7 +156,7 @@ $K$, $f$ polinomunun $F$ üzerindeki ayrışım cismi, yani bütün kökleri tar
 
 Galois teorisinin temel teoremi, cisimlerle gruplar arasında bir sözlüktür. $F \subseteq E \subseteq K$ ara cisimleri, $G = \mathrm{Gal}(K/F)$ grubunun $H$ altgruplarıyla birebir eşlenir: Bir cisme, onu noktasal olarak sabit bırakan otomorfizmaların altgrubu; bir altgruba da sabit bıraktığı elemanların cismi karşılık gelir. Büyük cisimler küçük gruplarla eşleşir. Ayrıca $E/F$ genişlemesinin kendisi, tam olarak $H$ altgrubu $G$ içinde *normal altgrup* olduğunda bir Galois genişlemesidir ve bu durumda $\mathrm{Gal}(E/F) \cong G/H$ olur.
 
-Şimdi bir radikaller kulesini bu sözlükle okuyalım. $F$ cisminden $K$ cismine radikal radikal tırmanmak, $G$ grubundan aşikâr gruba her adımda bir normal altgruba inerek ilerlemek demektir ve her adımda bölüm grubu değişmelidir. (Tam söylemek gerekirse kule $K$ cismini aşabilir; o zaman kulenin, yine radikallerle kurulmuş olan Galois kapanışına geçilir ve $\mathrm{Gal}(f)$ grubunun bu büyük grubun bir bölüm grubu olduğu kullanılır.)
+Şimdi bir radikaller kulesini bu sözlükle okuyalım. $F$ cisminden $K$ cismine radikal radikal tırmanmak, $G$ grubundan aşikâr gruba her adımda bir normal altgruba inerek ilerlemek demektir; üstelik her adımın bölüm grubu değişmeli bir gruptur. (Daha kesin söylemek gerekirse, kule $K$ cismini aşabilir; o zaman kulenin, yine radikallerle kurulmuş olan Galois kapanışına geçilir ve $\mathrm{Gal}(f)$ grubunun bu büyük grubun bir bölüm grubu olduğu kullanılır.)
 
 ## Çözülebilir gruplar ve teorem
 
@@ -167,15 +174,15 @@ biçiminde, her $G_{i+1}$ grubunun $G_i$ içinde normal olduğu (ama $G$ içinde
 
 </div>
 
-Eksik fikir yine Lagrange'dan gelir. Ters yönde ilerlemek için seriyi, her bölüm asal $p$ mertebeli devirli bir grup olana kadar inceltir ve birimin gereken köklerini ekleriz. $\sigma$ böyle bir adımın Galois grubunu üretiyorsa ve $\zeta$ birimin ilkel bir $p$-inci köküyse,
+Eksik fikir yine Lagrange'dan gelir. Ters yönde ilerlemek için seriyi, her bölüm asal $p$ mertebeli devirli bir grup olana kadar inceltir ve birimin gereken köklerini ekleriz. $\sigma$ böyle bir adımın Galois grubunu üretiyorsa, $\theta$ büyük cismin bir elemanıysa ve $\zeta$ birimin ilkel bir $p$'inci köküyse,
 
 $$
 \ell = \sum_{j=0}^{p-1} \zeta^{-j}\,\sigma^{j}(\theta)
 $$
 
-Lagrange çözücüsü $\sigma(\ell) = \zeta\ell$ eşitliğini sağlar; dolayısıyla $\ell^p$ küçük cisimdedir. Uygun bir $\theta$ için $\ell \ne 0$ olur ve o zaman $\ell$ bu adımı bir $p$-inci kök olarak üretir. Kübikteki $L$ tam olarak bu yapıdır.
+Lagrange çözücüsü $\sigma(\ell) = \zeta\ell$ eşitliğini sağlar; dolayısıyla $\ell^p$ küçük cisimdedir. $\theta$ uygun seçilirse $\ell \ne 0$ olur; o zaman büyük cisim, küçük cisme $\ell$ eklenerek elde edilir ve bu adım, $\ell^p$ elemanının $p$'inci kökünü almaktan ibarettir. Kübikteki $L$ tam olarak bu yapıdır.
 
-Genel polinomun Galois grubu $S_n$ olduğundan, $n$-inci dereceden genel denklem ancak ve ancak $S_n$ çözülebilir bir grupsa radikallerle çözülebilir. Formüllerle ilgili bir soru, permütasyonlarla ilgili bir soruya dönüşmüştür.
+Genel polinomun Galois grubu $S_n$ olduğundan, $n$'inci dereceden genel denklem ancak ve ancak $S_n$ çözülebilir bir grupsa radikallerle çözülebilir. Formüllerle ilgili bir soru, permütasyonlarla ilgili bir soruya dönüşmüştür.
 
 ### Merdiven olarak klasik formüller
 
@@ -196,7 +203,7 @@ $$
 S_4 \;\triangleright\; A_4 \;\triangleright\; V_4 \;\triangleright\; C_2 \;\triangleright\; \{e\}.
 $$
 
-Mertebeler sırasıyla $24, 12, 4, 2, 1$, bölüm grupları ise $C_2, C_3, C_2, C_2$ olur; burada $C_2 = \{e, (1\,2)(3\,4)\}$ alınmıştır. Bu $C_2$ altgrubu $V_4$ içinde normaldir ama $S_4$ içinde değildir. Bunda bir sakınca yoktur, çünkü altnormal seri her grubun yalnızca bir üstündeki grup içinde normal olmasını ister. Merdiven, Ferrari yönteminin ta kendisidir. İlk iki basamak, kökleri tam olarak $V_4$ tarafından sabit bırakılan çözücü kübiği bir karekök ve bir küpkökle çözer; son iki basamak da kareköklerdir: $\sqrt{2y - p}$ denklemi iki ikinci derece denkleme ayırır, ikinci derece kök formülü de işi bitirir.
+Mertebeler sırasıyla $24, 12, 4, 2, 1$, bölüm grupları ise $C_2, C_3, C_2, C_2$ olur; burada $C_2 = \{e, (1\,2)(3\,4)\}$ alınmıştır. Bu $C_2$ altgrubu $V_4$ içinde normaldir ama $S_4$ içinde değildir. Bunda bir sakınca yoktur, çünkü altnormal seri her grubun yalnızca bir üstündeki grup içinde normal olmasını ister. Merdiven, Ferrari yönteminin ta kendisidir. İlk iki basamak, kökleri tam olarak $V_4$ tarafından sabit bırakılan çözücü kübiği bir karekök ve bir küpkökle çözer; son iki basamak da kareköklerdir: $s = \sqrt{2y - p}$ karekökü denklemi iki ikinci derece denkleme ayırır, ikinci derece kök formülü de işi bitirir.
 
 ## Beşte kırılan merdiven: 60 elemanlı basit bir grup
 
@@ -231,62 +238,63 @@ $$
 S_5 \;\triangleright\; A_5 \;\triangleright\; \{e\}
 $$
 
-serisinin ötesinde inceltilemez. Bu, $S_5$ grubunun tek bileşim serisidir (bölümleri basit gruplar olan altnormal seri) ve Jordan–Hölder teoremine göre bir grubun bütün bileşim serileri aynı bölüm gruplarına sahiptir. Çözülebilir bir grubun bileşim serisindeki bölümler asal mertebeli devirli gruplardır; oysa buradaki bölümlerden biri $A_5$ grubudur. O halde $S_5$ çözülebilir değildir. Aynı şekilde, her $n \ge 5$ için $A_n$ basit ve değişmeli olmayan bir grup olduğundan, $n \ge 5$ için hiçbir $S_n$ grubu çözülebilir değildir.
+serisinin ötesinde inceltilemez. Bu, $S_5$ grubunun tek bileşim serisidir (bölümleri basit gruplar olan altnormal seri) ve Jordan–Hölder teoremine göre bir grubun bütün bileşim serileri aynı bölüm gruplarına sahiptir. Çözülebilir bir grubun bileşim serisindeki bölümler asal mertebeli devirli gruplardır; oysa buradaki bölümlerden biri $A_5$ grubudur. O hâlde $S_5$ çözülebilir değildir. Aynı şekilde, her $n \ge 5$ için $A_n$ basit ve değişmeli olmayan bir grup olduğundan, $n \ge 5$ için hiçbir $S_n$ grubu çözülebilir değildir.
 
 <div class="my-8 rounded-xl border border-zinc-200 bg-white px-5 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 
-**Teorem (Abel–Ruffini).** Her $n \ge 5$ için $n$-inci dereceden genel polinom denklemi radikallerle çözülemez.
+**Teorem (Abel–Ruffini).** Her $n \ge 5$ için $n$'inci dereceden genel polinom denklemi radikallerle çözülemez.
 
 </div>
 
 <figure class="not-prose my-10">
 <div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-3 py-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-graph mask-fade-b"></div>
-<svg class="relative mx-auto block h-auto w-full max-w-sm text-zinc-900 dark:text-zinc-100" viewBox="0 0 340 316" role="img" aria-label="Ortak bir logaritmik ölçekte çizilmiş iki merdiven. 4. derece: S4, A4, V4, C2 ve aşikâr grup; bölüm grupları C2, C3, C2 ve C2, hepsi değişmeli. 5. derece: S5, A5 ve aşikâr grup; bölüm grupları C2 ve A5. Son ve uzun basamak olan A5 değişmeli değildir." xmlns="http://www.w3.org/2000/svg">
+<svg class="relative mx-auto block h-auto w-full max-w-xs text-zinc-900 dark:text-zinc-100" viewBox="48 0 288 316" role="img" aria-label="Ortak bir logaritmik ölçekte çizilmiş iki merdiven. 4. derece: S4, A4, V4, C2 ve aşikâr grup; bölüm grupları C2, C3, C2 ve C2, hepsi değişmeli. 5. derece: S5, A5 ve aşikâr grup; bölüm grupları C2 ve A5. Son ve uzun basamak olan A5 değişmeli değildir." xmlns="http://www.w3.org/2000/svg">
 <g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
 <text x="100" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 4</text>
-<text x="232" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 5</text>
+<text x="220" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 5</text>
 </g>
 <g stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.6">
 <line x1="100" y1="143.7" x2="100" y2="164.4"/>
 <line x1="100" y1="178.4" x2="100" y2="219.5"/>
 <line x1="100" y1="233.5" x2="100" y2="254.3"/>
 <line x1="100" y1="268.3" x2="100" y2="289"/>
-<line x1="232" y1="63" x2="232" y2="83.8"/>
+<line x1="220" y1="63" x2="220" y2="83.8"/>
 </g>
 <g fill="currentColor">
 <circle cx="100" cy="136.7" r="3.5"/>
 <circle cx="100" cy="171.4" r="3.5"/>
 <circle cx="100" cy="226.5" r="3.5"/>
 <circle cx="100" cy="261.3" r="3.5"/>
-<circle cx="232" cy="56" r="3.5"/>
+<circle cx="220" cy="56" r="3.5"/>
 </g>
 <g fill="none" stroke="currentColor" stroke-width="1.25">
 <circle cx="100" cy="296" r="3.5"/>
-<circle cx="232" cy="296" r="3.5"/>
+<circle cx="220" cy="296" r="3.5"/>
 </g>
 <g fill="currentColor" text-anchor="end" style="font-family: var(--font-serif); font-size: 17px">
-<text x="86" y="142.2"><tspan font-style="italic">S</tspan><tspan font-size="11" dy="4">4</tspan></text>
-<text x="86" y="176.9"><tspan font-style="italic">A</tspan><tspan font-size="11" dy="4">4</tspan></text>
-<text x="86" y="232"><tspan font-style="italic">V</tspan><tspan font-size="11" dy="4">4</tspan></text>
-<text x="86" y="266.8"><tspan font-style="italic">C</tspan><tspan font-size="11" dy="4">2</tspan></text>
+<text x="86" y="142.2"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="176.9"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="232"><tspan font-style="italic">V</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="266.8"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
 <text x="86" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
-<text x="218" y="61.5"><tspan font-style="italic">S</tspan><tspan font-size="11" dy="4">5</tspan></text>
-<text x="218" y="96.3"><tspan font-style="italic">A</tspan><tspan font-size="11" dy="4">5</tspan></text>
-<text x="218" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
+<text x="206" y="61.5"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="96.3"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
 </g>
 <g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
-<text x="114" y="159"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
-<text x="114" y="204"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">3</tspan></text>
-<text x="114" y="249"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
-<text x="114" y="283.6"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
-<text x="246" y="78.4"><tspan font-style="italic">C</tspan><tspan font-size="10" dy="4">2</tspan></text>
+<text x="114" y="159"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="204"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">3</tspan></text>
+<text x="114" y="249"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="283.6"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="234" y="78.4"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
 </g>
 <g class="text-accent-700 dark:text-accent-400" fill="currentColor">
-<line x1="232" y1="97.8" x2="232" y2="289" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
-<circle cx="232" cy="90.8" r="3.5"/>
-<text x="246" y="192" style="font-family: var(--font-serif); font-size: 16px"><tspan font-style="italic">A</tspan><tspan font-size="11" dy="4">5</tspan></text>
-<text x="246" y="210" style="font-family: var(--font-mono); font-size: 10px">değişmeli değil</text>
+<line x1="220" y1="97.8" x2="220" y2="289" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+<circle cx="220" cy="90.8" r="3.5"/>
+<text x="234" y="192" style="font-family: var(--font-serif); font-size: 17px"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="234" y="212" style="font-family: var(--font-mono); font-size: 13px">değişmeli</text>
+<text x="234" y="228" style="font-family: var(--font-mono); font-size: 13px">değil</text>
 </g>
 </svg>
 </div>
@@ -317,7 +325,7 @@ $$
 x_{k+1} = x_k - \frac{x_k^5 - 4x_k + 2}{5x_k^4 - 4}
 $$
 
-halini alır ve $x_0 = 0$ noktasından başlatıldığında sırasıyla $0{,}5$, $0{,}508474\ldots$, $0{,}508499484435\ldots$ ve $0{,}508499484657\ldots$ değerlerini verir: Doğru ondalık basamak sayısı her adımda kabaca ikiye katlanır. Diğer kökler yaklaşık olarak $-1{,}518512$, $1{,}243596$ ve $-0{,}116792 \pm 1{,}438448\,i$ sayılarıdır.
+hâlini alır ve $x_0 = 0$ noktasından başlatıldığında sırasıyla $0{,}5$, $0{,}508474\ldots$, $0{,}508499484434\ldots$ ve $0{,}508499484657\ldots$ değerlerini verir: Doğru ondalık basamak sayısı her adımda kabaca ikiye katlanır. Diğer kökler yaklaşık olarak $-1{,}518512$, $1{,}243596$ ve $-0{,}116792 \pm 1{,}438448\,i$ sayılarıdır.
 
 **Hiçbir beşinci derece denklemin radikallerle çözülemeyeceğini de söylemez.** Bazı özel denklemler çözülebilir. $\zeta = e^{2\pi i/5}$ olmak üzere $x^5 - 2$ polinomunun kökleri $k = 0, 1, \dots, 4$ için $\sqrt[5]{2}\,\zeta^k$ sayılarıdır ve $\zeta$ da radikallerle ifade edilebilir; bunu örneğin $\cos(2\pi/5) = (\sqrt{5} - 1)/4$ eşitliği gösterir. $x^5 - 2$ polinomunun Galois grubu 20 elemanlıdır ve çözülebilirdir: 5 mertebeli devirli bir normal altgrubu vardır ve bölüm grubu 4 mertebeli devirli gruptur. Teorem, *her* beşinci derece denklem için işleyen tek bir formülü dışlar; hangi denklemlerin çözülebilir olduğuna ise Galois ölçütü tek tek karar verir.
 
@@ -329,7 +337,7 @@ Radikallerle yazılmış bir formül, simetriyi söken bir makinedir. Her radika
 
 ## Okuma önerileri
 
-- David S. Dummit ve Richard M. Foote, *Abstract Algebra*, 3. baskı (Wiley, 2004), 14. bölüm; 14.7. kısım çözülebilir ve radikal genişlemeleri ele alır ve beşinci derece denklemin çözülemezliğini kanıtlar.
-- Ian Stewart, *Galois Theory* (CRC Press): Teoriyi tarihiyle birlikte geliştirir.
-- V. B. Alekseev, *Abel's Theorem in Problems and Solutions* (V. I. Arnold'un derslerine dayanır): teoreme gruplar, karmaşık fonksiyonlar ve Riemann yüzeyleri üzerinden, problemlerle ilerleyen bir yol.
-- Niels Henrik Abel, *Mémoire sur les équations algébriques, où l'on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré* (Christiania, 1824): özgün kanıt; kısalığıyla ünlü bir risale.
+- David S. Dummit ve Richard M. Foote, <cite lang="en">Abstract Algebra</cite>, 3. baskı (Wiley, 2004), 14. bölüm; 14.7. kısım çözülebilir ve radikal genişlemeleri ele alır ve beşinci derece denklemin çözülemezliğini kanıtlar.
+- Ian Stewart, <cite lang="en">Galois Theory</cite> (CRC Press): Teoriyi tarihiyle birlikte geliştirir.
+- V. B. Alekseev, <cite lang="en">Abel's Theorem in Problems and Solutions</cite> (V. I. Arnold'un derslerine dayanır): teoreme gruplar, karmaşık fonksiyonlar ve Riemann yüzeyleri üzerinden, problemlerle ilerleyen bir yol.
+- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques, où l'on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): özgün kanıt; kısalığıyla ünlü bir risale.

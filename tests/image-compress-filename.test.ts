@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { baseName, extensionFor, outputFileName } from '../src/lib/image/compress/filename.ts';
+import { DEFAULT_OUTPUT_NAMES, baseName, extensionFor, outputFileName } from '../src/lib/image/compress/filename.ts';
+import { imageCompressorMessages } from '../src/i18n/tools/image-compressor.ts';
 
 test('replaces the extension and adds the suffix', () => {
   assert.equal(outputFileName('photo.jpg', 'webp'), 'photo-compressed.webp');
@@ -43,4 +44,25 @@ test('shortens very long names by code points', () => {
   assert.equal(outputFileName(long, 'webp'), `${'ş'.repeat(80)}-compressed.webp`);
   // Emoji are not split in half.
   assert.equal(Array.from(baseName('😀'.repeat(100))).length, 80);
+});
+
+test('uses the page language for the added words', () => {
+  const tr = imageCompressorMessages.tr.outputNames;
+  assert.equal(outputFileName('deneme görsel.png', 'png', tr), 'deneme görsel-sıkıştırılmış.png');
+  assert.equal(outputFileName('scan.jpeg', 'jpeg', tr), 'scan-sıkıştırılmış.jpeg');
+  assert.equal(outputFileName('', 'webp', tr), 'görsel-sıkıştırılmış.webp');
+  assert.equal(outputFileName('???.png', 'png', tr), 'görsel-sıkıştırılmış.png');
+  assert.equal(baseName('', tr.fallbackBase), 'görsel');
+  // English is the default and matches the English catalogue.
+  assert.deepEqual(imageCompressorMessages.en.outputNames, DEFAULT_OUTPUT_NAMES);
+  assert.equal(outputFileName('photo.jpg', 'webp', imageCompressorMessages.en.outputNames), 'photo-compressed.webp');
+});
+
+test('every language’s words are already safe file-name parts', () => {
+  for (const [locale, { outputNames }] of Object.entries(imageCompressorMessages)) {
+    // The fallback survives the same cleaning as a user's name, unchanged.
+    assert.equal(baseName(outputNames.fallbackBase, '<unused>'), outputNames.fallbackBase, locale);
+    // The suffix adds no reserved characters, dots or spaces (it sits right before the extension).
+    assert.match(outputNames.suffix, /^-[^\s.<>:"/\\|?*\u0000-\u001f\u007f-\u009f]+$/u, locale);
+  }
 });

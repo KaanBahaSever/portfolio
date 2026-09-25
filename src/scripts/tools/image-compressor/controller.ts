@@ -513,7 +513,7 @@ export function initImageCompressor(root: HTMLElement): void {
       return;
     }
     const replaced = result;
-    result = { blob, url, plan, fileName: outputFileName(target.name, plan.format) };
+    result = { blob, url, plan, fileName: outputFileName(target.name, plan.format, m.outputNames) };
     compare.setSize(plan.width, plan.height);
     compare.setImages({
       beforeUrl: target.url,
@@ -636,7 +636,7 @@ export function initImageCompressor(root: HTMLElement): void {
 
   async function openFile(file: File, others: number): Promise<void> {
     const generation = ++loadGeneration;
-    const name = file.name || 'image';
+    const name = file.name || m.outputNames.fallbackBase;
     clearError();
     clearNotice();
 

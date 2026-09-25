@@ -7,6 +7,7 @@
  * Turkish sentences are built so that no value needs a case suffix.
  */
 import type { Localized } from '../config.ts';
+import type { OutputNames } from '../../lib/image/compress/filename.ts';
 
 const en = {
   meta: {
@@ -134,6 +135,14 @@ const en = {
     metadata: 'Camera details, GPS location and other metadata are removed from the compressed copy.',
     fileSize: 'File size',
   },
+  /**
+   * Words in the download name (see OutputNames in filename.ts): "photo-compressed.webp";
+   * the base also names a file that arrives without a name.
+   */
+  outputNames: {
+    suffix: '-compressed',
+    fallbackBase: 'image',
+  } satisfies OutputNames,
   privacy: {
     label: 'Privacy',
     title: 'Nothing leaves your device.',
@@ -262,6 +271,10 @@ const tr: ImageCompressorMessages = {
     originalKeepsMetadata: 'Orijinal dosya meta verilerini hâlâ içerir.',
     metadata: 'Kamera bilgileri, GPS konumu ve diğer meta veriler sıkıştırılmış kopyadan kaldırılır.',
     fileSize: 'Dosya boyutu',
+  },
+  outputNames: {
+    suffix: '-sıkıştırılmış',
+    fallbackBase: 'görsel',
   },
   privacy: {
     label: 'Gizlilik',

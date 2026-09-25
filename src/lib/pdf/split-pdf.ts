@@ -39,33 +39,52 @@ export {
   planOutputs,
   summarizePlan,
 } from './page-ranges.ts';
-export type { PageRange, PlannedOutput, PlanResult, SplitMode } from './page-ranges.ts';
+export type { PageRange, PlannedOutput, PlanError, PlanResult, SplitMode } from './page-ranges.ts';
 
-export const PASSWORD_PROTECTED_MESSAGE =
-  'This PDF is password-protected or has editing restrictions, so it can’t be split here. Save an unprotected copy first (for example with Print → Save as PDF), then try again.';
-export const NOT_A_PDF_MESSAGE = 'This file isn’t a PDF.';
-export const DAMAGED_PDF_MESSAGE = 'This PDF couldn’t be read. The file may be damaged or incomplete.';
-export const NO_PAGES_MESSAGE = 'This PDF has no pages.';
-
-/** The PDF is encrypted (pdf-lib cannot decrypt it). `name` survives postMessage. */
+/**
+ * The PDF is encrypted (pdf-lib cannot decrypt it), including files that only restrict
+ * editing or printing. `name` and `code` survive postMessage; the page words the message.
+ */
 export class PdfPasswordError extends Error {
+  readonly code = 'encrypted';
+
   constructor(options?: { cause?: unknown }) {
-    super(PASSWORD_PROTECTED_MESSAGE, options);
+    super('The PDF is encrypted', options);
     this.name = 'PdfPasswordError';
   }
 }
 
-/** Not a PDF, damaged, or without pages. The message is meant for people. */
+/** Why a file can't be used: not a PDF at all, damaged, or without pages. */
+export type PdfInvalidCode = 'not-pdf' | 'damaged' | 'no-pages';
+
+const INVALID_MESSAGES: Record<PdfInvalidCode, string> = {
+  'not-pdf': 'Not a PDF file (no %PDF- header in the first 1024 bytes)',
+  damaged: 'The PDF could not be parsed',
+  'no-pages': 'The PDF has no pages',
+};
+
+/**
+ * Not a PDF, damaged, or without pages. The page words it from `code`; the message is for
+ * developers (console only).
+ */
 export class PdfInvalidError extends Error {
-  constructor(message: string, options?: { cause?: unknown }) {
-    super(message, options);
+  readonly code: PdfInvalidCode;
+
+  constructor(code: PdfInvalidCode, options?: { cause?: unknown }) {
+    super(INVALID_MESSAGES[code], options);
     this.name = 'PdfInvalidError';
+    this.code = code;
   }
 }
 
 export interface PdfInfo {
   pageCount: number;
   title?: string;
+  /**
+   * Size of the first page as displayed (crop box, rotation applied), in points. The page
+   * grid uses its shape for placeholders before any thumbnail exists.
+   */
+  firstPage?: { width: number; height: number };
 }
 
 export interface LoadPdfOptions {
@@ -119,12 +138,12 @@ export function toLoadError(error: unknown, bytes?: Uint8Array): Error {
   if (isEncryptedError(error)) return new PdfPasswordError({ cause: error });
   if (isOutOfMemory(error)) return error as RangeError;
   if (bytes && mentionsEncryption(bytes)) return new PdfPasswordError({ cause: error });
-  return new PdfInvalidError(DAMAGED_PDF_MESSAGE, { cause: error });
+  return new PdfInvalidError('damaged', { cause: error });
 }
 
-/** Parses the PDF. Throws PdfInvalidError or PdfPasswordError with a message for people. */
+/** Parses the PDF. Throws PdfInvalidError (with a code) or PdfPasswordError. */
 export async function loadPdf(bytes: Uint8Array, options: LoadPdfOptions = {}): Promise<PDFDocument> {
-  if (!hasPdfSignature(bytes.subarray(0, 1024))) throw new PdfInvalidError(NOT_A_PDF_MESSAGE);
+  if (!hasPdfSignature(bytes.subarray(0, 1024))) throw new PdfInvalidError('not-pdf');
   // Otherwise an encrypted linearized file with xref streams loads as unencrypted.
   keepTrailerEntriesAcrossXRefStreams();
   let doc: PDFDocument;
@@ -142,7 +161,7 @@ export async function loadPdf(bytes: Uint8Array, options: LoadPdfOptions = {}): 
   } catch (error) {
     throw toLoadError(error);
   }
-  if (pageCount < 1) throw new PdfInvalidError(NO_PAGES_MESSAGE);
+  if (pageCount < 1) throw new PdfInvalidError('no-pages');
   return doc;
 }
 
@@ -153,6 +172,16 @@ export function getPdfInfo(doc: PDFDocument): PdfInfo {
     if (title) info.title = title;
   } catch {
     // A malformed Title entry is not worth failing for.
+  }
+  try {
+    const page = doc.getPage(0);
+    const { width, height } = page.getCropBox();
+    const quarterTurns = Math.round(page.getRotation().angle / 90);
+    const sideways = Math.abs(quarterTurns % 2) === 1;
+    const shown = sideways ? { width: Math.abs(height), height: Math.abs(width) } : { width: Math.abs(width), height: Math.abs(height) };
+    if (shown.width > 0 && shown.height > 0 && Number.isFinite(shown.width / shown.height)) info.firstPage = shown;
+  } catch {
+    // A broken box or rotation only costs the placeholder shape; thumbnails correct it.
   }
   return info;
 }

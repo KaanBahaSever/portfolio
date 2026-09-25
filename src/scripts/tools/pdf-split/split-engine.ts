@@ -7,7 +7,7 @@
  * A new file gets a new worker, so the previous document is freed before it is read.
  */
 
-import type { FromSplitWorker, OutputFileInfo, OutputRequest, SplitStage, ToSplitWorker } from './types.ts';
+import type { FromSplitWorker, OutputFileInfo, OutputRequest, SplitStage, ToSplitWorker, WorkerError } from './types.ts';
 
 /** The worker script could not be loaded (offline, or a newer deployment replaced it). */
 export class PdfEngineLoadError extends Error {
@@ -36,7 +36,15 @@ export class WorkerCrashError extends Error {
 export interface PdfSummary {
   pageCount: number;
   title?: string;
+  /** Displayed size of page 1 in points (for the grid's placeholder shape). */
+  firstPage?: { width: number; height: number };
 }
+
+/**
+ * An error revived from the worker: the original `name` (PdfPasswordError, PdfInvalidError,
+ * ZipLimitError, RangeError…) plus the `code`, `count` and `limit` the page translates from.
+ */
+export type CodedError = Error & { code?: string; count?: number; limit?: number };
 
 export interface SplitProgress {
   stage: SplitStage;
@@ -64,9 +72,12 @@ function abortError(): DOMException {
   return new DOMException('Cancelled', 'AbortError');
 }
 
-function reviveError(name: string, message: string): Error {
-  const error = name === 'RangeError' ? new RangeError(message) : new Error(message);
-  error.name = name;
+function reviveError(info: WorkerError): CodedError {
+  const error: CodedError = info.name === 'RangeError' ? new RangeError(info.message) : new Error(info.message);
+  error.name = info.name;
+  if (info.code !== undefined) error.code = info.code;
+  if (info.count !== undefined) error.count = info.count;
+  if (info.limit !== undefined) error.limit = info.limit;
   return error;
 }
 
@@ -132,7 +143,7 @@ export function createSplitEngine(): SplitEngine {
       }
       const request = pending;
       pending = null;
-      if (message.type === 'error') request.reject(reviveError(message.name, message.message));
+      if (message.type === 'error') request.reject(reviveError(message.error));
       else request.resolve(message);
     };
 
@@ -212,7 +223,10 @@ export function createSplitEngine(): SplitEngine {
     const reply = await request({ type: 'load', id, bytes: new Uint8Array(buffer) }, [buffer], signal);
     if (reply.type !== 'loaded') throw new Error('Unexpected reply from the PDF worker');
     if (sourceFile === file) sourceReady = true;
-    return reply.title ? { pageCount: reply.pageCount, title: reply.title } : { pageCount: reply.pageCount };
+    const summary: PdfSummary = { pageCount: reply.pageCount };
+    if (reply.title) summary.title = reply.title;
+    if (reply.firstPage) summary.firstPage = reply.firstPage;
+    return summary;
   }
 
   return {

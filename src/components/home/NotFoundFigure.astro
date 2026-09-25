@@ -1,0 +1,118 @@
+---
+/**
+ * Fig. 404: the graph of a function with a removable discontinuity. The open circle (the one
+ * accent mark) is the point missing from the domain — the page that is not there. Static
+ * except for a one-time draw-in; decorative (aria-hidden), the caption says what it shows.
+ */
+import { notFoundMessages } from '../../i18n/messages/not-found';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const m = notFoundMessages[getLocale(Astro)].figure;
+
+/*
+ * The curve is one cubic Bézier followed by a smooth continuation. The hole sits at t = ½ on
+ * the first segment, P0 (40,150) P1 (110,150) P2 (150,70) P3 (200,80):
+ *   x = (40 + 3·110 + 3·150 + 200) / 8 = 127.5,  y = (150 + 3·150 + 3·70 + 80) / 8 = 111.25
+ */
+const hole = { x: 127.5, y: 111.25 };
+const axisY = 170;
+---
+
+<figure class:list={['not-found-figure', className]}>
+  <div
+    class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white/70 dark:border-zinc-800 dark:bg-zinc-900/50"
+  >
+    <div class="bg-graph-fine mask-fade-radial pointer-events-none absolute inset-0" aria-hidden="true"></div>
+    <svg
+      viewBox="0 0 320 200"
+      class="relative block aspect-[8/5] h-auto w-full text-zinc-800 dark:text-zinc-200"
+      fill="none"
+      stroke-linecap="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g class="text-zinc-400 dark:text-zinc-600" stroke="currentColor" stroke-width="1">
+        <path d={`M16 ${axisY}H304`} pathLength="1" class="nf-draw"></path>
+        <path d="M40 16V184" pathLength="1" class="nf-draw" style="--nf-delay: 80ms"></path>
+        <path d={`M${hole.x} ${axisY - 4}V${axisY + 4}`} class="nf-fade" style="--nf-delay: 900ms"></path>
+      </g>
+
+      <path
+        d="M40 150C110 150 150 70 200 80S270 40 304 36"
+        stroke="currentColor"
+        stroke-width="1.75"
+        pathLength="1"
+        class="nf-draw"
+        style="--nf-delay: 250ms; --nf-duration: 1300ms"></path>
+
+      {/* The dashed guide from the hole down to its x. */}
+      <path
+        d={`M${hole.x} ${hole.y + 8}V${axisY - 6}`}
+        class="nf-fade text-zinc-500"
+        style="--nf-delay: 1100ms"
+        stroke="currentColor"
+        stroke-width="1"
+        stroke-dasharray="3 4"></path>
+
+      <g stroke="none" class="nf-fade" style="--nf-delay: 1000ms">
+        <text x={hole.x} y={axisY + 20} text-anchor="middle" font-size="12" class="fill-zinc-600 font-mono dark:fill-zinc-400"
+          >404</text
+        >
+        <text x="300" y="26" text-anchor="end" font-size="16" class="fill-zinc-600 font-serif italic dark:fill-zinc-400"
+          >f</text
+        >
+        <text x="304" y={axisY + 20} text-anchor="end" font-size="14" class="fill-zinc-600 font-serif italic dark:fill-zinc-400"
+          >x</text
+        >
+        <text x="28" y="24" text-anchor="middle" font-size="14" class="fill-zinc-600 font-serif italic dark:fill-zinc-400"
+          >y</text
+        >
+      </g>
+
+      {/* The hole: paper-filled, so it cuts the curve; the accent ring is the missing point. */}
+      <circle
+        cx={hole.x}
+        cy={hole.y}
+        r="5.5"
+        stroke-width="1.75"
+        class="nf-fade fill-white stroke-accent-600 dark:fill-zinc-900 dark:stroke-accent-400"
+        style="--nf-delay: 1200ms"></circle>
+    </svg>
+  </div>
+  <figcaption class="mt-3 flex gap-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+    <span class="label-mono shrink-0 pt-0.5 text-zinc-900 dark:text-zinc-100">{m.label}</span>
+    <span>{m.caption}</span>
+  </figcaption>
+</figure>
+
+<style>
+  /* Same draw-in as Fig. 1 on the home page; without motion the figure is simply there. */
+  @media (prefers-reduced-motion: no-preference) {
+    .nf-draw {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: nf-draw var(--nf-duration, 900ms) cubic-bezier(0.65, 0, 0.35, 1) var(--nf-delay, 0ms) both;
+    }
+
+    .nf-fade {
+      animation: nf-fade 400ms ease-out var(--nf-delay, 0ms) both;
+    }
+  }
+
+  @keyframes nf-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes nf-fade {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

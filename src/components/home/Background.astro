@@ -1,0 +1,149 @@
+---
+/**
+ * The rest of the résumé in one compact section: education and volunteering/activities on the
+ * left, skills and spoken languages on the right (one column below lg). Each block keeps its
+ * own id (#education, #activities, #skills, #languages) for in-page links; they are plain
+ * <div>s under h3 headings rather than <section>s, so they add no extra landmark regions.
+ */
+import ResumeEntry from '../ui/ResumeEntry.astro';
+import Section from '../ui/Section.astro';
+import TagList from '../ui/TagList.astro';
+import {
+  ACTIVITIES,
+  CERTIFICATIONS,
+  EDUCATION,
+  FOCUS,
+  LANGUAGES,
+  SKILLS,
+  VOLUNTEERING,
+  resumeText,
+  type ActivityItem,
+} from '../../data/resume';
+import { pick, type Locale } from '../../i18n/config';
+import { homeMessages } from '../../i18n/messages/home';
+import { getLocale } from '../../i18n/server';
+import { sortNewestFirst } from '../../utils/resume-dates';
+
+interface Props {
+  /** Two-digit section number, e.g. '06'. */
+  index?: string;
+}
+
+const { index } = Astro.props;
+const locale = getLocale(Astro);
+const b = homeMessages[locale].background;
+
+const activities = sortNewestFirst<ActivityItem>([...VOLUNTEERING, ...CERTIFICATIONS, ...ACTIVITIES]);
+
+/** Heading, organisation line and extra details for a volunteering role, certificate or activity. */
+function describeActivity(item: ActivityItem, locale: Locale) {
+  const details: string[] = [];
+  if (item.kind === 'certification') details.push(b.certificate);
+  if (item.location) details.push(pick(item.location, locale));
+  const title = resumeText(item.title, locale);
+  return item.role
+    ? { title: pick(item.role, locale), organization: title, details }
+    : { title, organization: item.organization && resumeText(item.organization, locale), details };
+}
+
+/** Sub-heading drawn like a margin label, with a hairline running to the edge. */
+const subheading =
+  'label-mono flex items-center gap-3 text-zinc-600 after:h-px after:flex-1 after:bg-zinc-200 dark:text-zinc-400 dark:after:bg-zinc-800';
+---
+
+<Section id="background" index={index} title={b.title}>
+  <div class="grid gap-x-16 gap-y-14 lg:grid-cols-2">
+    <div class="min-w-0 space-y-14">
+      <div id="education">
+        <h3 id="education-heading" class={subheading}>{b.education}</h3>
+        <ol class="mt-6 space-y-8">
+          {
+            EDUCATION.map((school) => (
+              <li>
+                <ResumeEntry
+                  layout="stacked"
+                  headingLevel="h4"
+                  title={b.degree(pick(school.degree, locale), pick(school.field, locale))}
+                  organization={pick(school.institution, locale)}
+                  href={school.url}
+                  details={school.department ? [pick(school.department, locale)] : []}
+                  period={school}
+                  highlights={pick(school.highlights, locale)}
+                />
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <div id="activities">
+        <h3 id="activities-heading" class={subheading}>{b.activities}</h3>
+        <ol class="mt-6 space-y-8">
+          {
+            activities.map((item) => {
+              const { title, organization, details } = describeActivity(item, locale);
+              return (
+                <li>
+                  <ResumeEntry
+                    layout="stacked"
+                    headingLevel="h4"
+                    title={title}
+                    organization={organization}
+                    details={details}
+                    period={item}
+                    highlights={pick(item.highlights, locale)}
+                  />
+                </li>
+              );
+            })
+          }
+        </ol>
+      </div>
+    </div>
+
+    <div class="min-w-0 space-y-14">
+      <div id="skills">
+        <h3 id="skills-heading" class={subheading}>{b.skills}</h3>
+        <p class="mt-6 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{pick(FOCUS, locale)}</p>
+        <dl class="mt-6 divide-y divide-zinc-200 border-y border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+          {
+            SKILLS.map((group) => {
+              const label = pick(group.label, locale);
+              return (
+                <div class="grid gap-2 py-4 sm:grid-cols-[10.5rem_minmax(0,1fr)] sm:gap-6">
+                  <dt class="text-sm font-medium text-zinc-900 sm:pt-0.5 dark:text-zinc-100">{label}</dt>
+                  <dd class="min-w-0">
+                    <TagList items={group.items.map((item) => resumeText(item, locale))} label={label} />
+                  </dd>
+                </div>
+              );
+            })
+          }
+        </dl>
+      </div>
+
+      <div id="languages">
+        <h3 id="languages-heading" class={subheading}>{b.languages}</h3>
+        <ul class="mt-6 flex flex-wrap gap-x-10 gap-y-3">
+          {
+            LANGUAGES.map((language) => (
+              <li class="text-sm">
+                <span class="font-medium text-zinc-900 dark:text-zinc-100">{pick(language.name, locale)}</span>
+                {language.level && (
+                  <>
+                    <span class="text-zinc-400 dark:text-zinc-600" aria-hidden="true">
+                      {' '}
+                      ·{' '}
+                    </span>
+                    <span class="sr-only">, </span>
+                    <span class="text-zinc-600 dark:text-zinc-400">{pick(language.level, locale)}</span>
+                  </>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </div>
+</Section>

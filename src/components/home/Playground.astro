@@ -1,0 +1,121 @@
+---
+/**
+ * "Playground": the games, the console and a few of the browser tools, as one grid of cards.
+ */
+import PlayCard from './PlayCard.astro';
+import Icon, { type IconName } from '../ui/Icon.astro';
+import Section from '../ui/Section.astro';
+import { ui } from '../ui/styles';
+import { GAMES } from '../../data/games';
+import { TOOLS } from '../../data/tools';
+import { localizePath, pick } from '../../i18n/config';
+import { common } from '../../i18n/messages/common';
+import { homeMessages } from '../../i18n/messages/home';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  /** Two-digit section number, e.g. '04'. */
+  index?: string;
+}
+
+const { index } = Astro.props;
+const locale = getLocale(Astro);
+const t = common[locale];
+const p = homeMessages[locale].playground;
+
+/** The tools shown here, in this order; the rest are one click away on /tools/. */
+const FEATURED_TOOLS = ['notepad', 'pdf-split', 'password-generator'] as const;
+const TOOL_ICONS: Record<(typeof FEATURED_TOOLS)[number], IconName> = {
+  notepad: 'pen',
+  'pdf-split': 'file',
+  'password-generator': 'lock',
+};
+const GAME_ICONS: Record<string, IconName> = { battleship: 'grid', 'tic-tac-toe': 'gamepad' };
+
+const tools = FEATURED_TOOLS.flatMap((slug) => {
+  const tool = TOOLS.find((candidate) => candidate.slug === slug && candidate.status === 'ready');
+  return tool ? [{ tool, icon: TOOL_ICONS[slug] }] : [];
+});
+---
+
+<Section id="playground" index={index} title={p.title}>
+  <p class="max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400">{p.lead}</p>
+  <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      GAMES.map((game) => (
+        <li class="min-w-0">
+          <PlayCard
+            href={localizePath(game.href, locale)}
+            kind={p.kinds.game}
+            title={pick(game.title, locale)}
+            detail={pick(game.algorithm, locale)}
+            description={pick(game.description, locale)}
+            icon={GAME_ICONS[game.slug] ?? 'gamepad'}
+          />
+        </li>
+      ))
+    }
+    <li class="min-w-0">
+      <PlayCard
+        href={localizePath('/console/', locale)}
+        kind={p.kinds.terminal}
+        title={t.nav.console}
+        description={p.consoleText}
+        icon="terminal"
+      >
+        {/* A prompt, as the console greets you; purely decorative. */}
+        <p
+          class="mt-4 flex items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 font-mono text-xs text-zinc-600 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400"
+          aria-hidden="true"
+        >
+          <span class="font-semibold text-zinc-900 dark:text-zinc-100">λ</span>
+          <span>~</span>
+          <span class="text-accent-700 dark:text-accent-400">$</span>
+          <span class="console-caret inline-block h-3.5 w-1.5 bg-zinc-500 dark:bg-zinc-400"></span>
+        </p>
+      </PlayCard>
+    </li>
+    {
+      tools.map(({ tool, icon }) => (
+        <li class="min-w-0">
+          <PlayCard
+            href={localizePath(tool.href, locale)}
+            kind={p.kinds.tool}
+            title={pick(tool.title, locale)}
+            description={pick(tool.description, locale)}
+            icon={icon}
+          />
+        </li>
+      ))
+    }
+  </ul>
+  <ul class="mt-6 flex flex-wrap gap-x-6" aria-label={p.moreLabel}>
+    <li>
+      <a href={localizePath('/games/', locale)} class={ui.accentLink}>
+        {p.allGames}
+        <Icon name="arrow-right" class="size-4" />
+      </a>
+    </li>
+    <li>
+      <a href={localizePath('/tools/', locale)} class={ui.accentLink}>
+        {p.allTools}
+        <Icon name="arrow-right" class="size-4" />
+      </a>
+    </li>
+  </ul>
+</Section>
+
+<style>
+  /* A slow caret blink, only when motion is welcome; otherwise the caret simply stays lit. */
+  @media (prefers-reduced-motion: no-preference) {
+    .console-caret {
+      animation: console-caret 1.1s steps(1, end) infinite;
+    }
+  }
+
+  @keyframes console-caret {
+    50% {
+      opacity: 0;
+    }
+  }
+</style>

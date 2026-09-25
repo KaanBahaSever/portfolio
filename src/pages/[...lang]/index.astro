@@ -1,134 +1,89 @@
 ---
+/**
+ * Home page (/ and /tr/): hero with Fig. 1, then numbered sections — experience, selected
+ * work, the engineering-journey teaser, the playground, recent writing (only when there are
+ * posts) and the rest of the résumé. Section numbers are assigned in order of the sections
+ * actually shown, so hiding one never leaves a gap ("§ 04" is never followed by "§ 06").
+ */
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Icon from '../../components/ui/Icon.astro';
+import Background from '../../components/home/Background.astro';
+import Hero from '../../components/home/Hero.astro';
+import JourneyTeaser from '../../components/home/JourneyTeaser.astro';
+import Playground from '../../components/home/Playground.astro';
 import PostList from '../../components/ui/PostList.astro';
 import ProjectCard from '../../components/ui/ProjectCard.astro';
 import ResumeEntry from '../../components/ui/ResumeEntry.astro';
 import Section from '../../components/ui/Section.astro';
-import TagList from '../../components/ui/TagList.astro';
 import { SITE } from '../../config/site';
-import { pick } from '../../i18n/config';
-import { getLocale } from '../../i18n/server';
-import {
-  ACTIVITIES,
-  CERTIFICATIONS,
-  EDUCATION,
-  EXPERIENCE,
-  FOCUS,
-  LANGUAGES,
-  SKILLS,
-  VOLUNTEERING,
-} from '../../data/resume';
-import type { ActivityItem } from '../../data/resume';
+import { EDUCATION, EXPERIENCE, resumeText } from '../../data/resume';
+import { localizePath, pick } from '../../i18n/config';
+import { homeMessages } from '../../i18n/messages/home';
+import { getLocale, localeStaticPaths } from '../../i18n/server';
 import { getProjects, getPublishedPosts } from '../../utils/content';
-import { sortNewestFirst } from '../../utils/resume-dates';
-import { localeStaticPaths } from '../../i18n/server';
 
 export const getStaticPaths = () => localeStaticPaths();
 
 const locale = getLocale(Astro);
-const featuredProjects = (await getProjects(locale)).filter((project) => project.data.featured).slice(0, 6);
+const h = homeMessages[locale];
+const featuredProjects = (await getProjects(locale)).filter((project) => project.data.featured);
 const recentPosts = (await getPublishedPosts(locale)).slice(0, 3);
-const activities = sortNewestFirst<ActivityItem>([...VOLUNTEERING, ...CERTIFICATIONS, ...ACTIVITIES]);
 
-/** Heading, organisation line and extra details for a volunteering role, certificate or activity. */
-function describeActivity(item: ActivityItem): { title: string; organization?: string; details: string[] } {
-  const details: string[] = [];
-  if (item.kind === 'certification') details.push('Certificate');
-  if (item.location) details.push(item.location);
-  return item.role
-    ? { title: item.role, organization: item.title, details }
-    : { title: item.title, organization: item.organization, details };
-}
+const shown = [
+  'experience',
+  featuredProjects.length > 0 && 'work',
+  'journey',
+  'playground',
+  recentPosts.length > 0 && 'writing',
+  'background',
+].filter((id): id is string => Boolean(id));
+const sectionIndex = (id: string) => String(shown.indexOf(id) + 1).padStart(2, '0');
 
-// schema.org Person for search engines; `<` is escaped so the JSON can never close the script tag.
+// schema.org Person for search engines, in the page's language. `<` is escaped so the JSON can
+// never close the <script> element early.
+const school = EDUCATION[0];
 const personJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: SITE.name,
-  url: SITE.url,
-  jobTitle: 'Software Developer',
-  address: { '@type': 'PostalAddress', addressLocality: 'Istanbul', addressCountry: 'TR' },
+  url: new URL(localizePath('/', locale), SITE.url).href,
+  description: pick(SITE.description, locale),
+  jobTitle: h.person.jobTitle,
+  email: `mailto:${SITE.email}`,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: locale === 'tr' ? 'İstanbul' : 'Istanbul',
+    addressCountry: 'TR',
+  },
+  alumniOf: school && {
+    '@type': 'CollegeOrUniversity',
+    name: pick(school.institution, locale),
+    url: school.url,
+  },
+  knowsAbout: h.person.knowsAbout,
+  knowsLanguage: ['tr', 'en'],
   sameAs: SITE.socials.map((social) => social.href),
 }).replace(/</g, '\\u003c');
-
-const inlineLink =
-  'font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500';
-const contactLink =
-  'inline-flex min-h-11 items-center gap-1.5 rounded-lg font-medium text-zinc-700 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-300 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500';
 ---
 
 <BaseLayout title={SITE.name} description={pick(SITE.description, locale)} width="wide">
   <script slot="head" type="application/ld+json" is:inline set:html={personJsonLd} />
 
-  <section aria-labelledby="intro-heading" class="pt-2 sm:pt-6">
-    <p class="text-sm font-medium tracking-wide text-accent-700 uppercase dark:text-accent-400">{pick(SITE.role, locale)}</p>
-    <h1 id="intro-heading" class="mt-2 text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-      {SITE.name}
-    </h1>
+  <Hero />
 
-    <div class="mt-6 max-w-2xl space-y-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      <p>
-        I'm a software developer based in Istanbul and a mathematics student at Istanbul University. My work focuses on
-        system-level development in C++23, network backend applications in Go, and server infrastructure. At crowd.inc I
-        built and deployed full-stack web applications with Flask and PostgreSQL, and at Aydos Yazılım I developed
-        Antizan, a productivity app for Mac written in Swift.
-      </p>
-      <p>
-        I also build open-source projects such as{' '}
-        <a href="/projects/acik-matematik/" class={inlineLink}>Açık Matematik</a>, interactive and ad-free Turkish
-        lecture notes for undergraduate mathematics, and{' '}
-        <a href="/projects/neosmbios/" class={inlineLink}>NeoSMBIOS</a>, a header-only C++23 parser for SMBIOS firmware
-        tables.
-      </p>
-    </div>
-
-    <p class="mt-6 flex items-start gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-      <Icon name="map-pin" class="mt-0.5 size-4 shrink-0" />
-      <span>{pick(SITE.location, locale)}</span>
-    </p>
-
-    <div class="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
-      <a
-        href={SITE.cvPath}
-        download
-        class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent-700 px-6 text-base font-semibold text-white shadow-sm transition-colors hover:bg-accent-800 sm:w-auto dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400"
-      >
-        <Icon name="download" class="size-5" />
-        Download CV
-        <span class="sr-only">(PDF)</span>
-      </a>
-
-      <ul class="flex flex-wrap items-center gap-x-5 gap-y-1" aria-label="Contact and profiles">
-        <li>
-          <a href={`mailto:${SITE.email}`} class={contactLink}>Email</a>
-        </li>
-        {
-          SITE.socials.map((social) => (
-            <li>
-              <a href={social.href} target="_blank" rel="me noopener noreferrer" class={contactLink}>
-                {social.label}
-                <span class="sr-only"> (opens in a new tab)</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </div>
-  </section>
-
-  <Section id="experience" title="Experience">
-    <ol class="space-y-8">
+  <Section id="experience" index={sectionIndex('experience')} title={h.experience.title}>
+    <ol class="max-w-4xl space-y-10">
       {
         EXPERIENCE.map((job) => (
           <li>
             <ResumeEntry
-              title={job.role}
-              organization={job.organization}
+              title={pick(job.role, locale)}
+              organization={resumeText(job.organization, locale)}
               href={job.url}
-              details={job.location ? [job.location] : []}
+              details={job.location ? [pick(job.location, locale)] : []}
               period={job}
-              highlights={job.highlights}
+              summary={pick(job.summary, locale)}
+              highlights={pick(job.highlights, locale)}
+              tags={job.stack}
             />
           </li>
         ))
@@ -138,7 +93,12 @@ const contactLink =
 
   {
     featuredProjects.length > 0 && (
-      <Section id="projects" title="Selected projects" link={{ href: '/projects/', label: 'All projects' }}>
+      <Section
+        id="work"
+        index={sectionIndex('work')}
+        title={h.work.title}
+        link={{ href: localizePath('/projects/', locale), label: h.work.all }}
+      >
         <ul class="grid gap-4 sm:grid-cols-2">
           {featuredProjects.map((project) => (
             <li class="min-w-0">
@@ -150,71 +110,24 @@ const contactLink =
     )
   }
 
-  <Section id="education" title="Education">
-    <ol class="space-y-8">
-      {
-        EDUCATION.map((school) => (
-          <li>
-            <ResumeEntry
-              title={`${school.degree}, ${school.field}`}
-              organization={school.institution}
-              href={school.url}
-              details={school.department ? [school.department] : []}
-              period={school}
-              highlights={school.highlights}
-            />
-          </li>
-        ))
-      }
-    </ol>
-  </Section>
+  <JourneyTeaser index={sectionIndex('journey')} />
 
-  <Section id="activities" title="Volunteering & activities">
-    <ol class="space-y-8">
-      {
-        activities.map((item) => {
-          const { title, organization, details } = describeActivity(item);
-          return (
-            <li>
-              <ResumeEntry
-                title={title}
-                organization={organization}
-                details={details}
-                period={item}
-                highlights={item.highlights}
-              />
-            </li>
-          );
-        })
-      }
-    </ol>
-  </Section>
-
-  <Section id="skills" title="Skills">
-    <p class="mb-6 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{FOCUS}</p>
-    <dl class="space-y-5 sm:space-y-4">
-      {
-        SKILLS.map((group) => (
-          <div class="grid gap-2 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-6">
-            <dt class="text-sm font-medium text-zinc-900 sm:pt-0.5 dark:text-zinc-100">{group.label}</dt>
-            <dd class="min-w-0">
-              <TagList items={group.items} label={group.label} />
-            </dd>
-          </div>
-        ))
-      }
-    </dl>
-  </Section>
-
-  <Section id="languages" title="Languages">
-    <TagList items={LANGUAGES} label="Spoken languages" />
-  </Section>
+  <Playground index={sectionIndex('playground')} />
 
   {
     recentPosts.length > 0 && (
-      <Section id="writing" title="Recent writing" link={{ href: '/blog/', label: 'All posts' }}>
-        <PostList posts={recentPosts} headingLevel="h3" />
+      <Section
+        id="writing"
+        index={sectionIndex('writing')}
+        title={h.writing.title}
+        link={{ href: localizePath('/blog/', locale), label: h.writing.all }}
+      >
+        <div class="max-w-3xl">
+          <PostList posts={recentPosts} headingLevel="h3" />
+        </div>
       </Section>
     )
   }
+
+  <Background index={sectionIndex('background')} />
 </BaseLayout>

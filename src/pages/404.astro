@@ -1,56 +1,9 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { SITE } from '../config/site';
-
-const links = [
-  { href: '/projects/', label: 'Projects', description: 'Açık Matematik, Karecik and more' },
-  { href: '/blog/', label: 'Blog', description: 'Notes on the things I build' },
-  { href: '/tools/', label: 'Tools', description: 'Private utilities that run in your browser' },
-  { href: '/about/', label: 'About', description: 'Background and milestones' },
-];
+/**
+ * English 404, served by Cloudflare Pages for any missing URL outside /tr/. The page itself is
+ * src/components/home/NotFound.astro, shared with the Turkish version (src/pages/tr/404.astro).
+ */
+import NotFound from '../components/home/NotFound.astro';
 ---
 
-<BaseLayout title="Page not found" description="The page you were looking for could not be found." noindex>
-  <section class="flex flex-col items-start pt-6 sm:pt-12">
-    <p class="font-mono text-sm font-medium text-accent-700 dark:text-accent-400">404</p>
-    <h1 class="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Page not found</h1>
-    <p class="mt-4 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      Sorry, this page doesn't exist or has moved. You might find what you were looking for below.
-    </p>
-    <a
-      href="/"
-      class="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-accent-700 px-6 text-base font-semibold text-white hover:bg-accent-800 sm:w-auto dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400"
-    >
-      Go to the homepage
-    </a>
-  </section>
-
-  <nav aria-label="Popular pages" class="mt-10">
-    <ul class="grid gap-3 sm:grid-cols-2">
-      {
-        links.map((link) => (
-          <li class="min-w-0">
-            <a
-              href={link.href}
-              class="group flex h-full min-h-11 flex-col gap-0.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-accent-600/40 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent-500/40"
-            >
-              <span class="font-semibold text-zinc-900 group-hover:text-accent-700 dark:text-zinc-100 dark:group-hover:text-accent-400">
-                {link.label}
-              </span>
-              <span class="text-sm text-zinc-600 dark:text-zinc-400">{link.description}</span>
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </nav>
-
-  <p class="mt-10 text-sm text-zinc-600 dark:text-zinc-400">
-    Followed a broken link? Let me know by{' '}
-    <a
-      href={`mailto:${SITE.email}`}
-      class="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500"
-      >email</a
-    >.
-  </p>
-</BaseLayout>
+<NotFound />

@@ -1,11 +1,22 @@
 ---
 /**
- * One résumé entry (job, degree, volunteering role…). Phones stack everything;
- * from sm: up the period sits in a narrow left column. The heading comes first in
- * the DOM so heading navigation lands before the details.
+ * One résumé entry (job, degree, volunteering role…), styled like a notebook margin note: the
+ * period is a small mono figure, highlights use square markers, technologies are tags.
+ *
+ * Layouts
+ * - 'columns' (default): phones stack everything; from sm: up the period sits in a narrow left
+ *   column.
+ * - 'stacked': the period sits above the title at every width (for half-width columns). Only
+ *   the visual order changes: the DOM order below is the reading order in both layouts.
+ *
+ * The heading comes first in the DOM so heading navigation lands before the details. Text
+ * arrives already localized; the period is formatted here for the page's locale.
  */
 import Icon from './Icon.astro';
+import TagList from './TagList.astro';
 import type { ResumePeriod } from '../../data/resume';
+import { common } from '../../i18n/messages/common';
+import { getLocale } from '../../i18n/server';
 import { formatPeriod } from '../../utils/resume-dates';
 
 interface Props {
@@ -16,8 +27,15 @@ interface Props {
   /** Extra facts shown after the organisation, e.g. a location. */
   details?: readonly string[];
   period: ResumePeriod;
+  /** A sentence on the scope of the role, shown before the highlights. */
+  summary?: string;
   highlights?: readonly string[];
+  /** Technologies, shown as tags under the highlights. */
+  tags?: readonly string[];
+  /** Accessible name of the tag list; defaults to "Tech stack". */
+  tagsLabel?: string;
   headingLevel?: 'h3' | 'h4';
+  layout?: 'columns' | 'stacked';
 }
 
 const {
@@ -26,35 +44,53 @@ const {
   href,
   details = [],
   period,
+  summary,
   highlights = [],
+  tags = [],
+  tagsLabel,
   headingLevel: Heading = 'h3',
+  layout = 'columns',
 } = Astro.props;
 
-const { start, end } = formatPeriod(period);
+const locale = getLocale(Astro);
+const t = common[locale];
+const { start, end, endLabel, spoken } = formatPeriod(period, locale);
 const hasMeta = Boolean(organization) || details.length > 0;
+const columns = layout === 'columns';
+
+/** Everything after the period lives in the second column from sm: up (columns layout only). */
+const body = columns ? 'sm:col-start-2' : '';
 ---
 
-<article class="grid grid-cols-1 gap-y-1 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-x-6">
+<article
+  class:list={[
+    'grid grid-cols-1 gap-y-1',
+    columns && 'sm:grid-cols-[9.5rem_minmax(0,1fr)] sm:gap-x-8',
+  ]}
+>
   <Heading
-    class="text-base leading-snug font-semibold text-zinc-900 sm:col-start-2 sm:row-start-1 dark:text-zinc-100"
+    class:list={[
+      'text-base leading-snug font-semibold text-balance text-zinc-900 dark:text-zinc-100',
+      columns ? 'sm:col-start-2 sm:row-start-1' : 'row-start-2',
+    ]}
   >
     {title}
   </Heading>
 
   {
     hasMeta && (
-      <p class="text-sm leading-relaxed text-zinc-600 sm:col-start-2 dark:text-zinc-400">
+      <p class:list={['text-sm leading-relaxed text-zinc-600 dark:text-zinc-400', body, !columns && 'row-start-3']}>
         {organization &&
           (href ? (
             <a
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              class="-my-3 inline-flex items-center gap-1 rounded-sm py-3 font-medium text-zinc-800 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-200 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500"
+              class="-my-3 inline-flex items-center gap-1 rounded-sm py-3 font-medium text-zinc-800 underline decoration-zinc-300 underline-offset-4 transition-colors hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-200 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500"
             >
               {organization}
-              <Icon name="external" class="size-3.5 shrink-0" />
-              <span class="sr-only"> (opens in a new tab)</span>
+              <Icon name="arrow-up-right" class="size-3.5 shrink-0" />
+              <span class="sr-only"> {t.newTab}</span>
             </a>
           ) : (
             <span class="font-medium text-zinc-800 dark:text-zinc-200">{organization}</span>
@@ -69,18 +105,38 @@ const hasMeta = Boolean(organization) || details.length > 0;
     )
   }
 
-  {/* Kept on one line: whitespace around the separator would render as extra spaces. */}
-  <p class="text-sm text-zinc-600 tabular-nums sm:col-start-1 sm:row-start-1 sm:pt-0.5 dark:text-zinc-400">
-    <time datetime={start.datetime}>{start.label}</time>{end && <><span aria-hidden="true"> – </span><span class="sr-only"> to </span>{end === 'present' ? 'Present' : <time datetime={end.datetime}>{end.label}</time>}</>}
+  {/*
+    The period: <time> elements for machines, one spoken phrase for screen readers ("Jul 2021 to
+    Mar 2024"), and the visual en-dash version hidden from them. Each date stays in one piece; a
+    narrow column may break only at the dash; in the columns layout the period spans the title
+    and organisation rows, so a two-line period never pushes the organisation away from the
+    title. Kept on one line: whitespace around the separator would render as extra spaces.
+  */}
+  <p
+    class:list={[
+      'font-mono text-xs leading-5 text-zinc-600 tabular-nums dark:text-zinc-400',
+      columns ? 'sm:col-start-1 sm:row-span-2 sm:row-start-1 sm:pt-px' : 'row-start-1 mb-0.5',
+    ]}
+  >
+    <span class="sr-only">{spoken}</span><span aria-hidden="true"><time datetime={start.datetime} class="whitespace-nowrap">{start.label}</time>{endLabel !== null && <> – {end !== null && end !== 'present' ? <time datetime={end.datetime} class="whitespace-nowrap">{endLabel}</time> : <span class="whitespace-nowrap">{endLabel}</span>}</>}</span>
   </p>
+
+  {summary && <p class:list={['mt-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300', body]}>{summary}</p>}
 
   {
     highlights.length > 0 && (
-      <ul class="mt-2 list-disc space-y-1.5 ps-5 text-sm leading-relaxed text-zinc-700 marker:text-zinc-400 sm:col-start-2 dark:text-zinc-300 dark:marker:text-zinc-600">
+      <ul
+        class:list={[
+          'mt-2 list-[square] space-y-1.5 ps-4 text-sm leading-relaxed text-zinc-700 marker:text-zinc-400 dark:text-zinc-300 dark:marker:text-zinc-600',
+          body,
+        ]}
+      >
         {highlights.map((highlight) => (
-          <li>{highlight}</li>
+          <li class="ps-1">{highlight}</li>
         ))}
       </ul>
     )
   }
+
+  {tags.length > 0 && <TagList items={tags} label={tagsLabel ?? t.labels.techStack} class:list={['mt-3', body]} />}
 </article>

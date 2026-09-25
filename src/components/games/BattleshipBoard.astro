@@ -1,0 +1,359 @@
+---
+/**
+ * One 10×10 Battleship board: coordinate labels (A–J across, 1–10 down), graph-paper water, a layer
+ * of ship outlines and an ARIA grid of 100 cell buttons with a roving tabindex.
+ *
+ * The controller (src/scripts/games/battleship/controller.ts) drives everything through data
+ * attributes, so every visual state is styled here:
+ *   grid   [data-armed]  enemy board, the player may fire (hover crosshair)
+ *          [data-heat]   show the heat overlay (each cell sets --heat, 0–1)
+ *   cell   [data-state]  miss | hit | sunk          (absent: not fired at)
+ *          [data-preview] valid | invalid           (ship placement preview)
+ *          [data-last]   the most recent shot on this board
+ *          [data-peak]   a cell with the highest density (heat overlay only)
+ *   ship   [data-status] afloat | sunk | revealed   (+ [data-selected] during setup)
+ */
+import { BOARD_SIZE, COLUMN_LETTERS, FLEET } from '../../lib/games/battleship/rules.ts';
+
+interface Props {
+  side: 'own' | 'enemy';
+  /** Accessible name of the grid. */
+  label: string;
+  /** id of the element that explains the keyboard controls. */
+  helpId: string;
+  /** Initial accessible name of each cell (the controller keeps it current). */
+  cellLabel: (index: number) => string;
+}
+
+const { side, label, helpId, cellLabel } = Astro.props;
+const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
+---
+
+<div class="board" data-board={side}>
+  <div class="corner" aria-hidden="true"></div>
+  <div class="columns" aria-hidden="true">
+    {lines.map((col) => <span>{COLUMN_LETTERS[col]}</span>)}
+  </div>
+  <div class="rows" aria-hidden="true">
+    {lines.map((row) => <span>{row + 1}</span>)}
+  </div>
+  <div class="sea bg-graph-fine">
+    <div class="ships" data-ships aria-hidden="true">
+      {FLEET.map((ship) => <div class="ship" data-ship-shape={ship.id} hidden />)}
+    </div>
+    <div role="grid" aria-label={label} aria-describedby={helpId} class="cells" data-grid>
+      {
+        lines.map((row) => (
+          <div role="row" class="row">
+            {lines.map((col) => {
+              const index = row * BOARD_SIZE + col;
+              return (
+                <div role="gridcell" class="gridcell">
+                  <button
+                    type="button"
+                    class="cell"
+                    data-cell={index}
+                    tabindex={index === 0 ? 0 : -1}
+                    aria-label={cellLabel(index)}
+                  >
+                    <span class="heat" />
+                    <span class="dot" />
+                    <span class="cross" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</div>
+
+<style>
+  .board {
+    --ink: var(--color-zinc-700);
+    --ink-soft: color-mix(in oklab, var(--color-zinc-900) 7%, transparent);
+    --hatch: color-mix(in oklab, var(--color-zinc-700) 45%, transparent);
+    --miss: var(--color-zinc-500);
+    --hit: var(--color-rose-600);
+    --mark: var(--color-accent-600);
+    --mark-fill: color-mix(in oklab, var(--color-accent-500) 22%, transparent);
+    --bad: var(--color-rose-600);
+    --bad-fill: color-mix(in oklab, var(--color-rose-500) 16%, transparent);
+    --heat-color: var(--color-accent-500);
+    /* Cell boundaries a touch stronger than the page's graph paper, so the cells read as a grid. */
+    --graph-line-strong: color-mix(in oklab, var(--color-zinc-900) 17%, transparent);
+    --graph-line: color-mix(in oklab, var(--color-zinc-900) 5%, transparent);
+
+    display: grid;
+    grid-template-columns: 1.25rem minmax(0, 1fr);
+    grid-template-rows: 1.25rem auto;
+    gap: 0.25rem;
+    width: 100%;
+    max-width: 30rem;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .board {
+      --ink: var(--color-zinc-300);
+      --ink-soft: color-mix(in oklab, white 8%, transparent);
+      --hatch: color-mix(in oklab, var(--color-zinc-300) 45%, transparent);
+      --miss: var(--color-zinc-400);
+      --hit: var(--color-rose-400);
+      --mark: var(--color-accent-400);
+      --mark-fill: color-mix(in oklab, var(--color-accent-400) 22%, transparent);
+      --bad: var(--color-rose-400);
+      --bad-fill: color-mix(in oklab, var(--color-rose-400) 18%, transparent);
+      --heat-color: var(--color-accent-400);
+      --graph-line-strong: color-mix(in oklab, white 15%, transparent);
+      --graph-line: color-mix(in oklab, white 4%, transparent);
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .board {
+      grid-template-columns: 1.5rem minmax(0, 1fr);
+      grid-template-rows: 1.5rem auto;
+    }
+  }
+
+  .columns,
+  .rows {
+    display: grid;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-zinc-600);
+    user-select: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .columns,
+    .rows {
+      color: var(--color-zinc-400);
+    }
+  }
+
+  .columns {
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    align-items: end;
+    justify-items: center;
+    padding-bottom: 0.125rem;
+  }
+
+  .rows {
+    grid-template-rows: repeat(10, minmax(0, 1fr));
+    align-items: center;
+    justify-items: end;
+    padding-right: 0.25rem;
+  }
+
+  /* Graph paper scaled to the board: major lines on cell edges, minor lines every fifth of a cell. */
+  .sea {
+    position: relative;
+    aspect-ratio: 1;
+    border: 1px solid var(--color-zinc-300);
+    border-radius: 0.375rem;
+    background-color: white;
+    background-size:
+      10% 10%,
+      10% 10%,
+      2% 2%,
+      2% 2%;
+    overflow: hidden;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .sea {
+      border-color: var(--color-zinc-700);
+      background-color: var(--color-zinc-900);
+    }
+  }
+
+  .ships,
+  .cells {
+    position: absolute;
+    inset: 0;
+  }
+
+  .cells {
+    display: grid;
+    grid-template-rows: repeat(10, minmax(0, 1fr));
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+  }
+
+  .gridcell {
+    position: relative;
+    min-width: 0;
+  }
+
+  .cell {
+    position: absolute;
+    inset: 0;
+    display: block;
+    cursor: default;
+    touch-action: manipulation;
+  }
+
+  .cell:focus-visible {
+    z-index: 2;
+    outline-offset: -2px;
+  }
+
+  /* Enemy board on the player's turn: a crosshair and a faint wash over cells that can be fired at. */
+  .cells[data-armed] .cell:not([data-state]) {
+    cursor: crosshair;
+  }
+
+  @media (hover: hover) {
+    .cells[data-armed] .cell:not([data-state]):hover {
+      background-color: var(--mark-fill);
+    }
+  }
+
+  .board[data-board='own'] .cells[data-placing] .cell {
+    cursor: pointer;
+  }
+
+  .cell[data-preview='valid'] {
+    background-color: var(--mark-fill);
+    box-shadow: inset 0 0 0 1.5px var(--mark);
+  }
+
+  .cell[data-preview='invalid'] {
+    background-color: var(--bad-fill);
+    box-shadow: inset 0 0 0 1.5px var(--bad);
+  }
+
+  .heat,
+  .dot,
+  .cross {
+    position: absolute;
+    display: none;
+    pointer-events: none;
+  }
+
+  .heat {
+    inset: 1px;
+    background-color: var(--heat-color);
+    opacity: calc(var(--heat, 0) * 0.6);
+    transition: opacity 250ms ease-out;
+  }
+
+  .cells[data-heat] .heat {
+    display: block;
+  }
+
+  .cells[data-heat] .cell[data-peak]::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border: 1.5px dashed var(--mark);
+    border-radius: 3px;
+  }
+
+  .dot {
+    left: 50%;
+    top: 50%;
+    width: 22%;
+    height: 22%;
+    margin: -11% 0 0 -11%;
+    border-radius: 9999px;
+    background-color: var(--miss);
+  }
+
+  .cell[data-state='miss'] .dot {
+    display: block;
+    animation: bs-pop 220ms ease-out;
+  }
+
+  .cross {
+    inset: 0;
+  }
+
+  .cross::before,
+  .cross::after {
+    content: '';
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    border-radius: 1px;
+    background-color: var(--hit);
+    transform: rotate(45deg);
+  }
+
+  .cross::after {
+    transform: rotate(-45deg);
+  }
+
+  .cell[data-state='hit'] .cross,
+  .cell[data-state='sunk'] .cross {
+    display: block;
+    animation: bs-pop 220ms ease-out;
+  }
+
+  .cell[data-last]::before {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border: 2px solid var(--mark);
+    border-radius: 3px;
+    animation: bs-ring 300ms ease-out;
+  }
+
+  /* Ship outlines: positioned by the controller in percent of the board. */
+  .ship {
+    position: absolute;
+    color: var(--ink);
+  }
+
+  .ship::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1.5px solid currentColor;
+    border-radius: 9999px;
+    background-color: var(--ink-soft);
+    transition:
+      background-color 200ms ease-out,
+      border-color 200ms ease-out;
+  }
+
+  .ship[data-selected]::before {
+    border-color: var(--mark);
+    background-color: var(--mark-fill);
+  }
+
+  .ship[data-status='sunk']::before {
+    background-color: transparent;
+    background-image: repeating-linear-gradient(135deg, var(--hatch) 0 1px, transparent 1px 5px);
+  }
+
+  .ship[data-status='revealed']::before {
+    border-style: dashed;
+    background-color: transparent;
+  }
+
+  @keyframes bs-pop {
+    from {
+      opacity: 0;
+      transform: scale(0.4);
+    }
+  }
+
+  @keyframes bs-ring {
+    from {
+      opacity: 0;
+      transform: scale(1.35);
+    }
+  }
+</style>

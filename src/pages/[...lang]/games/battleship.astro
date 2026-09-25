@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Battleship from '../../../components/games/Battleship.astro';
+import BattleshipGuide from '../../../components/games/BattleshipGuide.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import { GAMES } from '../../../data/games';
+import { localizePath, pick } from '../../../i18n/config';
+import { battleshipMessages } from '../../../i18n/games/battleship';
+import { gamesHubMessages } from '../../../i18n/games/hub';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = battleshipMessages[locale];
+const hub = gamesHubMessages[locale];
+const game = GAMES.find((g) => g.slug === 'battleship');
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    eyebrow={game ? pick(game.algorithm, locale) : undefined}
+    title={game ? pick(game.title, locale) : m.meta.title}
+    lead={m.lead}
+    back={{ href: localizePath('/games/', locale), label: hub.backToGames }}
+  />
+  <Battleship />
+  <BattleshipGuide />
+</BaseLayout>

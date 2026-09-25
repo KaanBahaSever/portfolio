@@ -509,12 +509,25 @@ export function initPdfCompress(root: HTMLElement): void {
 
   // ---------------------------------------------------------------- options
 
+  /**
+   * The settings changed after a run: the result on screen (and its "Download again" link) was
+   * made with the old ones, so never offer it as if it matched the form. Compressing again makes
+   * a new one. Split PDF and the image compressor do the same.
+   */
+  function invalidateResult(): void {
+    if (phase !== 'ready') return; // the fieldset is disabled while compressing
+    if (!el.result.hidden) hideResult();
+    setStatus(''); // "Cancelled." or an error describes the previous run
+  }
+
   for (const input of el.levels) {
     input.addEventListener('change', () => {
+      invalidateResult();
       if (!summary) return;
       el.fileImages.textContent = imagesText(selectedLevel());
     });
   }
+  el.stripMetadata.addEventListener('change', invalidateResult);
 
   // ---------------------------------------------------------------- compress
 
@@ -613,7 +626,8 @@ export function initPdfCompress(root: HTMLElement): void {
         transcode: (request, signal) => (readback ? transcodeImage(request, signal) : Promise.resolve(null)),
       });
       const blob = new Blob([result.bytes as Uint8Array<ArrayBuffer>], { type: 'application/pdf' });
-      const filename = toPdfFilename(compressedBaseName(picked.name), 'compressed.pdf');
+      const names = m.outputNames;
+      const filename = toPdfFilename(compressedBaseName(picked.name, names), `${names.fallbackBase}${names.suffix}.pdf`);
       announcement = showResult(blob, filename, picked.size, result.stats);
     } catch (error) {
       if (session && !session.alive) session = null;

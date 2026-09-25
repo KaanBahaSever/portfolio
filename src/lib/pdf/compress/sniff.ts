@@ -24,9 +24,23 @@ export function looksLikePdf(head: Uint8Array): boolean {
 
 const MAX_BASE_CODE_POINTS = 80;
 
+/**
+ * Words used in the saved file name. They come from the page's message catalogue
+ * (pdfCompressMessages[locale].outputNames), so a Turkish page saves "Rapor-sıkıştırılmış.pdf".
+ */
+export interface CompressedNameParts {
+  /** Appended to the original base name, e.g. "-compressed". */
+  readonly suffix: string;
+  /** Base name when the original has none, e.g. "document". */
+  readonly fallbackBase: string;
+}
+
+/** The English words; the defaults when no locale is given. */
+export const DEFAULT_NAME_PARTS: CompressedNameParts = { suffix: '-compressed', fallbackBase: 'document' };
+
 /** "Report.pdf" -> "Report-compressed.pdf"; unsafe characters are cleaned by toPdfFilename. */
-export function compressedBaseName(originalName: string): string {
+export function compressedBaseName(originalName: string, parts: CompressedNameParts = DEFAULT_NAME_PARTS): string {
   const base = String(originalName ?? '').replace(/\.pdf$/i, '').trim();
   const shortened = Array.from(base).slice(0, MAX_BASE_CODE_POINTS).join('').trim();
-  return `${shortened || 'document'}-compressed.pdf`;
+  return `${shortened || parts.fallbackBase}${parts.suffix}.pdf`;
 }

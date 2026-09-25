@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { compressedBaseName, looksLikePdf } from '../src/lib/pdf/compress/sniff.ts';
+import { DEFAULT_NAME_PARTS, compressedBaseName, looksLikePdf } from '../src/lib/pdf/compress/sniff.ts';
 import { toPdfFilename } from '../src/lib/files/filename.ts';
+import { pdfCompressMessages } from '../src/i18n/tools/pdf-compress.ts';
 
 const bytes = (text: string) => new TextEncoder().encode(text);
 
@@ -35,4 +36,29 @@ test('compressedBaseName appends -compressed and keeps names reasonable', () => 
   assert.ok(long.endsWith('-compressed.pdf'));
   assert.equal(toPdfFilename(long), long, 'still within the shared filename limit');
   assert.equal(toPdfFilename(compressedBaseName('a/b:c.pdf')), 'abc-compressed.pdf');
+});
+
+test('compressedBaseName uses the words it is given', () => {
+  const parts = { suffix: '-small', fallbackBase: 'file' };
+  assert.equal(compressedBaseName('Report.pdf', parts), 'Report-small.pdf');
+  assert.equal(compressedBaseName('', parts), 'file-small.pdf');
+  assert.equal(compressedBaseName('Report.pdf', DEFAULT_NAME_PARTS), compressedBaseName('Report.pdf'));
+});
+
+test('saved file names follow the page language', () => {
+  const { en, tr } = pdfCompressMessages;
+  assert.deepEqual(en.outputNames, DEFAULT_NAME_PARTS, 'English keeps the previous names');
+  assert.equal(compressedBaseName('Report.pdf', en.outputNames), 'Report-compressed.pdf');
+  assert.equal(compressedBaseName('.pdf', en.outputNames), 'document-compressed.pdf');
+  // Same vocabulary as Split PDF's Turkish names ("belge", "bölünmüş").
+  assert.equal(compressedBaseName('Rapor.pdf', tr.outputNames), 'Rapor-sıkıştırılmış.pdf');
+  assert.equal(compressedBaseName('', tr.outputNames), 'belge-sıkıştırılmış.pdf');
+  for (const names of [en.outputNames, tr.outputNames]) {
+    // The controller's fallback when cleaning leaves nothing must itself survive cleaning.
+    const fallback = `${names.fallbackBase}${names.suffix}.pdf`;
+    assert.equal(toPdfFilename(fallback), fallback);
+    // Suffix plus the longest kept base stays within the shared 100-code-point limit.
+    const long = compressedBaseName(`${'ş'.repeat(150)}.pdf`, names);
+    assert.equal(toPdfFilename(long), long);
+  }
 });

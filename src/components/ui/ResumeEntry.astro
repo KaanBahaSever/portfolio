@@ -21,6 +21,8 @@ import { formatPeriod } from '../../utils/resume-dates';
 
 interface Props {
   title: string;
+  /** BCP 47 language of `title` when it differs from the page's (e.g. an English job title on /tr/). */
+  titleLang?: string;
   /** Organisation name; linked (new tab) when `href` is set. */
   organization?: string;
   href?: string;
@@ -40,6 +42,7 @@ interface Props {
 
 const {
   title,
+  titleLang,
   organization,
   href,
   details = [],
@@ -69,6 +72,7 @@ const body = columns ? 'sm:col-start-2' : '';
   ]}
 >
   <Heading
+    lang={titleLang}
     class:list={[
       'text-base leading-snug font-semibold text-balance text-zinc-900 dark:text-zinc-100',
       columns ? 'sm:col-start-2 sm:row-start-1' : 'row-start-2',
@@ -106,8 +110,8 @@ const body = columns ? 'sm:col-start-2' : '';
   }
 
   {/*
-    The period: <time> elements for machines, one spoken phrase for screen readers ("Jul 2021 to
-    Mar 2024"), and the visual en-dash version hidden from them. Each date stays in one piece; a
+    The period: <time> elements for machines, one spoken phrase with full month names for screen
+    readers ("July 2021 to March 2024"), and the abbreviated en-dash version hidden from them. Each date stays in one piece; a
     narrow column may break only at the dash; in the columns layout the period spans the title
     and organisation rows, so a two-line period never pushes the organisation away from the
     title. Kept on one line: whitespace around the separator would render as extra spaces.

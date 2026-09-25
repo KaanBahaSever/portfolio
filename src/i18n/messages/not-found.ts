@@ -28,7 +28,7 @@ const en = {
     projects: 'Systems, platforms and open-source work',
     blog: 'Notes on mathematics and the things I build',
     tools: 'Private utilities that run in your browser',
-    games: 'Battleship and tic-tac-toe against search algorithms',
+    games: 'Battleship and tic-tac-toe against algorithmic opponents',
     about: 'Background and the engineering journey so far',
   } satisfies Record<NotFoundLink, string>,
 };
@@ -50,7 +50,7 @@ const tr: NotFoundMessages = {
     projects: 'Sistemler, platformlar ve açık kaynak çalışmalar',
     blog: 'Matematik ve geliştirdiğim şeyler üzerine notlar',
     tools: 'Tarayıcınızda çalışan, gizliliğe saygılı araçlar',
-    games: 'Arama algoritmalarına karşı Amiral Battı ve XOX',
+    games: 'Algoritmik rakiplere karşı Amiral Battı ve XOX',
     about: 'Geçmişim ve bugüne kadarki mühendislik yolculuğum',
   },
 };

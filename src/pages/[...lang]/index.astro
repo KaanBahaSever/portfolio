@@ -57,7 +57,7 @@ const personJsonLd = JSON.stringify({
   alumniOf: school && {
     '@type': 'CollegeOrUniversity',
     name: pick(school.institution, locale),
-    url: school.url,
+    url: school.url && resumeText(school.url, locale),
   },
   knowsAbout: h.person.knowsAbout,
   knowsLanguage: ['tr', 'en'],
@@ -76,7 +76,8 @@ const personJsonLd = JSON.stringify({
         EXPERIENCE.map((job) => (
           <li>
             <ResumeEntry
-              title={pick(job.role, locale)}
+              title={resumeText(job.role, locale)}
+              titleLang={job.roleLang !== undefined && job.roleLang !== locale ? job.roleLang : undefined}
               organization={resumeText(job.organization, locale)}
               href={job.url}
               details={job.location ? [pick(job.location, locale)] : []}

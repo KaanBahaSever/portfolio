@@ -5,7 +5,8 @@
  *
  * - Server-rendered at a fixed pose, so it is complete without JavaScript; the viewBox fixes
  *   the aspect ratio, so nothing shifts when the fonts or the script arrive.
- * - The strokes draw in once (stroke-dashoffset); construction lines fade in after them.
+ * - The strokes draw in once (stroke-dashoffset), when the figure first comes into view (on
+ *   phones it sits below the fold); construction lines fade in after them.
  * - The script turns the point slowly (one turn every 16 s) with requestAnimationFrame, only
  *   while the figure is on screen and the tab is visible. A fine pointer moving across the
  *   hero nudges the phase a little. With prefers-reduced-motion the figure stays still.
@@ -50,6 +51,28 @@ const tickLabels = [
 ---
 
 <figure class:list={['hero-figure', className]}>
+  {/*
+    Holds the draw-in until the figure is on screen: a CSS animation that starts at page load
+    would be over before a phone visitor scrolls down to it. Inline and first in the figure, so
+    the hold is in place before any stroke is parsed or painted; it does not depend on the
+    bundled script below. Without JavaScript (or IntersectionObserver) the figure draws at load.
+  */}
+  <script is:inline>
+    (() => {
+      const figure = document.currentScript?.parentElement;
+      if (!figure || !('IntersectionObserver' in window)) return;
+      figure.setAttribute('data-draw', 'pending');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          figure.removeAttribute('data-draw');
+          observer.disconnect();
+        },
+        { threshold: 0.3 },
+      );
+      observer.observe(figure);
+    })();
+  </script>
   <div
     class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white/70 dark:border-zinc-800 dark:bg-zinc-900/50"
   >
@@ -190,6 +213,12 @@ const tickLabels = [
 
     .fig-fade {
       animation: fig-fade 400ms ease-out var(--fig-delay, 0ms) both;
+    }
+
+    /* Paused on their first frame (delays included) until the figure scrolls into view. */
+    .hero-figure[data-draw='pending'] .fig-draw,
+    .hero-figure[data-draw='pending'] .fig-fade {
+      animation-play-state: paused;
     }
   }
 

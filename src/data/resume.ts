@@ -3,9 +3,10 @@
  * certifications, activities, skills and languages. Used by the home page (and anything else
  * that summarises the CV). Keep it factual and in sync with public/cv/kaan-cv.pdf.
  *
- * Prose is Localized (read it with pick(value, locale)); dates, URLs and technology names are
- * shared by both languages. Dates are 'YYYY' or 'YYYY-MM' strings (valid <time datetime>
- * values); src/utils/resume-dates.ts formats them per locale.
+ * Prose is Localized (read it with pick(value, locale)); dates and technology names are shared
+ * by both languages. Fields typed ResumeText (names, titles kept in the original, URLs) may be
+ * either, so read them with resumeText(). Dates are 'YYYY' or 'YYYY-MM' strings (valid
+ * <time datetime> values); src/utils/resume-dates.ts formats them per locale.
  *
  * Pure module (types only from config.ts), so tests can import it with `node --test`.
  */
@@ -24,7 +25,13 @@ export interface ResumePeriod {
 export type ResumeText = string | Localized<string>;
 
 export interface ExperienceItem extends ResumePeriod {
-  role: Localized<string>;
+  /** The job title; a plain string when the original title is kept in every language. */
+  role: ResumeText;
+  /**
+   * The language `role` is written in when it is not translated (e.g. 'en' for an English job
+   * title), so pages in other languages can mark it with lang="…" for screen readers.
+   */
+  roleLang?: Locale;
   organization: ResumeText;
   url?: string;
   location?: Localized<string>;
@@ -39,7 +46,8 @@ export interface EducationItem extends ResumePeriod {
   institution: Localized<string>;
   /** Faculty or department, e.g. "Faculty of Science". */
   department?: Localized<string>;
-  url?: string;
+  /** The institution's site; per language when it has a page in each language. */
+  url?: ResumeText;
   degree: Localized<string>;
   field: Localized<string>;
   highlights: Localized<readonly string[]>;
@@ -76,10 +84,10 @@ export function resumeText(value: ResumeText, locale: Locale): string {
 
 export const EXPERIENCE: readonly ExperienceItem[] = [
   {
-    role: {
-      en: 'Full-Stack Software Engineer / Systems Contributor',
-      tr: 'Full-Stack Yazılım Mühendisi / Sistem Katkıcısı',
-    },
+    // The title as held, in English on both pages: Turkish CVs and LinkedIn profiles usually
+    // keep English job titles, and "Systems Contributor" has no established Turkish equivalent.
+    role: 'Full-Stack Software Engineer / Systems Contributor',
+    roleLang: 'en',
     organization: 'crowd.inc',
     start: '2021-07',
     end: '2024-03',
@@ -109,7 +117,7 @@ export const EDUCATION: readonly EducationItem[] = [
   {
     institution: { en: 'Istanbul University', tr: 'İstanbul Üniversitesi' },
     department: { en: 'Faculty of Science', tr: 'Fen Fakültesi' },
-    url: 'https://www.istanbul.edu.tr/en/',
+    url: { en: 'https://www.istanbul.edu.tr/en/', tr: 'https://www.istanbul.edu.tr/tr/' },
     degree: { en: 'Bachelor of Science', tr: 'Lisans' },
     field: { en: 'Mathematics', tr: 'Matematik' },
     start: '2019-11',

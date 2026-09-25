@@ -11,16 +11,27 @@ test('English month labels are unchanged by the move to Intl', () => {
   ENGLISH_MONTHS.forEach((name, index) => {
     const month = String(index + 1).padStart(2, '0');
     const value = `2021-${month}` as ResumeDate;
-    assert.deepEqual(formatResumeDate(value), { label: `${name} 2021`, datetime: value });
-    assert.deepEqual(formatResumeDate(value, 'en'), { label: `${name} 2021`, datetime: value });
+    assert.equal(formatResumeDate(value).label, `${name} 2021`);
+    assert.equal(formatResumeDate(value, 'en').label, `${name} 2021`);
+    assert.equal(formatResumeDate(value).datetime, value);
   });
 });
 
 test('Turkish month labels use Turkish abbreviations and keep the machine-readable value', () => {
-  assert.deepEqual(formatResumeDate('2021-07', 'tr'), { label: 'Tem 2021', datetime: '2021-07' });
+  assert.deepEqual(formatResumeDate('2021-07', 'tr'), { label: 'Tem 2021', spoken: 'Temmuz 2021', datetime: '2021-07' });
   assert.equal(formatResumeDate('2019-11', 'tr').label, 'Kas 2019');
   assert.equal(formatResumeDate('2020-08', 'tr').label, 'Ağu 2020');
   assert.equal(formatResumeDate('2018-02', 'tr').label, 'Şub 2018');
+});
+
+test('spoken labels spell the month out, so speech engines never read an abbreviation as a word', () => {
+  // "Kas", "Ara", "Mar" and "Haz" are also Turkish words ("muscle", "search"…).
+  assert.deepEqual(formatResumeDate('2021-07'), { label: 'Jul 2021', spoken: 'July 2021', datetime: '2021-07' });
+  assert.equal(formatResumeDate('2019-11', 'tr').spoken, 'Kasım 2019');
+  assert.equal(formatResumeDate('2018-12', 'tr').spoken, 'Aralık 2018');
+  assert.equal(formatResumeDate('2024-03', 'tr').spoken, 'Mart 2024');
+  assert.equal(formatResumeDate('2017-06', 'tr').spoken, 'Haziran 2017');
+  assert.equal(formatResumeDate('2020', 'tr').spoken, '2020');
 });
 
 test('January and December stay in their own year whatever the build time zone', () => {
@@ -31,8 +42,8 @@ test('January and December stay in their own year whatever the build time zone',
 });
 
 test('bare years are shown as they are', () => {
-  assert.deepEqual(formatResumeDate('2020'), { label: '2020', datetime: '2020' });
-  assert.deepEqual(formatResumeDate('2020', 'tr'), { label: '2020', datetime: '2020' });
+  assert.deepEqual(formatResumeDate('2020'), { label: '2020', spoken: '2020', datetime: '2020' });
+  assert.deepEqual(formatResumeDate('2020', 'tr'), { label: '2020', spoken: '2020', datetime: '2020' });
 });
 
 test('malformed dates fail loudly so bad data breaks the build', () => {
@@ -46,13 +57,17 @@ test('malformed dates fail loudly so bad data breaks the build', () => {
 test('formatPeriod renders a closed period in each language', () => {
   const en = formatPeriod({ start: '2021-07', end: '2024-03' });
   assert.equal(en.text, 'Jul 2021 – Mar 2024');
-  assert.equal(en.spoken, 'Jul 2021 to Mar 2024');
+  assert.equal(en.spoken, 'July 2021 to March 2024');
   assert.equal(en.endLabel, 'Mar 2024');
-  assert.deepEqual(en.end, { label: 'Mar 2024', datetime: '2024-03' });
+  assert.deepEqual(en.end, { label: 'Mar 2024', spoken: 'March 2024', datetime: '2024-03' });
 
   const tr = formatPeriod({ start: '2021-07', end: '2024-03' }, 'tr');
   assert.equal(tr.text, 'Tem 2021 – Mar 2024');
-  assert.equal(tr.spoken, 'Tem 2021 – Mar 2024');
+  assert.equal(tr.spoken, 'Temmuz 2021 – Mart 2024');
+
+  const erasmus = formatPeriod({ start: '2017-06', end: '2018-12' }, 'tr');
+  assert.equal(erasmus.text, 'Haz 2017 – Ara 2018');
+  assert.equal(erasmus.spoken, 'Haziran 2017 – Aralık 2018');
 });
 
 test('formatPeriod localizes an ongoing end and leaves single dates alone', () => {
@@ -60,7 +75,10 @@ test('formatPeriod localizes an ongoing end and leaves single dates alone', () =
   assert.equal(ongoing.end, 'present');
   assert.equal(ongoing.endLabel, 'Present');
   assert.equal(ongoing.text, 'Nov 2019 – Present');
-  assert.equal(formatPeriod({ start: '2019-11', end: 'present' }, 'tr').text, 'Kas 2019 – Günümüz');
+  assert.equal(ongoing.spoken, 'November 2019 to Present');
+  const ongoingTr = formatPeriod({ start: '2019-11', end: 'present' }, 'tr');
+  assert.equal(ongoingTr.text, 'Kas 2019 – Günümüz');
+  assert.equal(ongoingTr.spoken, 'Kasım 2019 – Günümüz');
 
   const single = formatPeriod({ start: '2020' }, 'tr');
   assert.equal(single.end, null);

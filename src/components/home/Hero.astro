@@ -66,12 +66,25 @@ const contactLink =
           {h.selectedWork}
           <Icon name="arrow-right" class="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
         </a>
-        {/* The CV is an English PDF: hreflang/type say so to machines, the mono note to people. */}
-        <a href={SITE.cvPath} download hreflang="en" type="application/pdf" class={secondary}>
+        {/*
+          The CV is an English PDF: hreflang/type say so to machines, the mono note to people.
+          Label and note each stay in one piece; when both do not fit on one line (the Turkish
+          "Özgeçmişi indir · PDF · İngilizce" at 320 px) the note wraps under the label and the
+          button grows, instead of both breaking into a cramped 2×2 block.
+        */}
+        <a
+          href={SITE.cvPath}
+          download
+          hreflang="en"
+          type="application/pdf"
+          class:list={[secondary, 'flex-wrap gap-y-0.5 py-2']}
+        >
           <Icon name="download" class="size-4 transition-transform duration-200 group-hover:translate-y-0.5" />
-          {t.labels.downloadCv}{' '}
+          <span class="whitespace-nowrap">{t.labels.downloadCv}</span>{' '}
           {/* The space above keeps the accessible name "Download CV PDF", not "Download CVPDF". */}
-          <span class="font-mono text-xs font-medium text-zinc-600 dark:text-zinc-400">{h.cvFormat}</span>
+          <span class="font-mono text-xs font-medium whitespace-nowrap text-zinc-600 dark:text-zinc-400">
+            {h.cvFormat}
+          </span>
         </a>
       </div>
 

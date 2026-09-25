@@ -67,6 +67,14 @@ test('Turkish interpolations stand alone (no case suffix glued to a value)', () 
   assert.equal(homeMessages.en.background.degree('Bachelor of Science', 'Mathematics'), 'Bachelor of Science in Mathematics');
 });
 
+test('the games are not described as search algorithms (only tic-tac-toe searches)', () => {
+  // Battleship's opponent is a probability-density heuristic; "algorithmic opponents" covers both.
+  const all = Object.values(CATALOGUES).flatMap((catalogue) => [...strings(catalogue.en), ...strings(catalogue.tr)]);
+  for (const text of all) assert.doesNotMatch(text, /search algorithm|arama algoritma/i, text);
+  assert.match(homeMessages.en.playground.lead, /algorithmic opponents/);
+  assert.match(notFoundMessages.tr.links.games, /Algoritmik rakiplere/);
+});
+
 test('the Turkish CV button says the CV is in English', () => {
   assert.match(homeMessages.tr.hero.cvFormat, /İngilizce/);
 });

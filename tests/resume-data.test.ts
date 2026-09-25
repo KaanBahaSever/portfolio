@@ -48,8 +48,23 @@ test('experience lists only the crowd.inc role', () => {
   assert.equal(EXPERIENCE.length, 1);
   const [job] = EXPERIENCE;
   assert.equal(resumeText(job!.organization, 'en'), 'crowd.inc');
-  assert.equal(job!.role.en, 'Full-Stack Software Engineer / Systems Contributor');
+  // The English title is kept on the Turkish page too, and marked as English there.
+  for (const locale of LOCALES) {
+    assert.equal(resumeText(job!.role, locale), 'Full-Stack Software Engineer / Systems Contributor');
+  }
+  assert.equal(job!.roleLang, 'en');
   assert.deepEqual([job!.start, job!.end], ['2021-07', '2024-03']);
+});
+
+test('links point at the page in the reader’s language where one exists', () => {
+  const [school] = EDUCATION;
+  assert.ok(school?.url);
+  assert.equal(resumeText(school.url, 'en'), 'https://www.istanbul.edu.tr/en/');
+  assert.equal(resumeText(school.url, 'tr'), 'https://www.istanbul.edu.tr/tr/');
+  for (const item of [...EXPERIENCE, ...EDUCATION]) {
+    if (!item.url) continue;
+    for (const locale of LOCALES) assert.match(resumeText(item.url, locale), /^https:\/\//);
+  }
 });
 
 test('retired roles and technologies do not appear anywhere in the résumé', () => {

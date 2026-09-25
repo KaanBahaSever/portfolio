@@ -4,6 +4,9 @@
  *
  * Month labels come from Intl through formatters(locale).date(…, 'monthYear'): "Jul 2021" in
  * English, "Tem 2021" in Turkish. Build-time ICU decides the output, not the visitor's browser.
+ *
+ * Screen readers get full month names instead ('monthYearLong'): Turkish abbreviations are
+ * ordinary words ("Kas" is "muscle", "Ara" is "search"), and speech engines read them as such.
  */
 
 import type { ResumeDate, ResumePeriod } from '../data/resume.ts';
@@ -14,6 +17,8 @@ import { common } from '../i18n/messages/common.ts';
 export interface DateLabel {
   /** Human-readable label, e.g. "Jul 2021" / "Tem 2021" or "2024". */
   label: string;
+  /** The label for screen readers, with the month in full: "July 2021" / "Temmuz 2021" or "2024". */
+  spoken: string;
   /** Value for <time datetime>, e.g. "2021-07" or "2024". */
   datetime: string;
 }
@@ -26,7 +31,7 @@ export interface PeriodLabels {
   endLabel: string | null;
   /** The visible period, e.g. "Jul 2021 – Mar 2024" or "2020". */
   text: string;
-  /** The period as a screen reader should hear it, e.g. "Jul 2021 to Mar 2024". */
+  /** The period as a screen reader should hear it, e.g. "July 2021 to March 2024". */
   spoken: string;
 }
 
@@ -44,24 +49,27 @@ export function parseResumeDate(value: string): { year: number; month?: number }
 /** Formats 'YYYY' or 'YYYY-MM' for `locale` (English by default). */
 export function formatResumeDate(value: ResumeDate, locale: Locale = DEFAULT_LOCALE): DateLabel {
   const { year, month } = parseResumeDate(value);
-  if (month === undefined) return { label: String(year), datetime: value };
+  if (month === undefined) return { label: String(year), spoken: String(year), datetime: value };
   // The first of the month at UTC midnight; formatters() formats in UTC, so the build
   // machine's time zone cannot shift it into the previous month.
-  const label = formatters(locale).date(new Date(Date.UTC(year, month - 1, 1)), 'monthYear');
-  return { label, datetime: value };
+  const date = new Date(Date.UTC(year, month - 1, 1));
+  const f = formatters(locale);
+  return { label: f.date(date, 'monthYear'), spoken: f.date(date, 'monthYearLong'), datetime: value };
 }
 
 export function formatPeriod(period: ResumePeriod, locale: Locale = DEFAULT_LOCALE): PeriodLabels {
   const start = formatResumeDate(period.start, locale);
   const end =
     period.end === undefined ? null : period.end === 'present' ? 'present' : formatResumeDate(period.end, locale);
-  const endLabel = end === null ? null : end === 'present' ? common[locale].labels.present : end.label;
+  const present = common[locale].labels.present;
+  const endLabel = end === null ? null : end === 'present' ? present : end.label;
+  const endSpoken = end === null ? null : end === 'present' ? present : end.spoken;
   return {
     start,
     end,
     endLabel,
     text: endLabel === null ? start.label : `${start.label} – ${endLabel}`,
-    spoken: endLabel === null ? start.label : common[locale].periodSr(start.label, endLabel),
+    spoken: endSpoken === null ? start.spoken : common[locale].periodSr(start.spoken, endSpoken),
   };
 }
 

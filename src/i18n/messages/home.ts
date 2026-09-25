@@ -67,7 +67,7 @@ const en = {
   },
   playground: {
     title: 'Playground',
-    lead: 'Small things to use right here: games against search algorithms, a terminal, and browser tools that keep your files on your device.',
+    lead: 'Small things to use right here: games against algorithmic opponents, a terminal, and browser tools that keep your files on your device.',
     kinds: { game: 'Game', tool: 'Tool', terminal: 'Terminal' },
     consoleText: 'Explore this site from a terminal, one command at a time.',
     allGames: 'All games',
@@ -112,7 +112,7 @@ export type HomeMessages = typeof en;
 const tr: HomeMessages = {
   hero: {
     intro:
-      'İstanbul Üniversitesinde matematik lisansımı tamamlıyorum; geliştirdiğim işlerin çoğu da bu matematiği işe koşuyor: roket aviyoniği ve yörünge simülasyonu, mesajlaşma platformları, oyun algoritmaları. Günlük işimde modern C++ ve Go kullanıyorum. Öncesinde yaklaşık üç yıl boyunca crowd.inc bünyesinde, canlıda çalışan bir web platformunun sorumluluğunu uçtan uca üstlendim: PostgreSQL şemasından Linux sunucularına kadar.',
+      'İstanbul Üniversitesinde matematik lisansımı tamamlıyorum ve geliştirdiğim projelerin çoğunda bu matematiği uygulamaya döküyorum: roket aviyoniği ve yörünge simülasyonu, mesajlaşma platformları, oyun algoritmaları. Günlük işimde modern C++ ve Go kullanıyorum. Öncesinde yaklaşık üç yıl boyunca crowd.inc bünyesinde, canlıda çalışan bir web platformunun sorumluluğunu uçtan uca üstlendim: PostgreSQL şemasından Linux sunucularına kadar.',
     selectedWork: 'Seçili işler',
     // The CV exists in English only; say so on the button.
     cvFormat: 'PDF · İngilizce',
@@ -157,7 +157,7 @@ const tr: HomeMessages = {
   },
   playground: {
     title: 'Oyun alanı',
-    lead: 'Hemen burada kullanabileceğiniz küçük şeyler: arama algoritmalarına karşı oyunlar, bir terminal ve dosyalarınızı cihazınızdan çıkarmayan tarayıcı araçları.',
+    lead: 'Hemen burada kullanabileceğiniz küçük şeyler: algoritmik rakiplere karşı oyunlar, bir terminal ve dosyalarınızı cihazınızdan çıkarmayan tarayıcı araçları.',
     kinds: { game: 'Oyun', tool: 'Araç', terminal: 'Terminal' },
     consoleText: 'Bu siteyi bir terminalden, komut komut keşfedin.',
     allGames: 'Tüm oyunlar',

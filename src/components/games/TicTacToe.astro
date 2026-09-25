@@ -1,0 +1,437 @@
+---
+/**
+ * Tic-tac-toe against the computer or a second player. Behaviour lives in
+ * src/scripts/games/tictactoe/controller.ts; every hook is a data-* attribute scoped to the root
+ * section (pass a distinct `id` for the ARIA ids if the game appears twice on a page).
+ *
+ * States styled here, all set by the controller:
+ *   grid    [data-ghost="X|O"]   a person may play now: empty squares preview that mark on hover
+ *   square  [data-mark="X|O"]    [data-win] part of the winning line
+ *   eval    [data-best]          one of the best moves when "Show evaluation" is on
+ */
+import { gameUi } from './styles';
+import { ui } from '../ui/styles';
+import { DIFFICULTIES, type Difficulty } from '../../lib/games/tictactoe/ai.ts';
+import type { KeypadLayout } from '../../lib/games/tictactoe/board.ts';
+import { gamesHubMessages } from '../../i18n/games/hub';
+import { ticTacToeMessages } from '../../i18n/games/tictactoe';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  /** Prefix for element ids; give each instance on a page its own. */
+  id?: string;
+}
+
+const { id = 'tictactoe' } = Astro.props;
+const locale = getLocale(Astro);
+const m = ticTacToeMessages[locale];
+const hub = gamesHubMessages[locale];
+
+const DEFAULT_DIFFICULTY: Difficulty = 'unbeatable';
+const KEYPADS: readonly KeypadLayout[] = ['phone', 'numpad'];
+const headingId = `${id}-heading`;
+const helpId = `${id}-help`;
+const evalHintId = `${id}-eval-hint`;
+const rows = [0, 1, 2];
+
+const segments = (count: 2 | 3) => [gameUi.segmented, count === 2 ? 'grid-cols-2' : 'grid-cols-3'];
+---
+
+<section data-tictactoe aria-labelledby={headingId} class="mt-8 sm:mt-10">
+  {/* Keeps the outline h1 → h2 → h3 (settings); the guide sections below are h2 too. */}
+  <h2 id={headingId} class="sr-only">{m.region}</h2>
+  <noscript>
+    <p
+      class="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+    >
+      {hub.noscript}
+    </p>
+  </noscript>
+
+  <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+    <div class="min-w-0">
+      <div class="mx-auto w-full max-w-[26rem]">
+        <div class="flex min-h-11 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <p data-status class="font-serif text-2xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100">&nbsp;</p>
+          <p data-substatus class="label-mono text-zinc-600 dark:text-zinc-400"></p>
+        </div>
+        <p id={helpId} class="sr-only">{m.boardHelp}</p>
+
+        <div class="board relative isolate mt-4 aspect-square w-full">
+          <div class="bg-graph mask-fade-radial pointer-events-none absolute -inset-6 -z-10" aria-hidden="true"></div>
+          {/* The # rules: four continuous hairlines with open ends, like a grid drawn by hand. */}
+          <svg class="rules" viewBox="0 0 300 300" aria-hidden="true" focusable="false">
+            <line x1="100" y1="6" x2="100" y2="294" />
+            <line x1="200" y1="6" x2="200" y2="294" />
+            <line x1="6" y1="100" x2="294" y2="100" />
+            <line x1="6" y1="200" x2="294" y2="200" />
+          </svg>
+          <div role="grid" aria-label={m.board} aria-describedby={helpId} data-grid class="squares">
+            {
+              rows.map((row) => (
+                <div role="row" class="row">
+                  {rows.map((col) => {
+                    const index = row * 3 + col;
+                    return (
+                      <div role="gridcell" class="gridcell">
+                        <button
+                          type="button"
+                          class="square"
+                          data-square={index}
+                          tabindex={index === 0 ? 0 : -1}
+                          aria-label={m.squareLabel(m.squares[index] ?? '', m.empty)}
+                        >
+                          <svg class="mark mark-x" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                            <path pathLength="1" d="M28 28 72 72" />
+                            <path pathLength="1" d="M72 28 28 72" />
+                          </svg>
+                          <svg class="mark mark-o" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                            <circle pathLength="1" cx="50" cy="50" r="24" transform="rotate(-90 50 50)" />
+                          </svg>
+                          <span class="eval" data-eval aria-hidden="true" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))
+            }
+          </div>
+          <div class="win-line" data-win-line hidden>
+            <svg viewBox="0 0 300 300" aria-hidden="true" focusable="false">
+              <line pathLength="1" x1="0" y1="0" x2="0" y2="0" />
+            </svg>
+          </div>
+        </div>
+
+        {/* Always present (empty when off), so turning the evaluation on or off never shifts the page. */}
+        <p data-eval-caption class="mt-3 min-h-4 text-center font-mono text-xs text-zinc-600 dark:text-zinc-400"></p>
+
+        <dl
+          class="mt-6 grid grid-cols-3 divide-x divide-zinc-200 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div class="px-2 py-3 text-center">
+            <dt data-score-label="a" class="label-mono text-zinc-600 dark:text-zinc-400">{m.scoreLabels.you}</dt>
+            <dd data-score="a" class="mt-1 font-mono text-2xl tabular-nums">0</dd>
+          </div>
+          <div class="px-2 py-3 text-center">
+            <dt class="label-mono text-zinc-600 dark:text-zinc-400">{m.scoreLabels.draws}</dt>
+            <dd data-score="draws" class="mt-1 font-mono text-2xl tabular-nums">0</dd>
+          </div>
+          <div class="px-2 py-3 text-center">
+            <dt data-score-label="b" class="label-mono text-zinc-600 dark:text-zinc-400">{m.scoreLabels.computer}</dt>
+            <dd data-score="b" class="mt-1 font-mono text-2xl tabular-nums">0</dd>
+          </div>
+        </dl>
+
+        <div class="mt-4 grid grid-cols-2 gap-2">
+          <button type="button" data-new-round class={ui.buttonPrimary}>{m.newRound}</button>
+          <button type="button" data-reset-score class={ui.buttonSecondary}>{m.resetScore}</button>
+        </div>
+      </div>
+    </div>
+
+    <div class:list={[gameUi.panel, 'flex flex-col gap-6']}>
+      <h3 class="font-serif text-xl font-medium tracking-tight">{m.settings}</h3>
+
+      <fieldset class="min-w-0">
+        <legend class={gameUi.legend}>{m.opponent}</legend>
+        <div class:list={segments(2)}>
+          <label class={gameUi.segment}>
+            <input type="radio" class="sr-only" name={`${id}-mode`} value="computer" checked data-mode />
+            {m.opponents.computer}
+          </label>
+          <label class={gameUi.segment}>
+            <input type="radio" class="sr-only" name={`${id}-mode`} value="human" data-mode />
+            {m.opponents.human}
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="min-w-0" data-when="computer">
+        <legend class={gameUi.legend}>{m.difficulty}</legend>
+        <div class:list={segments(3)}>
+          {
+            DIFFICULTIES.map((difficulty) => (
+              <label class={gameUi.segment}>
+                <input
+                  type="radio"
+                  class="sr-only"
+                  name={`${id}-difficulty`}
+                  value={difficulty}
+                  checked={difficulty === DEFAULT_DIFFICULTY}
+                  data-difficulty
+                />
+                {m.difficulties[difficulty]}
+              </label>
+            ))
+          }
+        </div>
+        <p data-difficulty-hint class={gameUi.hint}>{m.difficultyHints[DEFAULT_DIFFICULTY]}</p>
+      </fieldset>
+
+      <div class="grid gap-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-1 lg:gap-6" data-when="computer">
+        <fieldset class="min-w-0">
+          <legend class={gameUi.legend}>{m.yourMark}</legend>
+          <div class:list={segments(2)}>
+            {
+              (['X', 'O'] as const).map((mark) => (
+                <label class:list={[gameUi.segment, 'font-mono']}>
+                  <input type="radio" class="sr-only" name={`${id}-mark`} value={mark} checked={mark === 'X'} data-mark-choice />
+                  {mark}
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+        <fieldset class="min-w-0">
+          <legend class={gameUi.legend}>{m.firstMove}</legend>
+          <div class:list={segments(2)}>
+            <label class={gameUi.segment}>
+              <input type="radio" class="sr-only" name={`${id}-starter`} value="human" checked data-starter />
+              {m.starters.human}
+            </label>
+            <label class={gameUi.segment}>
+              <input type="radio" class="sr-only" name={`${id}-starter`} value="computer" data-starter />
+              {m.starters.computer}
+            </label>
+          </div>
+        </fieldset>
+      </div>
+
+      <fieldset class="min-w-0" data-when="human" hidden>
+        <legend class={gameUi.legend}>{m.firstMove}</legend>
+        <div class:list={segments(2)}>
+          {
+            (['X', 'O'] as const).map((mark) => (
+              <label class:list={[gameUi.segment, 'font-mono']}>
+                <input type="radio" class="sr-only" name={`${id}-first`} value={mark} checked={mark === 'X'} data-first-mark />
+                {mark}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="min-w-0">
+        <legend class={gameUi.legend}>{m.keypad}</legend>
+        <div class:list={segments(2)}>
+          {
+            KEYPADS.map((layout) => (
+              <label class={gameUi.segment}>
+                <input
+                  type="radio"
+                  class="sr-only"
+                  name={`${id}-keypad`}
+                  value={layout}
+                  checked={layout === 'phone'}
+                  data-keypad
+                />
+                {m.keypads[layout]}
+              </label>
+            ))
+          }
+        </div>
+        <p data-keypad-hint class={gameUi.hint}>{m.keypadHints.phone}</p>
+      </fieldset>
+
+      <div class="border-t border-zinc-200 pt-4 dark:border-zinc-800">
+        <label class={gameUi.toggle}>
+          <input type="checkbox" data-eval-toggle class={gameUi.checkbox} aria-describedby={evalHintId} />
+          {m.showEvaluation}
+        </label>
+        <p id={evalHintId} class={gameUi.hint}>{m.evaluationHint}</p>
+      </div>
+    </div>
+  </div>
+
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+</section>
+
+<style>
+  .board {
+    --ink: var(--color-zinc-800);
+    --rule: var(--color-zinc-800);
+    /* Strokes (marks, win line) need 3:1; the evaluation digits are text and need 4.5:1. */
+    --accent: var(--color-accent-600);
+    --accent-text: var(--color-accent-700);
+    --muted: var(--color-zinc-500);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .board {
+      --ink: var(--color-zinc-200);
+      --rule: var(--color-zinc-300);
+      --accent: var(--color-accent-400);
+      --accent-text: var(--color-accent-400);
+      --muted: var(--color-zinc-400);
+    }
+  }
+
+  .squares {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .gridcell {
+    position: relative;
+    min-width: 0;
+  }
+
+  .rules {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    stroke: var(--rule);
+    stroke-width: 1.5px;
+    stroke-linecap: round;
+  }
+
+  .rules line {
+    vector-effect: non-scaling-stroke;
+  }
+
+  .square {
+    position: absolute;
+    inset: 0;
+    display: block;
+    border-radius: 0.5rem;
+    color: var(--ink);
+    touch-action: manipulation;
+    transition: background-color 150ms ease-out;
+  }
+
+  .square:focus-visible {
+    outline-offset: -6px;
+  }
+
+  .squares[data-ghost] .square:not([data-mark]) {
+    cursor: pointer;
+  }
+
+  @media (hover: hover) {
+    .squares[data-ghost] .square:not([data-mark]):hover {
+      background-color: color-mix(in oklab, currentColor 4%, transparent);
+    }
+
+    /* Hover preview of the mark about to be played. */
+    .squares[data-ghost='X'] .square:not([data-mark]):hover .mark-x,
+    .squares[data-ghost='O'] .square:not([data-mark]):hover .mark-o {
+      display: block;
+      opacity: 0.16;
+    }
+
+    .squares[data-ghost] .square:not([data-mark]):hover .mark * {
+      animation: none;
+    }
+  }
+
+  .mark {
+    position: absolute;
+    inset: 12%;
+    display: none;
+    width: 76%;
+    height: 76%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    overflow: visible;
+  }
+
+  .square[data-mark='X'] .mark-x,
+  .square[data-mark='O'] .mark-o {
+    display: block;
+  }
+
+  /* Pen strokes: each path draws itself once (pathLength="1" makes the dash maths size-free). */
+  .mark * {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    animation: ttt-draw 200ms ease-out both;
+  }
+
+  .mark-x path:last-child {
+    animation-delay: 110ms;
+  }
+
+  .square[data-win] {
+    color: var(--accent);
+  }
+
+  .eval {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: clamp(0.875rem, 4.5vw, 1.25rem);
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+
+  .eval:not(:empty) {
+    display: flex;
+    animation: ttt-fade 200ms ease-out;
+  }
+
+  .eval[data-best] {
+    color: var(--accent-text);
+    font-weight: 600;
+  }
+
+  .win-line {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .win-line svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .win-line line {
+    stroke: var(--accent);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+    animation: ttt-draw 320ms ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mark-x path:last-child {
+      animation-delay: 0s;
+    }
+  }
+
+  @keyframes ttt-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  @keyframes ttt-fade {
+    from {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  import { initTicTacToe } from '../../scripts/games/tictactoe/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-tictactoe]').forEach(initTicTacToe);
+</script>

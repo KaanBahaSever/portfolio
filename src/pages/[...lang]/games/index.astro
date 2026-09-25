@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import GameCard from '../../../components/games/GameCard.astro';
+import Icon from '../../../components/ui/Icon.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import { GAMES } from '../../../data/games';
+import { gamesHubMessages } from '../../../i18n/games/hub';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const t = gamesHubMessages[getLocale(Astro)];
+---
+
+<BaseLayout title={t.meta.title} description={t.meta.description} width="wide">
+  <PageHeader eyebrow={t.eyebrow} title={t.title} lead={t.lead} />
+
+  <ul class="mt-10 grid gap-6 sm:mt-12 md:grid-cols-2">
+    {
+      GAMES.map((game, i) => (
+        <li class="min-w-0">
+          <GameCard game={game} index={i + 1} />
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="mt-8 flex max-w-2xl gap-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+    <Icon name="info" class="mt-0.5 size-4 shrink-0" />
+    <span>{t.note}</span>
+  </p>
+</BaseLayout>

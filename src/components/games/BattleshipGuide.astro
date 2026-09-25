@@ -1,0 +1,222 @@
+---
+/**
+ * The prose under the Battleship board: how to play and how the computer aims. Written once per
+ * locale (inline markup such as <kbd> and the density formula do not survive string templates).
+ */
+import Section from '../ui/Section.astro';
+import { ui } from '../ui/styles';
+import { battleshipMessages } from '../../i18n/games/battleship';
+import { getLocale } from '../../i18n/server';
+
+const locale = getLocale(Astro);
+const m = battleshipMessages[locale];
+
+const h3 = 'font-serif text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100';
+const body = 'mt-3 space-y-3 leading-relaxed text-zinc-700 dark:text-zinc-300';
+const list = 'mt-3 space-y-2 leading-relaxed text-zinc-700 dark:text-zinc-300 [&>li]:relative [&>li]:pl-5 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:text-zinc-400 [&>li]:before:content-["–"]';
+const formula =
+  'my-6 overflow-x-auto rounded-lg border border-zinc-200 bg-white px-4 py-4 text-center font-serif text-xl text-zinc-900 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 [&_sub]:text-[0.65em] [&_sup]:text-[0.65em]';
+const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
+/** The summation sign is set larger than the letters, as in printed mathematics. */
+const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
+---
+
+<Section id="how-to-play" index="01" title={m.guide.howToPlay}>
+  {
+    locale === 'tr' ? (
+      <div class="grid gap-10 md:grid-cols-2">
+        <div>
+          <h3 class={h3}>Hazırlık</h3>
+          <div class={body}>
+            <p>
+              Listeden bir gemi seçin, ardından geminin başlayacağı hücreyi seçin: gemi, yönüne göre bu hücreden sağa ya
+              da aşağı doğru uzanır. Yönü düğmeyle ya da <kbd class={ui.kbd}>R</kbd> tuşuyla değiştirin. Gemiler
+              birbirine değebilir ama üst üste binemez.
+            </p>
+            <p>
+              Bir gemiyi taşımak için onu tahtada ya da listede seçip yeni bir hücre seçin. <em>Rastgele</em> düğmesi
+              tüm filoyu tek seferde yerleştirir.
+            </p>
+          </div>
+          <h3 class:list={[h3, 'mt-8']}>Savaş</h3>
+          <div class={body}>
+            <p>
+              Siz ve bilgisayar sırayla birer atış yaparsınız; ilk atış sizindir. Nokta ıskayı, çarpı isabeti gösterir.
+              Bir geminin bütün hücreleri vurulunca gemi batar, hangi gemi olduğu duyurulur ve ana hatları görünür.
+              Kazanmak için beş gemiyi de batırın.
+            </p>
+          </div>
+        </div>
+        <div>
+          <h3 class={h3}>Klavye</h3>
+          <ul class={list}>
+            <li>
+              <kbd class={ui.kbd}>Tab</kbd> tahtalar ve düğmeler arasında gezinir; her tahta tek bir duraktır.
+            </li>
+            <li>
+              Ok tuşları bir hücre ilerler. <kbd class={ui.kbd}>Home</kbd> ve <kbd class={ui.kbd}>End</kbd> satırın
+              başına ve sonuna, <kbd class={ui.kbd}>Page Up</kbd> ve <kbd class={ui.kbd}>Page Down</kbd> sütunun başına
+              ve sonuna gider.
+            </li>
+            <li>
+              <kbd class={ui.kbd}>Enter</kbd> ya da <kbd class={ui.kbd}>Boşluk</kbd> hazırlıkta seçili gemiyi
+              yerleştirir, savaşta ateş eder.
+            </li>
+            <li>
+              <kbd class={ui.kbd}>R</kbd> hazırlıkta gemiyi döndürür.
+            </li>
+          </ul>
+          <p class={body}>
+            Ekran okuyucular her hücrenin koordinatını ve durumunu (“C7, isabet”), her atışı da savaş günlüğünden
+            duyurur.
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div class="grid gap-10 md:grid-cols-2">
+        <div>
+          <h3 class={h3}>Setting up</h3>
+          <div class={body}>
+            <p>
+              Pick a ship in the list, then pick the cell where it starts: the ship runs right or down from there,
+              depending on its orientation. Rotate it with the button or the <kbd class={ui.kbd}>R</kbd> key. Ships may
+              touch, but not overlap.
+            </p>
+            <p>
+              To move a ship, select it on the board or in the list and pick a new cell. <em>Random</em> places the
+              whole fleet at once.
+            </p>
+          </div>
+          <h3 class:list={[h3, 'mt-8']}>The battle</h3>
+          <div class={body}>
+            <p>
+              You and the computer take turns, one shot each, and you fire first. A dot marks a miss, a cross a hit.
+              When every cell of a ship has been hit, it sinks: the game names the ship and shows its outline. Sink all
+              five ships to win.
+            </p>
+          </div>
+        </div>
+        <div>
+          <h3 class={h3}>Keyboard</h3>
+          <ul class={list}>
+            <li>
+              <kbd class={ui.kbd}>Tab</kbd> moves between the boards and the controls; each board is a single stop.
+            </li>
+            <li>
+              Arrow keys move one cell. <kbd class={ui.kbd}>Home</kbd> and <kbd class={ui.kbd}>End</kbd> jump to the
+              ends of a row, <kbd class={ui.kbd}>Page Up</kbd> and <kbd class={ui.kbd}>Page Down</kbd> to the ends of a
+              column.
+            </li>
+            <li>
+              <kbd class={ui.kbd}>Enter</kbd> or <kbd class={ui.kbd}>Space</kbd> places the selected ship during setup
+              and fires during the battle.
+            </li>
+            <li>
+              <kbd class={ui.kbd}>R</kbd> rotates the ship during setup.
+            </li>
+          </ul>
+          <p class={body}>
+            Screen readers hear each cell’s coordinate and state (“C7, hit”), and every shot from the battle log.
+          </p>
+        </div>
+      </div>
+    )
+  }
+</Section>
+
+<Section id="how-it-aims" index="02" title={m.guide.aiming}>
+  {
+    locale === 'tr' ? (
+      <div class="max-w-3xl">
+        <p class={body}>
+          Üç seviye de yalnızca sizin göreceğinizi görür: nereye ateş ettiğini, neyi vurduğunu ve hangi gemilerin
+          battığını.
+        </p>
+        <ul class={list}>
+          <li>
+            <strong class={strong}>Kolay</strong>, henüz denemediği hücrelerden rastgele birine ateş eder.
+          </li>
+          <li>
+            <strong class={strong}>Normal</strong>, av ve hedef stratejisini izler. Av sırasında yalnızca satır ve sütun
+            numaralarının toplamı, su üstündeki en kısa geminin uzunluğunun katı olan hücrelere ateş eder; böylece o
+            gemi atışların arasına saklanamaz. İsabetten sonra dört komşu hücreyi dener, iki isabet aynı hizaya gelince
+            de o çizgiyi izler.
+          </li>
+          <li>
+            <strong class={strong}>Zor</strong>, gemilerin nerede olabileceğini hesaplar. Her atıştan önce kalan her
+            geminin hâlâ alabileceği bütün konumları (düz, tahtanın içinde, ıskaların ve batmış gemilerin üzerine denk
+            gelmeyen) tek tek dolaşır ve her hücre için bu konumlardan kaçının onu kapsadığını sayar:
+          </li>
+        </ul>
+        <p
+          class={formula}
+          role="math"
+          aria-label="d(c), tüm s gemileri ve s gemisinin c hücresini içeren tüm p konumları üzerinden, w üzeri h(p) değerlerinin toplamıdır."
+        >
+          {/* One line on purpose: whitespace inside <sub> would show as gaps. */}
+          <var>d</var>(<var>c</var>) = <span class={sum}>∑</span><sub><var>s</var></sub> <span class={sum}>∑</span><sub><var>p</var> ∈ <var>P</var><sub><var>s</var></sub>, <var>c</var> ∈ <var>p</var></sub> <var>w</var><sup><var>h</var>(<var>p</var>)</sup>
+        </p>
+        <div class={body}>
+          <p>
+            Burada <var>P</var><sub><var>s</var></sub>, <var>s</var> gemisi için kalan konumların kümesi;{' '}
+            <var>h</var>(<var>p</var>), bir konumun kapsadığı ve henüz batmamış gemilere ait isabet sayısı;{' '}
+            <var>w</var> ise isabet içermeyen hiçbir sayımın ulaşamayacağı kadar büyük bir ağırlıktır (tam filo için
+            35). Böylece bir isabetten sonra sayım o gemi üzerinde yoğunlaşır. Bilgisayar en yüksek değerli hücreye ateş
+            eder; birden fazla hücre eşitse aralarından rastgele birini seçer. Savaş sırasında ısı haritasını açarak
+            kendi tahtanızdaki <var>d</var> değerlerini izleyebilirsiniz.
+          </p>
+          <p>
+            Her gemiyi ayrı saymak, gemilerin birbirinin üstüne binemeyeceğini göz ardı eder; bütün filoları tam olarak
+            saymak ise çok büyük sayıda dizilimi dolaşmayı gerektirir. Bu, yaygın olarak kullanılan yaklaşımdır. Rastgele
+            filolarla oynanan 300 simülasyon oyununda filoyu batırmak için Kolay ortalama yaklaşık 95, Normal 51, Zor ise
+            44 atış kullandı.
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div class="max-w-3xl">
+        <p class={body}>
+          All three levels see only what you would: where they have fired, what they hit, and which ships have sunk.
+        </p>
+        <ul class={list}>
+          <li>
+            <strong class={strong}>Easy</strong> fires at a random cell it has not tried yet.
+          </li>
+          <li>
+            <strong class={strong}>Normal</strong> hunts and targets. While hunting, it fires only where the row and
+            column numbers add up to a multiple of the shortest ship still afloat, so that ship cannot hide between its
+            shots. After a hit it tries the four neighbours, and once two hits line up it follows the line.
+          </li>
+          <li>
+            <strong class={strong}>Hard</strong> estimates where the ships are. Before every shot it goes through each
+            position every remaining ship could still take (straight, on the board, clear of misses and sunk ships) and
+            counts, for each cell, how many of those positions cover it:
+          </li>
+        </ul>
+        <p
+          class={formula}
+          role="math"
+          aria-label="d of c equals the sum, over ships s and over the positions p of s that contain c, of w to the power h of p."
+        >
+          {/* One line on purpose: whitespace inside <sub> would show as gaps. */}
+          <var>d</var>(<var>c</var>) = <span class={sum}>∑</span><sub><var>s</var></sub> <span class={sum}>∑</span><sub><var>p</var> ∈ <var>P</var><sub><var>s</var></sub>, <var>c</var> ∈ <var>p</var></sub> <var>w</var><sup><var>h</var>(<var>p</var>)</sup>
+        </p>
+        <div class={body}>
+          <p>
+            Here <var>P</var><sub><var>s</var></sub> is the set of positions left for ship <var>s</var>,{' '}
+            <var>h</var>(<var>p</var>) is the number of hits on unsunk ships that a position covers, and <var>w</var> is
+            a weight larger than any count without hits (35 for the full fleet), so after a hit the count concentrates
+            on that ship. The computer fires at the highest value and breaks ties at random. Turn on the heat map during
+            a battle to watch <var>d</var> over your own board.
+          </p>
+          <p>
+            Counting each ship on its own ignores that ships cannot overlap one another; counting whole fleets exactly
+            would mean going through an enormous number of arrangements, and this is the usual approximation. In 300
+            simulated games against random fleets, Easy needed about 95 shots on average to sink the fleet, Normal about
+            51 and Hard about 44.
+          </p>
+        </div>
+      </div>
+    )
+  }
+</Section>

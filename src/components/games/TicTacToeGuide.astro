@@ -1,0 +1,173 @@
+---
+/**
+ * The prose under the tic-tac-toe board: rules, keyboard (with the two number-key layouts drawn
+ * out) and how the computer thinks. Written once per locale because of the inline markup.
+ */
+import Section from '../ui/Section.astro';
+import { ui } from '../ui/styles';
+import { digitForCell, type KeypadLayout } from '../../lib/games/tictactoe/board.ts';
+import { ticTacToeMessages } from '../../i18n/games/tictactoe';
+import { getLocale } from '../../i18n/server';
+
+const locale = getLocale(Astro);
+const m = ticTacToeMessages[locale];
+
+const h3 = 'font-serif text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100';
+const body = 'mt-3 space-y-3 leading-relaxed text-zinc-700 dark:text-zinc-300';
+const list = 'mt-3 space-y-2 leading-relaxed text-zinc-700 dark:text-zinc-300 [&>li]:relative [&>li]:pl-5 [&>li]:before:absolute [&>li]:before:left-0 [&>li]:before:text-zinc-400 [&>li]:before:content-["–"]';
+const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
+
+const layouts: readonly KeypadLayout[] = ['phone', 'numpad'];
+const cells = Array.from({ length: 9 }, (_, i) => i);
+---
+
+<Section id="how-to-play" index="01" title={m.guide.howToPlay}>
+  <div class="grid gap-10 md:grid-cols-2">
+    <div>
+      {
+        locale === 'tr' ? (
+          <>
+            <h3 class={h3}>Kurallar</h3>
+            <div class={body}>
+              <p>
+                Oyuncular 3×3 tahtaya sırayla X ve O koyar. Bir satırı, sütunu ya da çaprazı ilk tamamlayan kazanır;
+                çizgi oluşmadan dolan tahta berabere biter.
+              </p>
+              <p>
+                Bilgisayara ya da aynı cihazda bir arkadaşınıza karşı oynayabilir, işaretinizi ve ilk hamleyi kimin
+                yapacağını seçebilirsiniz.
+              </p>
+            </div>
+            <h3 class:list={[h3, 'mt-8']}>Klavye</h3>
+            <ul class={list}>
+              <li>
+                Ok tuşlarıyla kareler arasında gezinin; <kbd class={ui.kbd}>Enter</kbd> ya da{' '}
+                <kbd class={ui.kbd}>Boşluk</kbd> ile seçili kareye oynayın.
+              </li>
+              <li>
+                <kbd class={ui.kbd}>1</kbd>–<kbd class={ui.kbd}>9</kbd> rakam tuşlarıyla doğrudan bir kareye
+                oynayabilirsiniz. Hangi
+                rakamın hangi kareye denk geldiğini “Rakam tuşları” ayarından seçin: <em>1 sol üstte</em> düzeni telefon
+                tuş takımı gibi okuma sırasını izler, <em>7 sol üstte</em> düzeni klavyenin sayısal tuş takımıyla aynı
+                yerleşimdedir.
+              </li>
+            </ul>
+            <p class={body}>
+              Ekran okuyucular her hamleyi ve sonucu duyurur; değerlendirme açıkken her karenin adı puanını da içerir.
+            </p>
+          </>
+        ) : (
+          <>
+            <h3 class={h3}>Rules</h3>
+            <div class={body}>
+              <p>
+                Players take turns putting X and O on a 3×3 grid. The first to complete a row, a column or a diagonal
+                wins; a full board without a line is a draw.
+              </p>
+              <p>Play the computer or a friend on the same device, and choose your mark and who moves first.</p>
+            </div>
+            <h3 class:list={[h3, 'mt-8']}>Keyboard</h3>
+            <ul class={list}>
+              <li>
+                Arrow keys move between squares; <kbd class={ui.kbd}>Enter</kbd> or <kbd class={ui.kbd}>Space</kbd>{' '}
+                plays the focused square.
+              </li>
+              <li>
+                Number keys <kbd class={ui.kbd}>1</kbd>–<kbd class={ui.kbd}>9</kbd> play a square directly. Choose how
+                they map under “Number keys”: <em>1 is top left</em> follows reading order, like a phone keypad;{' '}
+                <em>7 is top left</em> matches the numeric keypad on a keyboard.
+              </li>
+            </ul>
+            <p class={body}>
+              Screen readers hear every move and the result, and when the evaluation is on, each square’s name includes
+              its score.
+            </p>
+          </>
+        )
+      }
+    </div>
+
+    <div class="flex flex-wrap items-start gap-8 md:justify-center md:pt-2" aria-hidden="true">
+      {
+        layouts.map((layout) => (
+          <figure class="flex flex-col items-center gap-3">
+            <div class="grid grid-cols-3 gap-1 rounded-lg border border-zinc-200 bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+              {cells.map((cell) => (
+                <span class="flex size-9 items-center justify-center rounded-md border border-zinc-200 font-mono text-sm text-zinc-800 dark:border-zinc-700 dark:text-zinc-200">
+                  {digitForCell(cell, layout)}
+                </span>
+              ))}
+            </div>
+            <figcaption class="label-mono text-zinc-600 dark:text-zinc-400">{m.keypads[layout]}</figcaption>
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</Section>
+
+<Section id="how-it-thinks" index="02" title={m.guide.thinking}>
+  {
+    locale === 'tr' ? (
+      <div class="max-w-3xl">
+        <div class={body}>
+          <p>
+            <strong class={strong}>Minimax.</strong> Bilgisayar hamlesini seçmek için olası her devamı oyunun sonuna
+            kadar oynar. Biten bir oyun, <var>n</var> hamle sonra kazanan taraf için 10 − <var>n</var>, kaybeden taraf
+            için bunun eksisi, beraberlikte 0 puan alır; iki tarafın da kendisi için en iyi hamleyi yapacağı varsayılır.
+            Puandan <var>n</var> çıkarıldığı için bilgisayar hızlı bir galibiyeti daha geç olanına, yenilgi kaçınılmazsa
+            da en uzun savunmayı erken bir yenilgiye tercih eder.
+          </p>
+          <p>
+            <strong class={strong}>Alfa–beta budama.</strong> Devamların birçoğunu incelemeye hiç gerek yoktur: bir
+            yanıt, bir hamlenin daha önce bulunmuş bir seçenekten kötü olduğunu gösterdiği anda o hamlenin kalan
+            yanıtları kararı değiştiremez ve atlanır. Sonuç tam minimax ile birebir aynıdır, yalnızca daha az pozisyon
+            incelenir. Bu sayfanın testleri iki iddiayı da doğrular: iki arama ulaşılabilir her pozisyonda aynı değeri
+            verir, Yenilmez seviye de kim başlarsa başlasın olası hiçbir hamle dizisine karşı kaybetmez.
+          </p>
+          <p>
+            <strong class={strong}>Seviyeler.</strong> Kolay herhangi bir boş kareye oynar. Orta iki hamle ileriyi
+            görür: kazanabiliyorsa kazanır, sizin kazanmanızı engeller ama yaklaşan bir çatalı göremez. Yenilmez sonuna
+            kadar tarar ve en iyi hamleler arasından rastgele seçer; oyunlar değişir ama asla kaybetmez. İki taraf da
+            kusursuz oynarsa XOX berabere biter.
+          </p>
+          <p>
+            <strong class={strong}>Değerlendirme.</strong> “Değerlendirmeyi göster”, sıradaki oyuncu için bu puanları
+            boş karelere yazar: +9 hemen kazanır, daha küçük artı puanlar daha geç kazanır, 0 berabere kalır, eksi
+            puanlar ise en iyi oyuna karşı kaybeder.
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div class="max-w-3xl">
+        <div class={body}>
+          <p>
+            <strong class={strong}>Minimax.</strong> To choose a move, the computer plays out every possible
+            continuation to the end of the game. A finished game scores 10 − <var>n</var> for the side that wins on the{' '}
+            <var>n</var>th move from now, minus that for the side that loses, and 0 for a draw; each side is assumed to
+            pick the move that is best for itself. Subtracting <var>n</var> makes the computer prefer a quick win and,
+            when it cannot avoid a loss, the longest defence.
+          </p>
+          <p>
+            <strong class={strong}>Alpha–beta pruning.</strong> Many continuations never need to be looked at: as soon
+            as one reply shows that a move is worse than an alternative already found, the rest of that move’s replies
+            cannot change the decision and are skipped. The answer is exactly the same as full minimax, reached through
+            fewer positions. The tests for this page check both claims: the two searches agree on every reachable
+            position, and Unbeatable never loses to any sequence of moves, whoever starts.
+          </p>
+          <p>
+            <strong class={strong}>Levels.</strong> Easy plays any free square. Medium looks two moves ahead: it takes a
+            win and blocks yours, but it cannot see a fork coming. Unbeatable searches to the end and picks at random
+            among the best moves, so games vary, but it never loses. With perfect play on both sides, tic-tac-toe is a
+            draw.
+          </p>
+          <p>
+            <strong class={strong}>Evaluation.</strong> “Show evaluation” writes these scores on the empty squares for
+            the player to move: +9 wins at once, smaller positive scores win later, 0 draws, and negative scores lose
+            against best play.
+          </p>
+        </div>
+      </div>
+    )
+  }
+</Section>

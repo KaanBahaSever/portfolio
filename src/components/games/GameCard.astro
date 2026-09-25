@@ -1,0 +1,57 @@
+---
+/**
+ * A card on /games/: the game's illustration on graph paper (with a "Fig. n" caption), its title,
+ * the opponent's algorithm and description. The whole card is one link (stretched-link pattern:
+ * the title link covers the card through ::after).
+ */
+import BattleshipFigure from './BattleshipFigure.astro';
+import TicTacToeFigure from './TicTacToeFigure.astro';
+import type { GameInfo } from '../../data/games';
+import { localizePath, pick } from '../../i18n/config';
+import { gamesHubMessages } from '../../i18n/games/hub';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  game: GameInfo;
+  /** Figure number shown in the caption. */
+  index: number;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { game, index, headingLevel: Heading = 'h2' } = Astro.props;
+const locale = getLocale(Astro);
+const t = gamesHubMessages[locale];
+const figureClass = 'relative mx-auto h-36 w-auto max-w-full text-zinc-700 sm:h-40 dark:text-zinc-300';
+---
+
+<article
+  class="group relative flex h-full flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white transition-colors hover:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600"
+>
+  <div class="relative isolate border-b border-zinc-200 px-4 py-5 dark:border-zinc-800" aria-hidden="true">
+    <div class="bg-graph-fine mask-fade-radial absolute inset-0 -z-10"></div>
+    {game.slug === 'battleship' ? <BattleshipFigure class={figureClass} /> : <TicTacToeFigure class={figureClass} />}
+    <span class="label-mono absolute bottom-2 left-3 text-zinc-500 dark:text-zinc-400">{t.figure(index)}</span>
+  </div>
+
+  <div class="flex flex-1 flex-col gap-3 p-5 sm:p-6">
+    <Heading class="font-serif text-2xl leading-tight font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
+      <a
+        href={localizePath(game.href, locale)}
+        class="rounded-sm after:absolute after:inset-0 after:rounded-xl group-hover:text-accent-700 dark:group-hover:text-accent-400"
+      >
+        {pick(game.title, locale)}
+      </a>
+    </Heading>
+    <p class="font-mono text-xs leading-5 tracking-wide text-accent-700 dark:text-accent-400">
+      <span class="sr-only">{t.opponent} </span>{pick(game.algorithm, locale)}
+    </p>
+    <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{pick(game.description, locale)}</p>
+    <p
+      class="mt-auto inline-flex items-center gap-1.5 pt-1 text-sm font-medium text-zinc-900 dark:text-zinc-100"
+      aria-hidden="true"
+    >
+      {t.play}
+      <span class="transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+    </p>
+  </div>
+</article>

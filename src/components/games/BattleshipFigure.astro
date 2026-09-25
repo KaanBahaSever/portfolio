@@ -1,0 +1,141 @@
+---
+/**
+ * Thin-line illustration for the Battleship card: a 6×6 corner of a board shaded by the real
+ * probability density (computed at build time with the game's own code), a sunk ship, a few
+ * misses, and a bar chart of the density along the row of the peak. The peak is the one accent.
+ * Decorative (aria-hidden): the card text says what the game is.
+ */
+import { MISS, SUNK, probabilityDensity, type Knowledge } from '../../lib/games/battleship/ai.ts';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+
+const SIZE = 6;
+const CELL = 20;
+const X0 = 22;
+const Y0 = 20;
+
+// A position mid-hunt: a sunk submarine along the bottom left, three misses.
+const misses = [7, 15, 26];
+const sunk = [30, 31, 32];
+const cells = new Uint8Array(SIZE * SIZE);
+for (const cell of misses) cells[cell] = MISS;
+for (const cell of sunk) cells[cell] = SUNK;
+const knowledge: Knowledge = {
+  size: SIZE,
+  cells,
+  remaining: [
+    { id: 'battleship', length: 4 },
+    { id: 'cruiser', length: 3 },
+    { id: 'destroyer', length: 2 },
+  ],
+};
+const density = [...probabilityDensity(knowledge)];
+const max = Math.max(...density);
+const peak = density.indexOf(max);
+const peakRow = Math.floor(peak / SIZE);
+
+const at = (index: number) => ({ x: X0 + (index % SIZE) * CELL, y: Y0 + Math.floor(index / SIZE) * CELL });
+const shading = density
+  .map((value, index) => ({ index, opacity: value > 0 ? 0.03 + 0.17 * (value / max) : 0 }))
+  .filter((cell) => cell.opacity > 0 && cell.index !== peak);
+const grid = Array.from({ length: SIZE + 1 }, (_, i) => i);
+
+// Row profile: one bar per cell of the peak's row.
+const BAR_X = 172;
+const BAR_W = 12;
+const BAR_GAP = 4;
+const BASE_Y = 128;
+const BAR_MAX = 84;
+const rowBars = Array.from({ length: SIZE }, (_, col) => {
+  const value = density[peakRow * SIZE + col] ?? 0;
+  const height = (value / max) * BAR_MAX;
+  return { x: BAR_X + col * (BAR_W + BAR_GAP), height, isPeak: peakRow * SIZE + col === peak };
+});
+const sunkStart = at(sunk[0] ?? 0);
+---
+
+<svg
+  class={className}
+  viewBox="0 0 280 150"
+  fill="none"
+  stroke="currentColor"
+  stroke-linecap="round"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-hidden="true"
+  focusable="false"
+>
+  {/* Density shading, then the grid on top of it. */}
+  {
+    shading.map(({ index, opacity }) => {
+      const { x, y } = at(index);
+      return <rect x={x} y={y} width={CELL} height={CELL} fill="currentColor" fill-opacity={opacity} stroke="none" />;
+    })
+  }
+  <g stroke-width="0.75" stroke-opacity="0.45">
+    {grid.map((i) => <line x1={X0 + i * CELL} y1={Y0} x2={X0 + i * CELL} y2={Y0 + SIZE * CELL} />)}
+    {grid.map((i) => <line x1={X0} y1={Y0 + i * CELL} x2={X0 + SIZE * CELL} y2={Y0 + i * CELL} />)}
+  </g>
+
+  {/* Sunk ship: outline, hatching and hits. */}
+  <rect
+    x={sunkStart.x + 3}
+    y={sunkStart.y + 3}
+    width={sunk.length * CELL - 6}
+    height={CELL - 6}
+    rx={(CELL - 6) / 2}
+    stroke-width="1.25"
+  />
+  {
+    sunk.map((index) => {
+      const { x, y } = at(index);
+      return (
+        <path
+          d={`M${x + 6} ${y + 6}l8 8M${x + 14} ${y + 6}l-8 8`}
+          stroke-width="1.25"
+          class="text-rose-600 dark:text-rose-400"
+        />
+      );
+    })
+  }
+
+  {
+    misses.map((index) => {
+      const { x, y } = at(index);
+      return <circle cx={x + CELL / 2} cy={y + CELL / 2} r="2" fill="currentColor" stroke="none" />;
+    })
+  }
+
+  {/* The peak: where the Hard admiral fires next. */}
+  <g class="text-accent-600 dark:text-accent-400">
+    <rect x={at(peak).x} y={at(peak).y} width={CELL} height={CELL} fill="currentColor" fill-opacity="0.35" stroke="none" />
+    <rect x={at(peak).x + 2} y={at(peak).y + 2} width={CELL - 4} height={CELL - 4} stroke-width="1.25" stroke-dasharray="2.5 2" />
+  </g>
+
+  {/* Density along the peak's row. */}
+  <g stroke-width="0.75" stroke-opacity="0.6">
+    <line x1={BAR_X - 6} y1={BASE_Y} x2={BAR_X + SIZE * (BAR_W + BAR_GAP)} y2={BASE_Y} />
+    <line x1={BAR_X - 6} y1={BASE_Y} x2={BAR_X - 6} y2={BASE_Y - BAR_MAX - 10} />
+  </g>
+  {
+    rowBars.map((bar) =>
+      bar.height > 0 ? (
+        <rect
+          x={bar.x}
+          y={BASE_Y - bar.height}
+          width={BAR_W}
+          height={bar.height}
+          stroke-width="1"
+          fill="currentColor"
+          fill-opacity={bar.isPeak ? 0.35 : 0.08}
+          class:list={[bar.isPeak && 'text-accent-600 dark:text-accent-400']}
+        />
+      ) : (
+        <line x1={bar.x} y1={BASE_Y - 0.5} x2={bar.x + BAR_W} y2={BASE_Y - 0.5} stroke-width="1" />
+      ),
+    )
+  }
+</svg>

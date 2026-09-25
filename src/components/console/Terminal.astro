@@ -1,0 +1,445 @@
+---
+/**
+ * The console: a full-viewport, pitch-black terminal in JetBrains Mono.
+ *
+ * - Toolbar (top right): font size − / +, phosphor colour (green / amber), Exit. Both settings
+ *   are remembered; ConsolePrefs.astro applies them before the first paint.
+ * - Transcript: a role="log" live region. Output is typed out in an inert copy and committed
+ *   whole (src/scripts/console/typewriter.ts), so screen readers hear each output once.
+ * - Command line: a real, labelled <input> laid transparently over a mirror that draws the text
+ *   and a glowing block cursor (src/scripts/console/controller.ts).
+ * - Data: the virtual file system and documents, built at build time for this page's language,
+ *   travel as JSON in a <script type="application/json"> (escaped by serializeJson()).
+ */
+import { consoleMessages } from '../../i18n/console/messages';
+import { getLocale } from '../../i18n/server';
+import { serializeJson, type ConsoleData } from '../../lib/console/data';
+import { DEFAULT_FONT_SIZE, DEFAULT_PHOSPHOR, PHOSPHORS } from '../../lib/console/prefs';
+import { promptPath } from '../../lib/console/vfs';
+
+interface Props {
+  data: ConsoleData;
+}
+
+const { data } = Astro.props;
+const m = consoleMessages[getLocale(Astro)];
+const prompt = `${data.user}@${data.host}:${promptPath([])}$`;
+---
+
+<div class="console flex min-h-dvh flex-col font-mono" data-console>
+  <header class="console-bar sticky top-0 z-10" data-console-bar>
+    <div class="px-safe flex h-14 items-center justify-between gap-2">
+      <h1 class="sr-only">{m.title}</h1>
+      <p class="min-w-0 truncate" aria-hidden="true">kbs-os<span class="max-sm:hidden"> · tty1</span></p>
+      <div class="flex shrink-0 items-center gap-1 sm:gap-3" role="group" aria-label={m.toolbar.label}>
+        <div class="flex items-center" role="group" aria-label={m.toolbar.fontSize}>
+          <button
+            type="button"
+            class="console-tool"
+            data-font-down
+            aria-label={m.toolbar.smaller}
+            title={m.toolbar.smaller}
+          >
+            <span aria-hidden="true">A<span class="console-tool-sign">−</span></span>
+          </button>
+          <output class="console-size" data-font-value aria-live="polite">
+            {m.toolbar.fontSizeValue(DEFAULT_FONT_SIZE)}
+          </output>
+          <button
+            type="button"
+            class="console-tool"
+            data-font-up
+            aria-label={m.toolbar.larger}
+            title={m.toolbar.larger}
+          >
+            <span aria-hidden="true">A<span class="console-tool-sign">+</span></span>
+          </button>
+        </div>
+        <div class="flex items-center gap-1" role="group" aria-label={m.toolbar.phosphor}>
+          {
+            PHOSPHORS.map((phosphor) => (
+              <button
+                type="button"
+                class="console-tool"
+                data-phosphor-choice={phosphor}
+                aria-pressed={phosphor === DEFAULT_PHOSPHOR ? 'true' : 'false'}
+                title={m.toolbar[phosphor]}
+              >
+                <span class="console-swatch" data-swatch={phosphor} aria-hidden="true" />
+                <span class="max-sm:sr-only">{m.toolbar[phosphor]}</span>
+              </button>
+            ))
+          }
+        </div>
+        <a href={data.home} class="console-tool console-exit">{m.toolbar.exit}</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="console-screen px-safe">
+    <div class="console-column">
+      <div class="console-log" role="log" aria-live="polite" aria-label={m.a11y.transcript} data-log></div>
+      <div class="console-log" data-typing aria-hidden="true" inert></div>
+      <form class="console-cmdline" data-form>
+        <label for="console-input" class="sr-only">{m.a11y.input}</label>
+        <p aria-hidden="true"><span id="console-prompt" class="console-prompt" data-prompt>{prompt}</span> <span data-mirror><span class="console-cursor"> </span></span></p>
+        <input
+          id="console-input"
+          class="console-input"
+          type="text"
+          data-input
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="send"
+          maxlength="500"
+          aria-describedby="console-prompt console-hint"
+        />
+        <p id="console-hint" class="sr-only">{m.a11y.inputHint}</p>
+      </form>
+      <noscript>
+        <style is:inline>
+          .console-cmdline {
+            display: none;
+          }
+        </style>
+        <p class="console-line">{m.noscript} <a href={data.home}>{m.noscriptLink}</a></p>
+      </noscript>
+    </div>
+  </div>
+
+  <script type="application/json" data-console-data is:inline set:html={serializeJson(data)} />
+</div>
+
+<script>
+  import { initConsole } from '../../scripts/console/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-console]').forEach(initConsole);
+</script>
+
+<style is:global>
+  /*
+   * The console is always a black screen, whatever the site theme: the page behind it (overscroll,
+   * safe areas) is black too. Everything is scoped under .console, which only this page renders.
+   */
+  html:has(.console),
+  html:has(.console) body {
+    background-color: #000;
+    color-scheme: dark;
+  }
+
+  .console {
+    /*
+     * Monochrome phosphor: the text colour, a brighter tone for headings, links and the prompt,
+     * and a dimmer one for asides. Against #000 even the dim tones exceed 6.5:1.
+     */
+    --ph: #45f58c;
+    --ph-bright: #c7ffd9;
+    --ph-dim: #2fa862;
+    --ph-rgb: 69 245 140;
+    background-color: #000;
+    color: var(--ph);
+    color-scheme: dark;
+  }
+
+  :root[data-console-phosphor='amber'] .console {
+    --ph: #ffb52e;
+    --ph-bright: #ffe3ad;
+    --ph-dim: #c08a2c;
+    --ph-rgb: 255 181 46;
+  }
+
+  .console :focus-visible {
+    outline: 2px solid var(--ph);
+    outline-offset: 2px;
+  }
+
+  .console ::selection {
+    background-color: var(--ph);
+    color: #000;
+    text-shadow: none;
+  }
+
+  /* Toolbar: small, dim and fixed-size (it does not follow the terminal font size). */
+  .console-bar {
+    background-color: #000;
+    border-bottom: 1px solid rgb(var(--ph-rgb) / 0.18);
+    color: var(--ph-dim);
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+  }
+
+  .console-tool {
+    display: inline-flex;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+    border-radius: 0.5rem;
+    color: var(--ph-dim);
+    cursor: pointer;
+    transition-property: color, background-color, box-shadow;
+    transition-duration: 150ms;
+  }
+
+  .console-tool:hover {
+    color: var(--ph-bright);
+    background-color: rgb(var(--ph-rgb) / 0.08);
+  }
+
+  .console-tool[aria-pressed='true'] {
+    color: var(--ph-bright);
+    box-shadow: inset 0 0 0 1px rgb(var(--ph-rgb) / 0.45);
+  }
+
+  .console-tool[aria-disabled='true'] {
+    opacity: 0.4;
+    cursor: default;
+    background-color: transparent;
+  }
+
+  .console-tool-sign {
+    font-size: 0.85em;
+  }
+
+  .console-size {
+    min-width: 4.5ch;
+    text-align: center;
+    color: var(--ph);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .console-swatch {
+    width: 0.625rem;
+    height: 0.625rem;
+    flex: none;
+    border-radius: 9999px;
+  }
+
+  .console-swatch[data-swatch='green'] {
+    background-color: #45f58c;
+    box-shadow: 0 0 6px rgb(69 245 140 / 0.7);
+  }
+
+  .console-swatch[data-swatch='amber'] {
+    background-color: #ffb52e;
+    box-shadow: 0 0 6px rgb(255 181 46 / 0.7);
+  }
+
+  /* Screen */
+  .console-screen {
+    flex: 1 1 auto;
+    padding-top: 1rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    font-size: var(--console-font-size, 15px);
+    line-height: 1.5;
+    /* A soft phosphor bloom (dropped below for visitors who ask for more contrast). */
+    text-shadow: 0 0 0.35em rgb(var(--ph-rgb) / 0.3);
+  }
+
+  /* A container, so two-column lines and ASCII art can adapt to the width in characters. */
+  .console-column {
+    max-width: 100ch;
+    margin-inline: auto;
+    container-type: inline-size;
+  }
+
+  /* A little air after each output, so one command's answer ends before the next prompt. */
+  .console-entry:not(.console-echo) {
+    margin-block-end: 0.75em;
+  }
+
+  /* `cat a.txt b.txt`: a blank line between the files. */
+  .console-entry > .console-block + *,
+  .console-entry > * + .console-block {
+    margin-block-start: 0.75em;
+  }
+
+  /* Long lines wrap anywhere: the page never scrolls sideways. */
+  .console-entry,
+  .console-line,
+  .console-cmdline > p {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .console-bright,
+  .console-prompt,
+  .console-term {
+    color: var(--ph-bright);
+  }
+
+  .console-dim {
+    color: var(--ph-dim);
+  }
+
+  .console-screen a {
+    color: var(--ph-bright);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-decoration-color: rgb(var(--ph-rgb) / 0.55);
+    text-underline-offset: 0.2em;
+    border-radius: 2px;
+  }
+
+  .console-screen a:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* Commands offered as buttons (banner, whoami): comfortable touch targets inside the text. */
+  .console-run {
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    margin-block: 0.125rem;
+    padding-inline: 1ch;
+    border: 1px solid rgb(var(--ph-rgb) / 0.4);
+    border-radius: 0.375rem;
+    color: var(--ph-bright);
+    text-shadow: inherit;
+    vertical-align: middle;
+    cursor: pointer;
+    transition: background-color 150ms;
+  }
+
+  .console-run:hover {
+    background-color: rgb(var(--ph-rgb) / 0.1);
+  }
+
+  /* While output is typed, a button appears with its first letter, not as an empty frame. */
+  .console-run:empty {
+    display: none;
+  }
+
+  /* Term and description: stacked (description indented) until two columns fit. */
+  .console-pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .console-desc {
+    padding-inline-start: 2ch;
+  }
+
+  @container (min-width: 48ch) {
+    .console-pair {
+      grid-template-columns: var(--console-term, 16ch) minmax(0, 1fr);
+      column-gap: 2ch;
+    }
+
+    .console-desc {
+      padding-inline-start: 0;
+    }
+  }
+
+  .console-ls {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 2ch;
+  }
+
+  /*
+   * ASCII art never wraps. It shrinks to fit the column (JetBrains Mono glyphs are 0.6em wide;
+   * --cols is set by the renderer) and scrolls inside its own box as a last resort.
+   */
+  .console-art {
+    padding-block: 0.25em;
+    overflow-x: auto;
+    font-size: min(1em, calc(100cqi / (var(--cols, 32) * 0.6 + 1)));
+    line-height: 1.25;
+    white-space: pre;
+  }
+
+  .console-mark {
+    text-shadow: 0 0 0.4em rgb(var(--ph-rgb) / 0.9);
+  }
+
+  /* Command line: the transparent input covers the mirror, which draws the text and cursor. */
+  .console-cmdline {
+    position: relative;
+  }
+
+  .console-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    /* 16px so iOS does not zoom in on focus; the input is invisible, so its size never shows. */
+    font-size: 16px;
+    color: transparent;
+    caret-color: transparent;
+    background: transparent;
+    cursor: text;
+  }
+
+  .console-cursor {
+    background-color: var(--ph);
+    color: #000;
+    text-shadow: none;
+    box-shadow:
+      0 0 0.45em rgb(var(--ph-rgb) / 0.75),
+      0 0 1.1em rgb(var(--ph-rgb) / 0.35);
+    animation: console-blink 1.06s steps(1, end) infinite;
+  }
+
+  /* Without focus the cursor is a hollow, steady block, as in a terminal window in the background. */
+  .console:not([data-focused]) .console-cursor {
+    background-color: transparent;
+    color: inherit;
+    box-shadow: inset 0 0 0 1px var(--ph-dim);
+    animation: none;
+  }
+
+  .console-selection {
+    background-color: rgb(var(--ph-rgb) / 0.35);
+  }
+
+  /* No prompt while output is being typed, as in a real terminal (the input keeps focus). */
+  .console[data-busy] .console-cmdline > p {
+    visibility: hidden;
+  }
+
+  /*
+   * Blink by switching the block off and on (steps, not a fade). With reduced motion the global
+   * rule stops the animation after one frame, leaving the steady block.
+   */
+  @keyframes console-blink {
+    50% {
+      background-color: transparent;
+      color: var(--ph);
+      box-shadow: none;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    .console-screen,
+    .console-mark {
+      text-shadow: none;
+    }
+
+    .console-cursor {
+      box-shadow: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .console-cursor,
+    .console-swatch {
+      forced-color-adjust: none;
+    }
+
+    .console-cursor {
+      background-color: CanvasText;
+      color: Canvas;
+    }
+  }
+</style>

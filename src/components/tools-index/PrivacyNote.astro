@@ -1,0 +1,62 @@
+---
+/**
+ * The privacy note on /tools/. Prose with a link, so it is written once per language as markup
+ * (no translated HTML strings). Keep both versions saying the same thing: nothing is uploaded,
+ * and of the visitor's files and text only the Notepad draft is kept, in this browser's local
+ * storage. The claim is scoped to user content on purpose: the header's EN|TR switch also
+ * remembers the chosen language in local storage.
+ *
+ * The prose sits inside a {…} expression, where JSX whitespace rules apply: a line break next
+ * to a tag is dropped without leaving a space ("Notepaddraft"). Keep a word on each side of the
+ * link on the link's own line when rewrapping.
+ */
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { localizePath } from '../../i18n/config';
+import { getLocale } from '../../i18n/server';
+import { toolsIndexMessages } from '../../i18n/tools/index';
+
+const locale = getLocale(Astro);
+const m = toolsIndexMessages[locale];
+const notepadHref = localizePath('/tools/notepad/', locale);
+const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
+---
+
+<aside
+  aria-labelledby="tools-privacy-title"
+  class="mt-8 grid gap-3 rounded-xl border border-zinc-200 bg-white p-4 sm:mt-10 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-6 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900"
+>
+  <h2 id="tools-privacy-title" class="flex items-center gap-2 text-accent-700 sm:items-start dark:text-accent-400">
+    <Icon name="lock" class="size-4 shrink-0 sm:mt-px" />
+    <span class="label-mono">{m.privacyTitle}</span>
+  </h2>
+  <div class="space-y-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+    {
+      locale === 'tr' ? (
+        <>
+          <p>
+            <strong class={strong}>Her şey tarayıcınızda çalışır.</strong> Bu araçlarda açtığınız dosyalar ve metinler
+            cihazınızda işlenir; hiçbir zaman bir sunucuya yüklenmez.
+          </p>
+          <p>
+            Dosyalarınız ve metinlerinizden saklanan tek
+            şey <a href={notepadHref} class={ui.inlineLink}>Not defteri</a> taslağıdır: sayfayı yenilediğinizde
+            kaybolmasın diye bu tarayıcının yerel depolama alanında (local storage) tutulur ve bu cihazdan çıkmaz.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            <strong class={strong}>Everything runs in your browser.</strong> Files and text you open in these tools are
+            processed on your device and never uploaded to a server.
+          </p>
+          <p>
+            Of your files and text, the only thing kept is
+            the <a href={notepadHref} class={ui.inlineLink}>Notepad</a> draft: it is saved in this browser’s local
+            storage so a reload does not lose it, and it never leaves this device.
+          </p>
+        </>
+      )
+    }
+  </div>
+</aside>

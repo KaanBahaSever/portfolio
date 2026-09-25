@@ -1,8 +1,12 @@
 /**
  * Password Generator: DOM wiring (browser only).
  * Passwords are generated on the device with the Web Crypto API. Nothing is stored, logged or sent.
+ * Interface text comes from the same catalogue the server-rendered component uses, in the
+ * page's language (<html lang>).
  */
 
+import { getPageLocale } from '../../../i18n/client.ts';
+import { passwordMessages } from '../../../i18n/tools/password-generator.ts';
 import {
   CHARSET_NAMES,
   DEFAULT_LENGTH,
@@ -106,6 +110,7 @@ export function initPasswordGenerator(root: HTMLElement): void {
   root.dataset.initialized = 'true';
 
   const el = getElements(root);
+  const m = passwordMessages[getPageLocale()];
 
   let length = clampLength(Number(el.lengthRange.value));
   let password = '';
@@ -115,7 +120,8 @@ export function initPasswordGenerator(root: HTMLElement): void {
   let copiedTimer = 0;
   let announceTimer = 0;
   let strengthTimer = 0;
-  let announcedStrength = '';
+  /** The score last read out, so an unchanged rating is not announced again (-1: none yet). */
+  let announcedScore: StrengthScore | -1 = -1;
   /** The options the current password was made with. */
   let generatedWith: PasswordOptions | undefined;
   /** Said with the next strength announcement when a type change has just locked the last type. */
@@ -170,20 +176,20 @@ export function initPasswordGenerator(root: HTMLElement): void {
   }
 
   function renderStrength(options: PasswordOptions): void {
-    const { bits, label, score } = currentStrength(options);
+    const { bits, level, score } = currentStrength(options);
     const tone = toneOf(score);
     el.segments.forEach((segment, index) => {
       segment.dataset.tone = index <= score ? tone : 'off';
     });
-    el.strengthLabel.textContent = label;
+    el.strengthLabel.textContent = m.strength[level];
     el.strengthLabel.dataset.tone = tone;
     // Rounded down: the thresholds are whole numbers, so the figure never sits on a threshold the label has not reached.
-    el.strengthBits.textContent = `${Math.floor(bits)} bits`;
+    el.strengthBits.textContent = m.bits(Math.floor(bits));
   }
 
   function renderLength(): void {
     el.lengthRange.value = String(length);
-    el.lengthRange.setAttribute('aria-valuetext', `${length} characters`);
+    el.lengthRange.setAttribute('aria-valuetext', m.characters(length));
   }
 
   /** The type that is locked on because it is the only one checked, if any. */
@@ -206,7 +212,7 @@ export function initPasswordGenerator(root: HTMLElement): void {
 
   function renderCopyButton(): void {
     el.copy.dataset.state = copyPhase;
-    el.copyLabel.textContent = copyPhase === 'copied' ? 'Copied' : 'Copy';
+    el.copyLabel.textContent = copyPhase === 'copied' ? m.copied : m.copy;
   }
 
   function resetCopyState(): void {
@@ -237,10 +243,10 @@ export function initPasswordGenerator(root: HTMLElement): void {
     regenerate();
     window.clearTimeout(strengthTimer);
     strengthTimer = window.setTimeout(() => {
-      const { bits, label } = currentStrength(readOptions());
+      const { bits, level, score } = currentStrength(readOptions());
       const messages = [lockNotice];
-      if (label !== announcedStrength) messages.push(`Strength: ${label}, about ${Math.floor(bits)} bits`);
-      announcedStrength = label;
+      if (score !== announcedScore) messages.push(m.strengthAnnouncement(level, Math.floor(bits)));
+      announcedScore = score;
       lockNotice = '';
       const message = messages.filter(Boolean).join(' ');
       if (message) announce(message);
@@ -290,10 +296,7 @@ export function initPasswordGenerator(root: HTMLElement): void {
       onOptionsChanged();
       // A disabled checkbox leaves the Tab order silently, so say when the lock engages.
       const locked = lockedType();
-      lockNotice =
-        locked && !wasLocked
-          ? `${el.types[locked].dataset.label ?? locked} stays on: at least one type must stay selected.`
-          : '';
+      lockNotice = locked && !wasLocked ? m.lockNotice(locked) : '';
     });
   }
   el.lookAlikes.addEventListener('change', onOptionsChanged);
@@ -303,7 +306,7 @@ export function initPasswordGenerator(root: HTMLElement): void {
 
   el.generate.addEventListener('click', () => {
     regenerate();
-    announce('New password generated');
+    announce(m.generated);
   });
 
   el.copy.addEventListener('click', async () => {
@@ -317,7 +320,7 @@ export function initPasswordGenerator(root: HTMLElement): void {
     if (copied) {
       copyPhase = 'copied';
       setStatus('');
-      announce('Copied to clipboard');
+      announce(m.copiedAnnouncement);
       copiedTimer = window.setTimeout(() => {
         copyPhase = 'idle';
         renderCopyButton();
@@ -326,9 +329,8 @@ export function initPasswordGenerator(root: HTMLElement): void {
       copyPhase = 'idle';
       // Select the password so the device's own Copy command is one step away.
       window.getSelection()?.selectAllChildren(el.visual);
-      const message = 'Couldn’t copy automatically. The password is selected: copy it with your device’s Copy command.';
-      setStatus(message, 'error');
-      announce(message);
+      setStatus(m.copyFailed, 'error');
+      announce(m.copyFailed);
     }
     renderCopyButton();
   });
@@ -346,7 +348,7 @@ export function initPasswordGenerator(root: HTMLElement): void {
     el.lengthNumber.value = String(length);
     renderLength();
     regenerate();
-    announcedStrength = currentStrength(readOptions()).label;
+    announcedScore = currentStrength(readOptions()).score;
   }
 
   /** False when the controls changed without events since the current password was made. */

@@ -1,0 +1,80 @@
+---
+/**
+ * Thin-line figure for a tool card (24×24 grid): the object the tool works on, drawn in
+ * currentColor, with one accent mark for what the tool does to it (the caret that writes, the
+ * cut that splits, the arrows that compress, the key bit that locks). Decorative: the card
+ * names the tool in text. Unknown slugs get a neutral page.
+ */
+interface Props {
+  slug: string;
+  class?: string;
+}
+
+const { slug, class: className = 'size-6' } = Astro.props;
+
+interface Glyph {
+  /** Paths in the ink colour. */
+  ink: string[];
+  /** The one accent mark (stroked). */
+  accent: string[];
+  /** Accent dots (filled circles: cx, cy, r). */
+  dots?: Array<[number, number, number]>;
+  /** Dashed accent strokes. */
+  dashed?: boolean;
+}
+
+const page = 'M6 3h8.5L18 6.5V21H6z';
+const fold = 'M14.5 3v3.5H18';
+
+const glyphs: Record<string, Glyph> = {
+  // A ruled page and a text caret.
+  notepad: { ink: [page, fold, 'M9 10h6', 'M9 13h6', 'M9 16h3'], accent: ['M13.75 14.75v2.75'] },
+  // Two pages parted by a dashed cut.
+  'pdf-split': {
+    ink: ['M3.5 5h6v14h-6z', 'M14.5 5h6v14h-6z', 'M5.5 9h2', 'M16.5 9h2'],
+    accent: ['M12 2.5v19'],
+    dashed: true,
+  },
+  // A picture inside crop marks that close in on it.
+  'image-compressor': {
+    ink: ['M7.5 7.5h9v9h-9z', 'm7.5 15 3-3 2.5 2.5 1-1 2.5 2.5'],
+    accent: ['M3 6V3h3', 'M21 6V3h-3', 'M3 18v3h3', 'M21 18v3h-3'],
+  },
+  // A page squeezed from top and bottom.
+  'pdf-compress': {
+    ink: [page, fold, 'M9 13h6'],
+    accent: ['m10 8.5 2 2 2-2', 'm10 17.5 2-2 2 2'],
+  },
+  // A padlock with one filled key bit.
+  'password-generator': {
+    ink: ['M5.5 11h13v9.5h-13z', 'M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11'],
+    accent: ['M12 17v1.25'],
+    dots: [[12, 15.5, 1.35]],
+  },
+};
+
+const glyph = glyphs[slug] ?? { ink: [page, fold], accent: ['M9 13h6'] };
+---
+
+<svg
+  class={className}
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {glyph.ink.map((d) => <path d={d} />)}
+  <g class="stroke-accent-600 dark:stroke-accent-400" stroke-dasharray={glyph.dashed ? '1.5 2.25' : undefined}>
+    {glyph.accent.map((d) => <path d={d} />)}
+  </g>
+  {
+    glyph.dots?.map(([cx, cy, r]) => (
+      <circle cx={cx} cy={cy} r={r} stroke="none" class="fill-accent-600 dark:fill-accent-400" />
+    ))
+  }
+</svg>

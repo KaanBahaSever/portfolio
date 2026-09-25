@@ -1,0 +1,37 @@
+---
+/**
+ * "Tips" section under a tool: numbered notes, each a bold lead-in followed by plain text.
+ * Pages pass the notes for their locale; the text is rendered as text (never as HTML).
+ * The mono numbers are decorative: the ordered list already conveys position.
+ */
+import Section from '../ui/Section.astro';
+import type { ToolTip } from './types';
+
+interface Props {
+  title: string;
+  tips: readonly ToolTip[];
+  /** Section id and in-page fragment. */
+  id?: string;
+  /** Columns from lg up: 2 suits the prose column, 3 the wide one. */
+  columns?: 2 | 3;
+}
+
+const { title, tips, id = 'tips', columns = 2 } = Astro.props;
+---
+
+<Section id={id} title={title}>
+  <ol class:list={['grid gap-x-10 gap-y-6 sm:grid-cols-2', columns === 3 && 'lg:grid-cols-3']}>
+    {
+      tips.map((tip, index) => (
+        <li class="grid grid-cols-[2rem_minmax(0,1fr)] items-baseline gap-x-2">
+          <span aria-hidden="true" class="font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400">
+            {String(index + 1).padStart(2, '0')}
+          </span>
+          <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <strong class="font-semibold text-zinc-900 dark:text-zinc-100">{tip.lead}</strong> {tip.body}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+</Section>

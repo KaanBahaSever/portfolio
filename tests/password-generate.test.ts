@@ -7,6 +7,7 @@ import {
   LOOK_ALIKES,
   MAX_LENGTH,
   MIN_LENGTH,
+  STRENGTH_LEVELS,
   characterKind,
   characterPool,
   entropyBits,
@@ -14,7 +15,8 @@ import {
   randomInt,
   strength,
 } from '../src/lib/password/generate.ts';
-import type { PasswordOptions, RandomSource } from '../src/lib/password/generate.ts';
+import type { PasswordOptions, RandomSource, StrengthLevel } from '../src/lib/password/generate.ts';
+import { passwordMessages } from '../src/i18n/tools/password-generator.ts';
 
 /** Deterministic 32-bit PRNG (mulberry32), so statistical checks can never flake. */
 function seeded(seed: number): RandomSource {
@@ -295,45 +297,79 @@ test('entropyBits validates its options', () => {
 });
 
 test('strength thresholds', () => {
-  const cases: Array<[number, string, number]> = [
-    [Number.NaN, 'Very weak', 0],
-    [0, 'Very weak', 0],
-    [39.99, 'Very weak', 0],
-    [40, 'Weak', 1],
-    [59.99, 'Weak', 1],
-    [60, 'Fair', 2],
-    [79.99, 'Fair', 2],
-    [80, 'Strong', 3],
-    [99.99, 'Strong', 3],
-    [100, 'Very strong', 4],
-    [840, 'Very strong', 4],
+  const cases: Array<[number, StrengthLevel, number]> = [
+    [Number.NaN, 'very-weak', 0],
+    [0, 'very-weak', 0],
+    [39.99, 'very-weak', 0],
+    [40, 'weak', 1],
+    [59.99, 'weak', 1],
+    [60, 'fair', 2],
+    [79.99, 'fair', 2],
+    [80, 'strong', 3],
+    [99.99, 'strong', 3],
+    [100, 'very-strong', 4],
+    [840, 'very-strong', 4],
   ];
-  for (const [bits, label, score] of cases) {
-    assert.deepEqual(strength(bits), { label, score }, `${bits} bits`);
+  for (const [bits, level, score] of cases) {
+    assert.deepEqual(strength(bits), { score, level }, `${bits} bits`);
   }
   // The defaults (20 characters, all types) are very strong; 4 digits are very weak.
-  assert.equal(strength(entropyBits(DEFAULT_OPTIONS)).label, 'Very strong');
+  assert.equal(strength(entropyBits(DEFAULT_OPTIONS)).level, 'very-strong');
   assert.equal(strength(entropyBits(options({ length: 4, lowercase: false, uppercase: false, symbols: false }))).score, 0);
 });
 
-test('bits rounded down (as displayed) always give the same label as the exact bits', () => {
+test('strength levels are listed in score order', () => {
+  assert.deepEqual(STRENGTH_LEVELS, ['very-weak', 'weak', 'fair', 'strong', 'very-strong']);
+  STRENGTH_LEVELS.forEach((level, score) => assert.equal(strength(score * 20 + 20).level, level));
+});
+
+test('bits rounded down (as displayed) always give the same level as the exact bits', () => {
   // The page shows Math.floor(bits); Math.round would show e.g. "Very weak, 40 bits" for 12 digits (39.86 bits).
-  const labelsByShownBits = new Map<number, Set<string>>();
+  const levelsByShownBits = new Map<number, Set<string>>();
   for (const types of ALL_TYPE_COMBINATIONS) {
     for (const excludeLookAlikes of [false, true]) {
       for (let length = MIN_LENGTH; length <= MAX_LENGTH; length++) {
         const bits = entropyBits(options({ ...types, excludeLookAlikes, length }));
         const shown = Math.floor(bits);
         assert.deepEqual(strength(shown), strength(bits), `${bits} bits shown as ${shown}`);
-        const labels = labelsByShownBits.get(shown) ?? new Set<string>();
-        labels.add(strength(bits).label);
-        labelsByShownBits.set(shown, labels);
+        const levels = levelsByShownBits.get(shown) ?? new Set<string>();
+        levels.add(strength(bits).level);
+        levelsByShownBits.set(shown, levels);
       }
     }
   }
-  for (const [shown, labels] of labelsByShownBits) {
-    assert.equal(labels.size, 1, `${shown} bits shown with labels ${[...labels].join(', ')}`);
+  for (const [shown, levels] of levelsByShownBits) {
+    assert.equal(levels.size, 1, `${shown} bits shown with levels ${[...levels].join(', ')}`);
   }
+});
+
+// ------------------------------------------------------------------ messages
+
+test('both locales define the same password generator messages', () => {
+  const keys = (value: unknown, prefix = ''): string[] =>
+    value && typeof value === 'object'
+      ? Object.entries(value).flatMap(([key, child]) => keys(child, `${prefix}${key}.`))
+      : [prefix];
+  assert.deepEqual(keys(passwordMessages.tr).sort(), keys(passwordMessages.en).sort());
+  for (const locale of ['en', 'tr'] as const) {
+    const m = passwordMessages[locale];
+    for (const level of STRENGTH_LEVELS) assert.ok(m.strength[level].length > 0, `${locale}: ${level}`);
+    for (const name of CHARSET_NAMES) assert.ok(m.types[name].length > 0, `${locale}: ${name}`);
+  }
+});
+
+test('password generator messages pluralise and format numbers per locale', () => {
+  const { en, tr } = passwordMessages;
+  assert.equal(en.characters(1), '1 character');
+  assert.equal(en.characters(20), '20 characters');
+  assert.equal(tr.characters(20), '20 karakter');
+  assert.equal(en.bits(131), '131 bits');
+  assert.equal(tr.bits(131), '131 bit');
+  assert.equal(en.strengthAnnouncement('very-strong', 131), 'Strength: Very strong, about 131 bits');
+  assert.equal(tr.strengthAnnouncement('very-strong', 131), 'Güç: Çok güçlü, yaklaşık 131 bit');
+  // The locked type is quoted in Turkish so no case suffix has to follow it.
+  assert.equal(tr.lockNotice('symbols'), '“Semboller” seçili kalıyor: en az bir tür seçili olmalı.');
+  assert.equal(en.lockNotice('symbols'), 'Symbols stays on: at least one type must stay selected.');
 });
 
 test('characterKind classifies characters', () => {

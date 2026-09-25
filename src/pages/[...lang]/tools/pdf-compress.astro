@@ -1,92 +1,91 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PdfCompress from '../../../components/tools/PdfCompress.astro';
-import { LEVELS } from '../../../lib/pdf/compress/plan.ts';
-import { localeStaticPaths } from '../../../i18n/server';
+import ToolTips from '../../../components/tools-index/ToolTips.astro';
+import type { ToolTip } from '../../../components/tools-index/types';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import { localizePath, type Locale, type Localized } from '../../../i18n/config';
+import { formatters } from '../../../i18n/format';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { pdfCompressMessages } from '../../../i18n/tools/pdf-compress';
+import { LEVELS, MIN_IMAGE_SAVING, type CompressionLevel } from '../../../lib/pdf/compress/plan.ts';
 
 export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = pdfCompressMessages[locale];
+
+// The figures come from the compression settings, so the tips cannot fall out of date.
+const px = (l: Locale, level: CompressionLevel) => formatters(l).number(LEVELS[level].maxDimension);
+const minSaving = (l: Locale) => formatters(l).percent(MIN_IMAGE_SAVING);
+const names = (l: Locale) => pdfCompressMessages[l].levelNames;
+
+// Page-only prose: kept here rather than in the catalogue, which also ships to the browser.
+const tips: Localized<ToolTip[]> = {
+  en: [
+    {
+      lead: 'How the levels work.',
+      body: `${names('en').light} recompresses JPEG photos gently and only shrinks images larger than ${px('en', 'light')} pixels. ${names('en').balanced} reduces images to at most ${px('en', 'balanced')} pixels and also turns other large images, such as scans stored without compression, into JPEG. ${names('en').strong} goes down to ${px('en', 'strong')} pixels with stronger compression: good for email, but small print in scans can get harder to read.`,
+    },
+    {
+      lead: 'Try another level.',
+      body: `Each run starts again from your original file, so you can compare levels without choosing the file again. An image is only replaced when that makes it at least ${minSaving('en')} smaller.`,
+    },
+    {
+      lead: 'Why text PDFs barely shrink.',
+      body: 'Text, fonts and vector drawings are already stored compactly, and they are kept exactly as they are so the document looks the same. The tool can still remove unused data and duplicates, but most of the gain comes from images.',
+    },
+    {
+      lead: 'Forms and signatures.',
+      body: 'The compressed file is a new file, so digital signatures will no longer be valid. Fillable forms keep their fields, but check them before you send the file. Keep your original.',
+    },
+    {
+      lead: 'Password-protected PDFs aren’t supported.',
+      body: 'Remove the password or editing restrictions in a PDF app first.',
+    },
+    {
+      lead: 'Large files on a phone.',
+      body: 'Compressing needs several times the file’s size in memory. If the page reloads, close other tabs and apps, or use a computer.',
+    },
+  ],
+  tr: [
+    {
+      lead: 'Düzeyler nasıl çalışır?',
+      body: `${names('tr').light} düzey, JPEG fotoğrafları hafifçe yeniden sıkıştırır ve yalnızca ${px('tr', 'light')} pikselden büyük görselleri küçültür. ${names('tr').balanced} düzey, görselleri en fazla ${px('tr', 'balanced')} piksele indirir; sıkıştırılmadan saklanmış taramalar gibi diğer büyük görselleri de JPEG biçimine dönüştürür. ${names('tr').strong} düzey ${px('tr', 'strong')} piksele kadar iner ve daha güçlü sıkıştırır: e-posta için uygundur, ancak taramalardaki küçük yazıların okunması zorlaşabilir.`,
+    },
+    {
+      lead: 'Başka bir düzey deneyin.',
+      body: `Her çalıştırma orijinal dosyanızdan yeniden başlar; böylece dosyayı yeniden seçmeden düzeyleri karşılaştırabilirsiniz. Bir görsel yalnızca en az ${minSaving('tr')} küçülecekse değiştirilir.`,
+    },
+    {
+      lead: 'Metin ağırlıklı PDF’ler neden az küçülür?',
+      body: 'Metin, yazı tipleri ve vektör çizimler zaten az yer kaplayacak biçimde saklanır ve belge aynı görünsün diye olduğu gibi korunur. Araç yine de kullanılmayan verileri ve kopyaları temizleyebilir, ancak kazancın büyük kısmı görsellerden gelir.',
+    },
+    {
+      lead: 'Formlar ve imzalar.',
+      body: 'Sıkıştırılmış dosya yeni bir dosyadır; bu nedenle dijital imzalar artık geçerli olmaz. Doldurulabilir formlar alanlarını korur, ancak dosyayı göndermeden önce kontrol edin. Orijinal dosyanızı saklayın.',
+    },
+    {
+      lead: 'Parola korumalı PDF’ler desteklenmez.',
+      body: 'Önce parolayı ya da düzenleme kısıtlamalarını bir PDF uygulamasında kaldırın.',
+    },
+    {
+      lead: 'Telefonda büyük dosyalar.',
+      body: 'Sıkıştırma, dosya boyutunun birkaç katı kadar bellek gerektirir. Sayfa yeniden yüklenirse diğer sekmeleri ve uygulamaları kapatın ya da bir bilgisayar kullanın.',
+    },
+  ],
+};
 ---
 
-<BaseLayout
-  title="Compress PDF"
-  description="Make a PDF smaller right in your browser by recompressing its images. Best for scans and photo-heavy files. Nothing is uploaded."
-  wide
->
-  <nav aria-label="Breadcrumb" class="pt-2 sm:pt-6">
-    <a
-      href="/tools/"
-      class="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
-        <path d="m15 18-6-6 6-6"></path>
-      </svg>
-      Tools
-    </a>
-  </nav>
-
-  <header class="mt-2 max-w-2xl">
-    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Compress PDF</h1>
-    <p class="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      Make a PDF smaller by recompressing its images. Everything is processed on your device — nothing is uploaded.
-      Scans and photo-heavy PDFs shrink the most; text-only documents usually shrink very little.
-    </p>
-  </header>
+<BaseLayout title={m.title} description={m.description} width="wide">
+  <PageHeader
+    title={m.title}
+    lead={m.lead}
+    back={{ href: localizePath('/tools/', locale), label: common[locale].nav.tools }}
+  />
 
   <PdfCompress />
 
-  <details
-    class="group mt-10 rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
-  >
-    <summary
-      class="flex min-h-12 list-none items-center justify-between gap-3 rounded-xl px-4 text-base font-semibold sm:px-5 [&::-webkit-details-marker]:hidden"
-    >
-      Tips
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="size-5 shrink-0 text-zinc-500 transition-transform group-open:rotate-180"
-        aria-hidden="true"
-      >
-        <path d="m6 9 6 6 6-6"></path>
-      </svg>
-    </summary>
-    <ul
-      class="flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400"
-    >
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">How the levels work:</strong> Light recompresses
-        JPEG photos gently and only shrinks images larger than {LEVELS.light.maxDimension} pixels. Balanced reduces
-        images to at most {LEVELS.balanced.maxDimension} pixels and also turns other large images, such as scans stored
-        without compression, into JPEG. Strong goes down to {LEVELS.strong.maxDimension} pixels with stronger
-        compression: good for email, but small print in scans can get harder to read.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Try another level:</strong> each run starts again
-        from your original file, so you can compare levels without choosing the file again. An image is only replaced
-        when that makes it at least 10% smaller.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Why text PDFs barely shrink:</strong> text, fonts
-        and vector drawings are already stored compactly, and they are kept exactly as they are so the document looks the
-        same. The tool can still remove unused data and duplicates, but most of the gain comes from images.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Forms and signatures:</strong> the compressed file
-        is a new file, so digital signatures will no longer be valid. Fillable forms keep their fields, but check them
-        before you send the file. Keep your original.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Password-protected PDFs</strong> aren’t supported.
-        Remove the password or editing restrictions in a PDF app first.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Large files on a phone:</strong> compressing needs
-        several times the file’s size in memory. If the page reloads, close other tabs and apps, or use a computer.
-      </li>
-    </ul>
-  </details>
+  <ToolTips title={m.tipsTitle} tips={tips[locale]} columns={3} />
 </BaseLayout>

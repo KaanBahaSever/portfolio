@@ -1,0 +1,113 @@
+---
+/**
+ * One tool on /tools/: figure, mono index, serif title, description and the formats it handles.
+ * A ready tool is a card with a stretched link (the link's name is just the tool name, so a
+ * screen reader's links list stays short); a planned tool is a muted card with a badge.
+ * The focus ring is drawn on the card (the link itself is a line of text); only the border
+ * colour transitions, so the ring appears at once.
+ */
+import Badge from '../ui/Badge.astro';
+import Icon from '../ui/Icon.astro';
+import ToolGlyph from './ToolGlyph.astro';
+import { TOOL_FORMATS } from './meta';
+import type { ToolInfo } from '../../data/tools';
+import { localizePath, pick } from '../../i18n/config';
+import { common } from '../../i18n/messages/common';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  tool: ToolInfo;
+  /** Position in the list, from 1; shown as "01". */
+  index: number;
+  headingLevel?: 2 | 3;
+}
+
+const { tool, index, headingLevel = 2 } = Astro.props;
+const locale = getLocale(Astro);
+const Heading = `h${headingLevel}` as const;
+const ready = tool.status === 'ready';
+const formats = TOOL_FORMATS[tool.slug] ?? [];
+const number = String(index).padStart(2, '0');
+---
+
+<article
+  class:list={[
+    'group relative isolate flex h-full flex-col overflow-hidden rounded-xl border p-5 sm:p-6',
+    ready
+      ? 'border-zinc-200 bg-white transition-[border-color] duration-200 hover:border-zinc-400 has-[a:focus-visible]:outline-2 has-[a:focus-visible]:outline-offset-2 has-[a:focus-visible]:outline-accent-700 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:has-[a:focus-visible]:outline-accent-400'
+      : 'border-dashed border-zinc-300 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-950',
+  ]}
+>
+  {
+    ready && (
+      <div
+        class="bg-graph mask-fade-radial pointer-events-none absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-has-[a:focus-visible]:opacity-100"
+        aria-hidden="true"
+      />
+    )
+  }
+
+  <div class="flex items-start justify-between gap-4">
+    <span
+      aria-hidden="true"
+      class:list={[
+        'flex size-12 items-center justify-center rounded-lg border',
+        ready
+          ? 'border-zinc-200 bg-zinc-50 text-zinc-800 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200'
+          : 'border-zinc-200 text-zinc-500 dark:border-zinc-800',
+      ]}
+    >
+      <ToolGlyph
+        slug={tool.slug}
+        class="size-7 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-hover:scale-105"
+      />
+    </span>
+    <span aria-hidden="true" class="font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400">{number}</span>
+  </div>
+
+  <Heading
+    class:list={[
+      'mt-5 font-serif text-xl font-medium tracking-tight text-balance sm:text-2xl',
+      ready ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-600 dark:text-zinc-400',
+    ]}
+  >
+    {
+      ready ? (
+        <a
+          href={localizePath(tool.href, locale)}
+          class="transition-colors group-hover:text-accent-700 focus-visible:outline-none after:absolute after:inset-0 after:rounded-xl dark:group-hover:text-accent-400"
+        >
+          {pick(tool.title, locale)}
+        </a>
+      ) : (
+        pick(tool.title, locale)
+      )
+    }
+  </Heading>
+  <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{pick(tool.description, locale)}</p>
+
+  <div class="mt-auto flex min-h-6 items-center justify-between gap-3 pt-5">
+    {
+      formats.length > 0 && (
+        <p aria-hidden="true" translate="no" class="flex flex-wrap gap-x-2 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+          {formats.map((format, i) => (
+            <span>
+              {i > 0 && <span class="mr-2 text-zinc-400 dark:text-zinc-600">·</span>}
+              {format}
+            </span>
+          ))}
+        </p>
+      )
+    }
+    {
+      ready ? (
+        <Icon
+          name="arrow-right"
+          class="ml-auto size-4 shrink-0 text-zinc-400 transition-[translate,color] duration-200 group-hover:translate-x-1 group-hover:text-accent-700 dark:text-zinc-500 dark:group-hover:text-accent-400"
+        />
+      ) : (
+        <Badge class="ml-auto">{common[locale].badges.comingSoon}</Badge>
+      )
+    }
+  </div>
+</article>

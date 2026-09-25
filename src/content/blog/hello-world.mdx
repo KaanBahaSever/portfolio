@@ -4,16 +4,20 @@ description: Why this site exists and what you can expect to find here.
 pubDate: 2026-08-28
 lang: en
 tags: [meta]
-# Kept as a draft MDX example (components + expressions); it only appears in `npm run dev`.
+# Kept as a draft MDX example (components, expressions, math and code); it only appears in `npm run dev`.
 draft: true
 ---
 
 import { SITE } from '../../config/site';
 import Badge from '../../components/ui/Badge.astro';
 
-export const topics = ['Projects I have built', 'Notes on web development', 'Small tools that respect your privacy'];
+export const topics = [
+  'Projects I have built',
+  'Notes on mathematics and systems programming',
+  'Small tools that respect your privacy',
+];
 
-{/* Draft example post: shows how MDX mixes Markdown with components and expressions. */}
+{/* Draft example post: shows how MDX mixes Markdown with components, expressions, math and code. */}
 
 Welcome to the personal site of **{SITE.name}**. This post is written in
 MDX, so it can mix Markdown with components and expressions.
@@ -26,5 +30,34 @@ MDX, so it can mix Markdown with components and expressions.
   {topics.map((topic) => <li>{topic}</li>)}
 </ul>
 
+## Math
+
+Math is rendered to HTML and MathML when the site is built, so pages load no math scripts.
+Inline formulas sit in the sentence: to approximate $\sqrt{2}$, look for the positive root of
+$f(x) = x^2 - 2$. Newton's method refines a guess $x_n$ with
+
+$$
+x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)} = \frac{1}{2}\left(x_n + \frac{2}{x_n}\right),
+$$
+
+and near the root the error is roughly squared at every step. A literal dollar sign is
+written as `\$`, so a price such as \$5 stays text.
+
+## Code
+
+The same iteration in C++23, highlighted at build time in both colour schemes:
+
+```cpp
+#include <print>
+
+int main() {
+    double x = 1.0;
+    for (int n = 1; n <= 5; ++n) {
+        x = 0.5 * (x + 2.0 / x);  // one Newton step for x² = 2
+        std::println("x{} = {:.15f}", n, x);
+    }
+}
+```
+
 Everything on this site is static, and the tools run entirely in your browser.
-Thanks for stopping by!
+Thanks for stopping by.

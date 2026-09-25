@@ -1,109 +1,358 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { Image } from 'astro:assets';
-import { getEntry, render } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+// KaTeX's stylesheet (font-display: swap build) and the long-form rules load on post pages only.
+import 'katex/dist/katex-swap.min.css';
+import '../../../components/blog/post-prose.css';
+import TableOfContents from '../../../components/blog/TableOfContents.astro';
+import { readingMinutes } from '../../../components/blog/reading-time';
+import { buildToc, shouldShowToc } from '../../../components/blog/toc';
 import FormattedDate from '../../../components/ui/FormattedDate.astro';
 import Icon from '../../../components/ui/Icon.astro';
-import TagList from '../../../components/ui/TagList.astro';
-import { getPostsByLocale, type BlogPost } from '../../../utils/content';
-import { langParam } from '../../../i18n/server';
+import Tag from '../../../components/ui/Tag.astro';
+import { ui } from '../../../components/ui/styles';
+import { SITE } from '../../../config/site';
+import { LOCALES, LOCALE_META, localizePath, type Locale } from '../../../i18n/config';
+import { blogMessages } from '../../../i18n/messages/blog';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, langParam } from '../../../i18n/server';
+import { getPostCounterpart, getPostsByLocale, getProjects, type BlogPost } from '../../../utils/content';
 
 export const getStaticPaths = (async () => {
+  // One page per post and locale that lists it: a post appears under its own language, and
+  // under the other one only while it has no translation there. Posts are newest first, so
+  // the neighbours in that list are the newer and older posts.
   const byLocale = await getPostsByLocale();
   return byLocale.flatMap(({ locale, posts }) =>
-    posts.map((post) => ({ params: { lang: langParam(locale), id: post.id }, props: { post } })),
+    posts.map((post, index) => ({
+      params: { lang: langParam(locale), id: post.id },
+      props: { post, newer: posts[index - 1], older: posts[index + 1] },
+    })),
   );
 }) satisfies GetStaticPaths;
 
-interface Props {
-  post: BlogPost;
-}
+// Props are inferred from getStaticPaths: { post, newer?, older? }.
+const { post, newer, older } = Astro.props;
+const locale = getLocale(Astro);
+const m = blogMessages[locale];
+const t = common[locale];
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  tags,
+  heroImage,
+  heroImageAlt,
+  relatedProject,
+  lang: postLang,
+  source,
+  canonicalUrl,
+  mediumUrl,
+} = post.data;
 
-const { post } = Astro.props;
-const { title, description, pubDate, updatedDate, tags, heroImage, heroImageAlt, relatedProject } = post.data;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const minutes = readingMinutes(post.body);
+const toc = buildToc(headings);
+const showToc = shouldShowToc(toc, minutes);
 
-// Resolve the project reference; skip it if it is a draft (no page exists in production).
-const project = relatedProject ? await getEntry(relatedProject) : undefined;
-if (relatedProject && !project) {
-  throw new Error(
-    `Post "${post.id}": relatedProject "${relatedProject.id}" does not exist in src/content/projects/`,
-  );
-}
-const linkedProject = project && !(import.meta.env.PROD && project.data.draft) ? project : undefined;
+// This post in each language: its translation where one exists, otherwise the same post.
+const alternates = Object.fromEntries(
+  await Promise.all(
+    LOCALES.map(async (l) => [l, localizePath(`/blog/${(await getPostCounterpart(post, l)).id}/`, l)] as const),
+  ),
+) as Record<Locale, string>;
+
+// A Medium import points search engines at the original. A post shown in the other language's
+// interface (no translation exists) points at its page in its own language.
+const canonical = canonicalUrl ?? (postLang !== locale ? alternates[postLang] : undefined);
+
+// `lang` for interface text inside <article lang={postLang}>, and for post text outside it.
+const foreign = postLang !== locale;
+const uiLang = foreign ? LOCALE_META[locale].htmlLang : undefined;
+const postLangAttr = foreign ? LOCALE_META[postLang].htmlLang : undefined;
+const langOf = (other: BlogPost) => (other.data.lang !== locale ? LOCALE_META[other.data.lang].htmlLang : undefined);
+
+// The project in the reader's language (drafts are absent in production).
+const project = relatedProject ? (await getProjects(locale)).find((entry) => entry.id === relatedProject.id) : undefined;
+const projectLang = project && project.lang !== locale ? LOCALE_META[project.lang].htmlLang : undefined;
+
+const blogHref = localizePath('/blog/', locale);
+const postHref = (other: BlogPost) => localizePath(`/blog/${other.id}/`, locale);
+const showUpdated = updatedDate && updatedDate.toISOString().slice(0, 10) !== pubDate.toISOString().slice(0, 10);
+
+// Social previews: a 1200 px JPEG of the hero image, and schema.org article data.
+// Absolute URLs need `site` (astro.config.mjs), like BaseLayout's canonical and og:url.
+const absolute = (path: string) =>
+  /^https?:/.test(path) ? path : Astro.site ? new URL(path, Astro.site).href : undefined;
+const ogImage = heroImage ? await getImage({ src: heroImage, width: 1200, format: 'jpeg' }) : undefined;
+const ogImageUrl = ogImage ? absolute(ogImage.src) : undefined;
+const canonicalAbsolute = absolute(canonical ?? Astro.url.pathname);
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  inLanguage: LOCALE_META[postLang].htmlLang,
+  datePublished: pubDate.toISOString(),
+  dateModified: (updatedDate ?? pubDate).toISOString(),
+  author: { '@type': 'Person', name: SITE.name, url: SITE.url },
+  keywords: tags.join(', ') || undefined,
+  image: ogImageUrl,
+  mainEntityOfPage: canonicalAbsolute,
+}).replace(/</g, '\\u003c');
 ---
 
-<BaseLayout title={title} description={description}>
-  <a
-    href="/blog/"
-    class="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
-  >
-    <Icon name="arrow-left" class="size-4" />
-    All posts
-  </a>
+<BaseLayout
+  title={title}
+  description={description}
+  width={showToc ? 'wide' : 'prose'}
+  alternates={alternates}
+  canonical={canonical}
+  ogType="article"
+>
+  <Fragment slot="head">
+    <meta property="article:published_time" content={pubDate.toISOString()} />
+    {updatedDate && <meta property="article:modified_time" content={updatedDate.toISOString()} />}
+    {tags.map((tag) => <meta property="article:tag" content={tag} />)}
+    {ogImageUrl && <meta property="og:image" content={ogImageUrl} />}
+    {ogImageUrl && heroImageAlt && <meta property="og:image:alt" content={heroImageAlt} />}
+    <script is:inline type="application/ld+json" set:html={jsonLd} />
+  </Fragment>
 
-  <article class="mt-4">
-    <header class="space-y-4">
-      <h1 class="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h1>
-      <p class="flex flex-wrap gap-x-3 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
-        <span>Published <FormattedDate date={pubDate} /></span>
+  {/* With contents: a reading column (≤ 48rem) and a sticky contents column from lg up. */}
+  <div
+    class:list={[
+      showToc &&
+        'lg:grid lg:grid-cols-[minmax(0,1fr)_13rem] lg:gap-12 xl:grid-cols-[minmax(0,48rem)_minmax(0,1fr)] xl:gap-16',
+    ]}
+  >
+    <div class="min-w-0">
+      <nav aria-label={t.labels.breadcrumb}>
+        <a href={blogHref} class={ui.backLink}>
+          <Icon name="chevron-left" class="size-4" />
+          {m.post.allPosts}
+        </a>
+      </nav>
+
+      <article lang={postLang} aria-labelledby="post-title" class="mt-2">
+        <header class="relative isolate">
+          <div
+            class="bg-graph mask-fade-radial pointer-events-none absolute -inset-x-4 -top-10 -bottom-2 -z-10 sm:-inset-x-8"
+            aria-hidden="true"
+          >
+          </div>
+          <h1 id="post-title" class:list={[ui.pageTitle, 'pt-4']}>{title}</h1>
+          <p class:list={[ui.lead, 'mt-4 max-w-2xl']}>{description}</p>
+
+          <dl
+            lang={uiLang}
+            class="mt-7 flex flex-wrap gap-x-8 gap-y-3 border-y border-zinc-200 py-3.5 dark:border-zinc-800"
+          >
+            <div>
+              <dt class="label-mono text-zinc-600 dark:text-zinc-400">{m.post.published}</dt>
+              <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-100"><FormattedDate date={pubDate} /></dd>
+            </div>
+            {
+              showUpdated && updatedDate && (
+                <div>
+                  <dt class="label-mono text-zinc-600 dark:text-zinc-400">{m.post.updated}</dt>
+                  <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-100">
+                    <FormattedDate date={updatedDate} />
+                  </dd>
+                </div>
+              )
+            }
+            <div>
+              <dt class="label-mono text-zinc-600 dark:text-zinc-400">{m.post.readingTimeLabel}</dt>
+              <dd class="mt-1 text-sm text-zinc-900 tabular-nums dark:text-zinc-100">{m.post.readingTime(minutes)}</dd>
+            </div>
+          </dl>
+
+          {
+            tags.length > 0 && (
+              <ul aria-label={t.labels.tags} lang={uiLang} class="mt-4 flex flex-wrap gap-1.5">
+                {tags.map((tag) => (
+                  <li lang={postLangAttr}>
+                    <Tag label={tag} />
+                  </li>
+                ))}
+              </ul>
+            )
+          }
+        </header>
+
         {
-          updatedDate && (
-            <span>
-              Updated <FormattedDate date={updatedDate} />
-            </span>
+          foreign && (
+            <p
+              lang={uiLang}
+              class="mt-6 flex items-start gap-3 rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm leading-relaxed text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+            >
+              <Icon name="globe" class="mt-0.5 size-4 shrink-0 text-accent-700 dark:text-accent-400" />
+              <span>{m.post.onlyIn(m.languageName[postLang])}</span>
+            </p>
           )
         }
-      </p>
-      <TagList items={tags} label="Tags" />
-    </header>
 
-    {
-      heroImage && (
-        <Image
-          src={heroImage}
-          alt={heroImageAlt ?? ''}
-          widths={[400, 800, 1200]}
-          sizes="(min-width: 768px) 720px, 100vw"
-          loading="eager"
-          class="mt-8 h-auto w-full rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900"
-        />
-      )
-    }
+        {
+          heroImage && (
+            <figure class="mt-8">
+              <Image
+                src={heroImage}
+                alt={heroImageAlt ?? ''}
+                widths={[400, 800, 1200, 1600]}
+                sizes="(min-width: 768px) 768px, calc(100vw - 2rem)"
+                loading="eager"
+                fetchpriority="high"
+                class="h-auto w-full rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900"
+              />
+            </figure>
+          )
+        }
 
-    <div class="prose prose-zinc mt-8 max-w-none dark:prose-invert prose-a:text-accent-700 dark:prose-a:text-accent-400">
-      <Content />
+        {
+          showToc && (
+            <TableOfContents
+              entries={toc}
+              label={m.post.contents}
+              variant="collapsible"
+              lang={uiLang}
+              contentLang={uiLang ? postLangAttr : undefined}
+              class="mt-8 lg:hidden"
+            />
+          )
+        }
+
+        <div class="post-body prose prose-zinc mt-10 max-w-none sm:prose-lg dark:prose-invert">
+          <Content />
+        </div>
+
+        {
+          source === 'medium' && mediumUrl && (
+            <footer
+              lang={uiLang}
+              class="mt-12 flex flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 dark:border-zinc-800 dark:bg-zinc-900"
+            >
+              <p class="text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+                {
+                  locale === 'tr' ? (
+                    <>
+                      Bu yazı ilk olarak <FormattedDate date={pubDate} /> tarihinde Medium’da yayımlandı.
+                    </>
+                  ) : (
+                    <>
+                      Originally published on Medium on <FormattedDate date={pubDate} />.
+                    </>
+                  )
+                }
+              </p>
+              <a
+                href={mediumUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class:list={[ui.buttonSecondary, 'shrink-0 self-start sm:self-auto']}
+              >
+                {m.post.readOnMedium}
+                <Icon name="external" class="size-4" />
+                <span class="sr-only"> {t.newTab}</span>
+              </a>
+            </footer>
+          )
+        }
+      </article>
+
+      {
+        project && (
+          <aside aria-labelledby="related-project-label" class="mt-12">
+            <div class:list={[ui.cardInteractive, 'group relative p-5 sm:p-6']}>
+              <p id="related-project-label" class="label-mono text-zinc-600 dark:text-zinc-400">
+                {m.post.relatedProject}
+              </p>
+              <p lang={projectLang} class="mt-2 font-serif text-xl font-medium tracking-tight">
+                <a
+                  href={localizePath(`/projects/${project.id}/`, locale)}
+                  class="rounded-sm text-zinc-900 transition-colors group-hover:text-accent-700 after:absolute after:inset-0 after:rounded-xl dark:text-zinc-100 dark:group-hover:text-accent-400"
+                >
+                  {project.data.title}
+                </a>
+              </p>
+              <p lang={projectLang} class="mt-1.5 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+                {project.data.shortDescription}
+              </p>
+            </div>
+          </aside>
+        )
+      }
+
+      {
+        (older || newer) && (
+          <nav aria-label={m.post.morePosts} class="mt-12 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+            <ul class="grid gap-3 sm:grid-cols-2">
+              {older && (
+                <li class="min-w-0">
+                  <a
+                    href={postHref(older)}
+                    hreflang={langOf(older)}
+                    class:list={[ui.cardInteractive, 'group flex h-full flex-col gap-1.5 p-4 sm:p-5']}
+                  >
+                    <span class="label-mono flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
+                      <span
+                        aria-hidden="true"
+                        class="inline-block transition-transform duration-200 group-hover:-translate-x-0.5"
+                      >
+                        ←
+                      </span>
+                      {m.post.older}
+                    </span>
+                    <span lang={langOf(older)} class="font-serif text-lg leading-snug font-medium text-zinc-900 dark:text-zinc-100">
+                      {older.data.title}
+                    </span>
+                  </a>
+                </li>
+              )}
+              {newer && (
+                <li class="min-w-0 sm:col-start-2">
+                  <a
+                    href={postHref(newer)}
+                    hreflang={langOf(newer)}
+                    class:list={[ui.cardInteractive, 'group flex h-full flex-col items-end gap-1.5 p-4 text-end sm:p-5']}
+                  >
+                    <span class="label-mono flex items-center gap-1.5 text-zinc-600 dark:text-zinc-400">
+                      {m.post.newer}
+                      <span
+                        aria-hidden="true"
+                        class="inline-block transition-transform duration-200 group-hover:translate-x-0.5"
+                      >
+                        →
+                      </span>
+                    </span>
+                    <span lang={langOf(newer)} class="font-serif text-lg leading-snug font-medium text-zinc-900 dark:text-zinc-100">
+                      {newer.data.title}
+                    </span>
+                  </a>
+                </li>
+              )}
+            </ul>
+          </nav>
+        )
+      }
+
+      <a href={blogHref} class:list={[ui.backLink, 'mt-10']}>
+        <Icon name="arrow-left" class="size-4" />
+        {m.post.allPosts}
+      </a>
     </div>
 
     {
-      linkedProject && (
-        <aside
-          aria-label="Related project"
-          class="relative mt-12 rounded-xl border border-zinc-200 bg-white p-5 hover:border-zinc-300 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
-        >
-          <p class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Related project</p>
-          <p class="mt-1 text-lg font-semibold">
-            <a
-              href={`/projects/${linkedProject.id}/`}
-              class="text-zinc-900 after:absolute after:inset-0 after:rounded-xl hover:text-accent-700 dark:text-zinc-100 dark:hover:text-accent-400"
-            >
-              {linkedProject.data.title}
-            </a>
-          </p>
-          <p class="mt-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
-            {linkedProject.data.shortDescription}
-          </p>
+      showToc && (
+        <aside class="hidden lg:block">
+          <div class="sticky top-24 max-h-[calc(100dvh-8rem)] overflow-y-auto overscroll-contain pb-4">
+            <TableOfContents entries={toc} label={m.post.contents} variant="sidebar" contentLang={postLangAttr} />
+          </div>
         </aside>
       )
     }
-  </article>
-
-  <a
-    href="/blog/"
-    class="-mx-2 mt-10 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
-  >
-    <Icon name="arrow-left" class="size-4" />
-    Back to all posts
-  </a>
+  </div>
 </BaseLayout>

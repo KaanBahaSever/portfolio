@@ -1,46 +1,90 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
 import PostList from '../../../components/ui/PostList.astro';
+import { ui } from '../../../components/ui/styles';
 import { SITE } from '../../../config/site';
-import { getPublishedPosts } from '../../../utils/content';
-import { getLocale } from '../../../i18n/server';
-import { localeStaticPaths } from '../../../i18n/server';
+import { blogMessages } from '../../../i18n/messages/blog';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { getPublishedPosts, type BlogPost } from '../../../utils/content';
 
 export const getStaticPaths = () => localeStaticPaths();
 
-const posts = await getPublishedPosts(getLocale(Astro));
+const locale = getLocale(Astro);
+const m = blogMessages[locale].index;
+const t = common[locale];
+
+// Posts in the reader's language, plus untranslated posts in the other one (marked by PostList).
+const posts = await getPublishedPosts(locale);
 const medium = SITE.socials.find((social) => social.label === 'Medium');
 
-const inlineLink =
-  'font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500';
+// Grouped by year (UTC, like every date on the site); posts arrive newest first.
+const years: { year: string; posts: BlogPost[] }[] = [];
+for (const post of posts) {
+  const year = String(post.data.pubDate.getUTCFullYear());
+  const group = years.at(-1);
+  if (group?.year === year) group.posts.push(post);
+  else years.push({ year, posts: [post] });
+}
 ---
 
-<BaseLayout
-  title="Blog"
-  description={`Writing by ${SITE.name}: notes on the projects he builds, web development and privacy-friendly tools.`}
->
-  <header class="pt-2 sm:pt-6">
-    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Blog</h1>
-    <p class="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      Notes on the projects I build and what I learn along the way.{' '}
-      {
-        medium && (
-          <>
-            You can also find me on{' '}
-            <a href={medium.href} target="_blank" rel="me noopener noreferrer" class={inlineLink}>Medium<span class="sr-only"> (opens in a new tab)</span></a>.
-          </>
-        )
-      }
-    </p>
-  </header>
-
-  <div class="mt-10">
+<BaseLayout title={m.metaTitle} description={m.description}>
+  <PageHeader eyebrow={m.eyebrow} title={m.title}>
     {
-      posts.length > 0 ? (
-        <PostList posts={posts} showTags />
+      locale === 'tr' ? (
+        <p>
+          Matematik, yazılım ve bilim tarihi üzerine Türkçe ya da İngilizce notlar; İngilizce yazılar{' '}
+          <span class="font-mono text-[0.875em]">EN</span> ile işaretlidir.
+          {medium && (
+            <>
+              {' '}
+              {/* "Medium üzerinde" rather than "Medium’da": no suffix glued to the link text. */}
+              Bazı yazılar ilk olarak{' '}
+              <a href={medium.href} target="_blank" rel="me noopener noreferrer" class={ui.inlineLink}>Medium<span class="sr-only"> {t.newTab}</span></a>{' '}
+              üzerinde yayımlandı.
+            </>
+          )}
+        </p>
       ) : (
-        <p class="text-zinc-600 dark:text-zinc-400">No posts published yet. Check back soon.</p>
+        <p>
+          Notes on mathematics, software and the history of science, in English or Turkish; posts in Turkish are marked{' '}
+          <span class="font-mono text-[0.875em]">TR</span>.
+          {medium && (
+            <>
+              {' '}
+              Some first appeared on{' '}
+              <a href={medium.href} target="_blank" rel="me noopener noreferrer" class={ui.inlineLink}>Medium<span class="sr-only"> {t.newTab}</span></a>.
+            </>
+          )}
+        </p>
       )
     }
-  </div>
+  </PageHeader>
+
+  {
+    years.length > 0 ? (
+      <div class="mt-12 space-y-12 sm:mt-16 sm:space-y-16">
+        {years.map(({ year, posts: yearPosts }) => (
+          <section aria-labelledby={`year-${year}`} class="sm:grid sm:grid-cols-[5rem_minmax(0,1fr)] sm:gap-6">
+            <h2
+              id={`year-${year}`}
+              class="mb-6 flex items-center gap-3 font-mono text-sm font-medium text-zinc-600 tabular-nums after:h-px after:flex-1 after:bg-zinc-200 sm:mb-0 sm:block sm:after:hidden dark:text-zinc-400 dark:after:bg-zinc-800"
+            >
+              <span class="sm:sticky sm:top-24 sm:block">{year}</span>
+            </h2>
+            <PostList posts={yearPosts} headingLevel="h3" showTags />
+          </section>
+        ))}
+      </div>
+    ) : (
+      <div class="mt-12 rounded-xl border border-dashed border-zinc-300 px-6 py-12 text-center sm:mt-16 dark:border-zinc-700">
+        {/* The empty set: nothing here yet. */}
+        <p aria-hidden="true" class="font-serif text-5xl leading-none text-zinc-400 dark:text-zinc-600">
+          ∅
+        </p>
+        <p class="mt-4 text-zinc-700 dark:text-zinc-300">{m.empty}</p>
+      </div>
+    )
+  }
 </BaseLayout>

@@ -1,14 +1,22 @@
 /**
  * Notepad: DOM wiring and state (browser only).
  *
- * The text only ever lives in the textarea. Nothing is stored (no localStorage, cookies or
- * anything else) and nothing is uploaded, so every visit starts with an empty page.
+ * The text lives in the textarea and, while autosave is on, in this browser's localStorage
+ * (autosave.ts): it survives a reload or a closed tab on this device and is never sent
+ * anywhere. Download saves it as a file. Interface text comes from src/i18n/tools/notepad.ts,
+ * in the language of the page.
  */
 
+import { getPageLocale } from '../../../i18n/client.ts';
+import { LOCALE_META } from '../../../i18n/config.ts';
+import { formatters } from '../../../i18n/format.ts';
+import { notepadMessages } from '../../../i18n/tools/notepad.ts';
 import { saveBlob } from '../../../lib/download.ts';
-import { formatBytes } from '../../../lib/files/filename.ts';
 import { mimeTypeForFilename, sanitizeFilename } from '../../../lib/files/save-file.ts';
+import { localStore } from '../../../lib/storage.ts';
 import { decodeTextFile } from '../../../lib/text/decode.ts';
+import { DRAFT_KEYS } from '../../../lib/text/draft.ts';
+import type { RestoredDraft } from '../../../lib/text/draft.ts';
 import { buildReplacementPreview } from '../../../lib/text/preview.ts';
 import {
   MATCH_LIMIT,
@@ -25,15 +33,19 @@ import {
 import type { CompiledSearch, MatchWindow, SearchOptions, TextMatch, WindowRequest } from '../../../lib/text/search.ts';
 import { convertLineEndings, countCharactersBounded, lineColumnAt } from '../../../lib/text/stats.ts';
 import type { LineEnding, TextStats } from '../../../lib/text/stats.ts';
+import { createAutosave } from './autosave.ts';
+import { createConfirmDialog } from './confirm-dialog.ts';
 import { createHighlighter } from './highlighter.ts';
 import { IS_APPLE, ariaShortcut, hasPrimaryModifier, isLetter, shortcutLabel } from './keyboard.ts';
 import { createSearchRunner } from './search-runner.ts';
 import { createStatsRunner } from './stats-runner.ts';
+import { createZenMode } from './zen.ts';
 
 type PanelMode = 'find' | 'replace';
 type OptionKey = 'matchCase' | 'wholeWord' | 'regex' | 'multiline' | 'dotAll';
 /** A compiled query, or one whose search didn't finish (took too long or failed). */
 type SearchStatus = CompiledSearch | { status: 'unfinished'; message: string };
+type Shortcut = Parameters<typeof shortcutLabel>[0];
 
 interface UndoState {
   text: string;
@@ -43,8 +55,16 @@ interface UndoState {
   scrollLeft: number;
 }
 
-const DEFAULT_FILENAME = 'untitled.txt';
+/** Everything Clear resets, so Undo can bring it back. */
+interface ClearedState extends UndoState {
+  filename: string;
+  lineEnding: LineEnding;
+  /** The text was unchanged since it was opened or downloaded. */
+  wasClean: boolean;
+}
+
 const MAX_OPEN_BYTES = 20 * 1024 * 1024;
+const MAX_OPEN_MEGABYTES = 20;
 const PREVIEW_LIMIT = 100;
 /** Edits up to this many characters go through the browser's editing commands, so Ctrl+Z still works. */
 const UNDOABLE_EDIT_LIMIT = 20_000;
@@ -54,12 +74,12 @@ const COUNT_ANNOUNCE_DELAY = 700;
 /** Longer selections are counted without grapheme segmentation, which would stall the page. */
 const SELECTION_SEGMENT_LIMIT = 100_000;
 
-const SEARCH_TIMEOUT_MESSAGE =
-  'Search took too long. Simplify the pattern: nested quantifiers like (a+)+ can run forever.';
-const REPLACE_TIMEOUT_MESSAGE =
-  'Replace all took too long, so nothing was replaced. Simplify the pattern: nested quantifiers like (a+)+ can run forever.';
-const REPLACE_TOO_LARGE_MESSAGE = 'Replace all failed: the result would be too large.';
-const REPLACING_MESSAGE = 'Replacing…';
+/**
+ * Zen mode: Ctrl+Shift+Enter (⌘⇧↩ on Apple keyboards). Browsers and screen readers leave this
+ * combination to the page, it types nothing on any keyboard layout (unlike Alt or Option
+ * letters), and F11 stays the browser's own full screen.
+ */
+const ZEN_SHORTCUT: Shortcut = { primary: true, shift: true, key: IS_APPLE ? '↩' : 'Enter' };
 
 /** How long a regular-expression search may run in the worker before it is abandoned (ms). */
 function searchTimeout(length: number): number {
@@ -83,13 +103,6 @@ const NUL = String.fromCharCode(0);
 const REPLACEMENT_CHARACTER = String.fromCharCode(0xfffd);
 
 const OPTION_KEYS: readonly OptionKey[] = ['matchCase', 'wholeWord', 'regex', 'multiline', 'dotAll'];
-const OPTION_LABELS: Record<OptionKey, string> = {
-  matchCase: 'Match case',
-  wholeWord: 'Match whole word',
-  regex: 'Use regular expression',
-  multiline: '^ and $ match each line',
-  dotAll: 'Dot matches newline',
-};
 /** Alt (Option) shortcuts while the find panel has focus. */
 const OPTION_SHORTCUTS: ReadonlyArray<[OptionKey, string]> = [
   ['matchCase', 'c'],
@@ -97,22 +110,15 @@ const OPTION_SHORTCUTS: ReadonlyArray<[OptionKey, string]> = [
   ['regex', 'r'],
 ];
 
-const numberFormat = new Intl.NumberFormat('en');
-
-function formatNumber(value: number): string {
-  return numberFormat.format(value);
-}
-
-function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
-  return `${formatNumber(count)} ${count === 1 ? singular : pluralForm}`;
-}
-
-/** "Invalid regular expression: Unterminated group" from any engine's wording. */
-function describeRegexError(message: string): string {
+/**
+ * The engine's explanation of a bad pattern ("Unterminated group") without its own prefix, in
+ * any engine's wording. The explanation itself stays in the browser's language.
+ */
+function regexErrorDetail(message: string): string {
   const detail = message
     .replace(/^(?:SyntaxError:\s*)?Invalid regular expression:\s*/i, '')
     .replace(/^\/.*\/[a-z]*:\s*/s, '');
-  return `Invalid regular expression: ${detail || message}`;
+  return detail || message;
 }
 
 function detectLineEnding(text: string): LineEnding {
@@ -138,6 +144,15 @@ function hasFiles(event: DragEvent): boolean {
   return !!types && Array.from(types).includes('Files');
 }
 
+function isComposing(event: KeyboardEvent): boolean {
+  // keyCode 229: some IMEs (and Safari) report composition keys this way instead of isComposing.
+  return event.isComposing || event.keyCode === 229;
+}
+
+function isZenShortcut(event: KeyboardEvent): boolean {
+  return event.key === 'Enter' && event.shiftKey && !event.altKey && hasPrimaryModifier(event);
+}
+
 function query<T extends Element>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);
   if (!element) throw new Error(`Notepad: missing element ${selector}`);
@@ -151,13 +166,18 @@ function getElements(root: HTMLElement) {
   }
   return {
     announcer: query<HTMLElement>(root, '[data-announcer]'),
+    card: query<HTMLElement>(root, '[data-card]'),
+    notice: query<HTMLElement>(root, '[data-notice]'),
     message: query<HTMLElement>(root, '[data-message]'),
-    newButton: query<HTMLButtonElement>(root, '[data-new]'),
+    noticeUndo: query<HTMLButtonElement>(root, '[data-notice-undo]'),
     openButton: query<HTMLButtonElement>(root, '[data-open]'),
     openInput: query<HTMLInputElement>(root, '[data-open-input]'),
+    clearButton: query<HTMLButtonElement>(root, '[data-clear]'),
     findToggle: query<HTMLButtonElement>(root, '[data-find-toggle]'),
     replaceToggle: query<HTMLButtonElement>(root, '[data-replace-toggle]'),
     wrapToggle: query<HTMLButtonElement>(root, '[data-wrap-toggle]'),
+    zenToggle: query<HTMLButtonElement>(root, '[data-zen-toggle]'),
+    zenExit: query<HTMLButtonElement>(root, '[data-zen-exit]'),
     findPanel: query<HTMLElement>(root, '[data-find-panel]'),
     findInput: query<HTMLInputElement>(root, '[data-find-input]'),
     findCount: query<HTMLElement>(root, '[data-find-count]'),
@@ -186,18 +206,28 @@ function getElements(root: HTMLElement) {
     caret: query<HTMLElement>(root, '[data-caret]'),
     selectionCount: query<HTMLElement>(root, '[data-selection-count]'),
     saveState: query<HTMLElement>(root, '[data-save-state]'),
+    autosaveToggle: query<HTMLButtonElement>(root, '[data-autosave-toggle]'),
     summaries: Array.from(root.querySelectorAll<HTMLElement>('[data-summary]')),
     details: Array.from(root.querySelectorAll<HTMLElement>('[data-detail]')),
-    saveBar: query<HTMLElement>(root, '[data-save-bar]'),
     filename: query<HTMLInputElement>(root, '[data-filename]'),
     lineEnding: query<HTMLSelectElement>(root, '[data-line-ending]'),
     save: query<HTMLButtonElement>(root, '[data-save]'),
+    confirm: query<HTMLDialogElement>(root, 'dialog[data-confirm]'),
   };
 }
 
 export function initNotepad(root: HTMLElement): void {
   if (root.dataset.initialized === 'true') return;
   root.dataset.initialized = 'true';
+
+  const locale = getPageLocale();
+  const m = notepadMessages[locale];
+  const f = formatters(locale);
+  const intl = LOCALE_META[locale].intl;
+  // Local time (the shared date formatter is UTC, for build-time dates).
+  const timeFormat = new Intl.DateTimeFormat(intl, { hour: 'numeric', minute: '2-digit' });
+  const dayTimeFormat = new Intl.DateTimeFormat(intl, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  const formatNumber = (value: number) => f.number(value);
 
   const el = getElements(root);
   const editor = el.editor;
@@ -210,15 +240,21 @@ export function initNotepad(root: HTMLElement): void {
   let textVersion = 0;
   /** Text length as of the last statistics run (avoids reading a huge value on every keystroke). */
   let knownLength = 0;
-  /** Changed since the last save, open or new. */
-  let dirty = false;
-  let savedRecently = false;
+  /** textVersion when the text last matched a file (opened or downloaded) or was a new, empty page. */
+  let cleanVersion = 0;
   let unloadGuardInstalled = false;
   /** True while this code edits the text through the browser's editing commands. */
   let applyingEdit = false;
+  /** Replace all can be undone until the text is edited. */
   let undoState: UndoState | null = null;
+  /** Clear can be undone until the text is edited or another notice replaces it. */
+  let clearedState: ClearedState | null = null;
   let wrapLines = true;
   let openGeneration = 0;
+  /** Changes whenever the notice line changes, so a delayed "Replacing…" only clears itself. */
+  let messageToken = 0;
+  let renderedSaveState = '';
+
 
   const search = {
     open: false,
@@ -259,6 +295,32 @@ export function initNotepad(root: HTMLElement): void {
   let caretTimer = 0;
   let caretCache = { version: -1, start: -1, end: -1, direction: '' };
 
+  const confirmDialog = createConfirmDialog(el.confirm);
+
+  const autosave = createAutosave({
+    storage: localStore,
+    snapshot: () => ({
+      version: textVersion,
+      length: editor.value.length,
+      filename: el.filename.value,
+      lineEnding: getLineEnding(),
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+      scrollTop: editor.scrollTop,
+      wrap: wrapLines,
+    }),
+    readText: () => editor.value,
+    onChange: () => {
+      renderSaveState();
+      renderAutosaveToggle();
+      updateUnloadGuard();
+    },
+    timers: {
+      set: (callback, ms) => window.setTimeout(callback, ms),
+      clear: (id) => window.clearTimeout(id as number),
+    },
+  });
+
   // ---------------------------------------------------------------- helpers
 
   function announce(message: string): void {
@@ -270,13 +332,22 @@ export function initNotepad(root: HTMLElement): void {
     }, 50);
   }
 
-  function setMessage(message: string, tone: 'neutral' | 'error' = 'neutral'): void {
+  /** The notice line above the editor; `undo` offers to undo the last Clear. */
+  function setMessage(message: string, tone: 'neutral' | 'error' = 'neutral', { undo = false } = {}): void {
+    messageToken++;
+    if (!undo) clearedState = null;
     el.message.textContent = message;
     el.message.dataset.tone = tone;
+    el.noticeUndo.hidden = !undo;
+    el.notice.hidden = message === '';
   }
 
   function getLineEnding(): LineEnding {
     return el.lineEnding.value === 'crlf' ? 'crlf' : 'lf';
+  }
+
+  function isModified(): boolean {
+    return textVersion !== cleanVersion;
   }
 
   function countLabel(): string {
@@ -285,57 +356,110 @@ export function initNotepad(root: HTMLElement): void {
     return formatNumber(search.matches.length);
   }
 
-  /** "3 of 120", or "10,000+ matches" for a window further down (its position is unknown). */
+  /** "3 of 120" for the find field, or "10,000+ matches" for a window further down (its position is unknown). */
   function positionLabel(): string {
-    if (search.start > 0) return `${countLabel()} matches`;
-    return `${formatNumber(search.current + 1)} of ${countLabel()}`;
+    if (search.start > 0) return m.search.matches(countLabel());
+    return m.search.position(formatNumber(search.current + 1), countLabel());
+  }
+
+  /** The same, phrased to be read aloud. */
+  function spokenPosition(): string {
+    if (search.start > 0) return m.search.matches(countLabel());
+    return m.search.positionSpoken(formatNumber(search.current + 1), countLabel());
   }
 
   function statusProblem(status: SearchStatus): string {
-    if (status.status === 'error') return describeRegexError(status.message);
+    if (status.status === 'error') return m.search.invalidRegex(regexErrorDetail(status.message));
     if (status.status === 'unfinished') return status.message;
     return '';
   }
 
   // ---------------------------------------------------------------- saved state
 
+  function formatSavedAt(time: number): string {
+    const date = new Date(time);
+    const today = new Date().toDateString() === date.toDateString();
+    return (today ? timeFormat : dayTimeFormat).format(date);
+  }
+
+  /** The status bar's save state: when the text was stored, or why it isn't. */
+  function renderSaveState(): void {
+    const state = autosave.state;
+    let long = '';
+    let short = '';
+    let warning = false;
+    if (state === 'saved' && autosave.savedAt !== null) {
+      const time = formatSavedAt(autosave.savedAt);
+      long = m.status.saved(time);
+      short = m.status.savedShort(time);
+    } else if (state === 'off') {
+      if (isModified() && knownLength > 0) {
+        long = short = m.status.unsaved;
+        warning = true;
+      }
+    } else if (state === 'full' || state === 'error' || (state === 'unavailable' && knownLength > 0)) {
+      long = short = m.status[state];
+      warning = true;
+    }
+
+    const key = `${long}\n${short}\n${warning}`;
+    if (key === renderedSaveState) return;
+    renderedSaveState = key;
+    el.saveState.title = long;
+    if (warning) el.saveState.dataset.tone = 'warning';
+    else delete el.saveState.dataset.tone;
+    if (long === short) {
+      el.saveState.textContent = long;
+      return;
+    }
+    const wide = document.createElement('span');
+    wide.className = 'max-sm:hidden';
+    wide.textContent = long;
+    const narrow = document.createElement('span');
+    narrow.className = 'sm:hidden';
+    narrow.textContent = short;
+    el.saveState.replaceChildren(wide, narrow);
+  }
+
+  function renderAutosaveToggle(): void {
+    el.autosaveToggle.setAttribute('aria-checked', String(autosave.enabled));
+    el.autosaveToggle.disabled = autosave.state === 'unavailable';
+  }
+
+  /** Text that exists nowhere else: not stored by autosave, and changed since it was opened or downloaded. */
+  function hasUnprotectedText(length: number): boolean {
+    return !autosave.protects && isModified() && length > 0;
+  }
+
   function onBeforeUnload(event: BeforeUnloadEvent): void {
-    if (!dirty || editor.value.length === 0) return;
+    if (!hasUnprotectedText(editor.value.length)) return;
     event.preventDefault();
     // Older browsers need returnValue set to show the prompt.
     event.returnValue = '';
   }
 
-  function updateSaveState(): void {
-    if (dirty && knownLength > 0) {
-      el.saveState.textContent = 'Unsaved changes';
-      el.saveState.dataset.state = 'dirty';
-    } else if (savedRecently) {
-      el.saveState.textContent = 'Saved';
-      el.saveState.dataset.state = 'saved';
-    } else {
-      el.saveState.textContent = '';
-      delete el.saveState.dataset.state;
-    }
-  }
-
-  function setDirty(value: boolean): void {
-    dirty = value;
-    // The listener only exists while there is something to lose (it can disable the back/forward cache).
-    if (dirty && !unloadGuardInstalled) {
+  /**
+   * The "leave page?" prompt is only armed while text would be lost: with autosave working,
+   * pagehide stores the last change instead. (The listener also keeps the page out of the
+   * back/forward cache, another reason to add it only when needed.)
+   */
+  function updateUnloadGuard(): void {
+    const needed = hasUnprotectedText(knownLength);
+    if (needed && !unloadGuardInstalled) {
       window.addEventListener('beforeunload', onBeforeUnload);
       unloadGuardInstalled = true;
-    } else if (!dirty && unloadGuardInstalled) {
+    } else if (!needed && unloadGuardInstalled) {
       window.removeEventListener('beforeunload', onBeforeUnload);
       unloadGuardInstalled = false;
     }
-    updateSaveState();
   }
 
-  function confirmDiscard(question: string): boolean {
-    if (!dirty || editor.value.length === 0) return true;
-    return window.confirm(question);
-  }
+  // Store the last change before the page goes away or into the background (phones may
+  // discard a background tab without another event).
+  window.addEventListener('pagehide', () => autosave.flush());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') autosave.flush();
+  });
 
   // ---------------------------------------------------------------- statistics
 
@@ -350,11 +474,8 @@ export function initNotepad(root: HTMLElement): void {
     const summary = (key: string, text: string) => setAll(el.summaries, 'summary', key, text);
     const detail = (key: string, text: string) => setAll(el.details, 'detail', key, text);
 
-    summary('characters', plural(stats.characters, 'character'));
-    summary('words', plural(stats.words, 'word'));
-    summary('sentences', plural(stats.sentences, 'sentence'));
-    summary('lines', plural(stats.lines, 'line'));
-    summary('bytes', formatBytes(stats.bytes));
+    summary('lines', m.status.lines(stats.lines, formatNumber(stats.lines)));
+    summary('words', m.status.words(stats.words, formatNumber(stats.words)));
 
     detail('characters', formatNumber(stats.characters));
     detail('charactersNoSpaces', formatNumber(stats.charactersNoSpaces));
@@ -364,10 +485,11 @@ export function initNotepad(root: HTMLElement): void {
     detail('paragraphs', formatNumber(stats.paragraphs));
     detail(
       'bytes',
-      stats.bytes >= 1024 ? `${formatNumber(stats.bytes)} (${formatBytes(stats.bytes)})` : formatNumber(stats.bytes),
+      stats.bytes >= 1024 ? m.stats.bytesDetail(formatNumber(stats.bytes), f.bytes(stats.bytes)) : formatNumber(stats.bytes),
     );
-    detail('readingMinutes', `${formatNumber(stats.readingMinutes)} min`);
-    updateSaveState();
+    detail('readingMinutes', m.stats.minutes(formatNumber(stats.readingMinutes)));
+    renderSaveState();
+    updateUnloadGuard();
   }
 
   const stats = createStatsRunner({ getText: () => editor.value, getLineEnding, onStats: renderStats });
@@ -391,10 +513,10 @@ export function initNotepad(root: HTMLElement): void {
 
     const text = editor.value;
     const { line, column } = lineColumnAt(text, direction === 'backward' ? start : end);
-    el.caret.textContent = `Ln ${formatNumber(line)}, Col ${formatNumber(column)}`;
+    el.caret.textContent = m.status.caret(formatNumber(line), formatNumber(column));
     if (end > start) {
       const { count, exact } = countCharactersBounded(text.slice(start, end), SELECTION_SEGMENT_LIMIT);
-      el.selectionCount.textContent = `${exact ? '' : '≈'}${formatNumber(count)} selected`;
+      el.selectionCount.textContent = m.status.selected(formatNumber(count), !exact);
       el.selectionCount.hidden = false;
     } else {
       el.selectionCount.hidden = true;
@@ -437,14 +559,25 @@ export function initNotepad(root: HTMLElement): void {
     if (hadFocus && search.open) el.replaceAll.focus({ preventScroll: true });
   }
 
+  /** Withdraws the offer to undo Clear (the text was edited since). */
+  function dismissClearUndo(): void {
+    if (!clearedState) return;
+    const hadFocus = el.notice.contains(document.activeElement);
+    setMessage('');
+    if (hadFocus) editor.focus({ preventScroll: true });
+  }
+
   /** `byUser`: typed, pasted, dropped or undone in the textarea (not an edit made by this code). */
   function handleTextChange(byUser: boolean): void {
     textVersion++;
-    if (byUser && !applyingEdit) hideReplaceResult();
-    savedRecently = false;
-    setDirty(true);
+    if (byUser && !applyingEdit) {
+      hideReplaceResult();
+      dismissClearUndo();
+    }
     stats.schedule();
     scheduleCaretUpdate();
+    autosave.schedule(knownLength);
+    updateUnloadGuard();
     if (search.open && search.options.query !== '') scheduleSearch(false);
   }
 
@@ -531,7 +664,7 @@ export function initNotepad(root: HTMLElement): void {
     const status = search.compiled;
     const count = search.matches.length;
     if (status.status === 'ok') {
-      el.findCount.textContent = count > 0 ? positionLabel() : 'No results';
+      el.findCount.textContent = count > 0 ? positionLabel() : m.search.noResults;
       el.findCount.dataset.tone = count > 0 ? 'some' : 'none';
     } else {
       el.findCount.textContent = '';
@@ -553,7 +686,7 @@ export function initNotepad(root: HTMLElement): void {
   function showSearchingSoon(): void {
     window.clearTimeout(searchingTimer);
     searchingTimer = window.setTimeout(() => {
-      el.findCount.textContent = 'Searching…';
+      el.findCount.textContent = m.search.searching;
       delete el.findCount.dataset.tone;
     }, 250);
   }
@@ -563,8 +696,8 @@ export function initNotepad(root: HTMLElement): void {
     const problem = statusProblem(status);
     if (problem) return problem;
     if (status.status === 'empty') return '';
-    if (search.matches.length === 0) return 'No results';
-    return search.start > 0 ? positionLabel() : `${positionLabel()} matches`;
+    if (search.matches.length === 0) return m.search.noResults;
+    return spokenPosition();
   }
 
   /** Result counts change on every keystroke in the find field: announce once typing pauses. */
@@ -626,7 +759,7 @@ export function initNotepad(root: HTMLElement): void {
   }
 
   function applyTimeout(version: number, text: string): void {
-    applySearch({ status: 'unfinished', message: SEARCH_TIMEOUT_MESSAGE }, version, emptyWindow(), 0, false, text);
+    applySearch({ status: 'unfinished', message: m.search.timeout }, version, emptyWindow(), 0, false, text);
   }
 
   /**
@@ -703,7 +836,7 @@ export function initNotepad(root: HTMLElement): void {
           countAnnounceWanted = true;
         } else {
           console.error('Notepad: search failed', outcome.message);
-          const message = outcome.tooLarge ? 'The text is too large to search with this pattern.' : 'Search failed. Try again.';
+          const message = outcome.tooLarge ? m.search.tooLarge : m.search.failed;
           applySearch({ status: 'unfinished', message }, version, emptyWindow(), 0, false, text);
         }
         if (countAnnounceWanted) {
@@ -782,10 +915,10 @@ export function initNotepad(root: HTMLElement): void {
         if (outcome.status === 'timeout') {
           timedOut = { key: searchKey(compiled.regex), version };
           applyTimeout(version, text);
-          announce(SEARCH_TIMEOUT_MESSAGE);
+          announce(m.search.timeout);
         } else {
           updateFindStatus();
-          if (outcome.status === 'failed') announce('Search failed. Try again.');
+          if (outcome.status === 'failed') announce(m.search.failed);
         }
         return false;
       }
@@ -817,6 +950,8 @@ export function initNotepad(root: HTMLElement): void {
     }
     highlighter.syncScroll();
 
+    // In zen mode the editor fills the screen: the page itself never scrolls.
+    if (zenMode.active) return;
     // Bring the editor itself into view unless the user is typing in the find panel
     // (scrolling the page then would fight the on-screen keyboard).
     const active = document.activeElement;
@@ -825,9 +960,11 @@ export function initNotepad(root: HTMLElement): void {
     if (!anchor) return;
     const rect = anchor.getBoundingClientRect();
     const viewport = window.visualViewport;
-    const top = (viewport?.offsetTop ?? 0) + 80; // below the sticky site header
-    let bottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
-    if (getComputedStyle(el.saveBar).position === 'sticky') bottom = Math.min(bottom, el.saveBar.getBoundingClientRect().top);
+    // Below the sticky site header, however tall it is.
+    const header = document.querySelector('body > header');
+    const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+    const top = Math.max(viewport?.offsetTop ?? 0, headerBottom) + 8;
+    const bottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
     if (rect.top < top) window.scrollBy({ top: rect.top - top - 16 });
     else if (rect.bottom > bottom) window.scrollBy({ top: rect.bottom - bottom + 16 });
   }
@@ -849,7 +986,7 @@ export function initNotepad(root: HTMLElement): void {
     const match = search.matches[search.current];
     if (!match) return;
     const { line } = lineColumnAt(editor.value, match.start);
-    announce(`${positionLabel()}, line ${formatNumber(line)}`);
+    announce(m.search.atLine(spokenPosition(), formatNumber(line)));
   }
 
   async function navigate(direction: 1 | -1): Promise<void> {
@@ -870,7 +1007,7 @@ export function initNotepad(root: HTMLElement): void {
     const matches = search.matches;
     const count = matches.length;
     if (count === 0) {
-      announce('No results');
+      announce(m.search.noResults);
       return;
     }
     if (freshness === 'revealed') {
@@ -935,7 +1072,7 @@ export function initNotepad(root: HTMLElement): void {
         highlighter.clear();
         updateFindStatus();
         updatePreview();
-        announce('No results');
+        announce(m.search.noResults);
         return;
       }
       highlighter.render(editor.value, loaded, next);
@@ -961,7 +1098,7 @@ export function initNotepad(root: HTMLElement): void {
       if (el.previewList.firstChild) el.previewList.replaceChildren();
       return;
     }
-    el.previewTitle.textContent = `Preview changes (${countLabel()})`;
+    el.previewTitle.textContent = m.find.previewCount(countLabel());
     if (!el.preview.open) return;
 
     const items = buildReplacementPreview(
@@ -974,7 +1111,7 @@ export function initNotepad(root: HTMLElement): void {
     const fragment = document.createDocumentFragment();
     for (const item of items) {
       const row = el.previewTemplate.content.cloneNode(true) as DocumentFragment;
-      query<HTMLElement>(row, '[data-preview-line]').textContent = `Line ${formatNumber(item.line)}`;
+      query<HTMLElement>(row, '[data-preview-line]').textContent = m.find.previewLine(formatNumber(item.line));
       query<HTMLElement>(row, '[data-preview-before]').textContent = `${item.clippedBefore ? '…' : ''}${item.before}`;
       query<HTMLElement>(row, '[data-preview-old]').textContent = item.removed;
       query<HTMLElement>(row, '[data-preview-new]').textContent = item.inserted;
@@ -986,7 +1123,7 @@ export function initNotepad(root: HTMLElement): void {
     const more = search.truncated || search.start > 0 || search.matches.length > items.length;
     el.previewNote.hidden = !more;
     el.previewNote.textContent = more
-      ? `Showing ${search.start > 0 ? '' : 'the first '}${formatNumber(items.length)} of ${countLabel()} changes.`
+      ? (search.start > 0 ? m.find.previewWindow : m.find.previewFirst)(formatNumber(items.length), countLabel())
       : '';
   }
 
@@ -1089,7 +1226,7 @@ export function initNotepad(root: HTMLElement): void {
   });
 
   el.findInput.addEventListener('keydown', (event) => {
-    if (event.isComposing || event.keyCode === 229) return;
+    if (isComposing(event)) return;
     if (event.key === 'Enter' && !event.altKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
       const direction = event.shiftKey ? -1 : 1;
@@ -1105,7 +1242,7 @@ export function initNotepad(root: HTMLElement): void {
       for (const button of el.regexOnly) button.hidden = !value;
       if (focusLost) el.optionButtons.get('regex')?.focus();
     }
-    if (spoken) announce(`${OPTION_LABELS[key]} ${value ? 'on' : 'off'}`);
+    if (spoken) announce(m.optionState(m.options[key], value));
     if (search.open) {
       runSearch(search.options.query !== '');
       announceCountSoon();
@@ -1136,7 +1273,7 @@ export function initNotepad(root: HTMLElement): void {
     if (problem) {
       announce(problem);
     } else {
-      announce('Type something to find first');
+      announce(m.search.typeFirst);
       el.findInput.focus();
     }
   }
@@ -1155,7 +1292,7 @@ export function initNotepad(root: HTMLElement): void {
     }
     const match = search.matches[search.current] ?? search.matches[0];
     if (!match) {
-      announce('No results');
+      announce(m.search.noResults);
       return;
     }
 
@@ -1169,11 +1306,11 @@ export function initNotepad(root: HTMLElement): void {
     if ((await ensureFreshSearch()) === 'unavailable') return;
     const problem = statusProblem(search.compiled);
     if (problem) {
-      announce(`Replaced. ${problem}`);
+      announce(m.replace.replacedProblem(problem));
       return;
     }
     const left = search.matches.length;
-    announce(left === 0 ? 'Replaced. No more matches.' : `Replaced. ${countLabel()} ${left === 1 ? 'match' : 'matches'} left.`);
+    announce(left === 0 ? m.replace.replacedNoMore : m.replace.replacedLeft(left, countLabel()));
   }
 
   async function replaceAll(): Promise<void> {
@@ -1185,7 +1322,7 @@ export function initNotepad(root: HTMLElement): void {
       return;
     }
     if (search.matches.length === 0) {
-      announce('No results');
+      announce(m.search.noResults);
       return;
     }
 
@@ -1198,31 +1335,36 @@ export function initNotepad(root: HTMLElement): void {
         result = replaceAllInText(text, compiled.regex, template, false);
       } catch (error) {
         console.error('Notepad: replace all failed', error);
-        reportReplaceAllProblem(REPLACE_TOO_LARGE_MESSAGE);
+        reportReplaceAllProblem(m.replace.tooLarge);
         return;
       }
     } else {
       // In the worker, like every regular-expression search.
-      const busyTimer = window.setTimeout(() => setMessage(REPLACING_MESSAGE), 300);
+      let busyToken = -1;
+      const busyTimer = window.setTimeout(() => {
+        setMessage(m.replace.replacing);
+        busyToken = messageToken;
+      }, 300);
       const outcome = await runner.replaceAll(
         { text, version, regex: compiled.regex, timeout: replaceTimeout(text.length) },
         template,
         true,
       );
       window.clearTimeout(busyTimer);
-      if (el.message.textContent === REPLACING_MESSAGE) setMessage('');
+      // Clear "Replacing…" unless another notice has replaced it meanwhile.
+      if (busyToken === messageToken) setMessage('');
       if (outcome.status === 'cancelled' || !search.open) return;
       if (outcome.status === 'timeout') {
-        reportReplaceAllProblem(REPLACE_TIMEOUT_MESSAGE);
+        reportReplaceAllProblem(m.replace.timeout);
         return;
       }
       if (outcome.status === 'failed') {
         console.error('Notepad: replace all failed', outcome.message);
-        reportReplaceAllProblem(outcome.tooLarge ? REPLACE_TOO_LARGE_MESSAGE : 'Replace all failed. Try again.');
+        reportReplaceAllProblem(outcome.tooLarge ? m.replace.tooLarge : m.replace.failed);
         return;
       }
       if (version !== textVersion) {
-        reportReplaceAllProblem('The text changed during Replace all, so nothing was replaced. Try again.');
+        reportReplaceAllProblem(m.replace.textChanged);
         return;
       }
       result = outcome.result;
@@ -1242,7 +1384,7 @@ export function initNotepad(root: HTMLElement): void {
     editor.scrollLeft = snapshot.scrollLeft;
 
     undoState = snapshot;
-    const message = `Replaced ${plural(result.count, 'occurrence')}`;
+    const message = m.replace.replacedAll(result.count, formatNumber(result.count));
     el.replaceResultText.textContent = message;
     el.replaceResult.hidden = false;
     search.anchor = caret;
@@ -1254,7 +1396,8 @@ export function initNotepad(root: HTMLElement): void {
   el.replaceAll.addEventListener('click', () => queueAction(replaceAll));
   el.replaceInput.addEventListener('input', schedulePreview);
   el.replaceInput.addEventListener('keydown', (event) => {
-    if (event.isComposing || event.keyCode === 229 || event.key !== 'Enter' || event.altKey) return;
+    // Ctrl+Shift+Enter is the zen shortcut (handled on the document), not Replace all.
+    if (isComposing(event) || event.key !== 'Enter' || event.altKey || isZenShortcut(event)) return;
     event.preventDefault();
     // The on-screen keyboard's "done" key only closes the keyboard: on touch screens a single
     // replacement can't be undone, so it takes the Replace button.
@@ -1278,35 +1421,54 @@ export function initNotepad(root: HTMLElement): void {
     el.replaceAll.focus({ preventScroll: true });
     search.anchor = state.selectionStart;
     runSearch(false);
-    announce('Replace all undone');
+    announce(m.replace.undone);
   });
 
   // ---------------------------------------------------------------- editor surface
 
-  el.editorWrap.dataset.wrap = 'on';
   editor.addEventListener('scroll', () => highlighter.syncScroll(), { passive: true });
 
   if (typeof ResizeObserver === 'function') {
     new ResizeObserver(() => {
       if (highlighter.active) highlighter.sync();
     }).observe(editor);
-    // Lets focus scrolling keep controls clear of the sticky Save As bar (scroll-padding-bottom).
-    new ResizeObserver(() => {
-      const height = Math.ceil(el.saveBar.getBoundingClientRect().height);
-      document.documentElement.style.setProperty('--np-save-bar-height', `${height}px`);
-    }).observe(el.saveBar);
+  }
+
+  function setWrap(on: boolean): void {
+    wrapLines = on;
+    el.editorWrap.dataset.wrap = on ? 'on' : 'off';
+    editor.setAttribute('wrap', on ? 'soft' : 'off');
+    el.wrapToggle.setAttribute('aria-pressed', String(on));
+    if (on) editor.scrollLeft = 0;
+    highlighter.sync();
   }
 
   el.wrapToggle.addEventListener('click', () => {
-    wrapLines = !wrapLines;
-    el.editorWrap.dataset.wrap = wrapLines ? 'on' : 'off';
-    editor.setAttribute('wrap', wrapLines ? 'soft' : 'off');
-    el.wrapToggle.setAttribute('aria-pressed', String(wrapLines));
-    if (wrapLines) editor.scrollLeft = 0;
-    highlighter.sync();
+    setWrap(!wrapLines);
+    autosave.schedule(knownLength);
   });
 
-  // ---------------------------------------------------------------- open, new, save
+  // ---------------------------------------------------------------- zen mode
+
+  const zenMode = createZenMode({
+    root,
+    card: el.card,
+    editor,
+    toggle: el.zenToggle,
+    exit: el.zenExit,
+    coarsePointer,
+    onChange: (on) => {
+      highlighter.sync();
+      announce(on ? m.zen.on : m.zen.off);
+    },
+    onFullscreenExit: () => {
+      if (!search.open) return false;
+      closePanel(true);
+      return true;
+    },
+  });
+
+  // ---------------------------------------------------------------- open, clear, download
 
   function loadText(text: string, filename: string): void {
     const lineEnding = detectLineEnding(text);
@@ -1318,10 +1480,11 @@ export function initNotepad(root: HTMLElement): void {
     el.lineEnding.value = lineEnding;
     hideReplaceResult();
     textVersion++;
-    savedRecently = false;
-    setDirty(false);
+    cleanVersion = textVersion;
     stats.schedule(true);
     scheduleCaretUpdate();
+    autosave.schedule(text.length);
+    updateUnloadGuard();
     search.matches = [];
     search.truncated = false;
     search.start = 0;
@@ -1331,14 +1494,26 @@ export function initNotepad(root: HTMLElement): void {
   }
 
   async function openFile(file: File): Promise<void> {
-    const name = file.name || DEFAULT_FILENAME;
+    if (confirmDialog.open) return;
+    const name = file.name || m.defaultFilename;
     if (file.size > MAX_OPEN_BYTES) {
-      const message = `“${name}” is ${formatBytes(file.size)}. Notepad opens files up to 20 MB.`;
+      const message = m.files.tooLarge(name, f.bytes(file.size), `${formatNumber(MAX_OPEN_MEGABYTES)} MB`);
       setMessage(message, 'error');
       announce(message);
       return;
     }
-    if (!confirmDiscard(`Discard your unsaved changes and open “${name}”?`)) return;
+    if (
+      isModified() &&
+      editor.value.length > 0 &&
+      !(await confirmDialog.ask({
+        title: m.files.replaceTitle(name),
+        body: m.files.replaceBody,
+        confirm: m.files.replaceConfirm,
+        returnFocus: el.openButton,
+      }))
+    ) {
+      return;
+    }
 
     const generation = ++openGeneration;
     let text: string;
@@ -1349,27 +1524,32 @@ export function initNotepad(root: HTMLElement): void {
       utf16 = decoded.encoding !== 'utf-8';
     } catch (error) {
       console.error('Notepad: could not read file', error);
-      const message = `Couldn’t read “${name}”.`;
+      const message = m.files.readError(name);
       setMessage(message, 'error');
       announce(message);
       return;
     }
     if (generation !== openGeneration) return; // another file was opened meanwhile
-    if (text.slice(0, 8000).includes(NUL) && !window.confirm(`“${name}” doesn’t look like a text file. Open it anyway?`)) {
+    if (
+      text.slice(0, 8000).includes(NUL) &&
+      !(await confirmDialog.ask({
+        title: m.files.notTextTitle(name),
+        body: m.files.notTextBody,
+        confirm: m.files.notTextConfirm,
+        returnFocus: el.openButton,
+      }))
+    ) {
       return;
     }
+    if (generation !== openGeneration) return;
 
     loadText(text, name);
     const notes: string[] = [];
-    if (utf16) notes.push(`“${name}” is UTF-16 text; Save As writes UTF-8.`);
-    if (text.includes(REPLACEMENT_CHARACTER)) {
-      notes.push(
-        `Some characters in “${name}” couldn’t be read and are shown as ${REPLACEMENT_CHARACTER}. The file may not be ${utf16 ? 'UTF-16' : 'UTF-8'} text.`,
-      );
-    }
+    if (utf16) notes.push(m.files.utf16(name));
+    if (text.includes(REPLACEMENT_CHARACTER)) notes.push(m.files.badCharacters(name, utf16 ? 'UTF-16' : 'UTF-8'));
     const note = notes.join(' ');
     setMessage(note);
-    announce(note ? `Opened ${name}. ${note}` : `Opened ${name}`);
+    announce(note ? m.files.openedWithNote(name, note) : m.files.opened(name));
     if (!coarsePointer) editor.focus();
   }
 
@@ -1398,50 +1578,214 @@ export function initNotepad(root: HTMLElement): void {
     if (file) void openFile(file);
   });
 
-  el.newButton.addEventListener('click', () => {
-    if (!confirmDiscard('Discard your unsaved changes and start a new file?')) return;
-    openGeneration++;
-    loadText('', DEFAULT_FILENAME);
+  /**
+   * Clear: starts over with an empty, untitled page and removes the stored draft. It asks first,
+   * and can be undone right afterwards (Ctrl+Z too, for texts the browser's own undo can take).
+   */
+  async function clearText(): Promise<void> {
+    if (confirmDialog.open) return;
+    const text = editor.value;
+    const filename = el.filename.value;
+    const lineEnding = getLineEnding();
+    if (text === '') {
+      // Nothing to lose: reset the name and line endings without asking.
+      el.filename.value = m.defaultFilename;
+      el.lineEnding.value = 'lf';
+      if (lineEnding !== 'lf') stats.schedule(true);
+      autosave.clear();
+      setMessage('');
+      if (!coarsePointer) editor.focus();
+      return;
+    }
+    const confirmed = await confirmDialog.ask({
+      title: m.clear.title,
+      body: m.clear.body,
+      confirm: m.clear.confirm,
+      danger: true,
+      returnFocus: el.clearButton,
+    });
+    if (!confirmed) {
+      return;
+    }
+    if (editor.value !== text) return; // edited in another tab meanwhile: ask again
+
+    const cleared: ClearedState = {
+      text,
+      filename,
+      lineEnding,
+      selectionStart: editor.selectionStart,
+      selectionEnd: editor.selectionEnd,
+      scrollTop: editor.scrollTop,
+      scrollLeft: editor.scrollLeft,
+      wasClean: !isModified(),
+    };
+    openGeneration++; // a file still being read won't fill the cleared page
+    hideReplaceResult();
+    replaceWholeText(text, '');
+    el.filename.value = m.defaultFilename;
+    el.lineEnding.value = 'lf';
+    stats.schedule(true);
+    autosave.clear();
+    cleanVersion = textVersion;
+    updateUnloadGuard();
+    setMessage(m.clear.done, 'neutral', { undo: true });
+    clearedState = cleared;
+    announce(m.clear.done);
+    if (!coarsePointer) editor.focus();
+  }
+
+  el.clearButton.addEventListener('click', () => void clearText());
+
+  el.noticeUndo.addEventListener('click', () => {
+    const state = clearedState;
+    if (!state) return;
+    clearedState = null;
+    replaceWholeText(editor.value, state.text);
+    el.filename.value = state.filename;
+    el.lineEnding.value = state.lineEnding;
+    editor.setSelectionRange(state.selectionStart, state.selectionEnd);
+    editor.scrollTop = state.scrollTop;
+    editor.scrollLeft = state.scrollLeft;
+    highlighter.syncScroll();
+    if (state.wasClean) cleanVersion = textVersion;
+    stats.schedule(true);
+    autosave.schedule(state.text.length);
+    updateUnloadGuard();
     setMessage('');
-    editor.focus();
-    announce('New file');
+    announce(m.clear.undone);
+    // The Undo button just disappeared: continue in the text (or at Clear on touch screens,
+    // where focusing the text would open the keyboard).
+    if (coarsePointer) el.clearButton.focus();
+    else editor.focus();
   });
 
-  function save(): void {
-    const name = sanitizeFilename(el.filename.value);
+  function download(): void {
+    const name = sanitizeFilename(el.filename.value, m.defaultFilename);
     el.filename.value = name;
     try {
       const text = convertLineEndings(editor.value, getLineEnding());
       saveBlob(new Blob([text], { type: mimeTypeForFilename(name) }), name);
     } catch (error) {
-      console.error('Notepad: save failed', error);
-      const message = 'Couldn’t save the file. Try again.';
+      console.error('Notepad: download failed', error);
+      const message = m.files.downloadFailed;
       setMessage(message, 'error');
       announce(message);
       return;
     }
-    savedRecently = true;
-    setDirty(false);
+    cleanVersion = textVersion;
+    autosave.schedule(knownLength); // the name may have been tidied up
+    updateUnloadGuard();
+    renderSaveState();
     if (el.message.dataset.tone === 'error') setMessage('');
-    announce(`Saved ${name}`);
+    announce(m.files.downloaded(name));
   }
 
-  el.save.addEventListener('click', save);
+  el.save.addEventListener('click', download);
 
+  el.filename.addEventListener('input', () => autosave.schedule(knownLength));
   el.filename.addEventListener('keydown', (event) => {
-    if (event.isComposing || event.keyCode === 229 || event.key !== 'Enter') return;
+    if (isComposing(event) || event.key !== 'Enter' || event.ctrlKey || event.metaKey || event.altKey) return;
     event.preventDefault();
-    // On touch screens the keyboard's "done" key just closes the keyboard (Save As is right there).
+    // On touch screens the keyboard's "done" key just closes the keyboard (Download is right there).
     if (coarsePointer) el.filename.blur();
-    else save();
+    else download();
   });
 
-  el.lineEnding.addEventListener('change', () => stats.schedule(true));
+  el.lineEnding.addEventListener('change', () => {
+    stats.schedule(true);
+    autosave.schedule(knownLength);
+  });
+
+  el.autosaveToggle.addEventListener('click', () => {
+    const on = !autosave.enabled;
+    autosave.setEnabled(on);
+    if (autosave.enabled === on) announce(on ? m.status.autosaveOn : m.status.autosaveOff);
+  });
+
+  // ---------------------------------------------------------------- other tabs
+
+  /**
+   * Shows what storage now holds: another tab saved or cleared the draft. Only called while
+   * this tab's own text is stored and unchanged since, so nothing of this tab is lost. The
+   * value is set directly: the browser's editing commands would move focus into the text (and
+   * open the keyboard on phones) while the visitor may be reading.
+   */
+  function adoptStoredDraft(draft: RestoredDraft | null): void {
+    const text = draft?.text ?? '';
+    const changed = text !== editor.value;
+    if (changed) {
+      const { selectionStart, selectionEnd, scrollTop, scrollLeft } = editor;
+      editor.value = text;
+      const length = editor.value.length;
+      editor.setSelectionRange(Math.min(selectionStart, length), Math.min(selectionEnd, length));
+      editor.scrollTop = scrollTop;
+      editor.scrollLeft = scrollLeft;
+      hideReplaceResult();
+      if (clearedState) setMessage('');
+      textVersion++;
+      if (text === '') cleanVersion = textVersion;
+      scheduleCaretUpdate();
+      if (search.open && search.options.query !== '') scheduleSearch(false);
+    }
+    el.filename.value = draft?.filename ?? m.defaultFilename;
+    el.lineEnding.value = draft?.lineEnding ?? 'lf';
+    if (draft?.wrap != null && draft.wrap !== wrapLines) setWrap(draft.wrap);
+    stats.schedule(true);
+    if (draft && draft.savedAt !== null) {
+      autosave.markStored({ version: textVersion, filename: el.filename.value, lineEnding: getLineEnding() }, draft.savedAt);
+    } else {
+      autosave.clear();
+    }
+    updateUnloadGuard();
+    if (changed) {
+      setMessage(m.status.fromOtherTab);
+      if (document.visibilityState === 'visible') announce(m.status.fromOtherTab);
+    }
+  }
+
+  function syncFromStorage(): void {
+    // A change waiting here wins (it is written over the other tab's save); text that isn't
+    // stored (autosave off or failing) is never replaced.
+    if (!autosave.enabled || autosave.pending || confirmDialog.open) return;
+    if (autosave.state !== 'saved' && autosave.state !== 'idle') return;
+    const meta = autosave.storedMeta();
+    if (!meta) {
+      if (autosave.state === 'saved') adoptStoredDraft(null); // cleared in another tab
+      return;
+    }
+    if (meta.savedAt === autosave.savedAt) return; // this tab's own save, or only a caret move
+    const draft = autosave.load();
+    // Incomplete: the other tab is between its two writes; its metadata write follows.
+    if (!draft || !draft.complete) return;
+    adoptStoredDraft(draft);
+  }
+
+  /**
+   * Autosave was turned off in another tab: stop storing here too, so this tab doesn't put the
+   * text back. (Turned on elsewhere, this tab stays as it is: storing its text now would
+   * overwrite the draft the other tab just saved.)
+   */
+  function followStoredPreference(): void {
+    if (autosave.enabled && !autosave.storedPreference()) autosave.setEnabled(false, { persist: false });
+  }
+
+  window.addEventListener('storage', (event) => {
+    if (event.key === DRAFT_KEYS.autosave) followStoredPreference();
+    // The metadata is written after the text, so its change means a complete save.
+    else if (event.key === DRAFT_KEYS.meta || event.key === null) syncFromStorage();
+  });
+
+  // Back from the back/forward cache: storage events were missed meanwhile.
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    followStoredPreference();
+    syncFromStorage();
+  });
 
   // ---------------------------------------------------------------- keyboard shortcuts
 
   root.addEventListener('keydown', (event) => {
-    if (event.defaultPrevented || event.isComposing) return;
+    if (event.defaultPrevented || isComposing(event) || confirmDialog.open) return;
     const primary = hasPrimaryModifier(event);
 
     if (primary && !event.altKey && !event.shiftKey && isLetter(event, 'f')) {
@@ -1473,21 +1817,38 @@ export function initNotepad(root: HTMLElement): void {
       return;
     }
 
+    // Esc, innermost first: an IME composition (ignored above), then the find panel, then zen
+    // mode (the document listener below). In zen mode the panel closes from anywhere in the tool.
     if (event.key === 'Escape' && search.open) {
       const target = event.target;
-      if (target === editor || (target instanceof Node && el.findPanel.contains(target))) {
+      if (zenMode.active || target === editor || (target instanceof Node && el.findPanel.contains(target))) {
         event.preventDefault();
         closePanel(true);
       }
     }
   });
 
-  // Ctrl/Cmd+S saves from anywhere on the page instead of saving the web page.
+  // Shortcuts that work anywhere on the page. The root's listener runs first, so an Esc that
+  // closed the find panel arrives here already handled (defaultPrevented).
   document.addEventListener('keydown', (event) => {
-    if (event.defaultPrevented || event.isComposing) return;
+    if (event.defaultPrevented || isComposing(event) || confirmDialog.open) return;
+
+    if (isZenShortcut(event)) {
+      event.preventDefault();
+      zenMode.set(!zenMode.active);
+      return;
+    }
+
+    if (event.key === 'Escape' && zenMode.active) {
+      event.preventDefault();
+      zenMode.set(false);
+      return;
+    }
+
+    // Ctrl/Cmd+S downloads the text instead of saving the web page.
     if (hasPrimaryModifier(event) && !event.altKey && isLetter(event, 's')) {
       event.preventDefault();
-      save();
+      download();
     }
   });
 
@@ -1495,35 +1856,70 @@ export function initNotepad(root: HTMLElement): void {
 
   // On Apple platforms Option+letter types characters in the find fields, so these shortcuts only
   // work while a panel button has focus: not advertised there.
-  const optionShortcut = (key: string) => (IS_APPLE ? null : { alt: true, key });
-  const titles: Array<[HTMLElement, string, Parameters<typeof shortcutLabel>[0] | null]> = [
-    [el.newButton, 'Start a new, empty file', null],
-    [el.openButton, 'Open a text file', { primary: true, key: 'O' }],
-    [el.findToggle, 'Find', { primary: true, key: 'F' }],
-    [el.replaceToggle, 'Replace', IS_APPLE ? { primary: true, alt: true, key: 'F' } : { primary: true, key: 'H' }],
-    [el.findPrev, 'Previous match', { shift: true, key: 'F3' }],
-    [el.findNext, 'Next match', { key: 'F3' }],
-    [el.findClose, 'Close', { key: 'Esc' }],
-    [el.optionButtons.get('matchCase')!, 'Match case', optionShortcut('C')],
-    [el.optionButtons.get('wholeWord')!, 'Match whole word', optionShortcut('W')],
-    [el.optionButtons.get('regex')!, 'Use regular expression', optionShortcut('R')],
-    [el.optionButtons.get('multiline')!, '^ and $ match at the start and end of each line', null],
-    [el.optionButtons.get('dotAll')!, 'Dot (.) also matches line breaks', null],
-    [el.save, 'Save As', { primary: true, key: 'S' }],
+  const optionShortcut = (key: string): Shortcut | null => (IS_APPLE ? null : { alt: true, key });
+  const titles: Array<[HTMLElement, string, Shortcut | null]> = [
+    [el.save, m.titles.download, { primary: true, key: 'S' }],
+    [el.openButton, m.titles.open, { primary: true, key: 'O' }],
+    [el.clearButton, m.titles.clear, null],
+    [el.findToggle, m.titles.find, { primary: true, key: 'F' }],
+    [el.replaceToggle, m.titles.replace, IS_APPLE ? { primary: true, alt: true, key: 'F' } : { primary: true, key: 'H' }],
+    [el.wrapToggle, m.titles.wrap, null],
+    [el.zenToggle, m.titles.zen, ZEN_SHORTCUT],
+    [el.zenExit, m.titles.zenExit, { key: 'Esc' }],
+    [el.findPrev, m.titles.previous, { shift: true, key: 'F3' }],
+    [el.findNext, m.titles.next, { key: 'F3' }],
+    [el.findClose, m.titles.close, { key: 'Esc' }],
+    [el.optionButtons.get('matchCase')!, m.options.matchCase, optionShortcut('C')],
+    [el.optionButtons.get('wholeWord')!, m.options.wholeWord, optionShortcut('W')],
+    [el.optionButtons.get('regex')!, m.options.regex, optionShortcut('R')],
+    [el.optionButtons.get('multiline')!, m.optionTitles.multiline, null],
+    [el.optionButtons.get('dotAll')!, m.optionTitles.dotAll, null],
+    [el.autosaveToggle, m.titles.autosave, null],
+    [el.lineEnding, m.titles.lineEnding, null],
   ];
   for (const [element, label, shortcut] of titles) {
-    element.title = shortcut ? `${label} (${shortcutLabel(shortcut)})` : label;
+    element.title = shortcut ? m.withShortcut(label, shortcutLabel(shortcut)) : label;
     // Only real shortcuts; keys like Esc just act on the focused panel.
     if (shortcut && (shortcut.primary || shortcut.alt)) element.setAttribute('aria-keyshortcuts', ariaShortcut(shortcut));
   }
+  // aria-keyshortcuts names the key, not the symbol shown on Apple keyboards.
+  el.zenToggle.setAttribute('aria-keyshortcuts', ariaShortcut({ ...ZEN_SHORTCUT, key: 'Enter' }));
 
-  // Always start empty, even if the browser tried to restore earlier input.
-  if (document.activeElement !== editor) editor.value = '';
-  el.filename.value = DEFAULT_FILENAME;
+  /** Brings back the draft an earlier visit left in this browser. */
+  function restoreStoredDraft(): void {
+    const draft = autosave.load();
+    if (!draft) return;
+    editor.value = draft.text;
+    el.filename.value = draft.filename ?? m.defaultFilename;
+    // A textarea turns CRLF into LF, so the choice comes from the metadata, not the text.
+    el.lineEnding.value = draft.lineEnding ?? 'lf';
+    if (draft.wrap !== null && draft.wrap !== wrapLines) setWrap(draft.wrap);
+    // Restored text counts as changed: opening a file over it asks first.
+    textVersion++;
+    if (draft.selection) editor.setSelectionRange(draft.selection.start, draft.selection.end);
+    editor.scrollTop = draft.scrollTop;
+    if (draft.complete && draft.savedAt !== null) {
+      autosave.markStored({ version: textVersion, filename: el.filename.value, lineEnding: getLineEnding() }, draft.savedAt);
+    } else {
+      // Interrupted or damaged: write a consistent draft.
+      autosave.schedule(draft.text.length);
+    }
+  }
+
+  // Browsers may restore earlier form input on reload: start from the stored draft (or an empty
+  // page) instead. Only text typed before this script ran is kept.
+  const typedEarly = document.activeElement === editor && editor.value !== '';
+  if (!typedEarly) editor.value = '';
+  el.filename.value = m.defaultFilename;
   el.lineEnding.value = 'lf';
   el.findInput.value = '';
   el.replaceInput.value = '';
-  if (editor.value !== '') handleTextChange(false);
+  el.editorWrap.dataset.wrap = 'on';
+  if (typedEarly) handleTextChange(false);
+  else restoreStoredDraft();
   stats.schedule(true);
   updateCaret();
+  renderAutosaveToggle();
+  renderSaveState();
+  updateUnloadGuard();
 }

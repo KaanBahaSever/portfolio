@@ -11,7 +11,9 @@
     "preview": "astro preview",
     "check": "astro check",
     "test": "node --test \"tests/**/*.test.ts\"",
-    "astro": "astro"
+    "astro": "astro",
+    "sync:medium": "node scripts/sync-medium.ts",
+    "favicons": "node scripts/build-favicons.mjs"
   },
   "dependencies": {
     "@astrojs/markdown-satteri": "^0.4.1",

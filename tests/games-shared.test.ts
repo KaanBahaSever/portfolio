@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import { moveInGrid } from '../src/lib/games/grid.ts';
+import { isPlainKey, isRotateKey, isTypingTarget } from '../src/lib/games/keys.ts';
 import { mulberry32, pickOne, randomInt, randomSeed } from '../src/lib/games/random.ts';
 import { FLEET } from '../src/lib/games/battleship/rules.ts';
 import { LINES } from '../src/lib/games/tictactoe/board.ts';
@@ -73,6 +74,50 @@ test('moveInGrid jumps with Home, End, Page Up and Page Down', () => {
   assert.equal(moveInGrid(55, { key: 'PageUp' }, 10, 10), 5);
   assert.equal(moveInGrid(55, { key: 'PageDown' }, 10, 10), 95);
   assert.equal(moveInGrid(4, { key: 'PageDown' }, 3, 3), 7);
+});
+
+// ---------------------------------------------------------------- shortcut keys
+
+test('isPlainKey accepts Shift but not Ctrl, Cmd, Alt or auto-repeat', () => {
+  assert.equal(isPlainKey({ key: '5' }), true);
+  assert.equal(isPlainKey({ key: 'R' }), true);
+  assert.equal(isPlainKey({ key: 'r', ctrlKey: true }), false);
+  assert.equal(isPlainKey({ key: 'r', metaKey: true }), false);
+  assert.equal(isPlainKey({ key: 'r', altKey: true }), false);
+  assert.equal(isPlainKey({ key: '5', repeat: true }), false);
+});
+
+test('isRotateKey is a plain R in either case and nothing else', () => {
+  assert.equal(isRotateKey({ key: 'r' }), true);
+  // Shift+R and Caps Lock report "R".
+  assert.equal(isRotateKey({ key: 'R' }), true);
+  // Ctrl+R / Cmd+R reload the page; a held R must not spin the ship.
+  assert.equal(isRotateKey({ key: 'r', ctrlKey: true }), false);
+  assert.equal(isRotateKey({ key: 'R', metaKey: true }), false);
+  assert.equal(isRotateKey({ key: 'r', repeat: true }), false);
+  assert.equal(isRotateKey({ key: 'e' }), false);
+  assert.equal(isRotateKey({ key: 'Enter' }), false);
+});
+
+test('isTypingTarget covers text fields, selects and editable content only', () => {
+  assert.equal(isTypingTarget(null), false);
+  assert.equal(isTypingTarget(undefined), false);
+  assert.equal(isTypingTarget({ tagName: 'BODY' }), false);
+  assert.equal(isTypingTarget({ tagName: 'BUTTON' }), false);
+  assert.equal(isTypingTarget({ tagName: 'A' }), false);
+  assert.equal(isTypingTarget({ tagName: 'TEXTAREA' }), true);
+  assert.equal(isTypingTarget({ tagName: 'SELECT' }), true);
+  assert.equal(isTypingTarget({ tagName: 'DIV', isContentEditable: true }), true);
+  // Inputs without a type attribute are text fields.
+  assert.equal(isTypingTarget({ tagName: 'INPUT', type: '' }), true);
+  for (const type of ['text', 'search', 'email', 'url', 'number', 'password', 'date']) {
+    assert.equal(isTypingTarget({ tagName: 'INPUT', type }), true, type);
+  }
+  for (const type of ['radio', 'checkbox', 'button', 'submit', 'range', 'color', 'file']) {
+    assert.equal(isTypingTarget({ tagName: 'INPUT', type }), false, type);
+  }
+  // Tag names from XHTML documents come in lower case.
+  assert.equal(isTypingTarget({ tagName: 'input', type: 'TEXT' }), true);
 });
 
 // ---------------------------------------------------------------- catalogues

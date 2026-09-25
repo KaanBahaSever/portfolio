@@ -12,6 +12,7 @@ import { battleshipMessages } from '../../../i18n/games/battleship.ts';
 import { getPageLocale } from '../../../i18n/client.ts';
 import { formatters } from '../../../i18n/format.ts';
 import { moveInGrid } from '../../../lib/games/grid.ts';
+import { isRotateKey, isTypingTarget } from '../../../lib/games/keys.ts';
 import { mulberry32, randomSeed } from '../../../lib/games/random.ts';
 import {
   DIFFICULTIES,
@@ -690,6 +691,10 @@ export function initBattleship(root: HTMLElement): void {
       const index = cellOf(event.target);
       if (index === null) return;
       setCursor(side, index);
+      // Safari and Firefox on macOS do not focus a button on click. Focusing the cell here keeps
+      // focus in the game in every browser, so R and the arrow keys carry on from the clicked cell.
+      // (A no-op where the click already focused it, and for Enter/Space, which click it too.)
+      boards[side].cells[index]?.focus({ preventScroll: true });
       activate(index);
     });
 
@@ -748,12 +753,25 @@ export function initBattleship(root: HTMLElement): void {
 
   el.rotate.addEventListener('click', rotate);
 
-  // R rotates during setup, wherever focus is inside the game (no text fields here to type into).
-  root.addEventListener('keydown', (event) => {
-    if (phase !== 'setup' || event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
-    if (event.key !== 'r' && event.key !== 'R') return;
+  function onRotateKey(event: KeyboardEvent): void {
+    if (phase !== 'setup' || !isRotateKey(event)) return;
     event.preventDefault();
     rotate();
+  }
+
+  // R rotates during setup, wherever focus is inside the game (no text fields here to type into).
+  root.addEventListener('keydown', onRotateKey);
+
+  // A mouse user aims with the pointer and may never have put focus inside the game (Safari and
+  // Firefox on macOS do not focus a clicked button or radio). So while the pointer rests on the
+  // player's board during setup, R rotates from anywhere on the page, except while typing.
+  document.addEventListener('keydown', (event) => {
+    if (hover === null || event.defaultPrevented) return;
+    const target = event.target;
+    // Keys from inside the game went through the listener above.
+    if (target instanceof Node && root.contains(target)) return;
+    if (isTypingTarget(target instanceof HTMLElement ? target : null)) return;
+    onRotateKey(event);
   });
 
   el.randomize.addEventListener('click', () => {

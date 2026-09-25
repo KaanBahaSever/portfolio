@@ -35,6 +35,14 @@ const evalHintId = `${id}-eval-hint`;
 const rows = [0, 1, 2];
 
 const segments = (count: 2 | 3) => [gameUi.segmented, count === 2 ? 'grid-cols-2' : 'grid-cols-3'];
+
+/*
+ * Score cells. The longest labels ("Beraberlik", "Bilgisayar") are ten uppercase mono characters,
+ * about 82px with the label tracking: phones get a narrower padding, and the narrowest phones plain
+ * tracking, so a label never breaks inside the word.
+ */
+const scoreCell = 'px-1 py-3 text-center sm:px-2';
+const scoreLabel = 'label-mono text-zinc-600 max-[359px]:tracking-normal dark:text-zinc-400';
 ---
 
 <section data-tictactoe aria-labelledby={headingId} class="mt-8 sm:mt-10">
@@ -58,7 +66,8 @@ const segments = (count: 2 | 3) => [gameUi.segmented, count === 2 ? 'grid-cols-2
         <p id={helpId} class="sr-only">{m.boardHelp}</p>
 
         <div class="board relative isolate mt-4 aspect-square w-full">
-          <div class="bg-graph mask-fade-radial pointer-events-none absolute -inset-6 -z-10" aria-hidden="true"></div>
+          {/* Phones: the board fills the column, so the paper stays inside the 16px page gutter. */}
+          <div class="bg-graph mask-fade-radial pointer-events-none absolute -inset-4 -z-10 sm:-inset-6" aria-hidden="true"></div>
           {/* The # rules: four continuous hairlines with open ends, like a grid drawn by hand. */}
           <svg class="rules" viewBox="0 0 300 300" aria-hidden="true" focusable="false">
             <line x1="100" y1="6" x2="100" y2="294" />
@@ -110,16 +119,16 @@ const segments = (count: 2 | 3) => [gameUi.segmented, count === 2 ? 'grid-cols-2
         <dl
           class="mt-6 grid grid-cols-3 divide-x divide-zinc-200 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900"
         >
-          <div class="px-2 py-3 text-center">
-            <dt data-score-label="a" class="label-mono text-zinc-600 dark:text-zinc-400">{m.scoreLabels.you}</dt>
+          <div class={scoreCell}>
+            <dt data-score-label="a" class={scoreLabel}>{m.scoreLabels.you}</dt>
             <dd data-score="a" class="mt-1 font-mono text-2xl tabular-nums">0</dd>
           </div>
-          <div class="px-2 py-3 text-center">
-            <dt class="label-mono text-zinc-600 dark:text-zinc-400">{m.scoreLabels.draws}</dt>
+          <div class={scoreCell}>
+            <dt class={scoreLabel}>{m.scoreLabels.draws}</dt>
             <dd data-score="draws" class="mt-1 font-mono text-2xl tabular-nums">0</dd>
           </div>
-          <div class="px-2 py-3 text-center">
-            <dt data-score-label="b" class="label-mono text-zinc-600 dark:text-zinc-400">{m.scoreLabels.computer}</dt>
+          <div class={scoreCell}>
+            <dt data-score-label="b" class={scoreLabel}>{m.scoreLabels.computer}</dt>
             <dd data-score="b" class="mt-1 font-mono text-2xl tabular-nums">0</dd>
           </div>
         </dl>

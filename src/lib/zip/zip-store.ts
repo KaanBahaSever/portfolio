@@ -56,11 +56,30 @@ export interface ZipIndex {
   entries: ZipEntryInfo[];
 }
 
-/** Raised when the archive would need ZIP64 (too large or too many entries) or a name is too long. */
+/**
+ * Which limit was hit: too many entries or too many bytes for an archive without ZIP64, or
+ * an entry name longer than a ZIP header can hold.
+ */
+export type ZipLimitCode = 'too-many-entries' | 'too-large' | 'name-too-long';
+
+/**
+ * Raised when the archive would need ZIP64 (too large or too many entries) or a name is too
+ * long. `code`, `count` and `limit` let the page explain it in the reader's language; the
+ * message is for developers. All three survive a trip through postMessage as plain fields.
+ */
 export class ZipLimitError extends Error {
-  constructor(message: string) {
-    super(message);
+  readonly code: ZipLimitCode;
+  /** The value that went over the limit: entries, archive bytes or name bytes. */
+  readonly count: number;
+  readonly limit: number;
+
+  constructor(code: ZipLimitCode, count: number, limit: number) {
+    const what = code === 'too-many-entries' ? 'Too many files for one ZIP' : code === 'too-large' ? 'The ZIP would exceed 4 GB' : 'A file name is too long for a ZIP';
+    super(`${what} (${count} > ${limit})`);
     this.name = 'ZipLimitError';
+    this.code = code;
+    this.count = count;
+    this.limit = limit;
   }
 }
 
@@ -168,11 +187,7 @@ interface PreparedEntry {
 
 /** Cleans up and de-duplicates names and checks the limits, before any header is written or any CRC is computed. */
 function prepareEntries(entries: ReadonlyArray<{ name: string; size: number; date?: Date | undefined }>): PreparedEntry[] {
-  if (entries.length > MAX_ZIP_ENTRIES) {
-    throw new ZipLimitError(
-      `Too many files for one ZIP (${entries.length.toLocaleString('en-US')}). The limit is ${MAX_ZIP_ENTRIES.toLocaleString('en-US')}.`,
-    );
-  }
+  if (entries.length > MAX_ZIP_ENTRIES) throw new ZipLimitError('too-many-entries', entries.length, MAX_ZIP_ENTRIES);
 
   const encoder = new TextEncoder();
   const used = new Set<string>();
@@ -183,11 +198,9 @@ function prepareEntries(entries: ReadonlyArray<{ name: string; size: number; dat
   for (const entry of entries) {
     const name = uniqueName(normalizeEntryName(entry.name), used);
     const nameBytes = encoder.encode(name);
-    if (nameBytes.length > MAX_NAME_BYTES) throw new ZipLimitError(`A file name is too long for a ZIP: ${name.slice(0, 40)}…`);
+    if (nameBytes.length > MAX_NAME_BYTES) throw new ZipLimitError('name-too-long', nameBytes.length, MAX_NAME_BYTES);
     total += LOCAL_HEADER_SIZE + CENTRAL_HEADER_SIZE + 2 * nameBytes.length + entry.size;
-    if (total > MAX_ZIP_SIZE) {
-      throw new ZipLimitError('The files are too large for one ZIP (the limit is 4 GB). Create fewer files at once.');
-    }
+    if (total > MAX_ZIP_SIZE) throw new ZipLimitError('too-large', total, MAX_ZIP_SIZE);
     prepared.push({ name, nameBytes, size: entry.size, dos: toDosDateTime(entry.date ?? now) });
   }
   return prepared;

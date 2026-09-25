@@ -13,7 +13,7 @@
 import type { PDFDocument } from 'pdf-lib';
 import { extractPages, getPdfInfo, loadPdf } from '../../../lib/pdf/split-pdf.ts';
 import { crc32, createZipIndex } from '../../../lib/zip/zip-store.ts';
-import type { FromSplitWorker, OutputFileInfo, OutputRequest, ToSplitWorker } from './types.ts';
+import type { FromSplitWorker, OutputFileInfo, OutputRequest, ToSplitWorker, WorkerError } from './types.ts';
 
 const scope = self as unknown as {
   postMessage(message: FromSplitWorker, transfer?: Transferable[]): void;
@@ -26,13 +26,19 @@ function post(message: FromSplitWorker, transfer: Transferable[] = []): void {
   scope.postMessage(message, transfer);
 }
 
+/** Copies the fields the page translates from (see WorkerError); everything else stays here. */
+function toWorkerError(error: unknown): WorkerError {
+  if (!(error instanceof Error)) return { name: 'Error', message: String(error) };
+  const info: WorkerError = { name: error.name, message: error.message };
+  const { code, count, limit } = error as Error & { code?: unknown; count?: unknown; limit?: unknown };
+  if (typeof code === 'string') info.code = code;
+  if (typeof count === 'number') info.count = count;
+  if (typeof limit === 'number') info.limit = limit;
+  return info;
+}
+
 function postError(id: number, error: unknown): void {
-  post({
-    type: 'error',
-    id,
-    name: error instanceof Error ? error.name : 'Error',
-    message: error instanceof Error ? error.message : String(error),
-  });
+  post({ type: 'error', id, error: toWorkerError(error) });
 }
 
 async function load(id: number, bytes: Uint8Array): Promise<void> {
@@ -42,7 +48,13 @@ async function load(id: number, bytes: Uint8Array): Promise<void> {
   source = pending;
   try {
     const info = getPdfInfo(await pending);
-    post({ type: 'loaded', id, pageCount: info.pageCount, ...(info.title ? { title: info.title } : {}) });
+    post({
+      type: 'loaded',
+      id,
+      pageCount: info.pageCount,
+      ...(info.title ? { title: info.title } : {}),
+      ...(info.firstPage ? { firstPage: info.firstPage } : {}),
+    });
   } catch (error) {
     if (source === pending) source = null;
     postError(id, error);

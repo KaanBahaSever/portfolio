@@ -217,6 +217,35 @@ test('createZip refuses archives that would need ZIP64', () => {
   assert.throws(() => createZip([{ name: 'x'.repeat(70_000), data: tiny }]), ZipLimitError);
 });
 
+test('ZipLimitError says which limit was hit, with the numbers the page words it with', () => {
+  const tiny = new Uint8Array(0);
+  const tooMany = Array.from({ length: MAX_ZIP_ENTRIES + 1 }, (_, i) => ({ name: `${i}.pdf`, data: tiny }));
+  assert.throws(() => createZip(tooMany), {
+    name: 'ZipLimitError',
+    code: 'too-many-entries',
+    count: MAX_ZIP_ENTRIES + 1,
+    limit: MAX_ZIP_ENTRIES,
+  });
+
+  const huge = { byteLength: 0xffff_ffff, length: 0xffff_ffff } as unknown as Uint8Array;
+  assert.throws(
+    () => createZip([{ name: 'big.pdf', data: huge }]),
+    (error: unknown) => {
+      assert.ok(error instanceof ZipLimitError);
+      assert.equal(error.code, 'too-large');
+      assert.equal(error.limit, 0xffff_fffe);
+      assert.ok(error.count > error.limit);
+      return true;
+    },
+  );
+
+  assert.throws(() => createZip([{ name: 'x'.repeat(70_000), data: tiny }]), {
+    code: 'name-too-long',
+    count: 70_000,
+    limit: 0xffff,
+  });
+});
+
 test('createZipIndex with Blobs builds the same archive as createZip', async () => {
   const date = new Date(2026, 8, 16, 14, 35, 58);
   const files: ZipEntryInput[] = [

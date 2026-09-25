@@ -1,45 +1,38 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
 import PdfSplit from '../../../components/tools/PdfSplit.astro';
-import { localeStaticPaths } from '../../../i18n/server';
+import { ui } from '../../../components/ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { pdfSplitMessages } from '../../../i18n/tools/pdf-split';
 
 export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = pdfSplitMessages[locale];
+const t = common[locale];
+
+// Tips are rich text (keys, code), so each language has its own markup below.
+const strong = 'font-medium text-zinc-900 dark:text-zinc-100';
 ---
 
-<BaseLayout
-  title="Split PDF"
-  description="Extract pages from a PDF or split it into several files right in your browser. Page ranges, equal parts or one file per page. Nothing is uploaded."
-  wide
->
-  <nav aria-label="Breadcrumb" class="pt-2 sm:pt-6">
-    <a
-      href="/tools/"
-      class="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
-        <path d="m15 18-6-6 6-6"></path>
-      </svg>
-      Tools
-    </a>
-  </nav>
-
-  <header class="mt-2 max-w-2xl">
-    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Split PDF</h1>
-    <p class="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      Pull out the pages you need or split a PDF into several files. Everything is processed on your device — nothing
-      is uploaded.
-    </p>
-  </header>
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    title={m.meta.title}
+    eyebrow={m.meta.eyebrow}
+    lead={m.meta.lead}
+    back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+  />
 
   <PdfSplit />
 
-  <details
-    class="group mt-10 rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
-  >
+  <details class:list={[ui.card, 'group mt-12']}>
     <summary
-      class="flex min-h-12 list-none items-center justify-between gap-3 rounded-xl px-4 text-base font-semibold sm:px-5 [&::-webkit-details-marker]:hidden"
+      class="flex min-h-12 list-none items-center justify-between gap-3 rounded-xl px-4 font-serif text-lg font-medium sm:px-5 [&::-webkit-details-marker]:hidden"
     >
-      Tips
+      {m.meta.tips}
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -53,35 +46,81 @@ export const getStaticPaths = () => localeStaticPaths();
         <path d="m6 9 6 6 6-6"></path>
       </svg>
     </summary>
-    <ul
-      class="flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400"
-    >
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Writing pages:</strong> separate pages and ranges
-        with commas, like <span class="whitespace-nowrap">1-3, 5, 8-</span>. “8-” runs to the last page, “-4” starts at
-        page 1, and “end” means the last page.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Reordering:</strong> “Extract pages” keeps the
-        order you type, so “3, 1, 2” moves page 3 to the front and “10-1” reverses the pages.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Several files</strong> are downloaded together as
-        one ZIP. Most phones and computers open ZIP files without extra apps.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">What isn’t kept:</strong> bookmarks, fillable form
-        fields and links that jump to other pages. The pages themselves look the same, and web links still work.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Password-protected PDFs</strong> aren’t supported,
-        including files that only restrict editing or printing. Open the file in a PDF app, save an unprotected copy,
-        and split that instead.
-      </li>
-      <li>
-        <strong class="font-medium text-zinc-900 dark:text-zinc-100">Very large PDFs</strong> need a lot of memory. If
-        the page reloads on a phone, try on a computer.
-      </li>
-    </ul>
+    {
+      locale === 'tr' ? (
+        <ul class="flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400">
+          <li>
+            <strong class={strong}>Sayfa seçmek:</strong> sayfalara tıklayın ya da dokunun. <kbd class={ui.kbd}>Shift</kbd>{' '}
+            tuşu basılıyken tıklarsanız aradaki tüm sayfalar da seçilir. Klavyeyle ok tuşlarıyla gezinip{' '}
+            <kbd class={ui.kbd}>Boşluk</kbd> tuşuna basın; <kbd class={ui.kbd}>Shift</kbd>+<kbd class={ui.kbd}>Boşluk</kbd>{' '}
+            bir aralık seçer, <kbd class={ui.kbd}>Ctrl</kbd>+<kbd class={ui.kbd}>A</kbd> (Mac’te{' '}
+            <kbd class={ui.kbd}>⌘</kbd>+<kbd class={ui.kbd}>A</kbd>) tüm sayfaları seçer.
+          </li>
+          <li>
+            <strong class={strong}>Sayfa yazmak:</strong> sayfaları ve aralıkları virgülle ayırın, ör.{' '}
+            <code class={ui.code}>1-3, 5, 8-</code>. “8-” son sayfaya kadar gider, “-4” ilk sayfadan başlar; “son” (ya da
+            “end”) son sayfa demektir. Yazdıklarınız seçimi günceller; sayfalara tıkladığınızda da alan yeniden yazılır.
+          </li>
+          <li>
+            <strong class={strong}>Sıralama:</strong> “Sayfaları çıkar” yazdığınız sırayı korur: “3, 1, 2” yazarsanız 3.
+            sayfa başa geçer, “10-1” ise sayfaları ters sıraya dizer. Sayfalara tıkladığınızda bu sıra korunur ve yeni
+            seçtikleriniz sona eklenir.
+          </li>
+          <li>
+            <strong class={strong}>Birden çok dosya</strong> tek bir ZIP olarak indirilir. Çoğu telefon ve bilgisayar ZIP
+            dosyalarını ek bir uygulamaya gerek kalmadan açar.
+          </li>
+          <li>
+            <strong class={strong}>Neler korunmaz:</strong> yer imleri, doldurulabilir form alanları ve başka sayfalara
+            götüren bağlantılar. Sayfaların görünümü aynı kalır; web bağlantıları da çalışmaya devam eder.
+          </li>
+          <li>
+            <strong class={strong}>Parola korumalı PDF’ler</strong> desteklenmez; yalnızca düzenlemeyi ya da yazdırmayı
+            kısıtlayan dosyalar da buna dahildir. Dosyayı bir PDF uygulamasında açıp korumasız bir kopyasını kaydedin ve o
+            kopyayı bölün.
+          </li>
+          <li>
+            <strong class={strong}>Çok büyük PDF’ler</strong> çok bellek gerektirir. Uzun belgelerde önizlemeler siz
+            isteyene kadar kapalı kalır; telefonda sayfa yeniden yüklenirse bir bilgisayarda deneyin.
+          </li>
+        </ul>
+      ) : (
+        <ul class="flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400">
+          <li>
+            <strong class={strong}>Selecting pages:</strong> click or tap pages in the grid. Hold{' '}
+            <kbd class={ui.kbd}>Shift</kbd> while clicking to select every page in between. With the keyboard, move with
+            the arrow keys and press <kbd class={ui.kbd}>Space</kbd>; <kbd class={ui.kbd}>Shift</kbd>+<kbd class={ui.kbd}
+              >Space</kbd
+            > selects a range, and <kbd class={ui.kbd}>Ctrl</kbd>+<kbd class={ui.kbd}>A</kbd> (<kbd class={ui.kbd}>⌘</kbd
+            >+<kbd class={ui.kbd}>A</kbd> on a Mac) selects them all.
+          </li>
+          <li>
+            <strong class={strong}>Writing pages:</strong> separate pages and ranges with commas, like{' '}
+            <code class={ui.code}>1-3, 5, 8-</code>. “8-” runs to the last page, “-4” starts at page 1, and “end” means
+            the last page. Typing updates the selection, and clicking pages rewrites the field.
+          </li>
+          <li>
+            <strong class={strong}>Reordering:</strong> “Extract pages” keeps the order you type, so “3, 1, 2” moves page
+            3 to the front and “10-1” reverses the pages. Clicking pages keeps that order and adds new pages at the end.
+          </li>
+          <li>
+            <strong class={strong}>Several files</strong> are downloaded together as one ZIP. Most phones and computers
+            open ZIP files without extra apps.
+          </li>
+          <li>
+            <strong class={strong}>What isn’t kept:</strong> bookmarks, fillable form fields and links that jump to other
+            pages. The pages themselves look the same, and web links still work.
+          </li>
+          <li>
+            <strong class={strong}>Password-protected PDFs</strong> aren’t supported, including files that only restrict
+            editing or printing. Open the file in a PDF app, save an unprotected copy, and split that instead.
+          </li>
+          <li>
+            <strong class={strong}>Very large PDFs</strong> need a lot of memory. Previews of long documents wait until
+            you ask for them; if the page reloads on a phone, try on a computer.
+          </li>
+        </ul>
+      )
+    }
   </details>
 </BaseLayout>

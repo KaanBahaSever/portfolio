@@ -18,9 +18,6 @@ import {
 } from 'pdf-lib';
 import type { PDFPage } from 'pdf-lib';
 import {
-  DAMAGED_PDF_MESSAGE,
-  NOT_A_PDF_MESSAGE,
-  PASSWORD_PROTECTED_MESSAGE,
   PdfInvalidError,
   PdfPasswordError,
   extractPages,
@@ -84,12 +81,28 @@ function annotationsOf(doc: PDFDocument, page: PDFPage): PDFDict[] {
 
 const tenPages = await makePdf(10);
 
-test('loadPdfInfo reads the page count and title', async () => {
-  assert.deepEqual(await loadPdfInfo(tenPages), { pageCount: 10, title: 'Test document' });
+test('loadPdfInfo reads the page count, title and first page size', async () => {
+  assert.deepEqual(await loadPdfInfo(tenPages), {
+    pageCount: 10,
+    title: 'Test document',
+    firstPage: { width: 100, height: 200 },
+  });
   const untitled = await makePdf(2, (doc) => {
     doc.setTitle('   ');
   });
-  assert.deepEqual(await loadPdfInfo(untitled), { pageCount: 2 });
+  assert.deepEqual(await loadPdfInfo(untitled), { pageCount: 2, firstPage: { width: 100, height: 200 } });
+});
+
+test('the first page size is as displayed: crop box, then rotation', async () => {
+  const turned = await makePdf(2, (_doc, pages) => {
+    pages[0]!.setRotation(degrees(90));
+    pages[0]!.setCropBox(0, 0, 80, 150);
+  });
+  assert.deepEqual((await loadPdfInfo(turned)).firstPage, { width: 150, height: 80 });
+  const upsideDown = await makePdf(1, (_doc, pages) => {
+    pages[0]!.setRotation(degrees(-180));
+  });
+  assert.deepEqual((await loadPdfInfo(upsideDown)).firstPage, { width: 100, height: 200 });
 });
 
 test('loadPdf keeps one parsed document that can be split repeatedly', async () => {
@@ -128,7 +141,7 @@ test('extractPages rejects empty and out-of-range selections', async () => {
 
 async function runPlan(mode: SplitMode, input: string, doc: PDFDocument) {
   const plan = planOutputs(mode, input, doc.getPageCount(), 'source.pdf');
-  assert.ok(plan.ok, plan.ok ? '' : plan.error);
+  assert.ok(plan.ok, plan.ok ? '' : JSON.stringify(plan.error));
   const outputs = [];
   for (const output of plan.outputs) {
     outputs.push({ filename: output.filename, indices: output.indices, doc: await reload(await extractPages(doc, output.indices)) });
@@ -281,7 +294,7 @@ test('encrypted PDFs are reported as password-protected', async () => {
   await assert.rejects(loadPdf(bytes), (error: unknown) => {
     assert.ok(error instanceof PdfPasswordError);
     assert.equal(error.name, 'PdfPasswordError');
-    assert.equal(error.message, PASSWORD_PROTECTED_MESSAGE);
+    assert.equal(error.code, 'encrypted');
     return true;
   });
   await assert.rejects(loadPdfInfo(bytes), PdfPasswordError);
@@ -317,7 +330,7 @@ function linearizedXrefStreamPdf(encrypted: boolean): Uint8Array {
 
 test('an encrypted file is detected when its last cross-reference stream omits /Encrypt', async () => {
   const info = await loadPdfInfo(linearizedXrefStreamPdf(false));
-  assert.deepEqual(info, { pageCount: 1, title: 'Scanned letter' });
+  assert.deepEqual(info, { pageCount: 1, title: 'Scanned letter', firstPage: { width: 100, height: 100 } });
   await assert.rejects(loadPdf(linearizedXrefStreamPdf(true)), PdfPasswordError);
 });
 
@@ -328,7 +341,8 @@ test('toLoadError maps pdf-lib failures', () => {
   assert.ok(toLoadError(new Error('invalid stored block lengths'), encryptedBytes) instanceof PdfPasswordError);
   const damaged = toLoadError(new Error('Failed to parse PDF document'), new TextEncoder().encode('%PDF-1.7'));
   assert.ok(damaged instanceof PdfInvalidError);
-  assert.equal(damaged.message, DAMAGED_PDF_MESSAGE);
+  assert.equal(damaged.code, 'damaged');
+  assert.equal(damaged.name, 'PdfInvalidError');
   const oom = new RangeError('Array buffer allocation failed');
   assert.equal(toLoadError(oom), oom);
   assert.ok(toLoadError(new RangeError('Maximum call stack size exceeded')) instanceof PdfInvalidError);
@@ -346,11 +360,21 @@ test('files that are not PDFs or are damaged are rejected clearly', async () => 
   const encoder = new TextEncoder();
   await assert.rejects(loadPdf(encoder.encode('<!doctype html><title>nope</title>')), (error: unknown) => {
     assert.ok(error instanceof PdfInvalidError);
-    assert.equal(error.message, NOT_A_PDF_MESSAGE);
+    assert.equal(error.code, 'not-pdf');
     return true;
   });
-  await assert.rejects(loadPdf(encoder.encode('%PDF-1.7\nthis is not really a pdf\n%%EOF')), PdfInvalidError);
-  await assert.rejects(loadPdf(new Uint8Array(0)), PdfInvalidError);
+  await assert.rejects(loadPdf(encoder.encode('%PDF-1.7\nthis is not really a pdf\n%%EOF')), (error: unknown) => {
+    assert.ok(error instanceof PdfInvalidError);
+    assert.equal(error.code, 'damaged');
+    return true;
+  });
+  await assert.rejects(loadPdf(new Uint8Array(0)), { name: 'PdfInvalidError', code: 'not-pdf' });
+});
+
+test('a PDF without pages is rejected with its own code', async () => {
+  // pdf-lib adds a blank page on save unless told not to.
+  const empty = await (await PDFDocument.create()).save({ addDefaultPage: false });
+  await assert.rejects(loadPdf(empty), { name: 'PdfInvalidError', code: 'no-pages' });
 });
 
 /** Pseudo-random bytes, so a fake image keeps its size in the file. */

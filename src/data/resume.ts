@@ -93,7 +93,7 @@ export const EXPERIENCE: readonly ExperienceItem[] = [
     end: '2024-03',
     summary: {
       en: 'Owned the end-to-end software development lifecycle, from relational schema design in PostgreSQL to RESTful APIs in Python and Flask with a jQuery front end.',
-      tr: "Yazılım geliştirme yaşam döngüsünü uçtan uca üstlendim: PostgreSQL ile ilişkisel şema tasarımından Python ve Flask ile yazılan RESTful API'lere ve jQuery tabanlı ön yüze kadar.",
+      tr: 'Yazılım geliştirme yaşam döngüsünü uçtan uca üstlendim: PostgreSQL ile ilişkisel şema tasarımından Python ve Flask ile yazılan RESTful API’lere ve jQuery tabanlı ön yüze kadar.',
     },
     highlights: {
       en: [

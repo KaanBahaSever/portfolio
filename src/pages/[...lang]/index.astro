@@ -63,9 +63,13 @@ const personJsonLd = JSON.stringify({
   knowsLanguage: ['tr', 'en'],
   sameAs: SITE.socials.map((social) => social.href),
 }).replace(/</g, '\\u003c');
+
+// The owner's headline is also the page title, so browser tabs, search results and share cards
+// carry it; BaseLayout adds the name ("Software Developer | … · Kaan Baha Sever").
+const headline = pick(SITE.role, locale);
 ---
 
-<BaseLayout title={SITE.name} description={pick(SITE.description, locale)} width="wide">
+<BaseLayout title={headline} description={pick(SITE.description, locale)} width="wide">
   <script slot="head" type="application/ld+json" is:inline set:html={personJsonLd} />
 
   <Hero />

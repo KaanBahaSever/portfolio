@@ -2,8 +2,10 @@
 /**
  * The console: a full-viewport, pitch-black terminal in JetBrains Mono.
  *
- * - Toolbar (top right): font size − / +, phosphor colour (green / amber), Exit. Both settings
- *   are remembered; ConsolePrefs.astro applies them before the first paint.
+ * - Toolbar (top right): font size − / +, phosphor colour (green / amber), the other language,
+ *   Exit. Both settings are remembered; ConsolePrefs.astro applies them before the first paint.
+ *   The page is bare (no site header), so the language link is here; the controller remembers
+ *   the choice as the header would.
  * - Transcript: a role="log" live region. Output is typed out in an inert copy and committed
  *   whole (src/scripts/console/typewriter.ts), so screen readers hear each output once.
  * - Command line: a real, labelled <input> laid transparently over a mirror that draws the text
@@ -11,7 +13,9 @@
  * - Data: the virtual file system and documents, built at build time for this page's language,
  *   travel as JSON in a <script type="application/json"> (escaped by serializeJson()).
  */
+import { LOCALE_META, otherLocale, switchLocalePath } from '../../i18n/config';
 import { consoleMessages } from '../../i18n/console/messages';
+import { common } from '../../i18n/messages/common';
 import { getLocale } from '../../i18n/server';
 import { serializeJson, type ConsoleData } from '../../lib/console/data';
 import { DEFAULT_FONT_SIZE, DEFAULT_PHOSPHOR, PHOSPHORS } from '../../lib/console/prefs';
@@ -22,16 +26,36 @@ interface Props {
 }
 
 const { data } = Astro.props;
-const m = consoleMessages[getLocale(Astro)];
+const locale = getLocale(Astro);
+const m = consoleMessages[locale];
 const prompt = `${data.user}@${data.host}:${promptPath([])}$`;
+
+// The console in the other language, labelled like the header's switch: the short code, named
+// in its own language ("TR, Türkçe oku" / "EN, Read in English").
+const other = otherLocale(locale);
+const switchLanguage = {
+  locale: other,
+  href: switchLocalePath(Astro.url.pathname, other),
+  short: LOCALE_META[other].short,
+  htmlLang: LOCALE_META[other].htmlLang,
+  label: common[other].language.switchTo,
+};
 ---
 
 <div class="console flex min-h-dvh flex-col font-mono" data-console>
   <header class="console-bar sticky top-0 z-10" data-console-bar>
     <div class="px-safe flex h-14 items-center justify-between gap-2">
       <h1 class="sr-only">{m.title}</h1>
-      <p class="min-w-0 truncate" aria-hidden="true">kbs-os<span class="max-sm:hidden"> · tty1</span></p>
-      <div class="flex shrink-0 items-center gap-1 sm:gap-3" role="group" aria-label={m.toolbar.label}>
+      {/*
+        Below 375px the toolbar needs every pixel for its 44px targets: the decorative name and
+        the gaps go, and the size value is only announced (the text itself shows the change).
+      */}
+      <p class="min-w-0 truncate max-[375px]:hidden" aria-hidden="true">kbs-os<span class="max-sm:hidden"> · tty1</span></p>
+      <div
+        class="ml-auto flex shrink-0 items-center gap-1 max-[375px]:gap-0 sm:gap-3"
+        role="group"
+        aria-label={m.toolbar.label}
+      >
         <div class="flex items-center" role="group" aria-label={m.toolbar.fontSize}>
           <button
             type="button"
@@ -42,7 +66,7 @@ const prompt = `${data.user}@${data.host}:${promptPath([])}$`;
           >
             <span aria-hidden="true">A<span class="console-tool-sign">−</span></span>
           </button>
-          <output class="console-size" data-font-value aria-live="polite">
+          <output class="console-size max-[375px]:sr-only" data-font-value aria-live="polite">
             {m.toolbar.fontSizeValue(DEFAULT_FONT_SIZE)}
           </output>
           <button
@@ -71,6 +95,16 @@ const prompt = `${data.user}@${data.host}:${promptPath([])}$`;
             ))
           }
         </div>
+        <a
+          href={switchLanguage.href}
+          hreflang={switchLanguage.htmlLang}
+          lang={switchLanguage.htmlLang}
+          data-set-locale={switchLanguage.locale}
+          class="console-tool"
+        >
+          {switchLanguage.short}
+          <span class="sr-only">{`, ${switchLanguage.label}`}</span>
+        </a>
         <a href={data.home} class="console-tool console-exit">{m.toolbar.exit}</a>
       </div>
     </div>
@@ -359,7 +393,11 @@ const prompt = `${data.user}@${data.host}:${promptPath([])}$`;
     text-shadow: 0 0 0.4em rgb(var(--ph-rgb) / 0.9);
   }
 
-  /* Command line: the transparent input covers the mirror, which draws the text and cursor. */
+  /*
+   * Command line: the transparent input covers the mirror, which draws the text and cursor. The
+   * input's own text sits elsewhere (under the prompt, in 16px), so the controller places clicks
+   * and taps by the mirror's characters.
+   */
   .console-cmdline {
     position: relative;
   }

@@ -4,6 +4,8 @@ import { test } from 'node:test';
 import { LOCALES } from '../src/i18n/config.ts';
 import { consoleContent } from '../src/i18n/console/content.ts';
 import { consoleMessages } from '../src/i18n/console/messages.ts';
+import { common } from '../src/i18n/messages/common.ts';
+import { projectsMessages } from '../src/i18n/messages/projects.ts';
 import { COMMANDS, execute } from '../src/lib/console/commands.ts';
 import type { ShellError } from '../src/lib/console/commands.ts';
 import { buildConsoleData, serializeJson } from '../src/lib/console/data.ts';
@@ -143,7 +145,7 @@ test('project files show the stack, status, page and links in the page language'
   const tr = build('tr');
   const karecik = fileLines(tr, ['projects', 'karecik.txt']).map(plainText).join('\n');
   assert.match(karecik, /teknolojiler Go · PostgreSQL · Cloudflare/);
-  assert.match(karecik, /durum Açık kaynak · Yayında/);
+  assert.match(karecik, /durum Açık kaynak · Canlıda/);
   assert.match(karecik, /sayfa \/tr\/projects\/karecik\//);
   assert.match(karecik, /kaynak kodu github\.com\/KaanBahaSever\/karecik/);
 
@@ -151,6 +153,17 @@ test('project files show the stack, status, page and links in the page language'
   assert.match(asion, /status Private · Early access/);
   assert.match(asion, /since 2024/);
   assert.match(asion, /site asion\.app/);
+});
+
+test('project stages use the same names as the project cards and pages', () => {
+  for (const locale of LOCALES) {
+    const { stages, openSource, private: closed } = consoleContent[locale].project;
+    assert.equal(stages.production, projectsMessages[locale].stage.production, locale);
+    assert.equal(stages['early-access'], common[locale].badges.earlyAccess, locale);
+    assert.equal(stages['in-development'], common[locale].badges.inDevelopment, locale);
+    assert.equal(openSource, common[locale].badges.openSource, locale);
+    assert.equal(closed, common[locale].badges.private, locale);
+  }
 });
 
 test('an untranslated project summary is marked as English on the Turkish page', () => {

@@ -4,14 +4,19 @@
  * The command line is a real <input>, made transparent and laid over a "mirror" that draws the
  * typed text with a block cursor (a native caret can be neither a block nor glow). The input
  * keeps focus, selection, IME and on-screen keyboards working; the mirror only follows it.
+ * Clicks and taps are the exception: they are placed by the mirror's layout (see "Pointer").
  * Commands run through the pure shell in src/lib/console/, and their structured output is
  * rendered by ./render.ts in the page language.
  *
- * Stored in localStorage (when allowed): font size, phosphor colour and the last commands.
+ * Stored in localStorage (when allowed): font size, phosphor colour, the last commands, and the
+ * language when the visitor switches it here (the key the site header uses).
  */
 import { getPageLocale } from '../../i18n/client.ts';
+import { isLocale, LOCALE_STORAGE_KEY } from '../../i18n/config.ts';
 import { consoleMessages } from '../../i18n/console/messages.ts';
 import { common } from '../../i18n/messages/common.ts';
+import { caretAt, characterAt, wordAt } from '../../lib/console/caret.ts';
+import type { CharBox } from '../../lib/console/caret.ts';
 import { execute } from '../../lib/console/commands.ts';
 import { complete } from '../../lib/console/complete.ts';
 import type { ConsoleData } from '../../lib/console/data.ts';
@@ -117,6 +122,94 @@ export function initConsole(root: HTMLElement): void {
 
   function keepInputInView(): void {
     els.form.scrollIntoView({ block: 'nearest', behavior: 'instant' });
+  }
+
+  // ---- Pointer ----------------------------------------------------------------------------
+  // The input covers the whole command line, prompt included, in a fixed 16px font that never
+  // wraps, so its own hit testing would put the caret under a different character from the one
+  // drawn there. Clicks and taps are placed by the mirror's characters instead.
+
+  /** Where the mirror drew each character, with its offset in the command line. */
+  function mirrorBoxes(): CharBox[] {
+    const boxes: CharBox[] = [];
+    const range = document.createRange();
+    const walker = document.createTreeWalker(els.mirror, NodeFilter.SHOW_TEXT);
+    // The mirror's text is the value in order (the cursor block holds the character under the
+    // caret), plus one space for the cursor at the end of the line.
+    let offset = 0;
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      const text = (node as Text).data;
+      for (let i = 0; i < text.length; ) {
+        const size = (text.codePointAt(i) ?? 0) > 0xffff ? 2 : 1;
+        range.setStart(node, i);
+        range.setEnd(node, i + size);
+        const { left, right, top, bottom } = range.getBoundingClientRect();
+        boxes.push({ start: offset + i, end: offset + i + size, left, right, top, bottom });
+        i += size;
+      }
+      offset += text.length;
+    }
+    return boxes;
+  }
+
+  /** The caret offset for a point (never past the end: the cursor's own space is not text). */
+  function caretFromPoint(x: number, y: number): number {
+    return Math.min(caretAt(mirrorBoxes(), x, y) ?? 0, els.input.value.length);
+  }
+
+  function select(anchor: number, focus: number): void {
+    const direction = focus < anchor ? 'backward' : 'forward';
+    els.input.setSelectionRange(Math.min(anchor, focus), Math.max(anchor, focus), direction);
+    renderMirror();
+  }
+
+  /** The kind of pointer behind the next mousedown/click on the input ('mouse', 'touch', 'pen'). */
+  let pointerType = '';
+
+  /**
+   * Mouse: the whole gesture is handled here (the native one would follow the input's layout):
+   * click places the caret, drag or Shift+click selects, double-click selects a word (a run of
+   * non-spaces, like a terminal) and triple-click the line.
+   */
+  function onMouseDown(event: MouseEvent): void {
+    if (pointerType !== 'mouse' || event.button !== 0) return;
+    event.preventDefault();
+    const hadFocus = document.activeElement === els.input;
+    const previousAnchor = els.input.selectionDirection === 'backward' ? els.input.selectionEnd : els.input.selectionStart;
+    els.input.focus({ preventScroll: true });
+    const { value } = els.input;
+
+    if (event.detail >= 3) {
+      select(0, value.length);
+      return;
+    }
+    if (event.detail === 2) {
+      const word = wordAt(value, characterAt(mirrorBoxes(), event.clientX, event.clientY) ?? value.length);
+      select(word.start, word.end);
+      return;
+    }
+
+    const at = caretFromPoint(event.clientX, event.clientY);
+    const anchor = event.shiftKey && hadFocus && previousAnchor !== null ? previousAnchor : at;
+    select(anchor, at);
+    const move = (moved: MouseEvent) => select(anchor, caretFromPoint(moved.clientX, moved.clientY));
+    const release = () => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', release);
+    };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', release);
+  }
+
+  /**
+   * Touch and pen: the tap itself stays native (focusing the input is what opens the on-screen
+   * keyboard, and long-press paste keeps working); the caret is then moved to the character
+   * that was tapped. A selection made with the system handles is left alone.
+   */
+  function onTap(event: MouseEvent): void {
+    if ((pointerType !== 'touch' && pointerType !== 'pen') || els.input.selectionStart !== els.input.selectionEnd) return;
+    const at = caretFromPoint(event.clientX, event.clientY);
+    select(at, at);
   }
 
   // ---- The transcript ---------------------------------------------------------------------
@@ -263,6 +356,12 @@ export function initConsole(root: HTMLElement): void {
   for (const type of ['keyup', 'select', 'pointerup'] as const) {
     els.input.addEventListener(type, renderMirror);
   }
+  // pointerdown always comes before the mousedown and click it causes, and says which device.
+  els.input.addEventListener('pointerdown', (event) => {
+    pointerType = event.pointerType;
+  });
+  els.input.addEventListener('mousedown', onMouseDown);
+  els.input.addEventListener('click', onTap);
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === els.input) renderMirror();
   });
@@ -319,6 +418,18 @@ export function initConsole(root: HTMLElement): void {
       writeStorage(STORAGE_KEYS.phosphor, phosphor);
     });
   }
+
+  // The language link in the toolbar: remember the choice, as the site header does (the header
+  // is not on this page). Otherwise a language stored earlier would send the visitor straight
+  // back. Middle-click counts too: the new tab opens in the chosen language.
+  function rememberLocale(event: MouseEvent): void {
+    if (event.type === 'auxclick' && event.button !== 1) return;
+    const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[data-set-locale]') : null;
+    const choice = link?.dataset.setLocale;
+    if (isLocale(choice)) writeStorage(LOCALE_STORAGE_KEY, choice);
+  }
+  root.addEventListener('click', rememberLocale);
+  root.addEventListener('auxclick', rememberLocale);
 
   // Coming back with the Back button restores this page from the back/forward cache.
   window.addEventListener('pageshow', (event) => {

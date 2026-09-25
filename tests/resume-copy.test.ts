@@ -5,6 +5,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { HEADLINE_SEPARATOR, headlineParts } from '../src/components/home/headline.ts';
+import { SITE } from '../src/config/site.ts';
 import * as resume from '../src/data/resume.ts';
 import { JOURNEY_CHAPTERS, homeMessages } from '../src/i18n/messages/home.ts';
 import { NOT_FOUND_LINKS, notFoundMessages } from '../src/i18n/messages/not-found.ts';
@@ -92,6 +94,44 @@ test('English copy keeps the house voice: no hype words, no exclamation marks', 
     assert.doesNotMatch(text, banned, text);
     assert.ok(!text.includes('!'), `exclamation mark in "${text}"`);
   }
+});
+
+test('the hero shows the headline verbatim: its two halves around the bar', () => {
+  for (const locale of ['en', 'tr'] as const) {
+    const headline = SITE.role[locale];
+    const { role, specialty } = headlineParts(headline);
+    assert.ok(role.trim() && specialty.trim(), `${locale}: the headline should have two halves`);
+    assert.equal(`${role}${HEADLINE_SEPARATOR}${specialty}`, headline);
+  }
+  assert.deepEqual(headlineParts('Software Developer | Math-Driven Solutions & Algorithms'), {
+    role: 'Software Developer',
+    specialty: 'Math-Driven Solutions & Algorithms',
+  });
+  assert.deepEqual(headlineParts('No bar here'), { role: 'No bar here', specialty: '' });
+  assert.deepEqual(headlineParts('a | b | c'), { role: 'a', specialty: 'b | c' });
+});
+
+test('the figure’s pause and play buttons have distinct names in both languages', () => {
+  for (const locale of ['en', 'tr'] as const) {
+    const { pause, play } = homeMessages[locale].figure;
+    assert.notEqual(pause, play, locale);
+  }
+});
+
+/** Every Turkish string: the catalogues' Turkish side and the résumé without its English fields. */
+function turkishStrings(): string[] {
+  const resumeTr = JSON.parse(JSON.stringify(resume, (key, value) => (key === 'en' ? undefined : value)));
+  return [...strings(homeMessages.tr), ...strings(notFoundMessages.tr), ...strings(resumeTr)];
+}
+
+test('Turkish suffixes after a name take the typographic apostrophe (API’lere, not API\'lere)', () => {
+  for (const text of turkishStrings()) assert.doesNotMatch(text, /\p{L}'\p{L}/u, text);
+});
+
+test('Turkish copy names linear algebra "lineer cebir", as the About page and the console do', () => {
+  const turkish = turkishStrings().join(' ');
+  assert.match(turkish, /lineer cebir/i);
+  assert.doesNotMatch(turkish, /doğrusal cebir/i);
 });
 
 test('Turkish copy uses Turkish letters where Turkish needs them', () => {

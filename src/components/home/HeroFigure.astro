@@ -10,6 +10,8 @@
  * - The script turns the point slowly (one turn every 16 s) with requestAnimationFrame, only
  *   while the figure is on screen and the tab is visible. A fine pointer moving across the
  *   hero nudges the phase a little. With prefers-reduced-motion the figure stays still.
+ * - The rotation starts by itself and never ends, so a button in the corner pauses and plays
+ *   it (WCAG 2.2.2 Pause, Stop, Hide); the choice is remembered in this browser.
  * - The SVG is decorative (aria-hidden); the visible caption says what it shows.
  */
 import { homeMessages } from '../../i18n/messages/home';
@@ -192,6 +194,46 @@ const tickLabels = [
           data-part="point"></circle>
       </g>
     </svg>
+    {/*
+      Pause/play for the rotation. Hidden until the script starts it, so there is no button
+      without JavaScript or with reduced motion, when the figure is still anyway. The name
+      follows the state through CSS alone: the label that does not apply is display: none,
+      which also leaves it out of the accessible name. The bottom-right corner is the emptiest
+      part of the drawing; the button is transparent until hovered.
+    */}
+    <button
+      type="button"
+      class="group/toggle absolute right-1.5 bottom-1.5 inline-flex size-11 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+      data-figure-toggle
+      hidden
+    >
+      <svg
+        viewBox="0 0 16 16"
+        class="size-4 group-data-[paused]/toggle:hidden"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M5.5 3.5v9M10.5 3.5v9"></path>
+      </svg>
+      <svg
+        viewBox="0 0 16 16"
+        class="hidden size-4 group-data-[paused]/toggle:block"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M5 3.25v9.5L12.75 8Z"></path>
+      </svg>
+      <span class="sr-only group-data-[paused]/toggle:hidden">{m.pause}</span>
+      <span class="sr-only hidden group-data-[paused]/toggle:inline">{m.play}</span>
+    </button>
   </div>
   <figcaption class="mt-3 flex gap-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
     <span class="label-mono shrink-0 pt-0.5 text-zinc-900 dark:text-zinc-100">{m.label}</span>
@@ -237,6 +279,7 @@ const tickLabels = [
 
 <script>
   import { FIGURE, angleLabelPoint, anglePath, pointOnCircle, svgNumber, wavePath } from './hero-figure-geometry';
+  import { localStore } from '../../lib/storage';
 
   /** One full turn every 16 s: slow enough to read as calm, not busy. */
   const RADIANS_PER_MS = (2 * Math.PI) / 16_000;
@@ -245,6 +288,8 @@ const tickLabels = [
   /** Rotation starts after the draw-in has finished, and eases up to speed. */
   const START_DELAY_MS = 1400;
   const RAMP_MS = 1500;
+  /** Set ('1') while the visitor has paused the figure; shared by both languages. */
+  const PAUSED_KEY = 'kbs-home:figure-paused';
 
   const svg = document.querySelector<SVGSVGElement>('[data-hero-figure]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -264,13 +309,18 @@ const tickLabels = [
     const point = part('point');
     if (!wave || !radius || !arc || !projection || !drop || !theta || !head || !halo || !point) return;
 
+    const toggle = svg.closest('figure')?.querySelector<HTMLButtonElement>('[data-figure-toggle]') ?? null;
+
     let angle: number = FIGURE.initialAngle;
     let phase = 0;
     let targetPhase = 0;
     let startedAt = 0;
+    /** Wait before easing up to speed: the draw-in at first, nothing after a resume. */
+    let startDelay = START_DELAY_MS;
     let last = 0;
     let frame = 0;
     let onScreen = false;
+    let paused = localStore.get(PAUSED_KEY) === '1';
 
     function render(value: number) {
       const p = pointOnCircle(value);
@@ -296,7 +346,7 @@ const tickLabels = [
       // Clamp the step so a long pause (a dropped frame, a background tab) never jumps the figure.
       const dt = last ? Math.min(now - last, 50) : 0;
       last = now;
-      const ramp = Math.min(1, Math.max(0, (now - startedAt - START_DELAY_MS) / RAMP_MS));
+      const ramp = Math.min(1, Math.max(0, (now - startedAt - startDelay) / RAMP_MS));
       angle += RADIANS_PER_MS * dt * ramp * ramp;
       // Critically damped approach to the pointer's phase (time constant ~250 ms).
       phase += (targetPhase - phase) * (1 - Math.exp(-dt / 250));
@@ -305,7 +355,7 @@ const tickLabels = [
     }
 
     function play() {
-      if (frame || !onScreen || document.hidden || reducedMotion.matches) return;
+      if (frame || paused || !onScreen || document.hidden || reducedMotion.matches) return;
       last = 0;
       frame = requestAnimationFrame(tick);
     }
@@ -315,6 +365,29 @@ const tickLabels = [
       frame = 0;
     }
 
+    /** The button exists only while the figure can move; its face and name follow `paused`. */
+    function syncToggle() {
+      if (!toggle) return;
+      toggle.hidden = reducedMotion.matches;
+      toggle.toggleAttribute('data-paused', paused);
+    }
+
+    toggle?.addEventListener('click', () => {
+      paused = !paused;
+      if (paused) {
+        pause();
+        localStore.set(PAUSED_KEY, '1');
+      } else {
+        // Ease back up to speed from where the figure stopped, as at the start.
+        startedAt = 0;
+        startDelay = 0;
+        localStore.remove(PAUSED_KEY);
+        play();
+      }
+      syncToggle();
+    });
+    syncToggle();
+
     new IntersectionObserver((entries) => {
       onScreen = entries.some((entry) => entry.isIntersecting);
       if (onScreen) play();
@@ -322,8 +395,13 @@ const tickLabels = [
     }).observe(svg);
 
     document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
-    // If the visitor turns on reduced motion mid-visit, stop where the figure is.
-    reducedMotion.addEventListener('change', () => (reducedMotion.matches ? pause() : play()));
+    // If the visitor turns on reduced motion mid-visit, stop where the figure is (and drop the
+    // button, which has nothing left to pause).
+    reducedMotion.addEventListener('change', () => {
+      if (reducedMotion.matches) pause();
+      else play();
+      syncToggle();
+    });
 
     // Pointer-driven phase shift, for mice and trackpads only (touch would fight with scrolling).
     const area = svg.closest<HTMLElement>('[data-hero]') ?? svg.parentElement;

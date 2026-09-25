@@ -32,6 +32,9 @@ const en = {
   figure: {
     label: 'Fig. 1',
     caption: 'A point turns on the unit circle. Traced over time, its height draws a sine wave.',
+    /** Accessible names of the figure's pause/play button (its visible face is an icon). */
+    pause: 'Pause the animation',
+    play: 'Play the animation',
   },
   experience: {
     title: 'Experience',
@@ -123,6 +126,8 @@ const tr: HomeMessages = {
   figure: {
     label: 'Şekil 1',
     caption: 'Birim çember üzerinde dönen bir nokta. Yüksekliği zaman içinde izlendiğinde bir sinüs dalgası çizer.',
+    pause: 'Animasyonu duraklat',
+    play: 'Animasyonu oynat',
   },
   experience: {
     title: 'Deneyim',
@@ -143,7 +148,8 @@ const tr: HomeMessages = {
       },
       guidance: {
         title: 'Otonom paraşüt güdümü',
-        text: 'Doğrusal cebir ve atmosferik iniş dinamiğiyle faydalı yükü belirlenen bir iniş koordinatına yönlendiren bir güdüm algoritması.',
+        // "Lineer cebir", as on the About page and in the console: one term for one subject.
+        text: 'Lineer cebir ve atmosferik iniş dinamiğiyle faydalı yükü belirlenen bir iniş koordinatına yönlendiren bir güdüm algoritması.',
       },
       simulation: {
         title: 'Uçuş fiziği simülasyonu',

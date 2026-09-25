@@ -5,6 +5,7 @@
  * screens). `data-hero` marks the area whose pointer position nudges the figure's phase.
  */
 import HeroFigure from './HeroFigure.astro';
+import { HEADLINE_SEPARATOR, headlineParts } from './headline';
 import Icon from '../ui/Icon.astro';
 import { SITE } from '../../config/site';
 import { localizePath, pick } from '../../i18n/config';
@@ -18,10 +19,10 @@ const t = common[locale];
 const h = homeMessages[locale].hero;
 const f = formatters(locale);
 
-// The headline has two halves ("Software Developer | Math-Driven Solutions & Algorithms"). Each
-// half wraps as a unit; the bar becomes a quiet slash on screen and a comma for screen readers.
-const [role = '', ...rest] = pick(SITE.role, locale).split(' | ');
-const specialty = rest.join(' | ');
+// The owner's headline, verbatim ("Software Developer | Math-Driven Solutions & Algorithms"):
+// each half wraps as a unit, and the bar stays, set as a quiet separator.
+const { role, specialty } = headlineParts(pick(SITE.role, locale));
+const separator = HEADLINE_SEPARATOR.trim();
 
 // Istanbul, written the way each language writes decimals (41.01 / 41,01).
 const coordinate = (value: number) => f.number(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -39,13 +40,18 @@ const contactLink =
 <section aria-labelledby="intro-heading" class="pt-2 sm:pt-6" data-hero>
   <div class="grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-center lg:gap-14">
     <div class="min-w-0">
-      <p class="label-mono text-accent-700 dark:text-accent-400">
+      {/*
+        The headline keeps the owner's capitals (mono, like the other eyebrows, but not the
+        uppercase label style) and its bar, so it reads and copies exactly as written. On a
+        narrow screen the line breaks after the bar, never inside a half.
+      */}
+      <p class="font-mono text-[0.8125rem] leading-5 font-medium text-accent-700 dark:text-accent-400">
         <span class="inline-block">{role}</span>
         {
           specialty && (
             <>
-              <span class="mx-1.5 text-zinc-400 dark:text-zinc-600" aria-hidden="true">/</span>
-              <span class="sr-only">, </span>
+              {' '}
+              <span class="text-zinc-500 dark:text-zinc-400">{separator}</span>{' '}
               <span class="inline-block">{specialty}</span>
             </>
           )

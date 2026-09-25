@@ -1,6 +1,19 @@
 ---
+import BrandMark from '../ui/BrandMark.astro';
 import Icon from '../ui/Icon.astro';
 import { SITE } from '../../config/site';
+import { LOCALES, LOCALE_META, localizePath, stripLocale, type Locale } from '../../i18n/config';
+import { common } from '../../i18n/messages/common';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  /** This page in each locale (site paths), for the language switch. */
+  alternates: Partial<Record<Locale, string>>;
+}
+
+const { alternates } = Astro.props;
+const locale = getLocale(Astro);
+const t = common[locale];
 
 /** '/blog/' -> '/blog', '/' stays '/'. */
 function normalize(path: string): string {
@@ -8,100 +21,190 @@ function normalize(path: string): string {
   return trimmed === '' ? '/' : trimmed;
 }
 
-const currentPath = normalize(Astro.url.pathname);
+// Compare locale-free paths, so /tr/blog/x/ marks "Blog" as current too.
+const currentPath = normalize(stripLocale(Astro.url.pathname).path);
 
 function isCurrent(href: string): boolean {
   const target = normalize(href);
-  if (target === '/') return currentPath === '/';
   return currentPath === target || currentPath.startsWith(`${target}/`);
 }
 
 const links = SITE.nav.map((item) => ({
-  ...item,
+  label: t.nav[item.key],
+  href: localizePath(item.href, locale),
   current: isCurrent(item.href),
   // "page" only for the page itself; a section link on one of its child pages is "true".
   ariaCurrent: currentPath === normalize(item.href) ? ('page' as const) : isCurrent(item.href) ? ('true' as const) : undefined,
 }));
+
+const consoleHref = localizePath('/console/', locale);
+const consoleCurrent = isCurrent('/console/');
+
+// Language switch: the current language as plain text, the other one as a link to this page in it.
+const languages = LOCALES.map((l) => ({
+  locale: l,
+  short: LOCALE_META[l].short,
+  htmlLang: LOCALE_META[l].htmlLang,
+  // Named in its own language ("Türkçe oku" / "Read in English").
+  label: common[l].language.switchTo,
+  href: alternates[l] ?? localizePath('/', l),
+  current: l === locale,
+}));
 ---
 
 <header
-  class="sticky top-0 z-40 border-b border-zinc-200 bg-zinc-50/90 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/85"
+  class="sticky top-0 z-40 border-b border-zinc-200/80 bg-zinc-50/85 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80"
 >
-  <div class="px-safe relative mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 sm:h-16">
+  <div class="px-safe relative mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 sm:h-16">
     <a
-      href="/"
-      class="-mx-2 flex min-h-11 items-center rounded-lg px-2 text-base font-semibold tracking-tight text-zinc-900 hover:text-emerald-700 dark:text-zinc-100 dark:hover:text-emerald-400"
+      href={localizePath('/', locale)}
+      class="group -mx-2 flex min-h-11 min-w-0 items-center gap-2.5 rounded-lg px-2 text-zinc-900 dark:text-zinc-100"
     >
-      {SITE.name}
+      <BrandMark class="size-7 shrink-0 transition-transform duration-300 group-hover:-rotate-6" />
+      <span class="truncate text-[0.9375rem] font-semibold tracking-tight">{SITE.name}</span>
     </a>
 
-    {/* md+: inline navigation */}
-    <nav aria-label="Main" class="hidden md:block">
-      <ul class="flex items-center gap-1">
-        {
-          links.map((link) => (
-            <li>
-              <a
-                href={link.href}
-                aria-current={link.ariaCurrent}
-                class:list={[
-                  'flex min-h-11 items-center rounded-lg px-3 text-sm font-medium transition-colors',
-                  link.current
-                    ? 'text-emerald-700 dark:text-emerald-400'
-                    : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100',
-                ]}
-              >
-                {link.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </nav>
+    <div class="flex items-center gap-1 sm:gap-2">
+      {/* lg+: inline navigation */}
+      <nav aria-label={t.nav.label} class="hidden lg:block">
+        <ul class="flex items-center gap-0.5">
+          {
+            links.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  aria-current={link.ariaCurrent}
+                  class:list={[
+                    'relative flex min-h-11 items-center rounded-lg px-3 text-sm font-medium transition-colors',
+                    link.current
+                      ? 'text-zinc-900 after:absolute after:inset-x-3 after:bottom-1.5 after:h-px after:bg-accent-600 dark:text-zinc-100 dark:after:bg-accent-400'
+                      : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100',
+                  ]}
+                >
+                  {link.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
 
-    {/* Phones: disclosure menu, works without JavaScript. The nav wraps it so the landmark exists while closed. */}
-    <nav aria-label="Main" class="md:hidden">
-      <details class="group">
-        <summary
-          class="-mr-2 flex size-11 list-none items-center justify-center rounded-lg text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900 [&::-webkit-details-marker]:hidden"
-        >
-          <Icon name="menu" class="size-6 group-open:hidden" />
-          <Icon name="close" class="hidden size-6 group-open:block" />
-          <span class="sr-only">Menu</span>
-        </summary>
-        <div
-          class="absolute inset-x-0 top-full max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-b border-zinc-200 bg-zinc-50 shadow-sm sm:max-h-[calc(100dvh-4rem)] dark:border-zinc-800 dark:bg-zinc-950"
-        >
-          <ul class="px-safe flex flex-col py-2">
-            {
-              links.map((link) => (
-                <li>
-                  <a
-                    href={link.href}
-                    aria-current={link.ariaCurrent}
-                    class:list={[
-                      '-mx-3 flex min-h-12 items-center rounded-lg px-3 text-base font-medium',
-                      link.current
-                        ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300'
-                        : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900',
-                    ]}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
-        </div>
-      </details>
-    </nav>
+      <a
+        href={consoleHref}
+        aria-current={consoleCurrent ? 'page' : undefined}
+        title={t.nav.consoleHint}
+        class:list={[
+          'hidden size-11 items-center justify-center rounded-lg font-mono text-sm transition-colors lg:flex',
+          consoleCurrent
+            ? 'text-accent-700 dark:text-accent-400'
+            : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100',
+        ]}
+      >
+        <Icon name="terminal" class="size-5" />
+        <span class="sr-only">{t.nav.console}</span>
+      </a>
+
+      {/* Language switch: works without JavaScript; the script below remembers the choice. */}
+      <div
+        role="group"
+        aria-label={t.language.label}
+        class="flex h-9 items-center rounded-full border border-zinc-300 p-0.5 font-mono text-xs font-medium dark:border-zinc-700"
+      >
+        {
+          languages.map((language) =>
+            language.current ? (
+              <span
+                lang={language.htmlLang}
+                class="flex h-full min-w-9 items-center justify-center rounded-full bg-zinc-900 px-2 text-zinc-50 dark:bg-zinc-100 dark:text-zinc-900"
+              >
+                {language.short}
+              </span>
+            ) : (
+              <a
+                href={language.href}
+                hreflang={language.htmlLang}
+                lang={language.htmlLang}
+                data-set-locale={language.locale}
+                class="relative flex h-full min-w-9 items-center justify-center rounded-full px-2 text-zinc-600 transition-colors after:absolute after:-inset-1 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+              >
+                {language.short}
+                <span class="sr-only">{`, ${language.label}`}</span>
+              </a>
+            ),
+          )
+        }
+      </div>
+
+      {/* Below lg: disclosure menu, works without JavaScript. The nav wraps it so the landmark exists while closed. */}
+      <nav aria-label={t.nav.label} class="lg:hidden">
+        <details class="group">
+          <summary
+            class="-mr-2 flex size-11 list-none items-center justify-center rounded-lg text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900 [&::-webkit-details-marker]:hidden"
+          >
+            <Icon name="menu" class="size-6 group-open:hidden" />
+            <Icon name="close" class="hidden size-6 group-open:block" />
+            <span class="sr-only">{t.nav.menu}</span>
+          </summary>
+          <div
+            class="absolute inset-x-0 top-full max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-b border-zinc-200 bg-zinc-50 shadow-sm sm:max-h-[calc(100dvh-4rem)] dark:border-zinc-800 dark:bg-zinc-950"
+          >
+            <ul class="px-safe mx-auto flex max-w-6xl flex-col py-2">
+              {
+                links.map((link) => (
+                  <li>
+                    <a
+                      href={link.href}
+                      aria-current={link.ariaCurrent}
+                      class:list={[
+                        '-mx-3 flex min-h-12 items-center rounded-lg px-3 text-base font-medium',
+                        link.current
+                          ? 'bg-accent-50 text-accent-800 dark:bg-accent-500/10 dark:text-accent-300'
+                          : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900',
+                      ]}
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))
+              }
+              <li class="mt-1 border-t border-zinc-200 pt-1 dark:border-zinc-800">
+                <a
+                  href={consoleHref}
+                  aria-current={consoleCurrent ? 'page' : undefined}
+                  class="-mx-3 flex min-h-12 items-center gap-3 rounded-lg px-3 text-base font-medium text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-900"
+                >
+                  <Icon name="terminal" class="size-5 text-zinc-500" />
+                  {t.nav.console}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </details>
+      </nav>
+    </div>
   </div>
 </header>
 
 <script>
+  import { LOCALE_STORAGE_KEY, isLocale } from '../../i18n/config';
+
   // A page restored from the back/forward cache keeps the menu open after following one of its links.
   window.addEventListener('pageshow', (event) => {
     if (!event.persisted) return;
     document.querySelectorAll('header details[open]').forEach((menu) => menu.removeAttribute('open'));
   });
+
+  // Remember an explicit language choice (also for middle-click / new-tab opens).
+  function remember(event: MouseEvent) {
+    const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[data-set-locale]');
+    const locale = link?.dataset.setLocale;
+    if (!isLocale(locale)) return;
+    try {
+      localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    } catch {
+      // Storage blocked (private mode, disabled cookies): the link still switches the page.
+    }
+  }
+  document.addEventListener('click', remember);
+  document.addEventListener('auxclick', remember);
 </script>

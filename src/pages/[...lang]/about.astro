@@ -1,0 +1,122 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import { SITE } from '../../config/site';
+import { getTimeline } from '../../utils/content';
+import { getLocale } from '../../i18n/server';
+import { localeStaticPaths } from '../../i18n/server';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const entries = await Promise.all(
+  (await getTimeline(getLocale(Astro))).map(async (entry) => ({ entry, ...(await render(entry.body)) })),
+);
+
+const inlineLink =
+  'font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500';
+---
+
+<BaseLayout
+  title="About"
+  description={`About ${SITE.name}: a software developer and mathematics student in Istanbul, and the milestones so far.`}
+>
+  <header class="pt-2 sm:pt-6">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">About</h1>
+    <div class="mt-4 max-w-2xl space-y-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
+      <p>
+        I'm {SITE.name}, born in 2000 and based in Istanbul. I'm an undergraduate student at the Faculty of Science of
+        Istanbul University, where I'm preparing to graduate in Mathematics, and I plan to continue with a Master's
+        degree in Computer Science.
+      </p>
+      <p>
+        My background is in pure mathematics — real analysis, abstract algebra and topology — while my software
+        engineering work is on system-level development in C++23, network backend applications in Go, and server
+        infrastructure management. Along the way I have built full-stack web applications at crowd.inc, a Mac
+        productivity app in Swift at Aydos Yazılım, and open-source projects such as{' '}
+        <a href="/projects/acik-matematik/" class={inlineLink}>Açık Matematik</a> and{' '}
+        <a href="/projects/neosmbios/" class={inlineLink}>NeoSMBIOS</a>.
+      </p>
+      <p>The timeline below collects the milestones so far, oldest first.</p>
+    </div>
+  </header>
+
+  {
+    entries.length > 0 && (
+      <section aria-labelledby="timeline-heading" class="mt-12 sm:mt-16">
+        <h2 id="timeline-heading" class="sr-only">
+          Timeline
+        </h2>
+        <ol class="relative ms-1.5 border-s border-zinc-200 dark:border-zinc-800">
+          {entries.map(({ entry, Content }) => {
+            const { title, date, dateLabel, photos } = entry.data;
+            const hasPhotos = photos.length > 0;
+            return (
+              <li class="relative ps-6 pb-12 last:pb-0 sm:ps-8">
+                <span
+                  class="absolute top-1.5 -start-[5px] size-2.5 rounded-full bg-accent-600 ring-4 ring-zinc-50 dark:bg-accent-500 dark:ring-zinc-950"
+                  aria-hidden="true"
+                />
+                <div class:list={['min-w-0', hasPhotos && 'md:grid md:grid-cols-2 md:gap-8']}>
+                  <div class="min-w-0">
+                    <p class="text-sm font-medium text-accent-700 dark:text-accent-400">
+                      {dateLabel ?? <time datetime={String(date.getUTCFullYear())}>{date.getUTCFullYear()}</time>}
+                    </p>
+                    <h3 class="mt-1 text-lg font-semibold tracking-tight sm:text-xl">{title}</h3>
+                    <div class="prose prose-zinc mt-3 max-w-none dark:prose-invert prose-a:text-accent-700 dark:prose-a:text-accent-400">
+                      <Content />
+                    </div>
+                  </div>
+                  {hasPhotos && (
+                    <div class="mt-5 min-w-0 space-y-4 md:mt-1">
+                      {photos.map((photo) => (
+                        <figure>
+                          <Image
+                            src={photo.src}
+                            alt={photo.alt}
+                            widths={[320, 640, 960]}
+                            sizes="(min-width: 768px) 340px, calc(100vw - 4rem)"
+                            loading="lazy"
+                            decoding="async"
+                            class="h-auto w-full rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900"
+                          />
+                          {photo.caption && (
+                            <figcaption class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{photo.caption}</figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+    )
+  }
+
+  <aside
+    aria-label="Résumé"
+    class="mt-14 flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 sm:mt-20 sm:flex-row sm:items-center sm:justify-between sm:p-6 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+      Experience, education and skills are summarised on the{' '}
+      <a
+        href="/#experience"
+        class="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500"
+        >home page</a
+      >.
+    </p>
+    <a
+      href={SITE.cvPath}
+      download
+      class="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-100 sm:w-auto dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+    >
+      <Icon name="download" class="size-4" />
+      Download CV
+      <span class="sr-only">(PDF)</span>
+    </a>
+  </aside>
+</BaseLayout>

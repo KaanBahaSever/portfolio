@@ -3,7 +3,7 @@ title: NeoSMBIOS
 shortDescription: A header-only, zero-copy SMBIOS/DMI parser for C++23 that reads firmware tables without WMI or any OS headers.
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/NeoSMBIOS
-techStack: ['C++23', 'Header-only', 'SMBIOS / DMI', 'std::ranges']
+techStack: ['C++']
 featured: false
 order: 6
 date: 2026-08-11

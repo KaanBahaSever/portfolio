@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Notepad from '../../../components/tools/Notepad.astro';
+import { localeStaticPaths } from '../../../i18n/server';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const strong = 'font-medium text-zinc-900 dark:text-zinc-100';
+const code =
+  'rounded bg-zinc-100 px-1 py-0.5 font-mono text-[0.8125rem] break-words text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100';
+const kbd =
+  'rounded border border-zinc-300 bg-zinc-50 px-1 py-0.5 font-mono text-xs whitespace-nowrap text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100';
+const heading = 'text-sm font-semibold text-zinc-900 dark:text-zinc-100';
+const list = 'mt-2 flex list-disc flex-col gap-2 pl-5';
+---
+
+<BaseLayout
+  title="Notepad"
+  description="A fast plain-text editor in your browser with find & replace, regular expressions and live character, word and byte counts. Nothing is saved or uploaded."
+  wide
+>
+  <nav aria-label="Breadcrumb" class="pt-2 sm:pt-6">
+    <a
+      href="/tools/"
+      class="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" aria-hidden="true">
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      Tools
+    </a>
+  </nav>
+
+  <header class="mt-2 max-w-2xl">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Notepad</h1>
+    <p class="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
+      A plain-text editor that runs in your browser. Nothing is saved or uploaded — use Save As to download your file.
+    </p>
+  </header>
+
+  <Notepad />
+
+  <details class="group mt-10 rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <summary
+      class="flex min-h-12 list-none items-center justify-between gap-3 rounded-xl px-4 text-base font-semibold sm:px-5 [&::-webkit-details-marker]:hidden"
+    >
+      Tips
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-5 shrink-0 text-zinc-500 transition-transform group-open:rotate-180"
+        aria-hidden="true"
+      >
+        <path d="m6 9 6 6 6-6"></path>
+      </svg>
+    </summary>
+    <div class="flex flex-col gap-6 px-4 pb-5 text-sm leading-relaxed text-zinc-600 sm:px-5 dark:text-zinc-400">
+      <section>
+        <h2 class={heading}>Nothing is kept</h2>
+        <ul class={list}>
+          <li>
+            The page always starts empty and never stores your text, not even in the browser. Closing or reloading the tab
+            discards it, so <strong class={strong}>Save As</strong> before you leave; the browser asks first if there are
+            unsaved changes.
+          </li>
+          <li>
+            Type any file name with any extension (<code class={code}>notes.txt</code>, <code class={code}>README.md</code>,{' '}
+            <code class={code}>data.json</code>). Names without an extension get <code class={code}>.txt</code>. Choose{' '}
+            <strong class={strong}>CRLF</strong> for Windows programs that expect it; opening a CRLF file selects it for you.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class={heading}>Keyboard shortcuts</h2>
+        <ul class={list}>
+          <li><kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>F</kbd> (<kbd class={kbd}>⌘</kbd> + <kbd class={kbd}>F</kbd> on a Mac): find. A selected word becomes the search.</li>
+          <li><kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>H</kbd> (<kbd class={kbd}>⌘</kbd> + <kbd class={kbd}>⌥</kbd> + <kbd class={kbd}>F</kbd> on a Mac): find and replace.</li>
+          <li>
+            <kbd class={kbd}>Enter</kbd> / <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Enter</kbd> in the search field,{' '}
+            <kbd class={kbd}>F3</kbd> / <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>F3</kbd> or{' '}
+            <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>G</kbd> / <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>G</kbd>:
+            next / previous match.
+          </li>
+          <li>
+            <kbd class={kbd}>Enter</kbd> in the replace field replaces the current match;{' '}
+            <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Enter</kbd> replaces all. <kbd class={kbd}>Esc</kbd> closes the
+            panel and returns to the text.
+          </li>
+          <li>
+            <kbd class={kbd}>Alt</kbd> + <kbd class={kbd}>C</kbd>, <kbd class={kbd}>W</kbd>, <kbd class={kbd}>R</kbd> while
+            in the panel: match case, whole word, regular expression. On a Mac, <kbd class={kbd}>⌥</kbd> + the letter works
+            while one of the panel’s buttons has focus, so the search fields can still type characters such as ç.
+          </li>
+          <li><kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>S</kbd>: Save As. <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>O</kbd>: open a file (or drop one onto the editor).</li>
+          <li><kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Z</kbd> undoes typing and single replacements; use the <strong class={strong}>Undo</strong> button right after Replace all.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class={heading}>Regular expressions</h2>
+        <p class="mt-2">Turn on <code class={code}>.*</code> to search with JavaScript regular expressions. Some examples:</p>
+        <ul class={list}>
+          <li><code class={code}>\d+</code> — any run of digits.</li>
+          <li><code class={code}>^[ \t]+$</code> — lines that contain only spaces or tabs (with <code class={code}>^$</code> on).</li>
+          <li><code class={code}>[ \t]+$</code> — trailing spaces and tabs at the end of each line; replace with nothing to remove them.</li>
+          <li><code class={code}>colou?r</code> — “color” or “colour”.</li>
+          <li><code class={code}>\p&#123;Lu&#125;\p&#123;Ll&#125;+</code> — capitalised words in any language, including Turkish (Çağrı, İstanbul).</li>
+          <li><code class={code}>^</code> with the replacement <code class={code}>&gt; </code> — adds a prefix to every line.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class={heading}>Replacement patterns</h2>
+        <p class="mt-2">In regular-expression mode the replacement can refer to what was found:</p>
+        <ul class={list}>
+          <li><code class={code}>$&amp;</code> — the whole match, e.g. <code class={code}>"$&amp;"</code> puts quotes around it.</li>
+          <li>
+            <code class={code}>$1</code>, <code class={code}>$2</code>… — capture groups. Find{' '}
+            <code class={code}>(\w+) (\w+)</code> and replace with <code class={code}>$2, $1</code> to turn “Ada Lovelace” into
+            “Lovelace, Ada”.
+          </li>
+          <li><code class={code}>$&lt;name&gt;</code> — a named group such as <code class={code}>(?&lt;year&gt;\d&#123;4&#125;)</code>.</li>
+          <li><code class={code}>$`</code> and <code class={code}>$'</code> — the text before and after the match; <code class={code}>$$</code> — a literal dollar sign.</li>
+          <li>Without regular expressions the replacement is inserted exactly as typed, dollar signs included.</li>
+        </ul>
+      </section>
+    </div>
+  </details>
+</BaseLayout>

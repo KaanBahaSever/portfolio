@@ -9,10 +9,20 @@
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
 
+# PDF.js data files live in a folder named after the PDF.js version (integrations/pdfjs-assets.mjs).
+/vendor/pdfjs/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # Hidden route: keep it out of search engines (the page also sets <meta name="robots">).
 # '/console' covers the redirect to the trailing-slash URL.
 /console
   X-Robots-Tag: noindex, nofollow
 
 /console/*
+  X-Robots-Tag: noindex, nofollow
+
+/tr/console
+  X-Robots-Tag: noindex, nofollow
+
+/tr/console/*
   X-Robots-Tag: noindex, nofollow

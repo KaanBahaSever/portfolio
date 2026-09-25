@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectCard from '../../../components/ui/ProjectCard.astro';
+import { SITE } from '../../../config/site';
+import { getProjects } from '../../../utils/content';
+import { getLocale } from '../../../i18n/server';
+import { localeStaticPaths } from '../../../i18n/server';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const projects = await getProjects(getLocale(Astro));
+---
+
+<BaseLayout
+  title="Projects"
+  description={`Projects by ${SITE.name}: open-source lecture notes, a QR menu platform, a rocket flight simulation library and browser tools.`}
+  wide
+>
+  <header class="max-w-2xl pt-2 sm:pt-6">
+    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Projects</h1>
+    <p class="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
+      A selection of things I have built. Open-source projects link to their code; each page describes what the project
+      does and how it is put together.
+    </p>
+  </header>
+
+  {
+    projects.length > 0 ? (
+      <ul class="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-6">
+        {projects.map((project) => (
+          <li class="min-w-0">
+            <ProjectCard project={project} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="mt-10 text-zinc-600 dark:text-zinc-400">No projects published yet.</p>
+    )
+  }
+</BaseLayout>

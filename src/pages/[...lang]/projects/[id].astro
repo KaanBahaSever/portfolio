@@ -1,0 +1,123 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Badge from '../../../components/ui/Badge.astro';
+import Icon from '../../../components/ui/Icon.astro';
+import PostList from '../../../components/ui/PostList.astro';
+import TagList from '../../../components/ui/TagList.astro';
+import { getPostsForProject, getProjects, isInternalHref, type LocalizedProject } from '../../../utils/content';
+import { LOCALES } from '../../../i18n/config';
+import { getLocale, langParam } from '../../../i18n/server';
+
+export const getStaticPaths = (async () => {
+  const perLocale = await Promise.all(
+    LOCALES.map(async (locale) => (await getProjects(locale)).map((project) => ({ locale, project }))),
+  );
+  return perLocale.flat().map(({ locale, project }) => ({
+    params: { lang: langParam(locale), id: project.id },
+    props: { project },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  project: LocalizedProject;
+}
+
+const { project } = Astro.props;
+const { title, shortDescription, techStack, isOpenSource, repositoryUrl, liveUrl, cover, coverAlt } = project.data;
+const { Content } = await render(project.body);
+const relatedPosts = await getPostsForProject(project.id, getLocale(Astro));
+const liveIsInternal = liveUrl ? isInternalHref(liveUrl) : false;
+
+const primaryLink =
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-accent-700 px-4 text-sm font-semibold text-white hover:bg-accent-800 dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400';
+const secondaryLink =
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800';
+---
+
+<BaseLayout title={title} description={shortDescription}>
+  <a
+    href="/projects/"
+    class="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
+  >
+    <Icon name="arrow-left" class="size-4" />
+    All projects
+  </a>
+
+  <article class="mt-4">
+    <header class="space-y-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="max-w-full min-w-0 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h1>
+        {isOpenSource ? <Badge variant="accent">Open source</Badge> : <Badge>Private</Badge>}
+      </div>
+      <p class="text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">{shortDescription}</p>
+      <TagList items={techStack} label="Tech stack" />
+
+      {
+        (liveUrl || repositoryUrl) && (
+          <div class="flex flex-col gap-3 pt-2 sm:flex-row">
+            {liveUrl &&
+              (liveIsInternal ? (
+                <a href={liveUrl} class={primaryLink}>
+                  Open project
+                  <Icon name="arrow-right" class="size-4" />
+                </a>
+              ) : (
+                <a href={liveUrl} target="_blank" rel="noopener noreferrer" class={primaryLink}>
+                  Visit live site
+                  <Icon name="external" class="size-4" />
+                  <span class="sr-only">(opens in a new tab)</span>
+                </a>
+              ))}
+            {repositoryUrl && (
+              <a href={repositoryUrl} target="_blank" rel="noopener noreferrer" class={secondaryLink}>
+                View repository
+                <Icon name="external" class="size-4" />
+                <span class="sr-only">(opens in a new tab)</span>
+              </a>
+            )}
+          </div>
+        )
+      }
+    </header>
+
+    {
+      cover && (
+        <Image
+          src={cover}
+          alt={coverAlt ?? ''}
+          widths={[400, 800, 1200]}
+          sizes="(min-width: 768px) 720px, 100vw"
+          class="mt-8 h-auto w-full rounded-xl border border-zinc-200 dark:border-zinc-800"
+        />
+      )
+    }
+
+    <div class="prose prose-zinc mt-10 max-w-none dark:prose-invert prose-a:text-accent-700 dark:prose-a:text-accent-400">
+      <Content />
+    </div>
+  </article>
+
+  {
+    relatedPosts.length > 0 && (
+      <section aria-labelledby="related-heading" class="mt-14 border-t border-zinc-200 pt-8 dark:border-zinc-800">
+        <h2 id="related-heading" class="text-xl font-semibold tracking-tight">
+          Related posts
+        </h2>
+        <div class="mt-6">
+          <PostList posts={relatedPosts} headingLevel="h3" />
+        </div>
+      </section>
+    )
+  }
+
+  <a
+    href="/projects/"
+    class="-mx-2 mt-10 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
+  >
+    <Icon name="arrow-left" class="size-4" />
+    Back to all projects
+  </a>
+</BaseLayout>

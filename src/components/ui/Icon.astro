@@ -4,15 +4,44 @@
  * always pair with visible or screen-reader text.
  */
 export type IconName =
-  | 'download'
-  | 'menu'
-  | 'close'
-  | 'external'
+  | 'alert'
   | 'arrow-left'
   | 'arrow-right'
-  | 'mail'
+  | 'arrow-up-right'
+  | 'book'
+  | 'check'
+  | 'chevron-down'
+  | 'chevron-left'
+  | 'chevron-right'
+  | 'clock'
+  | 'close'
+  | 'code'
+  | 'copy'
+  | 'cpu'
+  | 'download'
+  | 'external'
+  | 'eye'
+  | 'file'
+  | 'gamepad'
+  | 'globe'
+  | 'grid'
+  | 'image'
+  | 'info'
   | 'lock'
-  | 'map-pin';
+  | 'mail'
+  | 'map-pin'
+  | 'maximize'
+  | 'menu'
+  | 'minimize'
+  | 'pen'
+  | 'play'
+  | 'refresh'
+  | 'rocket'
+  | 'sigma'
+  | 'sliders'
+  | 'terminal'
+  | 'trash'
+  | 'upload';
 
 interface Props {
   name: IconName;
@@ -21,16 +50,60 @@ interface Props {
 
 const { name, class: className = 'size-5' } = Astro.props;
 
+const circle = (cx: number, cy: number, r: number) =>
+  `M${cx - r} ${cy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0`;
+
 const paths: Record<IconName, string[]> = {
-  download: ['M12 4v11', 'm7 10 5 5 5-5', 'M5 20h14'],
-  menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
-  close: ['M6 6l12 12', 'M18 6 6 18'],
-  external: ['M14 4h6v6', 'M20 4 10 14', 'M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'],
+  alert: ['M12 3.5 2.5 20h19z', 'M12 10v4.5', 'M12 17.25v.01'],
   'arrow-left': ['M19 12H5', 'm11 18-6-6 6-6'],
   'arrow-right': ['M5 12h14', 'm13 6 6 6-6 6'],
-  mail: ['M4 6h16v12H4z', 'm4 7 8 6 8-6'],
+  'arrow-up-right': ['M7 17 17 7', 'M8 7h9v9'],
+  book: ['M4 19V5a2 2 0 0 1 2-2h14v16H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2h14'],
+  check: ['m5 12.5 4.5 4.5L19 7.5'],
+  'chevron-down': ['m6 9 6 6 6-6'],
+  'chevron-left': ['m15 18-6-6 6-6'],
+  'chevron-right': ['m9 18 6-6-6-6'],
+  clock: [circle(12, 12, 9), 'M12 7v5l3.5 2'],
+  close: ['M6 6l12 12', 'M18 6 6 18'],
+  code: ['m8 7-5 5 5 5', 'm16 7 5 5-5 5', 'm14 4-4 16'],
+  copy: ['M9 9h11v11H9z', 'M5 15H4V4h11v1'],
+  cpu: ['M7 7h10v10H7z', 'M10 10h4v4h-4z', 'M10 3v4', 'M14 3v4', 'M10 17v4', 'M14 17v4', 'M3 10h4', 'M3 14h4', 'M17 10h4', 'M17 14h4'],
+  download: ['M12 4v11', 'm7 10 5 5 5-5', 'M5 20h14'],
+  external: ['M14 4h6v6', 'M20 4 10 14', 'M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5'],
+  eye: ['M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z', circle(12, 12, 3)],
+  file: ['M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z', 'M14 3v4h4'],
+  gamepad: [
+    'M7 7h10a5 5 0 0 1 5 5 3.5 3.5 0 0 1-6.3 2.1L14.5 13h-5l-1.2 1.1A3.5 3.5 0 0 1 2 12a5 5 0 0 1 5-5z',
+    'M7.5 9.5v4',
+    'M5.5 11.5h4',
+    'M16 10.5v.01',
+    'M18 12.5v.01',
+  ],
+  globe: [circle(12, 12, 9), 'M3 12h18', 'M12 3a14 14 0 0 1 0 18', 'M12 3a14 14 0 0 0 0 18'],
+  grid: ['M4 4h7v7H4z', 'M13 4h7v7h-7z', 'M4 13h7v7H4z', 'M13 13h7v7h-7z'],
+  image: ['M4 5h16v14H4z', 'm4 16 5-5 4 4 2-2 5 5', circle(15.5, 9.5, 1.5)],
+  info: [circle(12, 12, 9), 'M12 11v5', 'M12 7.75v.01'],
   lock: ['M6 11h12v9H6z', 'M8.5 11V8a3.5 3.5 0 0 1 7 0v3'],
-  'map-pin': ['M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z', 'M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z'],
+  mail: ['M4 6h16v12H4z', 'm4 7 8 6 8-6'],
+  'map-pin': ['M12 21s-6-5.5-6-11a6 6 0 0 1 12 0c0 5.5-6 11-6 11z', circle(12, 10, 2.5)],
+  maximize: ['M4 9V4h5', 'M20 9V4h-5', 'M4 15v5h5', 'M20 15v5h-5'],
+  menu: ['M4 7h16', 'M4 12h16', 'M4 17h16'],
+  minimize: ['M9 4v5H4', 'M15 4v5h5', 'M9 20v-5H4', 'M15 20v-5h5'],
+  pen: ['M4 20h4L19 9l-4-4L4 16z', 'm13.5 6.5 4 4'],
+  play: ['M7 4.5v15L19.5 12z'],
+  refresh: ['M20 12a8 8 0 1 1-2.35-5.65', 'M20 4v5h-5'],
+  rocket: [
+    'M12 2.5c3.2 2.3 4.8 6.2 4 11l-1.8 3h-4.4l-1.8-3c-.8-4.8.8-8.7 4-11z',
+    circle(12, 10, 1.75),
+    'M7.8 13.5 5 16.5l1 3.5 3.2-3',
+    'M16.2 13.5l2.8 3-1 3.5-3.2-3',
+    'M12 19.5v2',
+  ],
+  sigma: ['M18 5H6.5l6 7-6 7H18'],
+  sliders: ['M4 7h9', 'M17 7h3', 'M4 17h3', 'M11 17h9', circle(15, 7, 2), circle(9, 17, 2)],
+  terminal: ['M4 5h16v14H4z', 'm8 10 2.5 2.5L8 15', 'M13 15h3'],
+  trash: ['M4 7h16', 'M10 11v6', 'M14 11v6', 'M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12', 'M9 7V4h6v3'],
+  upload: ['M12 16V4', 'm7 9 5-5 5 5', 'M5 20h14'],
 };
 ---
 

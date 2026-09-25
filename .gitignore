@@ -3,6 +3,9 @@ dist/
 # generated types
 .astro/
 
+# PDF.js data files, copied from node_modules by integrations/pdfjs-assets.mjs
+public/vendor/
+
 # dependencies
 node_modules/
 

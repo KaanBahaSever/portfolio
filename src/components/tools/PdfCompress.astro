@@ -42,12 +42,12 @@ const secondaryButtonClass =
   <!-- 1. Dropzone / file picker -->
   <label
     data-dropzone
-    class="group flex min-h-[40vh] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-zinc-300 bg-white p-6 text-center transition-colors focus-within:ring-2 focus-within:ring-emerald-700 focus-within:ring-offset-2 focus-within:ring-offset-zinc-50 hover:border-emerald-600 sm:min-h-72 data-[compact]:min-h-12 data-[compact]:flex-row data-[compact]:justify-start data-[compact]:gap-3 data-[compact]:px-4 data-[compact]:py-2 data-[compact]:text-left sm:data-[compact]:min-h-12 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:hover:border-zinc-300 data-[dragover]:border-emerald-600 data-[dragover]:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-900 dark:focus-within:ring-emerald-500 dark:focus-within:ring-offset-zinc-950 dark:hover:border-emerald-500 dark:data-[disabled]:hover:border-zinc-700 dark:data-[dragover]:border-emerald-500 dark:data-[dragover]:bg-emerald-500/10"
+    class="group flex min-h-[40vh] cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-zinc-300 bg-white p-6 text-center transition-colors focus-within:ring-2 focus-within:ring-accent-700 focus-within:ring-offset-2 focus-within:ring-offset-zinc-50 hover:border-accent-600 sm:min-h-72 data-[compact]:min-h-12 data-[compact]:flex-row data-[compact]:justify-start data-[compact]:gap-3 data-[compact]:px-4 data-[compact]:py-2 data-[compact]:text-left sm:data-[compact]:min-h-12 data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:hover:border-zinc-300 data-[dragover]:border-accent-600 data-[dragover]:bg-accent-50 dark:border-zinc-700 dark:bg-zinc-900 dark:focus-within:ring-accent-500 dark:focus-within:ring-offset-zinc-950 dark:hover:border-accent-500 dark:data-[disabled]:hover:border-zinc-700 dark:data-[dragover]:border-accent-500 dark:data-[dragover]:bg-accent-500/10"
   >
     <input data-file-input type="file" accept="application/pdf,.pdf" class="sr-only" />
     <span
       aria-hidden="true"
-      class="flex size-14 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-700 group-data-[compact]:size-9 dark:bg-emerald-500/10 dark:text-emerald-400"
+      class="flex size-14 shrink-0 items-center justify-center rounded-full bg-accent-50 text-accent-700 group-data-[compact]:size-9 dark:bg-accent-500/10 dark:text-accent-400"
     >
       <svg
         viewBox="0 0 24 24"
@@ -144,7 +144,7 @@ const secondaryButtonClass =
         <div class="clear-both grid grid-cols-1 gap-2 md:grid-cols-3">
           {
             levels.map((level) => (
-              <label class="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300 has-checked:border-emerald-600 has-checked:bg-emerald-50 has-disabled:cursor-not-allowed has-disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:has-checked:border-emerald-500 dark:has-checked:bg-emerald-500/10">
+              <label class="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300 has-checked:border-accent-600 has-checked:bg-accent-50 has-disabled:cursor-not-allowed has-disabled:opacity-60 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-zinc-700 dark:has-checked:border-accent-500 dark:has-checked:bg-accent-500/10">
                 <input
                   type="radio"
                   name="pdf-compress-level"
@@ -152,13 +152,13 @@ const secondaryButtonClass =
                   checked={level.value === DEFAULT_LEVEL}
                   data-level
                   aria-describedby={`pdc-level-${level.value}-hint`}
-                  class="mt-0.5 size-5 shrink-0 accent-emerald-700 dark:accent-emerald-500"
+                  class="mt-0.5 size-5 shrink-0 accent-accent-700 dark:accent-accent-500"
                 />
                 <span class="flex min-w-0 flex-col gap-0.5">
                   <span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
                     {level.title}
                     {level.value === DEFAULT_LEVEL && (
-                      <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
+                      <span class="rounded-full bg-accent-100 px-2 py-0.5 text-xs font-medium text-accent-800 dark:bg-accent-500/15 dark:text-accent-300">
                         Recommended
                       </span>
                     )}
@@ -178,7 +178,7 @@ const secondaryButtonClass =
           type="checkbox"
           data-strip-metadata
           aria-describedby="pdc-metadata-hint"
-          class="mt-0.5 size-5 shrink-0 accent-emerald-700 dark:accent-emerald-500"
+          class="mt-0.5 size-5 shrink-0 accent-accent-700 dark:accent-accent-500"
         />
         <span class="flex min-w-0 flex-col gap-0.5">
           <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Remove document metadata</span>
@@ -200,7 +200,7 @@ const secondaryButtonClass =
         type="button"
         data-compress
         disabled
-        class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-emerald-700 px-6 text-base font-semibold text-white shadow-sm hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none md:w-auto dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
+        class="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-accent-700 px-6 text-base font-semibold text-white shadow-sm hover:bg-accent-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-500 disabled:shadow-none md:w-auto dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-500"
       >
         Compress PDF
       </button>
@@ -219,7 +219,7 @@ const secondaryButtonClass =
         data-progress
         max="1"
         aria-label="Compression progress"
-        class="h-2 w-full appearance-none overflow-hidden rounded-full bg-zinc-200 accent-emerald-600 indeterminate:animate-pulse dark:bg-zinc-800 [&::-moz-progress-bar]:bg-emerald-600 [&::-webkit-progress-bar]:bg-zinc-200 [&::-webkit-progress-value]:bg-emerald-600 dark:[&::-moz-progress-bar]:bg-emerald-500 dark:[&::-webkit-progress-bar]:bg-zinc-800 dark:[&::-webkit-progress-value]:bg-emerald-500"
+        class="h-2 w-full appearance-none overflow-hidden rounded-full bg-zinc-200 accent-accent-600 indeterminate:animate-pulse dark:bg-zinc-800 [&::-moz-progress-bar]:bg-accent-600 [&::-webkit-progress-bar]:bg-zinc-200 [&::-webkit-progress-value]:bg-accent-600 dark:[&::-moz-progress-bar]:bg-accent-500 dark:[&::-webkit-progress-bar]:bg-zinc-800 dark:[&::-webkit-progress-value]:bg-accent-500"
       ></progress>
       <p data-progress-text aria-hidden="true" class="text-sm text-zinc-600 tabular-nums dark:text-zinc-400"></p>
     </div>
@@ -234,7 +234,7 @@ const secondaryButtonClass =
   <div
     data-result
     hidden
-    class="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 data-[tone=success]:border-emerald-600/20 data-[tone=success]:bg-emerald-50 dark:border-zinc-800 dark:bg-zinc-900 dark:data-[tone=success]:border-emerald-500/25 dark:data-[tone=success]:bg-emerald-500/10"
+    class="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-4 sm:p-5 data-[tone=success]:border-accent-600/20 data-[tone=success]:bg-accent-50 dark:border-zinc-800 dark:bg-zinc-900 dark:data-[tone=success]:border-accent-500/25 dark:data-[tone=success]:bg-accent-500/10"
   >
     <p data-result-title class="text-base font-semibold text-zinc-900 tabular-nums dark:text-zinc-100"></p>
 
@@ -247,7 +247,7 @@ const secondaryButtonClass =
 
       <span class="text-zinc-600 dark:text-zinc-400">Compressed</span>
       <span class="h-2.5 overflow-hidden rounded-full bg-zinc-200/70 dark:bg-zinc-800">
-        <span data-bar-result class="block h-full rounded-full bg-emerald-600 dark:bg-emerald-500"></span>
+        <span data-bar-result class="block h-full rounded-full bg-accent-600 dark:bg-accent-500"></span>
       </span>
       <span data-bar-result-label class="text-right font-medium text-zinc-900 tabular-nums dark:text-zinc-100"></span>
     </div>

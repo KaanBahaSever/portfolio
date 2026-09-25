@@ -1,0 +1,50 @@
+---
+/**
+ * Top of a page: optional eyebrow label, serif h1 and a lead paragraph (prop or default slot).
+ * `back` renders a "← Tools" style link above the title (inside a breadcrumb nav).
+ * The graph-paper backdrop fades out behind the text; pass `plain` to drop it.
+ */
+import Icon from './Icon.astro';
+import { ui } from './styles';
+import { common } from '../../i18n/messages/common';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  title: string;
+  eyebrow?: string;
+  lead?: string;
+  back?: { href: string; label: string };
+  plain?: boolean;
+  class?: string;
+}
+
+const { title, eyebrow, lead, back, plain = false, class: className } = Astro.props;
+const t = common[getLocale(Astro)];
+---
+
+<header class:list={['relative isolate pt-2 sm:pt-6', className]}>
+  {
+    !plain && (
+      <div
+        class="bg-graph mask-fade-radial pointer-events-none absolute -inset-x-4 -top-8 -bottom-4 -z-10 sm:-inset-x-8"
+        aria-hidden="true"
+      />
+    )
+  }
+  {
+    back && (
+      <nav aria-label={t.labels.breadcrumb}>
+        <a href={back.href} class={ui.backLink}>
+          <Icon name="chevron-left" class="size-4" />
+          {back.label}
+        </a>
+      </nav>
+    )
+  }
+  <div class:list={['max-w-2xl', back && 'mt-2']}>
+    {eyebrow && <p class={ui.eyebrow}>{eyebrow}</p>}
+    <h1 class:list={[ui.pageTitle, eyebrow && 'mt-3']}>{title}</h1>
+    {lead && <p class:list={[ui.lead, 'mt-4']}>{lead}</p>}
+    {Astro.slots.has('default') && <div class:list={[ui.lead, 'mt-4 space-y-4']}><slot /></div>}
+  </div>
+</header>

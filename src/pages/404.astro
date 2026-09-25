@@ -12,14 +12,14 @@ const links = [
 
 <BaseLayout title="Page not found" description="The page you were looking for could not be found." noindex>
   <section class="flex flex-col items-start pt-6 sm:pt-12">
-    <p class="font-mono text-sm font-medium text-emerald-700 dark:text-emerald-400">404</p>
+    <p class="font-mono text-sm font-medium text-accent-700 dark:text-accent-400">404</p>
     <h1 class="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">Page not found</h1>
     <p class="mt-4 max-w-xl text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
       Sorry, this page doesn't exist or has moved. You might find what you were looking for below.
     </p>
     <a
       href="/"
-      class="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-emerald-700 px-6 text-base font-semibold text-white hover:bg-emerald-800 sm:w-auto dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+      class="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-accent-700 px-6 text-base font-semibold text-white hover:bg-accent-800 sm:w-auto dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400"
     >
       Go to the homepage
     </a>
@@ -32,9 +32,9 @@ const links = [
           <li class="min-w-0">
             <a
               href={link.href}
-              class="group flex h-full min-h-11 flex-col gap-0.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-emerald-600/40 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-500/40"
+              class="group flex h-full min-h-11 flex-col gap-0.5 rounded-xl border border-zinc-200 bg-white px-4 py-3 transition-colors hover:border-accent-600/40 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-accent-500/40"
             >
-              <span class="font-semibold text-zinc-900 group-hover:text-emerald-700 dark:text-zinc-100 dark:group-hover:text-emerald-400">
+              <span class="font-semibold text-zinc-900 group-hover:text-accent-700 dark:text-zinc-100 dark:group-hover:text-accent-400">
                 {link.label}
               </span>
               <span class="text-sm text-zinc-600 dark:text-zinc-400">{link.description}</span>
@@ -49,7 +49,7 @@ const links = [
     Followed a broken link? Let me know by{' '}
     <a
       href={`mailto:${SITE.email}`}
-      class="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-emerald-700 hover:decoration-emerald-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-emerald-400 dark:hover:decoration-emerald-500"
+      class="font-medium text-zinc-900 underline decoration-zinc-300 underline-offset-4 hover:text-accent-700 hover:decoration-accent-600 dark:text-zinc-100 dark:decoration-zinc-700 dark:hover:text-accent-400 dark:hover:decoration-accent-500"
       >email</a
     >.
   </p>

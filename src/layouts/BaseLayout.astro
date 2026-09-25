@@ -3,63 +3,159 @@ import '../styles/global.css';
 import Header from '../components/layout/Header.astro';
 import Footer from '../components/layout/Footer.astro';
 import { SITE } from '../config/site';
+import {
+  LOCALES,
+  LOCALE_META,
+  LOCALE_STORAGE_KEY,
+  pick,
+  switchLocalePath,
+  type Locale,
+} from '../i18n/config';
+import { common } from '../i18n/messages/common';
+import { getLocale } from '../i18n/server';
 
 interface Props {
   title: string;
   description?: string;
-  /** Use a wider content column (max-w-5xl) for grids and tools. */
+  /**
+   * Content column: 'prose' (max-w-3xl, reading), 'wide' (max-w-6xl, grids and tools) or
+   * 'full' (max-w-screen-2xl, editors). `wide` is kept as a boolean alias for 'wide'.
+   */
+  width?: 'prose' | 'wide' | 'full';
   wide?: boolean;
   /**
    * Keep the page out of search engines (robots noindex, nofollow; no canonical link or og:url,
    * e.g. 404.html is served at any missing URL, so its own path would be wrong).
    */
   noindex?: boolean;
+  /**
+   * The same page in each locale (site paths). Defaults to this path with the locale prefix
+   * swapped; pass it explicitly when slugs differ (translated blog posts).
+   */
+  alternates?: Partial<Record<Locale, string>>;
+  /** Canonical URL or site path when it is not this page (e.g. a post first published on Medium). */
+  canonical?: string;
+  /** Hide the site header and footer (the full-screen console). */
+  bare?: boolean;
+  /** og:type — 'article' for blog posts. */
+  ogType?: 'website' | 'article';
 }
 
-const { title, description = SITE.description, wide = false, noindex = false } = Astro.props;
+const {
+  title,
+  description = pick(SITE.description, getLocale(Astro)),
+  width: widthProp,
+  wide = false,
+  noindex = false,
+  alternates: alternatesProp,
+  canonical,
+  bare = false,
+  ogType = 'website',
+} = Astro.props;
+
+const locale = getLocale(Astro);
+const meta = LOCALE_META[locale];
+const t = common[locale];
+const width = widthProp ?? (wide ? 'wide' : 'prose');
 
 const pageTitle = title === SITE.name ? title : `${title} · ${SITE.name}`;
-// Canonical/og:url need an absolute origin: only emitted when `site` is set in astro.config.mjs.
-const pageURL = Astro.site ? new URL(Astro.url.pathname, Astro.site).href : undefined;
+const alternates: Partial<Record<Locale, string>> =
+  alternatesProp ?? Object.fromEntries(LOCALES.map((l) => [l, switchLocalePath(Astro.url.pathname, l)]));
+alternates[locale] ??= Astro.url.pathname;
+
+// Canonical/og:url/hreflang need an absolute origin: only emitted when `site` is set in astro.config.mjs.
+const absolute = (path: string) => (Astro.site ? new URL(path, Astro.site).href : undefined);
+const pageURL = absolute(Astro.url.pathname);
+const canonicalURL = canonical ? (/^https?:/.test(canonical) ? canonical : absolute(canonical)) : pageURL;
+// hreflang only for pages that are their own canonical, and only between existing versions.
+const hreflangLinks =
+  !noindex && canonicalURL === pageURL
+    ? LOCALES.flatMap((l) => {
+        const path = alternates[l];
+        const href = path ? absolute(path) : undefined;
+        return href ? [{ hreflang: LOCALE_META[l].htmlLang, href }] : [];
+      })
+    : [];
+const xDefault = hreflangLinks.length > 1 ? absolute(alternates.en ?? '/') : undefined;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={meta.htmlLang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    {/*
+      Language preference, before first paint. Only an explicit choice with the header toggle is
+      stored; it sends every later visit to that language's version of the page. Without a stored
+      choice, a first visit to the English home page follows the browser language once. Redirects
+      go to a page that exists (the alternates below), so they cannot loop.
+    */}
+    <script is:inline define:vars={{ pageLocale: locale, alternates, storageKey: LOCALE_STORAGE_KEY }}>
+      try {
+        let want = null;
+        try {
+          const stored = localStorage.getItem(storageKey);
+          if (stored === 'en' || stored === 'tr') want = stored;
+        } catch {}
+        if (!want && pageLocale === 'en' && location.pathname === '/') {
+          const langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language];
+          const first = langs.map((l) => String(l).slice(0, 2).toLowerCase()).find((l) => l === 'en' || l === 'tr');
+          if (first === 'tr') want = 'tr';
+        }
+        if (want && want !== pageLocale && alternates[want]) {
+          location.replace(alternates[want] + location.search + location.hash);
+        }
+      } catch {}
+    </script>
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <meta name="author" content={SITE.name} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
-    {pageURL && !noindex && <link rel="canonical" href={pageURL} />}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    {canonicalURL && !noindex && <link rel="canonical" href={canonicalURL} />}
+    {hreflangLinks.map((link) => <link rel="alternate" hreflang={link.hreflang} href={link.href} />)}
+    {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault} />}
     {pageURL && !noindex && <meta property="og:url" content={pageURL} />}
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={SITE.name} />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={meta.og} />
+    {
+      LOCALES.filter((l) => l !== locale && alternates[l]).map((l) => (
+        <meta property="og:locale:alternate" content={LOCALE_META[l].og} />
+      ))
+    }
     <meta name="generator" content={Astro.generator} />
     <slot name="head" />
   </head>
   <body class="flex min-h-dvh flex-col">
     <a
       href="#main"
-      class="sr-only rounded-lg bg-emerald-700 px-4 py-3 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 dark:bg-emerald-500 dark:text-zinc-950"
+      class="sr-only rounded-lg bg-accent-700 px-4 py-3 text-sm font-medium text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 dark:bg-accent-500 dark:text-zinc-950"
     >
-      Skip to content
+      {t.skipToContent}
     </a>
-    <Header />
+    {!bare && <Header alternates={alternates} />}
     <main
       id="main"
-      class:list={['px-safe mx-auto w-full flex-1 py-8 sm:py-12', wide ? 'max-w-5xl' : 'max-w-3xl']}
+      class:list={[
+        bare ? 'flex w-full flex-1 flex-col' : 'px-safe mx-auto w-full flex-1 py-8 sm:py-12',
+        !bare && {
+          'max-w-3xl': width === 'prose',
+          'max-w-6xl': width === 'wide',
+          'max-w-screen-2xl': width === 'full',
+        },
+      ]}
     >
       <slot />
     </main>
-    <Footer />
+    {!bare && <Footer />}
   </body>
 </html>

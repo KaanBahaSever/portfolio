@@ -4,7 +4,7 @@ shortDescription: Open-source, interactive and ad-free Turkish lecture notes for
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/acik-matematik
 liveUrl: https://acik-matematik.com
-techStack: [Quarto, Pandoc, Lua, Python, Typst, MathJax, Cloudflare Pages]
+techStack: [Quarto, Markdown, Python]
 featured: true
 order: 1
 date: 2026-06-02

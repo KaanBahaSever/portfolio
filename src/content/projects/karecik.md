@@ -3,7 +3,7 @@ title: Karecik
 shortDescription: A multi-tenant QR menu platform for cafés and restaurants, with a drag-and-drop menu editor, multilingual menus, branding themes and QR code export.
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/karecik
-techStack: [Go, Fiber, PostgreSQL, React, Vite, Tailwind CSS, dnd-kit]
+techStack: [Go, PostgreSQL, Cloudflare]
 featured: true
 order: 2
 date: 2026-08-24

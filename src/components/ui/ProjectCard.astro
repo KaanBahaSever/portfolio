@@ -2,21 +2,23 @@
 import Badge from './Badge.astro';
 import Icon from './Icon.astro';
 import TagList from './TagList.astro';
-import { isInternalHref, type Project } from '../../utils/content';
+import { isInternalHref, type LocalizedProject } from '../../utils/content';
+import { localizePath } from '../../i18n/config';
+import { getLocale } from '../../i18n/server';
 
 interface Props {
-  project: Project;
+  project: LocalizedProject;
   /** Heading level used for the card title. */
   headingLevel?: 'h2' | 'h3';
 }
 
 const { project, headingLevel: Heading = 'h2' } = Astro.props;
 const { title, shortDescription, techStack, isOpenSource, repositoryUrl, liveUrl } = project.data;
-const href = `/projects/${project.id}/`;
+const href = localizePath(`/projects/${project.id}/`, getLocale(Astro));
 const liveIsInternal = liveUrl ? isInternalHref(liveUrl) : false;
 
 const cardLink =
-  'relative z-10 -mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-emerald-700 hover:text-emerald-800 hover:underline dark:text-emerald-400 dark:hover:text-emerald-300';
+  'relative z-10 -mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-accent-700 hover:text-accent-800 hover:underline dark:text-accent-400 dark:hover:text-accent-300';
 ---
 
 {/*
@@ -30,7 +32,7 @@ const cardLink =
     <Heading class="min-w-0 text-lg leading-snug font-semibold text-zinc-900 dark:text-zinc-100">
       <a
         href={href}
-        class="rounded-sm group-hover:text-emerald-700 after:absolute after:inset-0 after:rounded-xl dark:group-hover:text-emerald-400"
+        class="rounded-sm group-hover:text-accent-700 after:absolute after:inset-0 after:rounded-xl dark:group-hover:text-accent-400"
       >
         {title}
       </a>

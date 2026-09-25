@@ -2,7 +2,7 @@
 title: Asion
 shortDescription: A cross-platform productivity and active window tracking system.
 isOpenSource: false
-techStack: ['C++23', 'Go', 'gRPC', 'Protobuf', 'SQLCipher', 'OS hooks']
+techStack: ['C++', 'Objective-C', 'Go', 'gRPC']
 featured: true
 order: 3
 date: 2026-09-16

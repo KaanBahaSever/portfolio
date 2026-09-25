@@ -3,7 +3,7 @@ title: Rocket-Up (Rocket Flight Simulation)
 shortDescription: An early-stage, modular C++ library for simulating rocket flight, from engine thrust to atmospheric conditions.
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/Rocket-Up
-techStack: [C++, CMake]
+techStack: ['C++']
 featured: true
 order: 5
 date: 2024-12-14

@@ -13,8 +13,8 @@
  * Idempotent: a story is rewritten only when the feed's `atom:updated` is newer than the file's
  * `mediumUpdated` (or with --force), and unchanged files and images are not rewritten. Files
  * marked `mediumSync: false` are never touched. On an update the existing description,
- * language, hero alt text, image alt text and every key the sync does not manage
- * (relatedProject, translationKey, draft…) are kept; the body text follows the feed.
+ * language, tags, hero alt text, image alt text and every key the sync does not manage
+ * (relatedProject, translationKey, draft…) are kept; the body text and captions follow the feed.
  * See scripts/medium/*.ts for the conversion rules.
  */
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
@@ -29,7 +29,7 @@ import {
   type ConvertWarning,
   type MediumImage,
 } from './medium/convert.ts';
-import { deriveDescription, detectLang, parseFeed, slugFromMedium, type FeedItem } from './medium/feed.ts';
+import { claimSlug, deriveDescription, detectLang, parseFeed, slugFromMedium, type FeedItem } from './medium/feed.ts';
 import { planSync, readFrontmatter, renderFrontmatter, type Frontmatter } from './medium/frontmatter.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -69,7 +69,10 @@ interface ExistingPost {
   source: string;
 }
 
-/** Existing posts by Medium id: a renamed file keeps receiving updates for its story. */
+/**
+ * Existing posts by Medium id (a renamed file keeps receiving updates for its story), and the
+ * lower-cased names already in use (file systems here may ignore case).
+ */
 async function indexExistingPosts(): Promise<{ byId: Map<string, ExistingPost>; files: Set<string> }> {
   const byId = new Map<string, ExistingPost>();
   const files = new Set<string>();
@@ -77,7 +80,7 @@ async function indexExistingPosts(): Promise<{ byId: Map<string, ExistingPost>; 
   for (const name of names) {
     if (!/\.mdx?$/.test(name)) continue;
     const file = path.join(BLOG_DIR, name);
-    files.add(path.basename(name).replace(/\.mdx?$/, ''));
+    files.add(path.basename(name).replace(/\.mdx?$/, '').toLowerCase());
     const source = await readFile(file, 'utf8');
     const frontmatter = readFrontmatter(source);
     const id = frontmatter?.values.mediumId;
@@ -131,11 +134,11 @@ async function syncItem(item: FeedItem, existing: ExistingPost | undefined, take
     return;
   }
 
-  let slug = existing ? path.basename(existing.file).replace(/\.mdx?$/, '') : slugFromMedium(item.url, item.title, item.mediumId);
-  if (!existing && taken.has(slug)) {
-    // A hand-written post already uses this name; keep both.
-    slug = `${slug}-${item.mediumId}`;
-  }
+  // A new story never takes a name in use, by a hand-written post or by another story created
+  // earlier in this run (also in a dry run, so the preview matches a real run).
+  const slug = existing
+    ? path.basename(existing.file).replace(/\.mdx?$/, '')
+    : claimSlug(slugFromMedium(item.url, item.title, item.mediumId), item.mediumId, taken);
   const postFile = existing?.file ?? path.join(BLOG_DIR, `${slug}.md`);
   if (existing && !postFile.endsWith('.md')) {
     console.warn(`! ${label}: ${path.relative(ROOT, postFile)} is MDX; the sync only writes .md files. Skipped.`);
@@ -189,6 +192,7 @@ async function syncItem(item: FeedItem, existing: ExistingPost | undefined, take
       ['tags', item.categories],
       ['heroImage', result.hero ? relative(localNames[0] ?? '') : undefined],
       ['heroImageAlt', result.hero?.alt || undefined],
+      ['heroImageCaption', result.hero?.caption || undefined],
       ['source', 'medium'],
       ['mediumId', item.mediumId],
       ['mediumUrl', item.url],

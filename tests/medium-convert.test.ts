@@ -11,7 +11,7 @@ import {
   readImageAlts,
   type ConvertOptions,
 } from '../scripts/medium/convert.ts';
-import { deriveDescription, detectLang, parseFeed, slugFromMedium } from '../scripts/medium/feed.ts';
+import { claimSlug, deriveDescription, detectLang, parseFeed, slugFromMedium } from '../scripts/medium/feed.ts';
 
 const fixture = readFileSync(new URL('./fixtures/medium-feed.xml', import.meta.url), 'utf8');
 const [story] = parseFeed(fixture).items;
@@ -57,6 +57,8 @@ test('the opening figure becomes the hero; the tracking pixel is dropped', () =>
 
   const result = convertArticle(story.html, options({ title: story.title, lang: 'tr' }));
   assert.equal(result.hero?.alt, 'Mozoleye çelenk bırakırken, soldan sağa; Buzz Aldrin, Neil Armstrong, Michael Collins');
+  // The caption stays visible (heroImageCaption): it says who is who.
+  assert.equal(result.hero?.caption, 'Mozoleye çelenk bırakırken, soldan sağa; Buzz Aldrin, Neil Armstrong, Michael Collins');
   assert.doesNotMatch(result.markdown, /01\.jpg/, 'the hero is not repeated in the body');
   assert.doesNotMatch(result.markdown, /_\/stat|medium\.com/);
   assert.match(
@@ -88,6 +90,38 @@ test('alt text written by hand survives a re-sync', () => {
   const again = convertArticle(story.html, options({ title: story.title, lang: 'tr', knownAlt: (path) => alts.get(path) }));
   assert.equal(again.markdown, edited);
   assert.deepEqual(again.warnings, []);
+});
+
+test('alt text is escaped too, so dollar signs and emphasis markers stay in it', () => {
+  const caption = 'Prices rose from $5 to $10 [draft] *not* snake_case `x` <b> ~y~ \\';
+  const { markdown } = convertArticle(
+    '<p>Intro</p><figure><img src="https://miro.medium.com/v2/1*a.png"><figcaption>' +
+      caption.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+      '</figcaption></figure>',
+    options(),
+  );
+  const alt = /!\[((?:\\.|[^\\\]])*)\]/.exec(markdown)?.[1];
+  assert.equal(alt, 'Prices rose from \\$5 to \\$10 \\[draft\\] \\*not\\* snake\\_case \\`x\\` \\<b> \\~y\\~ \\\\');
+
+  // Rendered with math on, the alt attribute carries the caption verbatim.
+  const html = render(markdown);
+  assert.doesNotMatch(html, /math/);
+  const renderedAlt = /alt="([^"]*)"/
+    .exec(html)?.[1]
+    ?.replace(/&#x([0-9a-f]+);/gi, (_match, hex: string) => String.fromCodePoint(Number.parseInt(hex, 16)))
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, '&');
+  assert.equal(renderedAlt, caption);
+
+  // …and readImageAlts undoes the escaping, so the re-sync writes the same Markdown.
+  assert.equal(readImageAlts(markdown).get('../../assets/blog/a-story/01.jpg'), caption);
+  const again = convertArticle(
+    '<p>Intro</p><figure><img src="https://miro.medium.com/v2/1*a.png"></figure>',
+    options({ knownAlt: (path) => readImageAlts(markdown).get(path) }),
+  );
+  assert.ok(again.markdown.includes(`![${alt}](../../assets/blog/a-story/01.jpg)`));
 });
 
 test('text is escaped for Markdown with math enabled', () => {
@@ -149,6 +183,21 @@ test('headings, lists, quotes and rules', () => {
   );
 });
 
+test('a nested list keeps its list tight; two paragraphs in an item make it loose', () => {
+  const nested = convertArticle('<ul><li>one<ul><li>nested</li></ul></li><li>two</li></ul>', options()).markdown;
+  assert.equal(nested, '- one\n  - nested\n- two\n');
+  assert.doesNotMatch(render(nested), /<p>/);
+
+  // An ordered list that does not start at 1 cannot interrupt a paragraph: it needs a blank line.
+  const numbered = convertArticle('<ol><li>one<ol start="2"><li>b</li></ol></li></ol>', options()).markdown;
+  assert.equal(numbered, '1. one\n\n   2. b\n');
+  assert.match(render(numbered), /<ol start="2">/);
+
+  const loose = convertArticle('<ul><li><p>a</p><p>b</p></li><li>c</li></ul>', options()).markdown;
+  assert.equal(loose, '- a\n\n  b\n\n- c\n');
+  assert.equal((render(loose).match(/<p>/g) ?? []).length, 3);
+});
+
 test('embeds become links with a warning; a late first figure is not a hero', () => {
   const result = convertArticle(
     '<p>Before</p><figure><iframe src="https://medium.com/media/abc123/href"></iframe></figure>' +
@@ -174,4 +223,14 @@ test('language detection and slugs', () => {
   assert.equal(slugFromMedium('https://medium.com/@a/%C3%87ok-g%C3%BCzel-%C4%B0stanbul-0123456789ab', 'x', '0123456789ab'), 'cok-guzel-istanbul');
   // A slug may never be a locale prefix.
   assert.equal(slugFromMedium('https://medium.com/@a/tr-0123456789ab', 'TR', '0123456789ab'), 'medium-0123456789ab');
+});
+
+test('new stories never take a file name already in use, even one claimed in the same run', () => {
+  const taken = new Set(['hello-world']);
+  assert.equal(claimSlug('notes', 'aaaaaaaaaaaa', taken), 'notes');
+  // A second story with the same title in the same feed.
+  assert.equal(claimSlug('notes', 'bbbbbbbbbbbb', taken), 'notes-bbbbbbbbbbbb');
+  // A hand-written post already uses the name (file systems may ignore case).
+  assert.equal(claimSlug('Hello-World', 'cccccccccccc', taken), 'Hello-World-cccccccccccc');
+  assert.deepEqual([...taken], ['hello-world', 'notes', 'notes-bbbbbbbbbbbb', 'hello-world-cccccccccccc']);
 });

@@ -1,13 +1,14 @@
 ---
-# Imported from Medium by `npm run sync:medium` (description, alt texts and unmanaged keys survive a re-sync; set mediumSync: false to freeze the body too).
+# Imported from Medium by `npm run sync:medium` (description, lang, tags, alt texts and unmanaged keys survive a re-sync; set mediumSync: false to freeze the body too).
 title: "Ay’dan Anıtkabir’e Yolculuk"
 description: "Apollo 11 mürettebatının Ekim 1969’daki Ankara ziyareti: Anıtkabir’e bırakılan çelenk, hediye edilen Nutuk ve “Türkiye Ay’dan daha ilginç” sözü."
 pubDate: "2020-03-01T00:36:58.000Z"
 updatedDate: "2020-03-02T21:24:27.779Z"
 lang: "tr"
-tags: ["apollo-11","atatürk"]
+tags: ["Apollo 11","Atatürk"]
 heroImage: "../../assets/blog/aydan-anitkabir-e-yolculuk/01.jpg"
-heroImageAlt: "Apollo 11 astronotları Buzz Aldrin, Neil Armstrong ve Michael Collins (soldan sağa) Anıtkabir’de mozoleye çelenk bırakırken"
+heroImageAlt: "Koyu renk takım elbiseli astronotlar, flaş patlatan fotoğrafçıların önünde kırmızı çiçeklerden örülmüş büyük bir çelengi mozoleye bırakıyor"
+heroImageCaption: "Mozoleye çelenk bırakırken, soldan sağa; Buzz Aldrin, Neil Armstrong, Michael Collins"
 source: "medium"
 mediumId: "2ddb23d72623"
 mediumUrl: "https://medium.com/@KaanBahaSever/aydan-an%C4%B1tkabir-e-yolculuk-2ddb23d72623"

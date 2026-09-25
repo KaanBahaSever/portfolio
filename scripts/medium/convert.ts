@@ -12,7 +12,8 @@
  *   so "$5 or $10" would otherwise render as inline math.
  * - Images stay Markdown images (`![alt](../../assets/…)`), so Astro optimizes them; a
  *   caption wraps the image in <figure> with blank lines around it (HTML block, then Markdown).
- * - The figure that opens the story becomes the post's hero image and is left out of the body.
+ * - The figure that opens the story becomes the post's hero image and is left out of the body;
+ *   its caption stays visible as `heroImageCaption` (the post page renders it under the hero).
  * - Medium's tracking pixel is dropped; embeds (gists, videos) become links plus a warning.
  *
  * Pure module (no I/O): the sync script downloads the images first (see inspectArticle) and
@@ -85,8 +86,11 @@ export interface ConvertOptions {
 
 export interface ConvertResult {
   markdown: string;
-  /** The hero image (index 0) and the alt text to put in `heroImageAlt`. */
-  hero?: { image: MediumImage; alt: string };
+  /**
+   * The hero image (index 0), the alt text for `heroImageAlt` (Medium's alt, else the caption)
+   * and the caption for `heroImageCaption` ('' when the figure has none).
+   */
+  hero?: { image: MediumImage; alt: string; caption: string };
   warnings: ConvertWarning[];
 }
 
@@ -284,7 +288,17 @@ function markdownUrl(url: string): string {
   return url.replace(/[ ()<>]/g, (char) => `%${char.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0')}`);
 }
 
-const escapeAlt = (text: string): string => collapse(text).replace(/[\\[\]]/g, '\\$&');
+/**
+ * An image description is parsed as inline Markdown and rendered as plain text, so syntax in
+ * it is not shown but consumed: "$5 to $10" would become inline math and "*a*" would lose its
+ * asterisks. Everything that can start inline syntax is backslash-escaped, and readImageAlts
+ * undoes exactly this set, so alt text round-trips through a re-sync. `&` is left alone: a
+ * hand-written entity such as `&copy;` must survive that round trip unchanged.
+ */
+const ALT_SYNTAX = /[\\`*_[\]<~$]/g;
+const ALT_UNESCAPE = /\\([\\`*_[\]<~$])/g;
+
+export const escapeAlt = (text: string): string => collapse(text).replace(ALT_SYNTAX, '\\$&');
 
 /**
  * The alt text of every Markdown image in `markdown`, by path (unescaped). The sync reads the
@@ -293,7 +307,7 @@ const escapeAlt = (text: string): string => collapse(text).replace(/[\\[\]]/g, '
 export function readImageAlts(markdown: string): Map<string, string> {
   const alts = new Map<string, string>();
   for (const match of markdown.matchAll(/!\[((?:\\.|[^\\\]])*)\]\(<?([^)\s>]+)>?\)/g)) {
-    const alt = (match[1] ?? '').replace(/\\([\\[\]])/g, '$1').trim();
+    const alt = (match[1] ?? '').replace(ALT_UNESCAPE, '$1').trim();
     if (alt && match[2]) alts.set(match[2], alt);
   }
   return alts;
@@ -504,18 +518,55 @@ function figure(node: HNode, ctx: Context): string[] {
   return [`<figure>\n\n${image}\n\n<figcaption>${captionMarkup}</figcaption>\n</figure>`];
 }
 
+const listStart = (node: HNode): number =>
+  isElement(node, 'ol') ? Number.parseInt(prop(node, 'start') || '1', 10) || 1 : 1;
+
+/**
+ * A list item's blocks, joined. In CommonMark a blank line between two blocks of an item makes
+ * the whole list loose (every item is wrapped in <p>), so blocks are separated by one newline
+ * where that is enough: before a nested list that may interrupt a paragraph (a bullet list, or
+ * an ordered list starting at 1). Other blocks need the blank line, and `loose` reports it.
+ */
+function listItem(item: HNode, ctx: Context): { text: string; loose: boolean } {
+  const parts: { text: string; tight: boolean }[] = [];
+  let run: HNode[] = [];
+  const flush = () => {
+    for (const text of blocks(run, ctx)) parts.push({ text, tight: false });
+    run = [];
+  };
+  for (const child of item.children ?? []) {
+    if (!isElement(child, 'ul', 'ol')) {
+      run.push(child);
+      continue;
+    }
+    flush();
+    const tight = isElement(child, 'ul') || listStart(child) === 1;
+    for (const text of list(child, ctx)) parts.push({ text, tight });
+  }
+  flush();
+
+  let loose = false;
+  const text = parts
+    .map((part, index) => {
+      if (index === 0) return part.text;
+      if (!part.tight) loose = true;
+      return `${part.tight ? '\n' : '\n\n'}${part.text}`;
+    })
+    .join('');
+  return { text, loose };
+}
+
 function list(node: HNode, ctx: Context): string[] {
   const ordered = isElement(node, 'ol');
-  const start = ordered ? Number.parseInt(prop(node, 'start') || '1', 10) || 1 : 1;
+  const start = listStart(node);
   const items = (node.children ?? []).filter((child) => isElement(child, 'li'));
   let loose = false;
   const rendered = items.map((item, index) => {
     const marker = ordered ? `${start + index}. ` : '- ';
-    const content = blocks(item.children ?? [], ctx);
-    if (content.length > 1) loose = true;
-    const text = content.join('\n\n') || '';
+    const content = listItem(item, ctx);
+    if (content.loose) loose = true;
     const indent = ' '.repeat(marker.length);
-    return marker + text.split('\n').map((line, i) => (i === 0 || line === '' ? line : indent + line)).join('\n');
+    return marker + content.text.split('\n').map((line, i) => (i === 0 || line === '' ? line : indent + line)).join('\n');
   });
   return rendered.length ? [rendered.join(loose ? '\n\n' : '\n')] : [];
 }
@@ -660,7 +711,7 @@ export function convertArticle(html: string, options: ConvertOptions): ConvertRe
     const alt = heroImage.alt || heroImage.caption;
     if (!alt) warn(ctx, 'empty-alt', `hero image (${heroImage.src}) has neither alt text nor a caption`);
     if (!heroImage.downloadUrl) warn(ctx, 'image-not-downloadable', heroImage.src || '(no src)');
-    else hero = { image: heroImage, alt };
+    else hero = { image: heroImage, alt, caption: heroImage.caption };
   }
   return { markdown: body ? `${body}\n` : '', hero, warnings: ctx.warnings };
 }

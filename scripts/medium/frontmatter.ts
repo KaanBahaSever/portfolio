@@ -116,6 +116,7 @@ export const MANAGED_KEYS = [
   'tags',
   'heroImage',
   'heroImageAlt',
+  'heroImageCaption',
   'source',
   'mediumId',
   'mediumUrl',
@@ -127,14 +128,15 @@ export type ManagedKey = (typeof MANAGED_KEYS)[number];
 
 /**
  * Managed keys whose existing value wins: the feed has no description, its language is a guess,
- * and Medium leaves alt text empty, so these are usually written by hand after the first import.
+ * Medium leaves alt text empty and its tags are lowercase slugs ("atatürk", "apollo-11"), so
+ * these are usually written by hand after the first import and must survive a re-sync.
  */
-export const CURATED_KEYS: ReadonlySet<ManagedKey> = new Set<ManagedKey>(['description', 'lang', 'heroImageAlt']);
+export const CURATED_KEYS: ReadonlySet<ManagedKey> = new Set<ManagedKey>(['description', 'lang', 'tags', 'heroImageAlt']);
 
 export type FrontmatterValue = string | boolean | Date | readonly string[] | undefined;
 
 const HEADER =
-  '# Imported from Medium by `npm run sync:medium` (description, alt texts and unmanaged keys survive a re-sync; set mediumSync: false to freeze the body too).';
+  '# Imported from Medium by `npm run sync:medium` (description, lang, tags, alt texts and unmanaged keys survive a re-sync; set mediumSync: false to freeze the body too).';
 
 function serialize(value: Exclude<FrontmatterValue, undefined>): string {
   return JSON.stringify(value instanceof Date ? value.toISOString() : value);

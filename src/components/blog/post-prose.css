@@ -147,6 +147,16 @@
   white-space: nowrap;
 }
 
+/*
+ * Math in a column label keeps its case and its own spacing: uppercasing would turn x_n into
+ * X_N, a different symbol. Next to the small mono labels it is set a little larger.
+ */
+.post-body thead th .katex {
+  font-size: 1.2em;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
 .post-body :where(thead):not(:where(.not-prose, .not-prose *)) {
   border-bottom-color: var(--color-zinc-300);
 }

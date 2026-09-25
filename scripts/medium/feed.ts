@@ -173,6 +173,18 @@ export function slugFromMedium(url: string, title: string, mediumId: string): st
   return `medium-${mediumId}`;
 }
 
+/**
+ * Reserves the file name of a new story. `taken` holds the lower-cased names of the posts on
+ * disk and grows with every story created in the same run, so two stories that share a title
+ * (their URLs differ only in the id suffix) never overwrite each other's file or images: the
+ * later one gets `<slug>-<mediumId>`.
+ */
+export function claimSlug(slug: string, mediumId: string, taken: Set<string>): string {
+  const name = taken.has(slug.toLowerCase()) ? `${slug}-${mediumId}` : slug;
+  taken.add(name.toLowerCase());
+  return name;
+}
+
 const TURKISH_WORDS = new Set(['ve', 'bir', 'bu', 'da', 'de', 'ile', 'için', 'çok', 'daha', 'gibi', 'olarak', 'ama', 'ne', 'mi', 'en', 'her', 'kadar', 'sonra', 'ise', 'veya']);
 const ENGLISH_WORDS = new Set(['the', 'and', 'of', 'to', 'in', 'is', 'was', 'that', 'for', 'with', 'on', 'as', 'it', 'this', 'are', 'by', 'from', 'be', 'an', 'or']);
 

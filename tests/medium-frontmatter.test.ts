@@ -33,7 +33,7 @@ test('frontmatter values are written as JSON and read back', () => {
   assert.equal(parsed.body, '\nBody text\n');
 });
 
-test('an update keeps the curated description and language and every unmanaged key', () => {
+test('an update keeps the curated description, language and tags and every unmanaged key', () => {
   const existing = readFrontmatter(
     [
       '---',
@@ -69,9 +69,14 @@ test('an update keeps the curated description and language and every unmanaged k
   assert.doesNotMatch(block, /Generated/);
   assert.match(block, /\nlang: en\n/);
   assert.match(block, /\n# Linked by hand\nrelatedProject: rocket-up\n/);
-  assert.match(block, /\ntags: \["apollo-11","atatürk"\]\n/);
-  assert.doesNotMatch(block, /- old/);
+  // Tags written by hand are not replaced by Medium's lowercase slugs.
+  assert.match(block, /\ntags:\n {2}- old\n/);
+  assert.doesNotMatch(block, /apollo-11/);
   assert.match(block, /\nmediumSync: true\n---\n$/);
+
+  // Without a hand-written value the feed's tags are written.
+  const fresh = renderFrontmatter(fields('New title', 'Generated'), readFrontmatter('---\ntitle: x\n---\n'));
+  assert.match(fresh, /\ntags: \["apollo-11","atatürk"\]\n/);
 });
 
 test('files without frontmatter, and a fence inside a value, are handled', () => {

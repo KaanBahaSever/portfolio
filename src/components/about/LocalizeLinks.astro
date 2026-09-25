@@ -1,0 +1,26 @@
+---
+/**
+ * Renders its slot and points site links at the page's locale, so Markdown in either language
+ * can link to site pages with locale-free paths, the same way code calls localizePath():
+ *   [Karecik](/projects/karecik/) → href="/tr/projects/karecik/" on Turkish pages.
+ * External, protocol-relative, fragment and mailto: links are left alone.
+ *
+ * Why HTML rewriting: Markdown bodies have no access to the locale, and a hard-coded "/tr/"
+ * in the Turkish files would drift from src/i18n/config.ts. The input is the Markdown
+ * renderer's own output for files in this repository (exactly what <Content /> would emit),
+ * so passing it through set:html adds nothing new. Plain .md only: MDX components with their
+ * own scripts or styles should be rendered directly instead.
+ */
+import { localizePath } from '../../i18n/config';
+import { getLocale } from '../../i18n/server';
+
+const locale = getLocale(Astro);
+const html = Astro.slots.has('default') ? await Astro.slots.render('default') : '';
+// The renderer always writes double-quoted attributes. "/x" matches; "//host" does not.
+const localized = html.replace(
+  /(<a\s[^>]*?\bhref=")(\/(?!\/)[^"]*)"/g,
+  (_match, start: string, href: string) => `${start}${localizePath(href, locale)}"`,
+);
+---
+
+<Fragment set:html={localized} />

@@ -1,0 +1,96 @@
+---
+/**
+ * Dated milestones as a vertical rule with one node per entry: the date in a mono column on
+ * the left (above the entry on phones), then a serif title, the Markdown body and any photos.
+ * The newest entry's node is the accent: the end of the line where things stand today.
+ *
+ * Entries come from getTimeline(locale); an entry without a translation is shown in English
+ * and marked lang="en".
+ */
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import LocalizeLinks from './LocalizeLinks.astro';
+import { LOCALE_META } from '../../i18n/config';
+import { formatters } from '../../i18n/format';
+import { getLocale } from '../../i18n/server';
+import type { LocalizedTimelineEntry } from '../../utils/content';
+
+interface Props {
+  entries: LocalizedTimelineEntry[];
+}
+
+const { entries } = Astro.props;
+const locale = getLocale(Astro);
+const fmt = formatters(locale);
+
+const items = await Promise.all(
+  entries.map(async (entry, index) => ({
+    entry,
+    Content: (await render(entry.body)).Content,
+    last: index === entries.length - 1,
+    lang: entry.lang === locale ? undefined : LOCALE_META[entry.lang].htmlLang,
+  })),
+);
+---
+
+<ol>
+  {
+    items.map(({ entry, Content, last, lang }) => {
+      const { title, date, dateLabel, photos } = entry.data;
+      return (
+        <li
+          lang={lang}
+          class="relative ps-7 pb-10 last:pb-0 sm:grid sm:grid-cols-[8.5rem_minmax(0,1fr)] sm:gap-x-10 sm:ps-0 sm:pb-12"
+        >
+          {/* The rule runs from this node down to the next one; the last node ends it. */}
+          {!last && (
+            <span
+              class="absolute top-2 -bottom-2 start-1 w-px bg-zinc-200 sm:start-[9.75rem] dark:bg-zinc-800"
+              aria-hidden="true"
+            />
+          )}
+          <span
+            class:list={[
+              'absolute top-1.5 start-0 size-[9px] rounded-full border sm:start-[calc(9.75rem-4px)]',
+              last
+                ? 'border-accent-600 bg-accent-600 dark:border-accent-400 dark:bg-accent-400'
+                : 'border-zinc-400 bg-zinc-50 dark:border-zinc-500 dark:bg-zinc-950',
+            ]}
+            aria-hidden="true"
+          />
+          <p class="label-mono pt-0.5 text-zinc-600 tabular-nums sm:text-end dark:text-zinc-400">
+            {dateLabel ?? <time datetime={String(date.getUTCFullYear())}>{fmt.date(date, 'year')}</time>}
+          </p>
+          <div class="mt-2 min-w-0 sm:mt-0">
+            <h3 class="font-serif text-xl font-medium tracking-tight text-balance">{title}</h3>
+            <div class="prose prose-zinc mt-2 max-w-[65ch] dark:prose-invert prose-p:my-3">
+              <LocalizeLinks>
+                <Content />
+              </LocalizeLinks>
+            </div>
+            {photos.length > 0 && (
+              <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                {photos.map((photo) => (
+                  <figure class="min-w-0">
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      widths={[320, 640, 960]}
+                      sizes="(min-width: 640px) 340px, calc(100vw - 4rem)"
+                      loading="lazy"
+                      decoding="async"
+                      class="h-auto w-full rounded-xl border border-zinc-200 bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900"
+                    />
+                    {photo.caption && (
+                      <figcaption class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{photo.caption}</figcaption>
+                    )}
+                  </figure>
+                ))}
+              </div>
+            )}
+          </div>
+        </li>
+      );
+    })
+  }
+</ol>

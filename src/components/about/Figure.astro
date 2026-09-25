@@ -1,0 +1,31 @@
+---
+/**
+ * A numbered figure: a hairline panel on faded graph paper, and a caption ("Fig. 2 …").
+ * The drawings inside are decorative SVGs (aria-hidden); the caption says in words what they
+ * show, so it stays readable for everyone.
+ */
+import { aboutMessages } from '../../i18n/messages/about';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  number: number;
+  caption: string;
+  class?: string;
+}
+
+const { number, caption, class: className } = Astro.props;
+const m = aboutMessages[getLocale(Astro)];
+---
+
+<figure class:list={['min-w-0', className]}>
+  <div
+    class="relative isolate overflow-hidden rounded-xl border border-zinc-200 bg-white p-3 sm:p-4 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <div class="bg-graph mask-fade-radial pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+    <slot />
+  </div>
+  <figcaption class="mt-3 text-xs leading-5 text-zinc-600 dark:text-zinc-400">
+    <span class="label-mono me-1.5 text-zinc-900 dark:text-zinc-100">{m.journey.figure(number)}</span>
+    {caption}
+  </figcaption>
+</figure>

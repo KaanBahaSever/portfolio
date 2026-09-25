@@ -1,0 +1,55 @@
+---
+/**
+ * Résumé card: the CV download (the page's one primary action), a link to the experience
+ * section on the home page, and the email address. The CV exists in English only, so the link
+ * carries hreflang="en" and the Turkish label says so.
+ */
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { SITE } from '../../config/site';
+import { localizePath } from '../../i18n/config';
+import { aboutMessages } from '../../i18n/messages/about';
+import { common } from '../../i18n/messages/common';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = aboutMessages[locale];
+---
+
+<aside aria-labelledby="resume-heading" class:list={[ui.card, 'p-5 sm:p-6', className]}>
+  <h2 id="resume-heading" class="font-serif text-2xl font-medium tracking-tight">{m.resume.title}</h2>
+  <p class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{m.resume.text}</p>
+
+  <a
+    href={SITE.cvPath}
+    download
+    hreflang="en"
+    type="application/pdf"
+    class:list={[ui.buttonPrimary, 'mt-5 min-h-12 w-full flex-wrap gap-x-2 gap-y-0 py-2 text-center']}
+  >
+    <Icon name="download" class="size-4 shrink-0" />
+    <span>{t.labels.downloadCv}</span>
+    <span class="font-normal">{m.resume.cvFormat}</span>
+  </a>
+
+  <a href={localizePath('/#experience', locale)} class:list={[ui.accentLink, 'mt-2']}>
+    {m.resume.experienceLink}
+    <Icon name="arrow-right" class="size-4 shrink-0" />
+  </a>
+
+  <div class="mt-4 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+    <p class="label-mono text-zinc-600 dark:text-zinc-400">{t.footer.email}</p>
+    <a
+      href={`mailto:${SITE.email}`}
+      class:list={[ui.inlineLink, 'inline-flex min-h-11 items-center text-sm break-all']}
+    >
+      {SITE.email}
+    </a>
+  </div>
+</aside>

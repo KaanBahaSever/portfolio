@@ -1,0 +1,93 @@
+---
+/**
+ * A trajectory integrated step by step in three dimensions (integrateTrajectory()): gravity
+ * pulls it down while a steady crosswind pushes it sideways. Dots are the integration steps,
+ * the dashed curve its ground track, dotted verticals tie a few states to the ground, and the
+ * accent arrow is the velocity vector at one state. Decorative.
+ */
+import { arrowHead, integrateTrajectory, linePath, oblique, round, type Point3 } from '../geometry';
+
+const origin = { x: 30, y: 176 };
+const SCALE = 40;
+const project = (p: Point3) => oblique(p, origin, SCALE);
+
+const { positions, velocities } = integrateTrajectory({ x: 1, y: 0, z: 2.6 }, { gravity: 1, crosswind: 0.2, dt: 0.2 });
+const flight = positions.map(project);
+const ground = positions.map((p) => project({ ...p, z: 0 }));
+const drops = positions
+  .map((p, i) => ({ p, i }))
+  .filter(({ p, i }) => i > 0 && i % 5 === 0 && p.z > 0.2)
+  .map(({ p }) => linePath([project(p), project({ ...p, z: 0 })]));
+
+// The state whose velocity is drawn: early in the climb, where the vector is long and steep.
+const STATE = 4;
+const state = positions[STATE];
+const v = velocities[STATE];
+const VECTOR = 0.55;
+const stateScreen = project(state);
+const tipScreen = project({ x: state.x + v.x * VECTOR, y: state.y + v.y * VECTOR, z: state.z + v.z * VECTOR });
+const direction = { x: tipScreen.x - stateScreen.x, y: tipScreen.y - stateScreen.y };
+
+const axes = {
+  x: project({ x: 6.2, y: 0, z: 0 }),
+  y: project({ x: 0, y: 3.4, z: 0 }),
+  z: project({ x: 0, y: 0, z: 3.8 }),
+};
+const axisDirection = (end: { x: number; y: number }) => ({ x: end.x - origin.x, y: end.y - origin.y });
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+---
+
+<svg
+  viewBox="0 0 320 196"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    {
+      Object.values(axes).map((end) => (
+        <>
+          <path d={linePath([origin, end])} />
+          <path d={arrowHead(end, axisDirection(end))} />
+        </>
+      ))
+    }
+    <path d={linePath(ground)} stroke-dasharray="3 3" />
+    {drops.map((d) => <path d={d} stroke-dasharray="1 2.5" />)}
+  </g>
+
+  <g class={`${ink} font-serif italic`} fill="currentColor" font-size="12">
+    <text x={round(axes.x.x) + 2} y={round(axes.x.y) + 14} text-anchor="end">x</text>
+    <text x={round(axes.y.x) + 8} y={round(axes.y.y) + 3}>y</text>
+    <text x={round(axes.z.x) - 8} y={round(axes.z.y) + 6} text-anchor="end">z</text>
+  </g>
+
+  <g class={ink}>
+    <path d={linePath(flight)} stroke="currentColor" stroke-width="1" />
+    <g fill="currentColor" fill-opacity="0.55">
+      {flight.map((p) => <circle cx={round(p.x)} cy={round(p.y)} r="1.4" />)}
+    </g>
+  </g>
+
+  <g class="text-accent-600 dark:text-accent-400">
+    <g stroke="currentColor" stroke-width="1.5">
+      <path d={linePath([stateScreen, tipScreen])} />
+      <path d={arrowHead(tipScreen, direction, 5, 0.42)} />
+    </g>
+    <circle cx={round(stateScreen.x)} cy={round(stateScreen.y)} r="3" fill="currentColor" />
+    <text
+      x={round(tipScreen.x) - 8}
+      y={round(tipScreen.y) + 2}
+      text-anchor="end"
+      class="font-serif italic"
+      fill="currentColor"
+      font-size="12"
+      font-weight="600">v</text
+    >
+  </g>
+</svg>

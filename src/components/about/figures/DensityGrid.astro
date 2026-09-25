@@ -1,0 +1,86 @@
+---
+/**
+ * Battleship hunt mode on an 8×8 board: each cell is shaded by how many placements of the
+ * remaining fleet (5, 4, 3, 3, 2) cover it, given five misses (small rings). The densest cell,
+ * the next shot, is the one accent mark. Decorative: the figure caption describes it.
+ */
+import { densestCell, placementDensity, round, type Cell } from '../geometry';
+
+const SIZE = 8;
+const CELL = 18;
+const OFFSET = 8;
+const misses: Cell[] = [
+  [1, 5],
+  [2, 2],
+  [4, 4],
+  [5, 1],
+  [6, 6],
+];
+const grid = placementDensity(SIZE, [5, 4, 3, 3, 2], misses);
+const target = densestCell(grid);
+
+const cells = grid.flatMap((row, r) =>
+  row.map((value, c) => ({
+    x: OFFSET + c * CELL,
+    y: OFFSET + r * CELL,
+    // Opacity grows with the square of the density, which spreads the mid-range apart; the
+    // floor keeps sparse cells visible as squares.
+    opacity: round((0.06 + 0.56 * (value / target.value) ** 2) * 100) / 100,
+    miss: value === 0,
+    target: r === target.row && c === target.col,
+  })),
+);
+const view = OFFSET * 2 + SIZE * CELL;
+---
+
+<svg
+  viewBox={`0 0 ${view} ${view}`}
+  class="block h-auto w-full"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class="text-zinc-900 dark:text-zinc-100">
+    {
+      cells.map((cell) =>
+        cell.miss ? (
+          <circle
+            cx={cell.x + CELL / 2 - 0.5}
+            cy={cell.y + CELL / 2 - 0.5}
+            r="2.5"
+            stroke="currentColor"
+            stroke-opacity="0.55"
+          />
+        ) : cell.target ? null : (
+          <rect
+            x={cell.x}
+            y={cell.y}
+            width={CELL - 1}
+            height={CELL - 1}
+            rx="2"
+            fill="currentColor"
+            fill-opacity={cell.opacity}
+          />
+        ),
+      )
+    }
+  </g>
+  {
+    cells
+      .filter((cell) => cell.target)
+      .map((cell) => (
+        <g class="text-accent-600 dark:text-accent-400">
+          <rect x={cell.x} y={cell.y} width={CELL - 1} height={CELL - 1} rx="2" fill="currentColor" />
+          <rect
+            x={cell.x - 3}
+            y={cell.y - 3}
+            width={CELL + 5}
+            height={CELL + 5}
+            rx="4"
+            stroke="currentColor"
+            stroke-width="1"
+          />
+        </g>
+      ))
+  }
+</svg>

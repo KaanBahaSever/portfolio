@@ -1,0 +1,42 @@
+---
+/** Journey chapter 2: Istanbul University Rocket Club and the flight avionics. Per-locale prose. */
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        2019–2022 yılları arasında İstanbul Üniversitesi Roket Kulübü’nün başkan yardımcısıydım. Üç roketin tasarımına
+        ve başarılı yüksek güçlü fırlatmalarına katkıda bulundum.
+      </p>
+      <p>
+        Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrol sistemini tek başıma geliştirdim. İkisi de roketteki
+        sensörlerden gelen yönelim, jiroskop ve altimetre telemetrisini birleştiren sensör füzyonuna dayanıyordu.
+      </p>
+      <p>
+        Telemetriyi SD karta kaydeden protokolleri, RF telemetri iletim modülleriyle birlikte çalışacak şekilde
+        tasarladım. Uçuş verisini ayrıştırıp uçuş sonrasında yörünge grafiklerini çizen bir masaüstü telemetri arayüzü de
+        geliştirdim.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        From 2019 to 2022 I was Vice President of the Istanbul University Rocket Club. I contributed to the design and
+        the successful high-power launches of three rockets.
+      </p>
+      <p>
+        I was solely responsible for the flight avionics firmware and the parachute deployment control system. Both
+        relied on onboard sensor fusion of orientation, gyroscope and altimeter telemetry.
+      </p>
+      <p>
+        I also designed the protocols for logging telemetry to an SD card, which worked alongside the RF telemetry
+        transmission modules, and built a desktop telemetry dashboard that parses the flight data and plots each
+        trajectory after the flight.
+      </p>
+    </>
+  )
+}

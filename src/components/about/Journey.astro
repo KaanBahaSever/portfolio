@@ -1,0 +1,88 @@
+---
+/**
+ * "Engineering journey" (section #journey, linked from the home page as /about/#journey):
+ * five chapters in rough chronological order, each with a small figure of the idea behind it.
+ * Chapter text lives in ./prose/* (per locale); headings, labels and captions in about.ts.
+ */
+import Chapter from './Chapter.astro';
+import Figure from './Figure.astro';
+import BrokerGraph from './figures/BrokerGraph.astro';
+import DensityGrid from './figures/DensityGrid.astro';
+import DescentField from './figures/DescentField.astro';
+import FlightProfile from './figures/FlightProfile.astro';
+import MinimaxTree from './figures/MinimaxTree.astro';
+import Trajectory3d from './figures/Trajectory3d.astro';
+import Algorithms from './prose/Algorithms.astro';
+import Avionics from './prose/Avionics.astro';
+import CurrentCore from './prose/CurrentCore.astro';
+import Guidance from './prose/Guidance.astro';
+import Simulation from './prose/Simulation.astro';
+import Section from '../ui/Section.astro';
+import { aboutMessages } from '../../i18n/messages/about';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  /** Section number shown as "§ 01". */
+  index?: string;
+}
+
+const { index } = Astro.props;
+const m = aboutMessages[getLocale(Astro)].journey;
+const { algorithms, avionics, guidance, simulation, core } = m.chapters;
+---
+
+<Section id="journey" title={m.title} index={index}>
+  <p class="max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">{m.intro}</p>
+
+  <ol class="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800">
+    <li class="py-10 sm:py-14">
+      <Chapter id="journey-algorithms" number="01" label={algorithms.label} title={algorithms.title}>
+        <Algorithms />
+        <Figure slot="figure" number={1} caption={algorithms.caption}>
+          <div class="grid grid-cols-2 items-center gap-3 sm:gap-5">
+            <DensityGrid />
+            <MinimaxTree />
+          </div>
+        </Figure>
+      </Chapter>
+    </li>
+    <li class="py-10 sm:py-14">
+      <Chapter
+        id="journey-avionics"
+        number="02"
+        period={{ start: '2019', end: '2022' }}
+        label={avionics.label}
+        title={avionics.title}
+      >
+        <Avionics />
+        <Figure slot="figure" number={2} caption={avionics.caption}>
+          <FlightProfile />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class="py-10 sm:py-14">
+      <Chapter id="journey-guidance" number="03" label={guidance.label} title={guidance.title}>
+        <Guidance />
+        <Figure slot="figure" number={3} caption={guidance.caption}>
+          <DescentField />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class="py-10 sm:py-14">
+      <Chapter id="journey-simulation" number="04" label={simulation.label} title={simulation.title}>
+        <Simulation />
+        <Figure slot="figure" number={4} caption={simulation.caption}>
+          <Trajectory3d />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class="pt-10 sm:pt-14">
+      <Chapter id="journey-core" number="05" label={core.label} title={core.title}>
+        <CurrentCore />
+        <Figure slot="figure" number={5} caption={core.caption}>
+          <BrokerGraph labels={core.figureLabels} />
+        </Figure>
+      </Chapter>
+    </li>
+  </ol>
+</Section>

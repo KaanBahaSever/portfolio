@@ -1,0 +1,56 @@
+---
+/**
+ * Four key facts under the page title, as a hairline table: two columns on phones, four on
+ * wide screens. The cells share 1px borders (a gap-px grid over the border colour).
+ */
+import Badge from '../ui/Badge.astro';
+import { ui } from '../ui/styles';
+import { SITE } from '../../config/site';
+import { localizePath, pick } from '../../i18n/config';
+import { aboutMessages } from '../../i18n/messages/about';
+import { common } from '../../i18n/messages/common';
+import { getLocale } from '../../i18n/server';
+
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = aboutMessages[locale].glance;
+const cell = 'min-w-0 bg-white p-4 sm:p-5 dark:bg-zinc-900';
+const term = 'label-mono text-zinc-600 dark:text-zinc-400';
+const value = 'text-sm font-medium text-zinc-900 sm:text-base dark:text-zinc-100';
+---
+
+<section aria-labelledby="glance-heading" class="mt-10 sm:mt-12">
+  <h2 id="glance-heading" class="sr-only">{m.heading}</h2>
+  <dl
+    class="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-zinc-200 bg-zinc-200 lg:grid-cols-4 dark:border-zinc-800 dark:bg-zinc-800"
+  >
+    <div class={cell}>
+      <dt class={term}>{m.location}</dt>
+      <dd class:list={[value, 'mt-2']}>{pick(SITE.location, locale)}</dd>
+    </div>
+    <div class={cell}>
+      <dt class={term}>{m.study}</dt>
+      <dd class:list={[value, 'mt-2']}>{m.studyValue}</dd>
+    </div>
+    <div class={cell}>
+      <dt class={term}>{m.languages}</dt>
+      <dd class:list={[value, 'mt-2']}>{m.languagesValue}</dd>
+    </div>
+    <div class={cell}>
+      <dt class={term}>{m.building}</dt>
+      {/*
+        The link keeps a 44×44px touch target (the word alone is about 41px wide); the negative
+        margins line its text up with the other cells.
+      */}
+      <dd class:list={[value, '-mt-0.5 -mb-2.5 flex flex-wrap items-center gap-x-2']}>
+        <a
+          href={localizePath('/projects/asion/', locale)}
+          class:list={[ui.inlineLink, 'inline-flex min-h-11 min-w-11 items-center']}
+        >
+          Asion
+        </a>
+        <Badge>{t.badges.earlyAccess}</Badge>
+      </dd>
+    </div>
+  </dl>
+</section>

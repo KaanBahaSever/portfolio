@@ -33,6 +33,13 @@ Adding old photos:
          caption: Optional caption            # optional
 3. Split the story over several entries if you like (e.g. 00-childhood.md,
    00-first-program.md); entries are sorted by `date`, oldest first.
+
+Turkish version: src/content/tr/timeline/00-childhood.md (same file name) holds the Turkish
+title, dateLabel, photo alt/caption (same order as above) and body. Write it too, and remove
+`draft: true` there as well when publishing.
+
+Links to site pages: write locale-free paths such as [Karecik](/projects/karecik/); the About
+page adds /tr/ on Turkish pages.
 -->
 
 TODO: the childhood story goes here.

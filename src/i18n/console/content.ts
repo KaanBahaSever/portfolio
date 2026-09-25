@@ -178,7 +178,7 @@ const en = {
     // The same stage names as the project cards and pages, so a status reads alike everywhere.
     stages: {
       production: projectsMessages.en.stage.production,
-      'early-access': common.en.badges.earlyAccess,
+      'early-access': `${common.en.badges.inDevelopment} · ${common.en.badges.earlyAccess}`,
       'in-development': common.en.badges.inDevelopment,
     },
   },
@@ -355,7 +355,7 @@ const tr: ConsoleContent = {
     private: common.tr.badges.private,
     stages: {
       production: projectsMessages.tr.stage.production,
-      'early-access': common.tr.badges.earlyAccess,
+      'early-access': `${common.tr.badges.inDevelopment} · ${common.tr.badges.earlyAccess}`,
       'in-development': common.tr.badges.inDevelopment,
     },
   },

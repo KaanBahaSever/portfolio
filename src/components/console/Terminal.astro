@@ -47,10 +47,11 @@ const switchLanguage = {
     <div class="px-safe flex h-14 items-center justify-between gap-2">
       <h1 class="sr-only">{m.title}</h1>
       {/*
-        Below 375px the toolbar needs every pixel for its 44px targets: the decorative name and
-        the gaps go, and the size value is only announced (the text itself shows the change).
+        Below 420px the toolbar (with the language link) needs every pixel for its 44px targets: the
+        decorative name goes rather than show clipped, and below 375px the gaps go too and the size
+        value is only announced (the text itself shows the change).
       */}
-      <p class="min-w-0 truncate max-[375px]:hidden" aria-hidden="true">kbs-os<span class="max-sm:hidden"> · tty1</span></p>
+      <p class="min-w-0 truncate max-[420px]:hidden" aria-hidden="true">kbs-os<span class="max-sm:hidden"> · tty1</span></p>
       <div
         class="ml-auto flex shrink-0 items-center gap-1 max-[375px]:gap-0 sm:gap-3"
         role="group"

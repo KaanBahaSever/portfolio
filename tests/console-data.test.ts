@@ -150,7 +150,7 @@ test('project files show the stack, status, page and links in the page language'
   assert.match(karecik, /kaynak kodu github\.com\/KaanBahaSever\/karecik/);
 
   const asion = fileLines(build('en'), ['projects', 'asion.txt']).map(plainText).join('\n');
-  assert.match(asion, /status Private · Early access/);
+  assert.match(asion, /status Private · In development · Early access/);
   assert.match(asion, /since 2024/);
   assert.match(asion, /site asion\.app/);
 });
@@ -159,7 +159,8 @@ test('project stages use the same names as the project cards and pages', () => {
   for (const locale of LOCALES) {
     const { stages, openSource, private: closed } = consoleContent[locale].project;
     assert.equal(stages.production, projectsMessages[locale].stage.production, locale);
-    assert.equal(stages['early-access'], common[locale].badges.earlyAccess, locale);
+    // Early access shows as two badges on the cards ("In development", "Early access").
+    assert.equal(stages['early-access'], `${common[locale].badges.inDevelopment} · ${common[locale].badges.earlyAccess}`, locale);
     assert.equal(stages['in-development'], common[locale].badges.inDevelopment, locale);
     assert.equal(openSource, common[locale].badges.openSource, locale);
     assert.equal(closed, common[locale].badges.private, locale);

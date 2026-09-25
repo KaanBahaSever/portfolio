@@ -31,7 +31,7 @@ Proje henüz erken aşamada. Planlanan sonraki adımlar:
 ## Arka plan
 
 Rocket-Up, uzun süredir sürdürdüğüm uçuş çalışmalarının bir parçası. 2019–2022 yılları arasında
-İstanbul Üniversitesi Roket Kulübü'nün başkan yardımcısıydım; üç roketin tasarımına ve başarılı
+İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım; üç roketin tasarımına ve başarılı
 yüksek güçlü atışlarına katkıda bulundum, uçuş aviyoniği yazılımını (firmware) ve paraşüt
 açma kontrol sistemini tek başıma geliştirdim.
 

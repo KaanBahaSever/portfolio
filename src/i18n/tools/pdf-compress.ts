@@ -10,6 +10,7 @@
 import type { Localized } from '../config.ts';
 import { formatters } from '../format.ts';
 import type { CompressionLevel } from '../../lib/pdf/compress/plan.ts';
+import type { CompressedNameParts } from '../../lib/pdf/compress/sniff.ts';
 
 const enNumber = (value: number) => formatters('en').number(value);
 const trNumber = (value: number) => formatters('tr').number(value);
@@ -57,6 +58,11 @@ const en = {
   compressed: 'Compressed',
   downloadAgain: 'Download again',
   downloadAnyway: 'Download anyway',
+  /** Words in the saved file name: "Report-compressed.pdf", or "document-compressed.pdf" without a name. */
+  outputNames: {
+    suffix: '-compressed',
+    fallbackBase: 'document',
+  } satisfies CompressedNameParts,
 
   // ------------------------------------------------------------ controller: loaded file
   /** Shown when a picked file has no name (some Android file providers). */
@@ -173,7 +179,7 @@ const tr: PdfCompressMessages = {
   noscript: 'Bu araç JavaScript gerektirir. Tamamen tarayıcınızda çalışır; hiçbir şey yüklenmez.',
   chooseFile: 'PDF seçin',
   chooseAnother: 'Başka bir PDF seçin',
-  dropHint: 'ya da buraya bırakın',
+  dropHint: 'ya da buraya sürükleyip bırakın',
   dropNote: 'Dosyanız cihazınızdan hiç çıkmaz. En iyi sonucu taranmış belgelerde ve fotoğraf dolu PDF’lerde verir.',
   dismissNotice: 'Bildirimi kapat',
   removeFile: 'Dosyayı kaldır',
@@ -196,6 +202,11 @@ const tr: PdfCompressMessages = {
   compressed: 'Sıkıştırılmış',
   downloadAgain: 'Yeniden indir',
   downloadAnyway: 'Yine de indir',
+  // Same words as Split PDF's Turkish file names ("belge", "bölünmüş").
+  outputNames: {
+    suffix: '-sıkıştırılmış',
+    fallbackBase: 'belge',
+  },
 
   untitled: 'Adsız.pdf',
   pages: (count) => `${trNumber(count)} sayfa`,

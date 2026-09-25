@@ -2,8 +2,9 @@
 /**
  * Turkish 404. Builds to /tr/404/index.html and is moved to /tr/404.html after the build
  * (integrations/localized-404.mjs), where Cloudflare Pages serves it for missing /tr/ URLs.
+ * Astro reads the locale from this path ('tr'), so the shared component renders in Turkish.
  */
-import NotFound from '../404.astro';
+import NotFound from '../../components/home/NotFound.astro';
 ---
 
 <NotFound />

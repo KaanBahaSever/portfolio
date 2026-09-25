@@ -1,0 +1,115 @@
+---
+/**
+ * The 404 page, shared by src/pages/404.astro (English) and src/pages/tr/404.astro (Turkish):
+ * getLocale() reads the language from the URL, so both files just render <NotFound />.
+ *
+ * Cloudflare Pages serves 404.html for any missing URL, so the page cannot know its own
+ * address: it is noindex, and `alternates` names no other language. That keeps the language
+ * preference script from redirecting away from the error, and the header switch falls back
+ * to the other language's home page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import NotFoundFigure from './NotFoundFigure.astro';
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { SITE } from '../../config/site';
+import { localizePath } from '../../i18n/config';
+import { common } from '../../i18n/messages/common';
+import { NOT_FOUND_LINKS, notFoundMessages } from '../../i18n/messages/not-found';
+import { getLocale } from '../../i18n/server';
+
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = notFoundMessages[locale];
+
+const links = NOT_FOUND_LINKS.map((key) => ({
+  href: localizePath(`/${key}/`, locale),
+  label: t.nav[key],
+  description: m.links[key],
+}));
+
+/** The formula in running text: serif italic, never broken across lines. */
+const formula = 'font-serif italic whitespace-nowrap text-zinc-900 dark:text-zinc-100';
+---
+
+<BaseLayout title={m.title} description={m.description} noindex alternates={{}} width="wide">
+  <section
+    aria-labelledby="not-found-heading"
+    class="grid gap-10 pt-2 sm:pt-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-center lg:gap-16"
+  >
+    <div class="min-w-0">
+      <p class={ui.eyebrow}>{m.eyebrow}</p>
+      <h1 id="not-found-heading" class:list={[ui.pageTitle, 'mt-3']}>{m.heading}</h1>
+      <p class:list={[ui.lead, 'mt-4 max-w-xl']}>
+        {
+          locale === 'tr' ? (
+            <>
+              Açmaya çalıştığınız adres bu sitenin tanım kümesinde değil: <span class={formula}>x ∉ dom(f)</span>. Sayfa
+              taşınmış ya da hiç var olmamış olabilir. Aşağıdaki bağlantıların hepsi iyi tanımlı.
+            </>
+          ) : (
+            <>
+              The address you followed is not in this site’s domain: <span class={formula}>x ∉ dom(f)</span>. The page
+              may have moved, or it may never have existed. Every link below is well defined.
+            </>
+          )
+        }
+      </p>
+      <a
+        href={localizePath('/', locale)}
+        class:list={[ui.buttonPrimary, 'group mt-8 w-full sm:w-auto']}
+      >
+        <Icon name="arrow-left" class="size-4 transition-transform duration-200 group-hover:-translate-x-0.5" />
+        {m.home}
+      </a>
+    </div>
+
+    <NotFoundFigure class="min-w-0" />
+  </section>
+
+  <nav aria-label={m.popular} class="mt-14 sm:mt-20">
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {
+        links.map((link) => (
+          <li class="min-w-0">
+            <a
+              href={link.href}
+              class="group flex h-full min-h-11 flex-col gap-1 rounded-xl border border-zinc-200 bg-white px-4 py-3.5 transition-colors hover:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600"
+            >
+              <span class="flex items-center justify-between gap-2 font-semibold text-zinc-900 transition-colors group-hover:text-accent-700 dark:text-zinc-100 dark:group-hover:text-accent-400">
+                {link.label}
+                <Icon
+                  name="arrow-right"
+                  class="size-4 text-zinc-400 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-current dark:text-zinc-500"
+                />
+              </span>
+              <span class="text-sm text-zinc-600 dark:text-zinc-400">{link.description}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+
+  <p class="mt-10 text-sm text-zinc-600 dark:text-zinc-400">
+    {
+      locale === 'tr' ? (
+        <>
+          Bozuk bir bağlantıdan mı geldiniz?{' '}
+          <a href={`mailto:${SITE.email}`} class={ui.inlineLink}>
+            E-postayla
+          </a>{' '}
+          haber verirseniz düzeltirim.
+        </>
+      ) : (
+        <>
+          Followed a broken link? Tell me by{' '}
+          <a href={`mailto:${SITE.email}`} class={ui.inlineLink}>
+            email
+          </a>{' '}
+          and I will fix it.
+        </>
+      )
+    }
+  </p>
+</BaseLayout>

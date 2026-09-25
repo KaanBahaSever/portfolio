@@ -1,0 +1,51 @@
+---
+/**
+ * "Engineering journey" teaser: four compact chapter cards, each a stretched link to the full
+ * story on the About page (/about/#journey).
+ */
+import JourneyGlyph from './JourneyGlyph.astro';
+import Section from '../ui/Section.astro';
+import { localizePath } from '../../i18n/config';
+import { JOURNEY_CHAPTERS, homeMessages } from '../../i18n/messages/home';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  /** Two-digit section number, e.g. '03'. */
+  index?: string;
+}
+
+const { index } = Astro.props;
+const locale = getLocale(Astro);
+const j = homeMessages[locale].journey;
+const href = localizePath('/about/#journey', locale);
+---
+
+<Section id="journey" index={index} title={j.title} link={{ href, label: j.all }}>
+  <p class="max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400">{j.lead}</p>
+  <ol class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {
+      JOURNEY_CHAPTERS.map((key, i) => {
+        const chapter = j.chapters[key];
+        return (
+          <li class="min-w-0">
+            <article class="group relative flex h-full flex-col rounded-xl border border-zinc-200 bg-white p-5 transition-colors hover:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600">
+              <div class="flex items-start justify-between gap-3">
+                <JourneyGlyph kind={key} class="h-11 w-[4.5rem] text-zinc-700 dark:text-zinc-300" />
+                <span class="label-mono text-zinc-600 dark:text-zinc-400">{j.chapter(i + 1)}</span>
+              </div>
+              <h3 class="mt-5 font-serif text-xl leading-snug font-medium tracking-tight text-balance">
+                <a
+                  href={href}
+                  class="rounded-sm text-zinc-900 transition-colors group-hover:text-accent-700 after:absolute after:inset-0 after:rounded-xl dark:text-zinc-100 dark:group-hover:text-accent-400"
+                >
+                  {chapter.title}
+                </a>
+              </h3>
+              <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{chapter.text}</p>
+            </article>
+          </li>
+        );
+      })
+    }
+  </ol>
+</Section>

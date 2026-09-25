@@ -1,0 +1,341 @@
+---
+/**
+ * Fig. 1 on the home page: a point turning on the unit circle projects its height onto a sine
+ * wave. Thin ink strokes over fine graph paper, mono tick labels, one accent node (the point).
+ *
+ * - Server-rendered at a fixed pose, so it is complete without JavaScript; the viewBox fixes
+ *   the aspect ratio, so nothing shifts when the fonts or the script arrive.
+ * - The strokes draw in once (stroke-dashoffset), when the figure first comes into view (on
+ *   phones it sits below the fold); construction lines fade in after them.
+ * - The script turns the point slowly (one turn every 16 s) with requestAnimationFrame, only
+ *   while the figure is on screen and the tab is visible. A fine pointer moving across the
+ *   hero nudges the phase a little. With prefers-reduced-motion the figure stays still.
+ * - The SVG is decorative (aria-hidden); the visible caption says what it shows.
+ */
+import { homeMessages } from '../../i18n/messages/home';
+import { getLocale } from '../../i18n/server';
+import {
+  FIGURE,
+  angleLabelPoint,
+  anglePath,
+  circlePath,
+  pointOnCircle,
+  svgNumber,
+  wavePath,
+} from './hero-figure-geometry';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const locale = getLocale(Astro);
+const m = homeMessages[locale].figure;
+
+const { cx, cy, r, x0, x1, period, width, height, initialAngle } = FIGURE;
+const p = pointOnCircle(initialAngle);
+const label = angleLabelPoint(initialAngle);
+const top = cy - r;
+const bottom = cy + r;
+
+// Wave axis: minor ticks every π/2, labelled ticks at π, 2π, 3π.
+const ticks = Array.from({ length: Math.floor(((x1 - x0) / period) * 4) }, (_, i) => ({
+  x: x0 + ((i + 1) * period) / 4,
+  major: (i + 1) % 2 === 0,
+}));
+const tickLabels = [
+  { x: x0 + period / 2, text: 'π' },
+  { x: x0 + period, text: '2π' },
+  { x: x0 + (3 * period) / 2, text: '3π' },
+];
+---
+
+<figure class:list={['hero-figure', className]}>
+  {/*
+    Holds the draw-in until the figure is on screen: a CSS animation that starts at page load
+    would be over before a phone visitor scrolls down to it. Inline and first in the figure, so
+    the hold is in place before any stroke is parsed or painted; it does not depend on the
+    bundled script below. Without JavaScript (or IntersectionObserver) the figure draws at load.
+  */}
+  <script is:inline>
+    (() => {
+      const figure = document.currentScript?.parentElement;
+      if (!figure || !('IntersectionObserver' in window)) return;
+      figure.setAttribute('data-draw', 'pending');
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          figure.removeAttribute('data-draw');
+          observer.disconnect();
+        },
+        { threshold: 0.3 },
+      );
+      observer.observe(figure);
+    })();
+  </script>
+  <div
+    class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white/70 dark:border-zinc-800 dark:bg-zinc-900/50"
+  >
+    <div class="bg-graph-fine mask-fade-radial pointer-events-none absolute inset-0" aria-hidden="true"></div>
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      class="relative block aspect-[12/7] h-auto w-full text-zinc-800 dark:text-zinc-200"
+      fill="none"
+      stroke-linecap="round"
+      aria-hidden="true"
+      focusable="false"
+      data-hero-figure
+    >
+      {/* Amplitude guides at y = ±1 (faint, dotted). */}
+      <g class="text-zinc-300 dark:text-zinc-700" stroke="currentColor" stroke-width="1" stroke-dasharray="1 5">
+        <path d={`M${cx} ${top}H${x1}`} class="fig-fade" style="--fig-delay: 700ms"></path>
+        <path d={`M${cx} ${bottom}H${x1}`} class="fig-fade" style="--fig-delay: 700ms"></path>
+      </g>
+
+      {/* Axes and ticks. */}
+      <g class="text-zinc-400 dark:text-zinc-600" stroke="currentColor" stroke-width="1">
+        <path d={`M20 ${cy}H${width - 12}`} pathLength="1" class="fig-draw" style="--fig-delay: 0ms"></path>
+        <path d={`M${cx} ${top - 16}V${bottom + 16}`} pathLength="1" class="fig-draw" style="--fig-delay: 80ms"></path>
+        <path d={`M${x0} ${top - 16}V${bottom + 16}`} pathLength="1" class="fig-draw" style="--fig-delay: 160ms"></path>
+        <g class="fig-fade" style="--fig-delay: 600ms">
+          {ticks.map((tick) => <path d={`M${tick.x} ${cy - (tick.major ? 5 : 3)}V${cy + (tick.major ? 5 : 3)}`} />)}
+          <path d={`M${x0 - 4} ${top}H${x0 + 4}`}></path>
+          <path d={`M${x0 - 4} ${bottom}H${x0 + 4}`}></path>
+        </g>
+      </g>
+
+      {/* Tick labels: mono figures; the smaller ones are dropped on phones, where they would be tiny. */}
+      <g
+        class="fig-fade fill-zinc-600 font-mono dark:fill-zinc-400"
+        style="--fig-delay: 700ms"
+        font-size="11"
+        stroke="none"
+      >
+        {
+          tickLabels.map((tick) => (
+            <text x={tick.x} y={cy + 19} text-anchor="middle" class="max-sm:hidden">
+              {tick.text}
+            </text>
+          ))
+        }
+        <text x={x0 - 8} y={top + 4} text-anchor="end">1</text>
+        <text x={x0 - 8} y={bottom + 4} text-anchor="end">−1</text>
+      </g>
+
+      {/* Formulas, set in the serif italic of the page titles. */}
+      <g class="fig-fade fill-zinc-600 font-serif italic dark:fill-zinc-400" style="--fig-delay: 900ms" stroke="none">
+        <text x={x1} y={top - 22} text-anchor="end" font-size="15">sin(θ − x)</text>
+        <text x="20" y={height - 18} font-size="14" class="max-sm:hidden">x² + y² = 1</text>
+      </g>
+
+      {/* The unit circle and the wave. */}
+      <path d={circlePath()} stroke="currentColor" stroke-width="1.5" pathLength="1" class="fig-draw" style="--fig-delay: 200ms"
+      ></path>
+      <path
+        d={wavePath(initialAngle)}
+        stroke="currentColor"
+        stroke-width="1.75"
+        pathLength="1"
+        class="fig-draw"
+        style="--fig-delay: 450ms; --fig-duration: 1400ms"
+        data-part="wave"></path>
+
+      {/* Construction: radius, angle arc, the projection onto the wave and the drop to the x-axis. */}
+      <g class="fig-fade text-zinc-500" style="--fig-delay: 1100ms" stroke="currentColor" stroke-width="1">
+        <path d={`M${cx} ${cy}L${svgNumber(p.x)} ${svgNumber(p.y)}`} data-part="radius"></path>
+        <path d={anglePath(initialAngle)} data-part="arc"></path>
+        <path
+          d={`M${svgNumber(p.x)} ${svgNumber(p.y)}H${x0}`}
+          stroke-dasharray="3 4"
+          data-part="projection"></path>
+        <path
+          d={`M${svgNumber(p.x)} ${svgNumber(p.y)}V${cy}`}
+          stroke-dasharray="3 4"
+          data-part="drop"></path>
+      </g>
+      <text
+        x={svgNumber(label.x)}
+        y={svgNumber(label.y)}
+        class="fig-fade fill-zinc-600 font-serif italic dark:fill-zinc-400"
+        style="--fig-delay: 1100ms"
+        font-size="14"
+        text-anchor="middle"
+        dominant-baseline="central"
+        stroke="none"
+        data-part="theta">θ</text
+      >
+
+      {/* Where the wave starts: P's height, carried across (ink). */}
+      <circle
+        cx={x0}
+        cy={svgNumber(p.y)}
+        r="2.75"
+        fill="currentColor"
+        class="fig-fade"
+        style="--fig-delay: 1100ms"
+        data-part="head"></circle>
+
+      {/* P, the one accent node, with a faint halo. */}
+      <g class="fig-fade" style="--fig-delay: 1000ms">
+        <circle
+          cx={svgNumber(p.x)}
+          cy={svgNumber(p.y)}
+          r="9"
+          class="fill-accent-500/15 stroke-accent-600/40 dark:fill-accent-400/15 dark:stroke-accent-400/40"
+          stroke-width="1"
+          data-part="halo"></circle>
+        <circle
+          cx={svgNumber(p.x)}
+          cy={svgNumber(p.y)}
+          r="4.5"
+          class="fill-accent-600 dark:fill-accent-400"
+          data-part="point"></circle>
+      </g>
+    </svg>
+  </div>
+  <figcaption class="mt-3 flex gap-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+    <span class="label-mono shrink-0 pt-0.5 text-zinc-900 dark:text-zinc-100">{m.label}</span>
+    <span>{m.caption}</span>
+  </figcaption>
+</figure>
+
+<style>
+  /*
+   * The draw-in only exists when motion is welcome: with prefers-reduced-motion (or before these
+   * rules apply) every stroke is simply there. pathLength="1" makes the dash one path long.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .fig-draw {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: fig-draw var(--fig-duration, 1100ms) cubic-bezier(0.65, 0, 0.35, 1) var(--fig-delay, 0ms) both;
+    }
+
+    .fig-fade {
+      animation: fig-fade 400ms ease-out var(--fig-delay, 0ms) both;
+    }
+
+    /* Paused on their first frame (delays included) until the figure scrolls into view. */
+    .hero-figure[data-draw='pending'] .fig-draw,
+    .hero-figure[data-draw='pending'] .fig-fade {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes fig-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes fig-fade {
+    from {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  import { FIGURE, angleLabelPoint, anglePath, pointOnCircle, svgNumber, wavePath } from './hero-figure-geometry';
+
+  /** One full turn every 16 s: slow enough to read as calm, not busy. */
+  const RADIANS_PER_MS = (2 * Math.PI) / 16_000;
+  /** The pointer can shift the phase by at most this much either way. */
+  const MAX_PHASE_SHIFT = 0.45;
+  /** Rotation starts after the draw-in has finished, and eases up to speed. */
+  const START_DELAY_MS = 1400;
+  const RAMP_MS = 1500;
+
+  const svg = document.querySelector<SVGSVGElement>('[data-hero-figure]');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  if (svg && !reducedMotion.matches) animate(svg);
+
+  function animate(svg: SVGSVGElement) {
+    const part = (name: string) => svg.querySelector<SVGElement>(`[data-part="${name}"]`);
+    const wave = part('wave');
+    const radius = part('radius');
+    const arc = part('arc');
+    const projection = part('projection');
+    const drop = part('drop');
+    const theta = part('theta');
+    const head = part('head');
+    const halo = part('halo');
+    const point = part('point');
+    if (!wave || !radius || !arc || !projection || !drop || !theta || !head || !halo || !point) return;
+
+    let angle: number = FIGURE.initialAngle;
+    let phase = 0;
+    let targetPhase = 0;
+    let startedAt = 0;
+    let last = 0;
+    let frame = 0;
+    let onScreen = false;
+
+    function render(value: number) {
+      const p = pointOnCircle(value);
+      const px = svgNumber(p.x);
+      const py = svgNumber(p.y);
+      const label = angleLabelPoint(value);
+      wave!.setAttribute('d', wavePath(value));
+      radius!.setAttribute('d', `M${FIGURE.cx} ${FIGURE.cy}L${px} ${py}`);
+      arc!.setAttribute('d', anglePath(value));
+      projection!.setAttribute('d', `M${px} ${py}H${FIGURE.x0}`);
+      drop!.setAttribute('d', `M${px} ${py}V${FIGURE.cy}`);
+      theta!.setAttribute('x', svgNumber(label.x));
+      theta!.setAttribute('y', svgNumber(label.y));
+      head!.setAttribute('cy', py);
+      for (const node of [halo!, point!]) {
+        node.setAttribute('cx', px);
+        node.setAttribute('cy', py);
+      }
+    }
+
+    function tick(now: number) {
+      if (!startedAt) startedAt = now;
+      // Clamp the step so a long pause (a dropped frame, a background tab) never jumps the figure.
+      const dt = last ? Math.min(now - last, 50) : 0;
+      last = now;
+      const ramp = Math.min(1, Math.max(0, (now - startedAt - START_DELAY_MS) / RAMP_MS));
+      angle += RADIANS_PER_MS * dt * ramp * ramp;
+      // Critically damped approach to the pointer's phase (time constant ~250 ms).
+      phase += (targetPhase - phase) * (1 - Math.exp(-dt / 250));
+      render(angle + phase);
+      frame = requestAnimationFrame(tick);
+    }
+
+    function play() {
+      if (frame || !onScreen || document.hidden || reducedMotion.matches) return;
+      last = 0;
+      frame = requestAnimationFrame(tick);
+    }
+
+    function pause() {
+      cancelAnimationFrame(frame);
+      frame = 0;
+    }
+
+    new IntersectionObserver((entries) => {
+      onScreen = entries.some((entry) => entry.isIntersecting);
+      if (onScreen) play();
+      else pause();
+    }).observe(svg);
+
+    document.addEventListener('visibilitychange', () => (document.hidden ? pause() : play()));
+    // If the visitor turns on reduced motion mid-visit, stop where the figure is.
+    reducedMotion.addEventListener('change', () => (reducedMotion.matches ? pause() : play()));
+
+    // Pointer-driven phase shift, for mice and trackpads only (touch would fight with scrolling).
+    const area = svg.closest<HTMLElement>('[data-hero]') ?? svg.parentElement;
+    if (area && window.matchMedia('(pointer: fine)').matches) {
+      area.addEventListener('pointermove', (event) => {
+        const box = area.getBoundingClientRect();
+        const x = (event.clientX - box.left) / Math.max(box.width, 1);
+        targetPhase = (Math.min(1, Math.max(0, x)) * 2 - 1) * MAX_PHASE_SHIFT;
+      });
+      area.addEventListener('pointerleave', () => {
+        targetPhase = 0;
+      });
+    }
+  }
+</script>

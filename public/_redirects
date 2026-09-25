@@ -1,7 +1,7 @@
 # Cloudflare Pages redirects: https://developers.cloudflare.com/pages/configuration/redirects/
-# The Images to PDF tool, its project page and its blog post were retired.
-/tools/images-to-pdf /tools/ 301
-/tools/images-to-pdf/ /tools/ 301
+# Images to PDF is a tool (/tools/images-to-pdf/), not a project: its project page and its blog
+# post were retired. Never redirect /tools/images-to-pdf here: Cloudflare applies these rules
+# before static files, so a rule would hide the tool.
 /projects/images-to-pdf /projects/ 301
 /projects/images-to-pdf/ /projects/ 301
 /blog/building-images-to-pdf /blog/ 301

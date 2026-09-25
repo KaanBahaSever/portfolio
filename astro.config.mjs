@@ -40,13 +40,15 @@ export default defineConfig({
   // Pure static output (no adapter): `astro build` writes everything to dist/.
   vite: {
     plugins: [tailwindcss()],
-    // Dev only: pdf-lib is imported solely by the lazily created Split/Compress PDF workers and
-    // PDF.js by the lazily loaded Split PDF thumbnails, so Vite would discover them on first use
-    // and reload the page (losing the chosen file).
-    optimizeDeps: { include: ['pdf-lib', 'pdfjs-dist/legacy/build/pdf.mjs'] },
+    // Dev only: pdf-lib is imported solely by the lazily created Images to PDF, Split PDF and
+    // Compress PDF workers, and PDF.js by the lazily loaded Split PDF thumbnails, so Vite would
+    // discover them on first use and reload the page (losing the chosen files). SortableJS is
+    // listed too, so the first visit to Images to PDF does not reload either.
+    optimizeDeps: { include: ['pdf-lib', 'pdfjs-dist/legacy/build/pdf.mjs', 'sortablejs'] },
     build: {
-      // pdf-lib (~515 kB minified) ships in each PDF worker and PDF.js (~520 kB) in the lazily
-      // loaded thumbnail chunk, so those bundles may exceed Vite's 500 kB default.
+      // pdf-lib (~515 kB minified) ships in each PDF worker (Images to PDF, Split PDF, Compress
+      // PDF) and PDF.js (~520 kB) in the lazily loaded thumbnail chunk, so those bundles may
+      // exceed Vite's 500 kB default.
       chunkSizeWarningLimit: 1400,
       // Never inline fonts as data: URLs (some small subsets would be); keep them cacheable files.
       assetsInlineLimit: (filePath) => (/\.(woff2?|ttf)$/.test(filePath) ? false : undefined),

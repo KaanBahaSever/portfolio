@@ -1,0 +1,410 @@
+---
+/**
+ * Images to PDF tool UI. Behaviour lives in src/scripts/tools/images-to-pdf/controller.ts; every
+ * hook is a data-* attribute scoped to the root section. All text comes from
+ * src/i18n/tools/images-to-pdf.ts, which the controller reads too, so the server-rendered and the
+ * scripted text never drift apart. The ids (itp-*) allow one instance per page.
+ *
+ * Layout: the file picker (compact once images are added), notices, the page grid with its
+ * toolbar, the PDF options, and an action bar that stays at the bottom of the viewport while
+ * the grid scrolls. The result sits below the bar so it never covers the pages.
+ */
+import { ui } from '../ui/styles';
+import { formatters } from '../../i18n/format';
+import { getLocale } from '../../i18n/server';
+import { imagesToPdfMessages } from '../../i18n/tools/images-to-pdf';
+import { MARGINS_MM } from '../../lib/pdf/page-layout';
+import type { MarginOption, OrientationOption, PageSizeOption } from '../../lib/pdf/page-layout';
+import type { Quality } from '../../scripts/tools/images-to-pdf/types';
+
+const locale = getLocale(Astro);
+const m = imagesToPdfMessages[locale];
+const f = formatters(locale);
+
+const PAGE_SIZES: readonly PageSizeOption[] = ['a4', 'letter', 'fit'];
+const ORIENTATIONS: readonly OrientationOption[] = ['auto', 'portrait', 'landscape'];
+const MARGINS: readonly MarginOption[] = ['none', 'small', 'large'];
+const QUALITIES: readonly Quality[] = ['original', 'compressed'];
+const marginLabel = (margin: MarginOption) => m.options.margins[margin](`${f.number(MARGINS_MM[margin])} mm`);
+
+const fieldClass = `${ui.field} cursor-pointer disabled:cursor-not-allowed disabled:opacity-60`;
+const labelTextClass = 'text-sm font-medium text-zinc-900 dark:text-zinc-100';
+const hintClass = 'text-xs leading-relaxed text-zinc-600 dark:text-zinc-400';
+/**
+ * The arrange buttons: quiet ghost buttons, like the page tools in Split PDF. The base carries
+ * no text colour, so the two variants never compete over it.
+ */
+const toolbarBase =
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-medium transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent dark:hover:bg-zinc-800 dark:disabled:hover:bg-transparent';
+const toolbarButton = `${toolbarBase} text-zinc-700 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-100`;
+const clearButton = `${toolbarBase} text-rose-700 hover:text-rose-800 dark:text-rose-400 dark:hover:text-rose-300`;
+const cardButtonBase =
+  'flex min-h-11 min-w-11 items-center justify-center text-zinc-600 transition-colors hover:bg-zinc-100 focus-visible:-outline-offset-2 disabled:pointer-events-none disabled:opacity-30 dark:text-zinc-400 dark:hover:bg-zinc-800';
+const cardButtonClass = `${cardButtonBase} hover:text-zinc-900 dark:hover:text-zinc-100`;
+const removeButtonClass = `${cardButtonBase} hover:text-rose-700 dark:hover:text-rose-400`;
+---
+
+<section data-images-to-pdf aria-label={m.toolLabel} class="mt-8 flex flex-col gap-4 sm:mt-10">
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <noscript>
+    <p
+      class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+    >
+      {m.noscript}
+    </p>
+  </noscript>
+
+  <!-- 1. File picker: large until images are added, then one compact row -->
+  <label
+    data-dropzone
+    class="group relative isolate flex min-h-[40vh] cursor-pointer flex-col items-center justify-center gap-5 overflow-hidden rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center transition-colors hover:border-zinc-400 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent-700 data-[compact]:min-h-12 data-[compact]:flex-row data-[compact]:justify-start data-[compact]:gap-3 data-[compact]:px-4 data-[compact]:py-2 data-[compact]:text-left data-[disabled]:cursor-not-allowed data-[disabled]:opacity-60 data-[disabled]:hover:border-zinc-300 data-[dragover]:border-accent-600 data-[dragover]:bg-accent-50 sm:min-h-80 sm:data-[compact]:min-h-12 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-zinc-600 dark:has-focus-visible:outline-accent-400 dark:data-[disabled]:hover:border-zinc-700 dark:data-[dragover]:border-accent-500 dark:data-[dragover]:bg-accent-500/10"
+  >
+    <span class="bg-graph mask-fade-radial pointer-events-none absolute inset-0 -z-10 group-data-[compact]:hidden" aria-hidden="true"
+    ></span>
+    <input data-file-input type="file" accept="image/*" multiple class="sr-only" />
+    <!-- Fig.: two photos go into one page; the page is the output. -->
+    <svg
+      viewBox="0 0 120 72"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.25"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="h-18 w-30 shrink-0 text-zinc-400 transition-transform duration-300 ease-out group-hover:-translate-y-0.5 group-data-[compact]:h-8 group-data-[compact]:w-14 group-data-[compact]:group-hover:translate-y-0 dark:text-zinc-500"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M12 12h30v22H12z"></path>
+      <path d="M20 24h30v22H20z" class="fill-white dark:fill-zinc-900"></path>
+      <path d="m22 44 8-8 5 5 4-3 9 6"></path>
+      <circle cx="43" cy="30" r="2.25"></circle>
+      <path d="M58 35h10m0 0-3-3m3 3-3 3" class="text-accent-600 dark:text-accent-400" stroke="currentColor"></path>
+      <g class="text-accent-600 dark:text-accent-400" stroke="currentColor">
+        <path d="M78 8h20l8 8v48H78z"></path>
+        <path d="M98 8v8h8"></path>
+        <path d="M83 22h18v15H83z"></path>
+        <path d="m83 35 5-5 4 4 3-2 6 4"></path>
+        <path d="M83 44h18M83 50h11"></path>
+      </g>
+    </svg>
+    <span
+      class="flex flex-col items-center gap-2 group-data-[compact]:min-w-0 group-data-[compact]:flex-row group-data-[compact]:flex-wrap group-data-[compact]:items-baseline group-data-[compact]:gap-x-2 group-data-[compact]:gap-y-0"
+    >
+      <span
+        data-dropzone-title
+        class="inline-flex min-h-12 items-center justify-center rounded-lg bg-accent-700 px-6 text-base font-semibold text-white shadow-sm transition-colors group-hover:bg-accent-800 group-data-[compact]:min-h-0 group-data-[compact]:bg-transparent group-data-[compact]:px-0 group-data-[compact]:text-sm group-data-[compact]:text-accent-700 group-data-[compact]:shadow-none group-data-[compact]:group-hover:bg-transparent group-data-[compact]:group-hover:underline group-data-[compact]:group-hover:underline-offset-4 dark:bg-accent-500 dark:text-zinc-950 dark:group-hover:bg-accent-400 dark:group-data-[compact]:bg-transparent dark:group-data-[compact]:text-accent-400 dark:group-data-[compact]:group-hover:bg-transparent"
+      >
+        {m.dropzone.choose}
+      </span>
+      <span class="text-sm text-zinc-600 pointer-coarse:hidden dark:text-zinc-400">{m.dropzone.drop}</span>
+    </span>
+    <span class="flex flex-col items-center gap-0.5 group-data-[compact]:hidden">
+      <span translate="no" class="font-mono text-xs tracking-wide text-zinc-700 dark:text-zinc-300">{m.dropzone.formats}</span>
+      <span class="text-xs text-zinc-600 dark:text-zinc-400">{m.dropzone.formatsHint}</span>
+    </span>
+    <span class="label-mono text-zinc-600 group-data-[compact]:hidden dark:text-zinc-400">{m.dropzone.privacy}</span>
+  </label>
+
+  <p data-import-status aria-hidden="true" hidden class="font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+
+  <!-- 2. Notices -->
+  <div data-notices class="flex flex-col gap-3 empty:hidden"></div>
+  <template data-notice-template>
+    <div
+      data-notice
+      class="flex items-start gap-2 rounded-xl border border-zinc-200 bg-white py-2 pr-2 pl-4 text-sm text-zinc-800 data-[tone=warning]:border-amber-300 data-[tone=warning]:bg-amber-50 data-[tone=warning]:text-amber-950 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-200 dark:data-[tone=warning]:border-amber-500/30 dark:data-[tone=warning]:bg-amber-500/10 dark:data-[tone=warning]:text-amber-100"
+    >
+      <div class="min-w-0 flex-1 py-2">
+        <p data-notice-message class="font-medium"></p>
+        <ul data-notice-list hidden class="mt-1 list-disc space-y-0.5 pl-5 break-words"></ul>
+      </div>
+      <button
+        type="button"
+        data-notice-dismiss
+        aria-label={m.dismissNotice}
+        class="flex size-11 shrink-0 items-center justify-center rounded-lg text-current opacity-70 hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="size-5" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </template>
+
+  <!-- 3. Toolbar: count, reorder hint and the arrange buttons -->
+  <div data-toolbar hidden class="mt-2 flex flex-col gap-2">
+    <div class="flex flex-wrap items-end justify-between gap-x-4 gap-y-2 border-b border-zinc-200 pb-3 dark:border-zinc-800">
+      <div class="min-w-0">
+        <p class="label-mono text-accent-700 dark:text-accent-400" aria-hidden="true">{m.toolbar.title}</p>
+        <p class="mt-1 font-serif text-xl font-medium tracking-tight text-zinc-900 tabular-nums dark:text-zinc-100">
+          <span data-count>{m.toolbar.count(0)}</span>
+        </p>
+      </div>
+      <div role="group" aria-label={m.toolbar.arrangeLabel} class="-mx-3 flex flex-wrap sm:mx-0 sm:-mr-3">
+        <button type="button" data-sort class={toolbarButton}>{m.toolbar.sort}</button>
+        <button type="button" data-reverse class={toolbarButton}>{m.toolbar.reverse}</button>
+        <button type="button" data-clear class={clearButton}>{m.toolbar.clear}</button>
+      </div>
+    </div>
+    <p class="flex flex-wrap items-center justify-between gap-x-4 text-sm text-zinc-600 dark:text-zinc-400">
+      <span>
+        <span class="pointer-coarse:hidden">{m.toolbar.hintPointer}</span>
+        <span class="hidden pointer-coarse:inline">{m.toolbar.hintTouch}</span>
+      </span>
+      <a
+        href="#itp-options"
+        class:list={[ui.accentLink, 'sr-only focus:not-sr-only focus:inline-flex']}
+      >
+        {m.toolbar.skipToOptions}
+      </a>
+    </p>
+  </div>
+
+  <!-- 4. Pages, in order, on graph paper -->
+  <!--
+    No overflow clipping and no stacking context here: SortableJS appends the dragged card to the
+    grid (positioned inside this frame on iOS), and it must float above the sticky action bar.
+    The graph paper is painted first, so the list after it needs no z-index.
+  -->
+  <div
+    data-grid-frame
+    hidden
+    class="relative rounded-xl border border-zinc-200 bg-zinc-100/50 p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900/40"
+  >
+    <div class="bg-graph pointer-events-none absolute inset-0 rounded-[inherit]" aria-hidden="true"></div>
+    <ol
+      data-grid
+      role="list"
+      aria-label={m.grid.label}
+      class="relative grid grid-cols-2 gap-2 min-[28rem]:grid-cols-3 sm:gap-3 md:grid-cols-4 lg:grid-cols-5"
+    >
+    </ol>
+  </div>
+  <template data-card-template>
+    <li
+      data-item
+      class="relative flex min-w-0 cursor-grab flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm select-none [-webkit-touch-callout:none] active:cursor-grabbing dark:border-zinc-700 dark:bg-zinc-900"
+    >
+      <div class="relative bg-zinc-100 p-2 dark:bg-zinc-950">
+        <img
+          data-thumb
+          alt=""
+          draggable="false"
+          decoding="async"
+          class="pointer-events-none block aspect-[3/4] w-full object-contain"
+        />
+        <span
+          data-badge
+          aria-hidden="true"
+          class="absolute top-2 left-2 flex h-6 min-w-6 items-center justify-center rounded-md bg-white/90 px-1.5 font-mono text-xs font-medium text-zinc-900 tabular-nums shadow-sm ring-1 ring-zinc-900/10 dark:bg-zinc-900/90 dark:text-zinc-100 dark:ring-white/15"
+        ></span>
+      </div>
+      <div class="flex min-w-0 flex-col gap-0.5 border-t border-zinc-200 px-2.5 pt-2 pb-1.5 dark:border-zinc-800">
+        <p data-name class="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100"></p>
+        <p data-meta class="truncate font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+      </div>
+      <div class="mt-auto grid grid-cols-3 border-t border-zinc-200 dark:border-zinc-800">
+        <button type="button" data-move="earlier" class={cardButtonClass}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+        <button type="button" data-move="later" class={cardButtonClass}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </button>
+        <button type="button" data-remove class={removeButtonClass}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5" aria-hidden="true">
+            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+          </svg>
+        </button>
+      </div>
+    </li>
+  </template>
+
+  <!-- 5. Options -->
+  <fieldset id="itp-options" tabindex="-1" data-options class:list={[ui.card, 'mt-2 min-w-0 p-4 sm:p-5']}>
+    <legend class="label-mono float-left mb-4 w-full text-zinc-600 dark:text-zinc-400">{m.options.legend}</legend>
+    <div class="clear-both grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+      <label class="flex min-w-0 flex-col gap-1.5">
+        <span class={labelTextClass}>{m.options.pageSize}</span>
+        <select data-option="pageSize" class={fieldClass}>
+          {PAGE_SIZES.map((size) => <option value={size} selected={size === 'a4'}>{m.options.pageSizes[size]}</option>)}
+        </select>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-1.5">
+        <span class={labelTextClass}>{m.options.orientation}</span>
+        <select data-option="orientation" class={fieldClass}>
+          {
+            ORIENTATIONS.map((orientation) => (
+              <option value={orientation} selected={orientation === 'auto'}>
+                {m.options.orientations[orientation]}
+              </option>
+            ))
+          }
+        </select>
+        <span data-orientation-hint hidden class={hintClass}>{m.options.orientationHint}</span>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-1.5">
+        <span class={labelTextClass}>{m.options.margin}</span>
+        <select data-option="margin" class={fieldClass}>
+          {MARGINS.map((margin) => <option value={margin} selected={margin === 'small'}>{marginLabel(margin)}</option>)}
+        </select>
+        <span data-margin-hint hidden class={hintClass}>{m.options.marginHint}</span>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-1.5">
+        <span class={labelTextClass}>{m.options.quality}</span>
+        <select data-option="quality" class={fieldClass}>
+          {QUALITIES.map((quality) => <option value={quality} selected={quality === 'original'}>{m.options.qualities[quality]}</option>)}
+        </select>
+      </label>
+
+      <label class="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
+        <span class={labelTextClass}>{m.options.filename}</span>
+        <input
+          data-filename
+          type="text"
+          value={m.names.fallbackFilename}
+          autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+          enterkeyhint="done"
+          class:list={[ui.field, 'disabled:cursor-not-allowed disabled:opacity-60']}
+        />
+      </label>
+    </div>
+  </fieldset>
+
+  <!-- 6. Action bar: sticks to the bottom of the viewport while the pages scroll (not on short screens) -->
+  <div
+    data-action-bar
+    class="bottom-0 z-30 -mx-4 flex flex-col gap-3 border-t border-zinc-200 bg-zinc-50/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md [@media(min-height:32rem)]:sticky sm:bottom-3 sm:mx-0 sm:rounded-xl sm:border sm:bg-white/95 sm:p-4 sm:shadow-lg sm:shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-950/95 sm:dark:bg-zinc-900/95 sm:dark:shadow-black/30"
+  >
+    <div class="flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+      <div class="flex flex-col gap-2 sm:flex-row md:shrink-0">
+        <button
+          type="button"
+          data-generate
+          disabled
+          class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-accent-700 px-6 text-base font-semibold text-white shadow-sm transition-colors hover:bg-accent-800 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-600 disabled:shadow-none sm:w-auto dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-400"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-5 shrink-0" aria-hidden="true">
+            <path d="M12 4v11"></path>
+            <path d="m7 10 5 5 5-5"></path>
+            <path d="M5 20h14"></path>
+          </svg>
+          {m.actions.generate}
+        </button>
+        <button type="button" data-cancel hidden class:list={[ui.buttonSecondary, 'min-h-12 w-full px-6 text-base sm:w-auto']}>
+          {m.actions.cancel}
+        </button>
+      </div>
+      <p
+        data-status
+        class="min-w-0 flex-1 text-sm text-zinc-600 empty:hidden data-[tone=error]:font-medium data-[tone=error]:text-rose-700 dark:text-zinc-400 dark:data-[tone=error]:text-rose-400"
+      >
+      </p>
+    </div>
+
+    <div data-progress-block hidden class="flex flex-col gap-1.5">
+      <progress
+        data-progress
+        max="1"
+        value="0"
+        aria-label={m.actions.progressLabel}
+        class="h-1.5 w-full appearance-none overflow-hidden rounded-full bg-zinc-200 accent-accent-600 dark:bg-zinc-800 [&::-moz-progress-bar]:bg-accent-600 [&::-webkit-progress-bar]:bg-zinc-200 [&::-webkit-progress-value]:bg-accent-600 dark:[&::-moz-progress-bar]:bg-accent-500 dark:[&::-webkit-progress-bar]:bg-zinc-800 dark:[&::-webkit-progress-value]:bg-accent-500"
+      ></progress>
+      <p data-progress-text aria-hidden="true" class="font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+    </div>
+  </div>
+
+  <!-- 7. Result (outside the sticky bar so it never covers the pages) -->
+  <div
+    data-result
+    hidden
+    class="flex flex-col gap-3 rounded-xl border border-accent-600/25 bg-accent-50 p-3 sm:flex-row sm:items-center sm:p-4 dark:border-accent-500/25 dark:bg-accent-500/10"
+  >
+    <p class="flex min-w-0 items-start gap-2 text-sm font-medium text-accent-900 sm:mr-auto dark:text-accent-200">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" class="mt-px size-4 shrink-0" aria-hidden="true">
+        <path d="m5 12.5 4.5 4.5L19 7.5"></path>
+      </svg>
+      <span data-result-text class="min-w-0 break-words"></span>
+    </p>
+    <div class="flex flex-wrap gap-2">
+      <a data-download-again download={m.names.fallbackFilename} class:list={[ui.buttonSecondary, 'flex-1 sm:flex-none']}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true">
+          <path d="M12 4v11"></path>
+          <path d="m7 10 5 5 5-5"></path>
+          <path d="M5 20h14"></path>
+        </svg>
+        {m.actions.downloadAgain}
+      </a>
+      <button type="button" data-share hidden class:list={[ui.buttonPrimary, 'flex-1 sm:flex-none']}>
+        {m.actions.share}
+      </button>
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  /* Focus scrolling keeps controls clear of the sticky action bar (height set by the controller). */
+  @media (min-height: 32rem) {
+    html:has([data-images-to-pdf]) {
+      scroll-padding-bottom: var(--itp-action-bar-height, 0px);
+    }
+  }
+
+  /*
+   * SortableJS adds these classes at runtime, so they cannot be scoped styles. The accent is the
+   * one the focus ring uses (global.css): accent-700 on light, accent-400 on dark backgrounds.
+   */
+  [data-images-to-pdf] {
+    --itp-drag-accent: var(--color-accent-700);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    [data-images-to-pdf] {
+      --itp-drag-accent: var(--color-accent-400);
+    }
+  }
+
+  .itp-ghost {
+    opacity: 0.35;
+    outline: 2px dashed var(--itp-drag-accent);
+    outline-offset: -2px;
+    box-shadow: none;
+  }
+
+  .itp-chosen:not(.itp-ghost) {
+    box-shadow:
+      0 0 0 2px var(--itp-drag-accent),
+      0 10px 25px -8px rgb(0 0 0 / 0.25);
+  }
+
+  /* The floating clone. Sortable positions it with an inline transform, so use `rotate`. */
+  .itp-drag {
+    rotate: 2deg;
+    cursor: grabbing;
+    box-shadow:
+      0 0 0 2px var(--itp-drag-accent),
+      0 20px 40px -12px rgb(0 0 0 / 0.4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .itp-drag {
+      rotate: none;
+    }
+  }
+</style>
+
+<script>
+  import { initImagesToPdf } from '../../scripts/tools/images-to-pdf/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-images-to-pdf]').forEach(initImagesToPdf);
+</script>

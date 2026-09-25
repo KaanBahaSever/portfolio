@@ -35,6 +35,7 @@ Live at [kaanbahasever.com](https://kaanbahasever.com).
 
 | Tool               | Route                        | What it does                                                                                   |
 | ------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------- |
+| Images to PDF      | `/tools/images-to-pdf/`      | Photos and scans into one PDF: drag to reorder, page size, orientation and margins; JPEGs kept at original quality, or a smaller file |
 | Notepad            | `/tools/notepad/`            | Full-width plain-text editor: zen mode, autosave in this browser, find & replace with regex, live line/word counts, clear and download |
 | Split PDF          | `/tools/pdf-split/`          | Page thumbnails (PDF.js); pick pages by clicking or typing ranges like `1-3, 5`; download one PDF, or split into parts as a ZIP |
 | Image compressor   | `/tools/image-compressor/`   | JPEG/PNG/WebP re-encoding with a quality slider and format choice, before/after comparison and size statistics |
@@ -56,6 +57,7 @@ The catalog on `/tools/` is generated from `src/data/tools.ts`; the games index 
 | Images        | `astro:assets` (optimized to WebP with responsive `srcset` at build)                     |
 | Client code   | Vanilla TypeScript (no UI framework)                                                     |
 | PDF tools     | `pdf-lib` in Web Workers; PDF.js (`pdfjs-dist`) for thumbnails, loaded on demand         |
+| Reordering    | `sortablejs` (drag and long-press reordering in Images to PDF)                           |
 | Tests         | Node's built-in test runner (`node --test`) on TypeScript sources                        |
 | Hosting       | Cloudflare Pages (static), built from GitHub on every push to `main`                     |
 

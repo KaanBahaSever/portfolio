@@ -14,6 +14,16 @@ export interface ToolInfo {
 
 export const TOOLS: readonly ToolInfo[] = [
   {
+    slug: 'images-to-pdf',
+    title: { en: 'Images to PDF', tr: 'Görsellerden PDF' },
+    description: {
+      en: 'Combine photos, scans and screenshots into one PDF: reorder the pages, pick a page size and margins, and keep JPEGs at their original quality.',
+      tr: 'Fotoğrafları, taramaları ve ekran görüntülerini tek bir PDF dosyasında birleştirin: sayfaları sıralayın, sayfa boyutunu ve kenar boşluğunu seçin; JPEG fotoğraflar orijinal kalitesinde kalır.',
+    },
+    status: 'ready',
+    href: '/tools/images-to-pdf/',
+  },
+  {
     slug: 'notepad',
     title: { en: 'Notepad', tr: 'Not defteri' },
     description: {

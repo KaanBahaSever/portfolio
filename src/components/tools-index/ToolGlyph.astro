@@ -1,9 +1,9 @@
 ---
 /**
  * Thin-line figure for a tool card (24×24 grid): the object the tool works on, drawn in
- * currentColor, with one accent mark for what the tool does to it (the caret that writes, the
- * cut that splits, the arrows that compress, the key bit that locks). Decorative: the card
- * names the tool in text. Unknown slugs get a neutral page.
+ * currentColor, with one accent mark for what the tool does to it (the picture set on a page,
+ * the caret that writes, the cut that splits, the arrows that compress, the key bit that locks).
+ * Decorative: the card names the tool in text. Unknown slugs get a neutral page.
  */
 interface Props {
   slug: string;
@@ -27,6 +27,12 @@ const page = 'M6 3h8.5L18 6.5V21H6z';
 const fold = 'M14.5 3v3.5H18';
 
 const glyphs: Record<string, Glyph> = {
+  // A stack of pages; a picture (frame, hill, sun) set on the top one.
+  'images-to-pdf': {
+    ink: [page, fold, 'M6 5H3.5v18h12v-2', 'M8.5 18.5h5'],
+    accent: ['M8.5 9.5h7v6h-7z', 'm8.5 15.5 3-3 4 3'],
+    dots: [[13.4, 11.6, 0.85]],
+  },
   // A ruled page and a text caret.
   notepad: { ink: [page, fold, 'M9 10h6', 'M9 13h6', 'M9 16h3'], accent: ['M13.75 14.75v2.75'] },
   // Two pages parted by a dashed cut.

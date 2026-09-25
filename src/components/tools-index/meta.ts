@@ -4,6 +4,7 @@
  * languages, so it needs no translation. A tool missing here simply shows no formats line.
  */
 export const TOOL_FORMATS: Readonly<Record<string, readonly string[]>> = {
+  'images-to-pdf': ['JPEG', 'PNG', 'WebP', 'PDF'],
   notepad: ['TXT'],
   'pdf-split': ['PDF', 'ZIP'],
   'image-compressor': ['JPEG', 'PNG', 'WebP'],

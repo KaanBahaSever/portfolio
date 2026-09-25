@@ -1,0 +1,109 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import ImagesToPdf from '../../../components/tools/ImagesToPdf.astro';
+import { ui } from '../../../components/ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { imagesToPdfMessages } from '../../../i18n/tools/images-to-pdf';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = imagesToPdfMessages[locale];
+const t = common[locale];
+
+// Tips are rich text (option names, a settings path), so each language has its own markup below.
+const strong = 'font-medium text-zinc-900 dark:text-zinc-100';
+const tipList =
+  'flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400';
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    title={m.meta.title}
+    eyebrow={m.meta.eyebrow}
+    lead={m.meta.lead}
+    back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+  />
+
+  <ImagesToPdf />
+
+  <details class:list={[ui.card, 'group mt-12']}>
+    <summary
+      class="flex min-h-12 list-none items-center justify-between gap-3 rounded-xl px-4 font-serif text-lg font-medium sm:px-5 [&::-webkit-details-marker]:hidden"
+    >
+      {m.meta.tips}
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-5 shrink-0 text-zinc-500 transition-transform group-open:rotate-180"
+        aria-hidden="true"
+      >
+        <path d="m6 9 6 6 6-6"></path>
+      </svg>
+    </summary>
+    {
+      locale === 'tr' ? (
+        <ul class={tipList}>
+          <li>
+            <strong class={strong}>Telefonda sıralama:</strong> bir kartı kısa bir süre basılı tutun, ardından
+            sürükleyin. Hızlıca kaydırdığınızda sayfa her zamanki gibi kayar. Her karttaki ok düğmeleri kartı bir sıra
+            öne ya da arkaya taşır.
+          </li>
+          <li>
+            <strong class={strong}>Orijinal kalite</strong> seçeneği, JPEG fotoğrafların görüntü verisini yeniden
+            sıkıştırmadan olduğu gibi korur; konum gibi kamera meta verileri PDF’e aktarılmaz. Diğer biçimler gözle
+            görülür bir kayıp olmadan dönüştürülür.
+          </li>
+          <li>
+            <strong class={strong}>Daha küçük dosya</strong> seçeneği, görselleri en fazla 2000 piksele küçültüp
+            sıkıştırır. E-posta ekleri için ya da telefonda çok sayıda büyük fotoğrafla PDF oluşturulamadığında bu
+            seçeneği kullanın.
+          </li>
+          <li>
+            <strong class={strong}>iPhone fotoğrafları (HEIC):</strong> Safari, Fotoğraflar’dan seçtiğiniz fotoğrafları
+            otomatik olarak JPEG biçimine dönüştürür. Diğer tarayıcılar HEIC dosyalarını okuyamayabilir; bu durumda
+            Ayarlar → Kamera → Formatlar → En Uyumlu seçeneğini işaretleyin ya da fotoğrafları önce JPEG olarak dışa
+            aktarın.
+          </li>
+          <li>
+            <strong class={strong}>Görsel boyutunda</strong> seçeneği, her sayfayı görselin boyutuna seçtiğiniz kenar
+            boşluğunu ekleyerek ayarlar (boşluk istemiyorsanız Kenar boşluğu için Yok seçin). A4 ve Letter ise tüm
+            sayfaları aynı boyutta tutar.
+          </li>
+        </ul>
+      ) : (
+        <ul class={tipList}>
+          <li>
+            <strong class={strong}>Reordering on a phone:</strong> press and hold a card for a moment, then drag it. A
+            quick swipe scrolls the page as usual. The arrow buttons on each card move it one place at a time.
+          </li>
+          <li>
+            <strong class={strong}>Original quality</strong> keeps the image data of JPEG photos unchanged, with no
+            re-compression; camera metadata such as location is left out. Other formats are converted without visible
+            loss.
+          </li>
+          <li>
+            <strong class={strong}>Smaller file</strong> resizes images to at most 2000 pixels and compresses them. Use it
+            for email attachments, or if creating the PDF fails on a phone with many large photos.
+          </li>
+          <li>
+            <strong class={strong}>iPhone photos (HEIC):</strong> Safari converts them to JPEG automatically when you
+            pick them from Photos. Other browsers may not read HEIC files; in that case set Settings → Camera → Formats →
+            Most Compatible, or export the photos as JPEG first.
+          </li>
+          <li>
+            <strong class={strong}>Fit to image</strong> makes every page the size of its image plus the chosen margin
+            (set Margin to None for no border); A4 and US Letter keep all pages the same size.
+          </li>
+        </ul>
+      )
+    }
+  </details>
+</BaseLayout>

@@ -47,9 +47,11 @@ const textLang = project.lang === locale ? undefined : project.lang;
 
 <BaseLayout title={title} description={shortDescription} width="wide">
   <div class="relative isolate">
-    {/* Same fading graph-paper backdrop as PageHeader, behind the breadcrumb and title. */}
+    {/* Same fading graph-paper backdrop as PageHeader, behind the breadcrumb and title. Its
+        side overhang matches the page gutter (px-safe: 1rem, then 1.5rem from sm), so it never
+        reaches past the viewport. */}
     <div
-      class="bg-graph mask-fade-radial pointer-events-none absolute -inset-x-4 -top-8 -bottom-4 -z-10 sm:-inset-x-8"
+      class="bg-graph mask-fade-radial pointer-events-none absolute -inset-x-4 -top-8 -bottom-4 -z-10 sm:-inset-x-6"
       aria-hidden="true"
     />
 

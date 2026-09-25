@@ -2,9 +2,11 @@
 /**
  * A project's status badges: its stage (when set) and whether the code is open.
  * "In production" is the only accented one, so a grid of cards shows one green mark at most
- * per card, and only where it means something.
+ * per card, and only where it means something. Early access shows as two badges, "In
+ * development" and "Early access" (see stageBadges); the dot marks the first stage badge only.
  */
 import Badge from '../ui/Badge.astro';
+import { stageBadges, type StageBadge } from './stage';
 import { common } from '../../i18n/messages/common';
 import { projectsMessages } from '../../i18n/messages/projects';
 import { getLocale } from '../../i18n/server';
@@ -20,23 +22,25 @@ const locale = getLocale(Astro);
 const t = common[locale];
 const m = projectsMessages[locale];
 
-const stageLabel = {
+const label: Readonly<Record<StageBadge, string>> = {
   production: m.stage.production,
-  'early-access': t.badges.earlyAccess,
   'in-development': t.badges.inDevelopment,
-} as const;
+  'early-access': t.badges.earlyAccess,
+};
+const badges = stageBadges(data.stage);
 ---
 
 <div class:list={['flex flex-wrap items-center gap-2', className]}>
+  {/* Whitespace after each badge (ignored by the flex layout) keeps screen readers from
+      running the labels together. */}
   {
-    data.stage && (
-      <Badge variant={data.stage === 'production' ? 'accent' : 'muted'} dot>
-        {stageLabel[data.stage]}
-      </Badge>
-    )
+    badges.map((badge, i) => (
+      <>
+        <Badge variant={badge === 'production' ? 'accent' : 'muted'} dot={i === 0}>
+          {label[badge]}
+        </Badge>{' '}
+      </>
+    ))
   }
-  {/* Whitespace between the badges (ignored by the flex layout) keeps screen readers from
-      running the two labels together. */}
-  {' '}
   <Badge variant="outline">{data.isOpenSource ? t.badges.openSource : t.badges.private}</Badge>
 </div>

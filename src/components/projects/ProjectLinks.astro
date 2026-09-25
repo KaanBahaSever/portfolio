@@ -24,6 +24,9 @@ const locale = getLocale(Astro);
 const m = projectsMessages[locale].card;
 const { title, repositoryUrl } = project.data;
 const live = liveLink(project.data.liveUrl, locale);
+// A project in early access has no finished product to call a "live site" yet: its link says
+// what the visitor gets there, next to the "In development" / "Early access" badges.
+const early = project.data.stage === 'early-access';
 const link = `${ui.accentLink} relative z-10`;
 ---
 
@@ -33,8 +36,14 @@ const link = `${ui.accentLink} relative z-10`;
       {live && (
         <li>
           {live.external ? (
-            <a href={live.href} target="_blank" rel="noopener noreferrer" class={link} aria-label={m.liveName(title)}>
-              {m.live}
+            <a
+              href={live.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class={link}
+              aria-label={early ? m.earlyAccessName(title) : m.liveName(title)}
+            >
+              {early ? m.earlyAccess : m.live}
               <Icon name="arrow-up-right" class="size-4" />
             </a>
           ) : (

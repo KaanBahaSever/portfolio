@@ -32,6 +32,9 @@ const en = {
   card: {
     live: 'Live site',
     liveName: (title: string) => `Live site of ${title} (opens in a new tab)`,
+    /** The external site of a project in early access (stage: 'early-access'): not a finished product. */
+    earlyAccess: 'Early-access site',
+    earlyAccessName: (title: string) => `Early-access site of ${title} (opens in a new tab)`,
     /** A project whose live version is a page on this site (e.g. a browser tool). */
     open: 'Open',
     openName: (title: string) => `Open ${title}`,
@@ -72,7 +75,8 @@ const tr: ProjectsMessages = {
     title: 'Projeler',
     description:
       'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik ve açık kaynak C++ kütüphaneleri; her birinin nasıl kurgulandığına dair notlarla.',
-    eyebrow: 'Seçili çalışmalar',
+    // Same wording as the home page's "Selected work" link and section that lead here.
+    eyebrow: 'Seçili işler',
     lead: 'C++ ile yazılmış yerel daemon’lardan Go servislerine ve açık kaynak matematiğe kadar geliştirdiğim projeler. Her sayfa, projenin ne yaptığını ve nasıl bir araya getirildiğini anlatıyor.',
     summary: (total, openSource) => `${total} proje · ${openSource} açık kaynak`,
     featured: 'Öne çıkanlar',
@@ -87,6 +91,8 @@ const tr: ProjectsMessages = {
   card: {
     live: 'Canlı site',
     liveName: (title) => `Canlı site: ${title} (yeni sekmede açılır)`,
+    earlyAccess: 'Erken erişim sitesi',
+    earlyAccessName: (title) => `Erken erişim sitesi: ${title} (yeni sekmede açılır)`,
     open: 'Aç',
     openName: (title) => `Aç: ${title}`,
     source: 'Kaynak kodu',

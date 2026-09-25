@@ -3,7 +3,7 @@ title: 'crowd.inc: full-stack yazılım mühendisliği'
 dateLabel: Temmuz 2021 – Mart 2024
 ---
 
-Full-Stack Software Engineer / Systems Contributor olarak yazılım geliştirme yaşam döngüsünü
+<span lang="en">Full-Stack Software Engineer / Systems Contributor</span> olarak yazılım geliştirme yaşam döngüsünü
 uçtan uca üstlendim: PostgreSQL ile ilişkisel şema tasarımı, Python/Flask ve jQuery ile
 RESTful API geliştirme, Linux sunucularının hazırlanması (provisioning) ve otomatik testler.
 

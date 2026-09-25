@@ -250,9 +250,10 @@ serisinin ötesinde inceltilemez. Bu, $S_5$ grubunun tek bileşim serisidir (bö
 <div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-3 py-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-graph mask-fade-b"></div>
 <svg class="relative mx-auto block h-auto w-full max-w-xs text-zinc-900 dark:text-zinc-100" viewBox="48 0 288 316" role="img" aria-label="Ortak bir logaritmik ölçekte çizilmiş iki merdiven. 4. derece: S4, A4, V4, C2 ve aşikâr grup; bölüm grupları C2, C3, C2 ve C2, hepsi değişmeli. 5. derece: S5, A5 ve aşikâr grup; bölüm grupları C2 ve A5. Son ve uzun basamak olan A5 değişmeli değildir." xmlns="http://www.w3.org/2000/svg">
-<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
-<text x="100" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 4</text>
-<text x="220" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 5</text>
+<!-- Math labels use KaTeX's fonts, which the formulas on this page already load: they match the text and cost no extra download. -->
+<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: KaTeX_Main, var(--font-serif); font-size: 15px">
+<text x="100" y="24" text-anchor="middle"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">n</tspan> = 4</text>
+<text x="220" y="24" text-anchor="middle"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">n</tspan> = 5</text>
 </g>
 <g stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.6">
 <line x1="100" y1="143.7" x2="100" y2="164.4"/>
@@ -272,27 +273,27 @@ serisinin ötesinde inceltilemez. Bu, $S_5$ grubunun tek bileşim serisidir (bö
 <circle cx="100" cy="296" r="3.5"/>
 <circle cx="220" cy="296" r="3.5"/>
 </g>
-<g fill="currentColor" text-anchor="end" style="font-family: var(--font-serif); font-size: 17px">
-<text x="86" y="142.2"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">4</tspan></text>
-<text x="86" y="176.9"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">4</tspan></text>
-<text x="86" y="232"><tspan font-style="italic">V</tspan><tspan font-size="12" dy="4">4</tspan></text>
-<text x="86" y="266.8"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="86" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
-<text x="206" y="61.5"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">5</tspan></text>
-<text x="206" y="96.3"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
-<text x="206" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
+<g fill="currentColor" text-anchor="end" style="font-family: KaTeX_Main, var(--font-serif); font-size: 17px">
+<text x="86" y="142.2"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">S</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="176.9"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">A</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="232"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">V</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="266.8"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="86" y="301.5">{<tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">e</tspan>}</text>
+<text x="206" y="61.5"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">S</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="96.3"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="301.5">{<tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">e</tspan>}</text>
 </g>
-<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
-<text x="114" y="159"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="114" y="204"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">3</tspan></text>
-<text x="114" y="249"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="114" y="283.6"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="234" y="78.4"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: KaTeX_Main, var(--font-serif); font-size: 15px">
+<text x="114" y="159"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="204"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">3</tspan></text>
+<text x="114" y="249"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="283.6"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="234" y="78.4"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
 </g>
 <g class="text-accent-700 dark:text-accent-400" fill="currentColor">
 <line x1="220" y1="97.8" x2="220" y2="289" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
 <circle cx="220" cy="90.8" r="3.5"/>
-<text x="234" y="192" style="font-family: var(--font-serif); font-size: 17px"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="234" y="192" style="font-family: KaTeX_Main, var(--font-serif); font-size: 17px"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
 <text x="234" y="212" style="font-family: var(--font-mono); font-size: 13px">değişmeli</text>
 <text x="234" y="228" style="font-family: var(--font-mono); font-size: 13px">değil</text>
 </g>
@@ -329,7 +330,7 @@ hâlini alır ve $x_0 = 0$ noktasından başlatıldığında sırasıyla $0{,}5$
 
 **Hiçbir beşinci derece denklemin radikallerle çözülemeyeceğini de söylemez.** Bazı özel denklemler çözülebilir. $\zeta = e^{2\pi i/5}$ olmak üzere $x^5 - 2$ polinomunun kökleri $k = 0, 1, \dots, 4$ için $\sqrt[5]{2}\,\zeta^k$ sayılarıdır ve $\zeta$ da radikallerle ifade edilebilir; bunu örneğin $\cos(2\pi/5) = (\sqrt{5} - 1)/4$ eşitliği gösterir. $x^5 - 2$ polinomunun Galois grubu 20 elemanlıdır ve çözülebilirdir: 5 mertebeli devirli bir normal altgrubu vardır ve bölüm grubu 4 mertebeli devirli gruptur. Teorem, *her* beşinci derece denklem için işleyen tek bir formülü dışlar; hangi denklemlerin çözülebilir olduğuna ise Galois ölçütü tek tek karar verir.
 
-**Hiçbir kapalı biçim olmadığını da söylemez.** Dışlanan yalnızca radikallerdir. Radikallere tek bir yeni fonksiyon, *Bring radikali* eklenirse (gerçel $a$ için $x^5 + x + a = 0$ denkleminin tek gerçel kökü, $a$'nın fonksiyonu olarak) her beşinci derece denklem kapalı biçimde çözülebilir. Charles Hermite 1858'de beşinci derece denklemi, kübiğin trigonometrik fonksiyonlarla çözülebilmesine benzer biçimde, eliptik modüler fonksiyonlarla çözdü. Felix Klein da daha sonra bütün tabloyu, dönme grubu tam olarak $A_5$ olan düzgün yirmi yüzlünün (ikosahedron) simetrileriyle açıkladı.
+**Hiçbir kapalı biçim olmadığını da söylemez.** Dışlanan yalnızca radikallerdir. Radikallere tek bir yeni fonksiyon, *Bring radikali* eklenirse (gerçel $a$ için $x^5 + x + a = 0$ denkleminin tek gerçel kökü; $a$'nın fonksiyonu olarak düşünülür ve karmaşık $a$ değerlerine analitik devamla genişletilir) her beşinci derece denklem kapalı biçimde çözülebilir. Charles Hermite 1858'de beşinci derece denklemi, kübiğin trigonometrik fonksiyonlarla çözülebilmesine benzer biçimde, eliptik modüler fonksiyonlarla çözdü. Felix Klein da daha sonra bütün tabloyu, dönme grubu tam olarak $A_5$ olan düzgün yirmi yüzlünün (ikosahedron) simetrileriyle açıkladı.
 
 ## Sonuç: Simetri çözülebilirliği belirler
 
@@ -340,4 +341,4 @@ Radikallerle yazılmış bir formül, simetriyi söken bir makinedir. Her radika
 - David S. Dummit ve Richard M. Foote, <cite lang="en">Abstract Algebra</cite>, 3. baskı (Wiley, 2004), 14. bölüm; 14.7. kısım çözülebilir ve radikal genişlemeleri ele alır ve beşinci derece denklemin çözülemezliğini kanıtlar.
 - Ian Stewart, <cite lang="en">Galois Theory</cite> (CRC Press): Teoriyi tarihiyle birlikte geliştirir.
 - V. B. Alekseev, <cite lang="en">Abel's Theorem in Problems and Solutions</cite> (V. I. Arnold'un derslerine dayanır): teoreme gruplar, karmaşık fonksiyonlar ve Riemann yüzeyleri üzerinden, problemlerle ilerleyen bir yol.
-- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques, où l'on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): özgün kanıt; kısalığıyla ünlü bir risale.
+- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques où on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): özgün kanıt; kısalığıyla ünlü bir risale.

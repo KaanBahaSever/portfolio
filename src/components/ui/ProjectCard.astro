@@ -1,74 +1,89 @@
 ---
-import Badge from './Badge.astro';
+/**
+ * A project as a card: figure plate (when the project has a drawing), status badges, serif
+ * title, summary, tech stack, the year work started and the live/source links.
+ *
+ * "Stretched link" pattern: the title link covers the whole card through its ::after box and
+ * draws the focus ring around the card; the live/source links sit above it (relative z-10).
+ * No nested <a> elements. `after:outline-solid` is needed because `outline-hidden` sets
+ * --tw-outline-style: none on the link, and ::after would inherit it.
+ */
 import Icon from './Icon.astro';
 import TagList from './TagList.astro';
-import { isInternalHref, type LocalizedProject } from '../../utils/content';
+import ProjectBadges from '../projects/ProjectBadges.astro';
+import ProjectFigure from '../projects/ProjectFigure.astro';
+import ProjectLinks from '../projects/ProjectLinks.astro';
+import { hasFigure } from '../projects/figures';
 import { localizePath } from '../../i18n/config';
+import { common } from '../../i18n/messages/common';
+import { projectsMessages } from '../../i18n/messages/projects';
 import { getLocale } from '../../i18n/server';
+import type { LocalizedProject } from '../../utils/content';
 
 interface Props {
   project: LocalizedProject;
   /** Heading level used for the card title. */
   headingLevel?: 'h2' | 'h3';
+  /** Show the project's line drawing above the text (when it has one). Default true. */
+  figure?: boolean;
 }
 
-const { project, headingLevel: Heading = 'h2' } = Astro.props;
-const { title, shortDescription, techStack, isOpenSource, repositoryUrl, liveUrl } = project.data;
-const href = localizePath(`/projects/${project.id}/`, getLocale(Astro));
-const liveIsInternal = liveUrl ? isInternalHref(liveUrl) : false;
-
-const cardLink =
-  'relative z-10 -mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-accent-700 hover:text-accent-800 hover:underline dark:text-accent-400 dark:hover:text-accent-300';
+const { project, headingLevel: Heading = 'h2', figure = true } = Astro.props;
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = projectsMessages[locale];
+const { title, shortDescription, techStack, since } = project.data;
+const href = localizePath(`/projects/${project.id}/`, locale);
+const figureId = figure && hasFigure(project.id) ? project.id : undefined;
+// Mark text that fell back to English on a Turkish page (and the reverse).
+const textLang = project.lang === locale ? undefined : project.lang;
+const hasLinks = Boolean(project.data.liveUrl || project.data.repositoryUrl);
 ---
 
-{/*
-  "Stretched link" pattern: the title link covers the whole card via ::after,
-  and the live/repository links sit above it (relative z-10). No nested <a> elements.
-*/}
 <article
-  class="group relative flex h-full flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5 transition-colors hover:border-zinc-300 sm:p-6 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+  class="group relative isolate flex h-full flex-col rounded-xl border border-zinc-200 bg-white transition-colors hover:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600"
 >
-  <div class="flex items-start justify-between gap-3">
-    <Heading class="min-w-0 text-lg leading-snug font-semibold text-zinc-900 dark:text-zinc-100">
-      <a
-        href={href}
-        class="rounded-sm group-hover:text-accent-700 after:absolute after:inset-0 after:rounded-xl dark:group-hover:text-accent-400"
-      >
-        {title}
-      </a>
-    </Heading>
-    {isOpenSource ? <Badge variant="accent">Open source</Badge> : <Badge>Private</Badge>}
-  </div>
-
-  <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{shortDescription}</p>
-
-  <TagList items={techStack} label="Tech stack" class="mt-auto" />
-
   {
-    (liveUrl || repositoryUrl) && (
-      <div class="-mb-2 flex flex-wrap gap-x-4">
-        {liveUrl &&
-          (liveIsInternal ? (
-            <a href={liveUrl} class={cardLink}>
-              Open
-              <Icon name="arrow-right" class="size-4" />
-              <span class="sr-only">{title}</span>
-            </a>
-          ) : (
-            <a href={liveUrl} target="_blank" rel="noopener noreferrer" class={cardLink}>
-              Live site
-              <Icon name="external" class="size-4" />
-              <span class="sr-only">of {title} (opens in a new tab)</span>
-            </a>
-          ))}
-        {repositoryUrl && (
-          <a href={repositoryUrl} target="_blank" rel="noopener noreferrer" class={cardLink}>
-            Repository
-            <Icon name="external" class="size-4" />
-            <span class="sr-only">for {title} (opens in a new tab)</span>
-          </a>
-        )}
+    figureId && (
+      <div class="relative h-32 overflow-hidden rounded-t-xl border-b border-zinc-200 sm:h-36 dark:border-zinc-800" aria-hidden="true">
+        {/* Graph paper strengthens on hover: a quiet cue that the whole card is a link. */}
+        <div class="bg-graph-fine mask-fade-radial absolute inset-0 opacity-50 transition-opacity duration-300 group-hover:opacity-100" />
+        <ProjectFigure
+          id={figureId}
+          class="relative h-full w-full px-4 py-2.5 transition-transform duration-300 ease-out group-hover:scale-[1.02]"
+        />
       </div>
     )
   }
+
+  <div class="flex flex-1 flex-col gap-4 p-5 sm:p-6">
+    <ProjectBadges data={project.data} />
+
+    <div lang={textLang}>
+      <Heading class="font-serif text-2xl leading-tight font-medium tracking-tight text-zinc-900 dark:text-zinc-100">
+        <a
+          href={href}
+          class="rounded-sm transition-colors group-hover:text-accent-700 after:absolute after:inset-0 after:rounded-xl focus-visible:outline-hidden focus-visible:after:outline-2 focus-visible:after:outline-solid focus-visible:after:outline-offset-2 focus-visible:after:outline-accent-700 dark:group-hover:text-accent-400 dark:focus-visible:after:outline-accent-400"
+        >
+          {title}
+          <Icon
+            name="arrow-right"
+            class="ml-0.5 inline-block size-5 -translate-y-px align-middle text-zinc-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-accent-700 dark:text-zinc-500 dark:group-hover:text-accent-400"
+          />
+        </a>
+      </Heading>
+      <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{shortDescription}</p>
+    </div>
+
+    <TagList items={techStack} label={t.labels.techStack} class="mt-auto" />
+
+    {
+      (since || hasLinks) && (
+        <div class="-mb-2 flex flex-wrap items-center justify-between gap-x-4 border-t border-zinc-200 pt-2 dark:border-zinc-800">
+          {since && <p class="label-mono py-3 text-zinc-500 tabular-nums dark:text-zinc-400">{m.since(String(since))}</p>}
+          <ProjectLinks project={project} class="ml-auto" />
+        </div>
+      )
+    }
+  </div>
 </article>

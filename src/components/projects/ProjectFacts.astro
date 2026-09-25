@@ -1,0 +1,60 @@
+---
+/**
+ * Side panel of a project page: the line drawing as a numbered figure with its caption, and a
+ * short fact sheet (year started, tech stack).
+ */
+import TagList from '../ui/TagList.astro';
+import ProjectFigure from './ProjectFigure.astro';
+import { hasFigure } from './figures';
+import { common } from '../../i18n/messages/common';
+import { projectsMessages } from '../../i18n/messages/projects';
+import { getLocale } from '../../i18n/server';
+import type { LocalizedProject } from '../../utils/content';
+
+interface Props {
+  project: LocalizedProject;
+  class?: string;
+}
+
+const { project, class: className } = Astro.props;
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = projectsMessages[locale];
+const { since, techStack } = project.data;
+const figureId = hasFigure(project.id) ? project.id : undefined;
+---
+
+<aside aria-label={m.detail.facts} class:list={['space-y-8', className]}>
+  {
+    figureId && (
+      <figure>
+        <div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+          <div class="bg-graph-fine mask-fade-radial absolute inset-0" aria-hidden="true" />
+          <ProjectFigure id={figureId} class="relative aspect-[12/5] w-full p-4" />
+        </div>
+        <figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+          {/* The space keeps "Fig. 1" and the caption apart for screen readers, not just visually. */}
+          <span class="label-mono mr-1 text-accent-700 dark:text-accent-400">{m.detail.figure(1)}</span>{' '}
+          {m.figures[figureId]}
+        </figcaption>
+      </figure>
+    )
+  }
+
+  <dl class="divide-y divide-zinc-200 border-y border-zinc-200 text-sm dark:divide-zinc-800 dark:border-zinc-800">
+    {
+      since && (
+        <div class="flex items-baseline justify-between gap-4 py-3">
+          <dt class="label-mono text-zinc-500 dark:text-zinc-400">{m.detail.started}</dt>
+          <dd class="font-mono text-zinc-900 tabular-nums dark:text-zinc-100">{since}</dd>
+        </div>
+      )
+    }
+    <div class="space-y-3 py-3">
+      <dt class="label-mono text-zinc-500 dark:text-zinc-400">{t.labels.techStack}</dt>
+      <dd>
+        <TagList items={techStack} label={t.labels.techStack} />
+      </dd>
+    </div>
+  </dl>
+</aside>

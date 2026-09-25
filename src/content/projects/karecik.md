@@ -1,43 +1,49 @@
 ---
 title: Karecik
-shortDescription: A multi-tenant QR menu platform for cafés and restaurants, with a drag-and-drop menu editor, multilingual menus, branding themes and QR code export.
+shortDescription: A production SaaS that local cafés and restaurants use for QR menus, customer interaction and menu and order management, engineered for zero downtime and low latency.
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/karecik
 techStack: [Go, PostgreSQL, Cloudflare]
+stage: production
 featured: true
-order: 2
+order: 3
 date: 2026-08-24
 ---
 
 ## What it is
 
-Karecik lets cafés and restaurants publish their menus behind a QR code. Owners manage
-their menus in a dashboard, and customers open them on their phones from the business's
-own subdomain.
+Karecik is a production SaaS used by local cafés and restaurants for customer interaction and
+for managing their menus and orders. Customers scan the business's QR code and its menu opens
+on their phone, served from the business's own subdomain; owners manage everything from a
+dashboard. A menu has to open the moment someone scans it, so the service is engineered for
+zero downtime and low latency.
 
 ## Features
 
-- **Menu editor**: categories and products with drag-and-drop ordering, inline price
-  editing and bulk percentage price updates with rounding rules.
-- **Branches and menus**: several branches per business, with menus shared across
-  branches or scoped to one, and per-branch price and availability overrides.
+- **Menu editor**: categories and products with drag-and-drop ordering, inline price editing
+  and bulk percentage price updates with rounding rules.
+- **Branches and menus**: several branches per business, with menus shared across branches or
+  scoped to one, and per-branch price and availability overrides.
 - **Six menu languages**: Turkish, English, German, Russian, Arabic and French.
-- **Product details**: images, ingredients, allergen warnings, calorie counts and
-  custom badges.
-- **Branding**: themes, typefaces, accent colours, backgrounds and a configurable splash
-  screen, checked in a live mobile preview inside the dashboard.
+- **Product details**: images, ingredients, allergen warnings, calorie counts and custom badges.
+- **Branding**: themes, typefaces, accent colours, backgrounds and a configurable splash screen,
+  checked in a live mobile preview inside the dashboard.
 - **QR codes**: download as PNG, print, or copy the menu address.
-- **Customer menu**: served on the business's subdomain (with a path-based fallback),
-  with search, language switching and Wi-Fi details.
+- **Customer menu**: served on the business's subdomain (with a path-based fallback), with
+  search, language switching and Wi-Fi details.
 
 ## Architecture
 
-| Layer    | Stack                                                               |
-| -------- | ------------------------------------------------------------------- |
-| API      | Go 1.22, Fiber v2, pgx; in-memory sessions with an HttpOnly cookie  |
-| Database | PostgreSQL with embedded SQL migrations applied on startup          |
-| Frontend | React 18, Vite, Tailwind CSS, dnd-kit                               |
-| Tenancy  | Wildcard subdomain resolution with a path-based fallback            |
+Every business is a tenant of one deployment: a request is resolved to its business by
+subdomain, so a new business needs no new infrastructure.
+
+| Layer    | Stack                                                              |
+| -------- | ------------------------------------------------------------------ |
+| API      | Go 1.22, Fiber v2, pgx; in-memory sessions with an HttpOnly cookie |
+| Database | PostgreSQL with embedded SQL migrations applied on startup         |
+| Frontend | React 18, Vite, Tailwind CSS, dnd-kit                              |
+| Tenancy  | Wildcard subdomain resolution with a path-based fallback           |
+| Edge     | Cloudflare                                                         |
 
 The code is written in English; the product itself ships in Turkish.
 

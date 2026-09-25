@@ -1,0 +1,70 @@
+---
+/**
+ * Note on the page of a project in early access (stage: 'early-access'): the software is still
+ * being built, and its own site is where early access happens. Written per locale because the
+ * sentence carries a link.
+ */
+import Icon from '../ui/Icon.astro';
+import type { LiveLink } from './links';
+import { common } from '../../i18n/messages/common';
+import { projectsMessages } from '../../i18n/messages/projects';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  title: string;
+  /** The project's own site; without one, the note only says that work is ongoing. */
+  live?: LiveLink;
+  /** Language of `title` when it differs from the page. */
+  titleLang?: string;
+  class?: string;
+}
+
+const { title, live, titleLang, class: className } = Astro.props;
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = projectsMessages[locale];
+const site = live?.external ? live : undefined;
+const linkClass =
+  'font-medium text-accent-800 underline decoration-accent-700/40 underline-offset-4 hover:decoration-accent-700 dark:text-accent-200 dark:decoration-accent-300/40 dark:hover:decoration-accent-300';
+---
+
+<aside
+  aria-label={t.badges.earlyAccess}
+  class:list={[
+    'flex gap-3 rounded-xl border border-accent-700/20 bg-accent-50 p-4 text-sm leading-relaxed text-accent-950 sm:p-5 dark:border-accent-400/25 dark:bg-accent-400/10 dark:text-accent-100',
+    className,
+  ]}
+>
+  <Icon name="info" class="mt-0.5 size-5 shrink-0 text-accent-700 dark:text-accent-400" />
+  {
+    locale === 'tr' ? (
+      <p>
+        <strong class="font-semibold" lang={titleLang}>{title}</strong>
+        {site ? (
+          <>
+            {' '}
+            hâlâ geliştirme aşamasında. Erken erişim ve en güncel bilgiler için{' '}
+            <a href={site.href} target="_blank" rel="noopener noreferrer" class={linkClass} aria-label={m.detail.visitName(site.host)}>{site.host}</a>{' '}
+            adresine göz atın.
+          </>
+        ) : (
+          <> hâlâ geliştirme aşamasında ve erken erişime açık.</>
+        )}
+      </p>
+    ) : (
+      <p>
+        <strong class="font-semibold" lang={titleLang}>{title}</strong>
+        {site ? (
+          <>
+            {' '}
+            is still in development. Visit{' '}
+            <a href={site.href} target="_blank" rel="noopener noreferrer" class={linkClass} aria-label={m.detail.visitName(site.host)}>{site.host}</a>{' '}
+            for early access and the latest details.
+          </>
+        ) : (
+          <> is still in development and open for early access.</>
+        )}
+      </p>
+    )
+  }
+</aside>

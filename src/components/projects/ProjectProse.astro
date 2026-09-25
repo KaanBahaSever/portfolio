@@ -1,0 +1,38 @@
+---
+/**
+ * Typeset container for a project's Markdown body: <ProjectProse><Content /></ProjectProse>.
+ *
+ * Bodies link to other pages with locale-free paths ('/about/#journey'). On English pages the
+ * body renders as is; on other locales the rendered HTML gets the locale prefix on those links
+ * (localizeProseLinks), so the Turkish text sends readers to Turkish pages without hard-coding
+ * '/tr/' in the content. The HTML is the site's own rendered Markdown, not translated strings.
+ */
+import { localizeProseLinks } from './links';
+import { DEFAULT_LOCALE } from '../../i18n/config';
+import { getLocale } from '../../i18n/server';
+
+interface Props {
+  /** Language of the body when it differs from the page (an untranslated fallback). */
+  lang?: string;
+  class?: string;
+}
+
+const { lang, class: className } = Astro.props;
+const locale = getLocale(Astro);
+const html = locale === DEFAULT_LOCALE ? undefined : localizeProseLinks(await Astro.slots.render('default'), locale);
+const classes = [
+  // prose-zinc would turn links ink-coloured; links stay in the accent, as everywhere else.
+  'prose prose-zinc max-w-[68ch] dark:prose-invert prose-a:text-accent-700 prose-a:underline-offset-4 dark:prose-a:text-accent-400 prose-table:text-sm',
+  className,
+];
+---
+
+{
+  html === undefined ? (
+    <div class:list={classes} lang={lang}>
+      <slot />
+    </div>
+  ) : (
+    <div class:list={classes} lang={lang} set:html={html} />
+  )
+}

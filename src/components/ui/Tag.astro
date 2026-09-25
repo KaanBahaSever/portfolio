@@ -1,5 +1,8 @@
 ---
-/** Neutral chip for tags and tech-stack items. */
+/**
+ * Neutral chip for tags and tech-stack items, in mono: names such as "gRPC" or "C++" keep their
+ * exact spelling (no uppercase transform).
+ */
 interface Props {
   label: string;
 }
@@ -8,7 +11,7 @@ const { label } = Astro.props;
 ---
 
 <span
-  class="inline-flex items-center rounded-full bg-zinc-100 px-2 py-1 text-xs leading-none font-medium text-zinc-700 ring-1 ring-zinc-200 ring-inset dark:bg-zinc-800/60 dark:text-zinc-300 dark:ring-zinc-700/60"
+  class="inline-flex items-center rounded-md bg-zinc-50 px-2 py-1 font-mono text-xs leading-none text-zinc-700 ring-1 ring-zinc-200 ring-inset dark:bg-zinc-900 dark:text-zinc-300 dark:ring-zinc-700/70"
 >
   {label}
 </span>

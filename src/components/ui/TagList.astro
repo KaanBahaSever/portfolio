@@ -1,4 +1,7 @@
 ---
+/**
+ * A labelled list of Tag chips. Renders nothing for an empty list, so callers need no guard.
+ */
 import Tag from './Tag.astro';
 
 interface Props {
@@ -15,7 +18,7 @@ const { items, label, class: className } = Astro.props;
   items.length > 0 && (
     <ul class:list={['flex flex-wrap gap-1.5', className]} aria-label={label}>
       {items.map((item) => (
-        <li>
+        <li class="flex">
           <Tag label={item} />
         </li>
       ))}

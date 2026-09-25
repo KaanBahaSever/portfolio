@@ -1,414 +1,614 @@
 ---
 /**
- * Notepad tool UI. Behaviour lives in src/scripts/tools/notepad/controller.ts;
- * every hook is a data-* attribute scoped to the root section.
+ * Notepad tool UI. Behaviour lives in src/scripts/tools/notepad/controller.ts; every hook is a
+ * data-* attribute scoped to the root section, and all text comes from src/i18n/tools/notepad.ts.
+ *
+ * Layout: one "window" (.np-card) holds the toolbar, a notice line, the find panel, the editor
+ * and a status bar. The root is a flex column and the window grows with it: give the root
+ * `grow` inside a column that reaches the bottom of the screen (the notepad page does) and the
+ * whole window fits the first screen. Where the screen is too short for its minimum height, the
+ * status bar sticks to the bottom of the viewport, so the counters and the save state stay in
+ * view. In zen mode the root section covers the whole viewport instead (styles at the end) and
+ * only the text, an open find panel and a quiet status line remain.
  */
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { formatters } from '../../i18n/format';
+import { getLocale } from '../../i18n/server';
+import { notepadMessages } from '../../i18n/tools/notepad';
 
-// Base classes carry no text color so variants below never compete with each other.
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const locale = getLocale(Astro);
+const m = notepadMessages[locale];
+const f = formatters(locale);
+const zero = f.number(0);
+
+/** Toolbar buttons: quiet until hovered; pressed and expanded states stay visible. */
+const toolButton =
+  'inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-lg px-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 aria-expanded:bg-accent-50 aria-expanded:text-accent-800 aria-pressed:bg-zinc-100 aria-pressed:text-zinc-900 aria-pressed:ring-1 aria-pressed:ring-zinc-300 aria-pressed:ring-inset dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 dark:aria-expanded:bg-accent-500/15 dark:aria-expanded:text-accent-300 dark:aria-pressed:bg-zinc-800 dark:aria-pressed:text-zinc-100 dark:aria-pressed:ring-zinc-700';
+/** Visible from lg up; below that the buttons show their icon and keep the name for screen readers. */
+const toolLabel = 'max-lg:sr-only';
+const divider = 'mx-1 hidden h-6 w-px shrink-0 bg-zinc-200 sm:block dark:bg-zinc-800';
+/**
+ * Button groups in the toolbar. Below 360 px the gaps go, so the six 44 px buttons still share
+ * one row on a 320 px phone instead of pushing Zen mode onto a row of its own.
+ */
+const toolGroup = 'flex gap-0 min-[22.5rem]:gap-1';
 const buttonBase =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:disabled:hover:bg-zinc-900';
-const toolbarButtonClass = `${buttonBase} text-zinc-900 aria-pressed:border-accent-600/40 aria-pressed:bg-accent-50 aria-pressed:text-accent-800 aria-expanded:border-accent-600/40 aria-expanded:bg-accent-50 aria-expanded:text-accent-800 dark:text-zinc-100 dark:aria-pressed:border-accent-500/40 dark:aria-pressed:bg-accent-500/15 dark:aria-pressed:text-accent-300 dark:aria-expanded:border-accent-500/40 dark:aria-expanded:bg-accent-500/15 dark:aria-expanded:text-accent-300`;
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-900 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800';
 const iconButtonClass =
   'inline-flex size-11 shrink-0 items-center justify-center rounded-lg text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100';
 const toggleBase =
   'inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-zinc-200 bg-white px-2.5 text-sm text-zinc-700 hover:bg-zinc-100 aria-pressed:border-accent-600/50 aria-pressed:bg-accent-50 aria-pressed:text-accent-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:aria-pressed:border-accent-500/50 dark:aria-pressed:bg-accent-500/15 dark:aria-pressed:text-accent-300';
 const toggleClass = `${toggleBase} font-mono`;
-const fieldClass =
-  'min-h-11 w-full rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900 placeholder:text-zinc-500 sm:pointer-fine:text-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500';
 const iconClass = 'size-5 shrink-0';
-const statValueClass = 'mt-0.5 text-base font-semibold text-zinc-900 tabular-nums dark:text-zinc-100';
+const statValueClass = 'mt-0.5 font-mono text-base font-medium text-zinc-900 tabular-nums dark:text-zinc-100';
 const statLabelClass = 'text-xs text-zinc-600 dark:text-zinc-400';
+/** Status bar controls: 44 px tall touch targets in a compact line. */
+const statusControl =
+  'inline-flex h-11 shrink-0 items-center gap-2 rounded-lg px-2 text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100';
 /**
- * Shared by the textarea and the highlight mirror behind it: both must lay text out
- * identically (the rest lives in .np-surface below). Text fields only go below 16px with a
- * fine pointer: iOS Safari zooms into smaller focused fields (phones in landscape are wider than sm).
+ * The textarea and the highlight mirror behind it share these classes and the .np-surface
+ * rules below: both must lay text out identically, so layout never goes on one of them alone.
  */
-const surfaceClass =
-  'np-surface border px-3 py-2.5 font-mono text-base leading-6 sm:px-4 sm:py-3 sm:pointer-fine:text-sm sm:pointer-fine:leading-[1.375rem]';
+const surfaceClass = 'np-surface font-mono';
 ---
 
-<section data-notepad aria-label="Notepad" class="mt-8 flex flex-col gap-3">
+<section
+  data-notepad
+  aria-label={m.label}
+  class:list={['np-root flex flex-col gap-3', className]}
+>
   <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 
   <noscript>
     <p
       class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
     >
-      This tool needs JavaScript. It runs entirely in your browser; nothing is uploaded.
+      {m.noscript}
     </p>
   </noscript>
 
-  <!-- 1. Toolbar -->
-  <div class="flex flex-wrap items-center gap-2">
-    <div role="group" aria-label="File" class="flex flex-wrap gap-2">
-      <button type="button" data-new class={toolbarButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
-          <path d="M14 2v4a2 2 0 0 0 2 2h4M9 15h6M12 18v-6"></path>
-        </svg>
-        New
-      </button>
-      <button type="button" data-open class={toolbarButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path>
-        </svg>
-        Open
-      </button>
-      <input
-        data-open-input
-        type="file"
-        hidden
-        tabindex="-1"
-        accept="text/*,.md,.txt,.json,.csv,.log,.xml,.yml,.yaml,.ini,.js,.ts,.css,.html,.py,.go,.c,.cpp,.cs,.java,.sql,.sh"
-      />
-    </div>
-    <div role="group" aria-label="Search and view" class="flex flex-wrap gap-2">
-      <button type="button" data-find-toggle aria-expanded="false" aria-controls="np-find-panel" class={toolbarButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <circle cx="11" cy="11" r="7"></circle>
-          <path d="m20 20-3.5-3.5"></path>
-        </svg>
-        Find
-      </button>
-      <button type="button" data-replace-toggle aria-expanded="false" aria-controls="np-find-panel" class={toolbarButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <path d="m16 3 4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"></path>
-        </svg>
-        Replace
-      </button>
-      <button type="button" data-wrap-toggle aria-pressed="true" title="Wrap long lines" class={toolbarButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <path d="M3 6h18M3 12h15a3 3 0 1 1 0 6h-4M3 18h7"></path>
-          <path d="m16 16-2 2 2 2"></path>
-        </svg>
-        Wrap lines
-      </button>
-    </div>
-  </div>
-
-  <p
-    data-message
-    class="text-sm text-zinc-600 empty:hidden data-[tone=error]:font-medium data-[tone=error]:text-rose-700 dark:text-zinc-400 dark:data-[tone=error]:text-rose-400"
-  ></p>
-
-  <!-- 2. Find & replace -->
   <div
-    id="np-find-panel"
-    data-find-panel
-    role="search"
-    aria-label="Find and replace"
-    hidden
-    class="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-900"
+    data-card
+    class="np-card flex grow flex-col rounded-xl border border-zinc-200 bg-white shadow-xs transition-[border-color,box-shadow] has-[.np-editor:focus-visible]:border-accent-600 has-[.np-editor:focus-visible]:ring-1 has-[.np-editor:focus-visible]:ring-accent-600 dark:border-zinc-800 dark:bg-zinc-900 dark:has-[.np-editor:focus-visible]:border-accent-400 dark:has-[.np-editor:focus-visible]:ring-accent-400"
   >
-    <div class="flex items-center gap-1 sm:gap-2">
-      <div
-        class="flex min-h-11 min-w-0 flex-1 items-center rounded-lg border border-zinc-300 bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-700 has-[[aria-invalid=true]]:border-rose-500 dark:border-zinc-700 dark:bg-zinc-950 dark:focus-within:outline-accent-500 dark:has-[[aria-invalid=true]]:border-rose-400"
-      >
+    <!-- 1. Toolbar: the document (name, download), file actions, search and view -->
+    <div
+      class="np-toolbar flex flex-wrap items-center gap-x-1 gap-y-1.5 border-b border-zinc-200 p-1 min-[22.5rem]:p-1.5 sm:p-2 dark:border-zinc-800"
+    >
+      <div class="flex min-w-0 grow basis-full items-center gap-1.5 sm:grow-0 sm:basis-auto">
+        <div class="relative min-w-0 flex-1 sm:w-48 sm:flex-none xl:w-64">
+          <label for="np-filename" class="sr-only">{m.toolbar.fileName}</label>
+          <Icon
+            name="file"
+            class="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-zinc-500 dark:text-zinc-400"
+          />
+          <input
+            id="np-filename"
+            data-filename
+            type="text"
+            value={m.defaultFilename}
+            title={m.titles.fileName}
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="done"
+            class="h-11 w-full min-w-0 rounded-lg border border-zinc-200 bg-zinc-50 pr-3 pl-9 font-mono text-base text-zinc-900 transition-colors hover:border-zinc-300 sm:pointer-fine:text-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:border-zinc-700"
+          />
+        </div>
+        <button type="button" data-save class={`${ui.buttonPrimary} shrink-0`}>
+          <Icon name="download" class={iconClass} />
+          {m.toolbar.download}
+        </button>
+      </div>
+
+      <span class={divider} aria-hidden="true"></span>
+
+      <div role="group" aria-label={m.toolbar.file} class={toolGroup}>
+        <button type="button" data-open class={toolButton}>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class={iconClass}
+            aria-hidden="true"
+          >
+            <path d="M4 19V6a1 1 0 0 1 1-1h4.5l2 2H19a1 1 0 0 1 1 1v2"></path>
+            <path d="M4 19l2.6-7.2a1 1 0 0 1 .94-.66H21l-2.7 7.2a1 1 0 0 1-.94.66z"></path>
+          </svg>
+          <span class={toolLabel}>{m.toolbar.open}</span>
+        </button>
         <input
-          id="np-find"
-          data-find-input
+          data-open-input
+          type="file"
+          hidden
+          tabindex="-1"
+          accept="text/*,.md,.txt,.json,.csv,.log,.xml,.yml,.yaml,.ini,.js,.ts,.css,.html,.py,.go,.c,.cpp,.cs,.java,.sql,.sh"
+        />
+        <button type="button" data-clear class={toolButton}>
+          <Icon name="trash" class={iconClass} />
+          <span class={toolLabel}>{m.toolbar.clear}</span>
+        </button>
+      </div>
+
+      <span class={divider} aria-hidden="true"></span>
+
+      <div role="group" aria-label={m.toolbar.view} class={toolGroup}>
+        <button type="button" data-find-toggle aria-expanded="false" aria-controls="np-find-panel" class={toolButton}>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class={iconClass}
+            aria-hidden="true"
+          >
+            <path d="M4 11a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"></path>
+            <path d="m20 20-4-4"></path>
+          </svg>
+          <span class={toolLabel}>{m.toolbar.find}</span>
+        </button>
+        <button type="button" data-replace-toggle aria-expanded="false" aria-controls="np-find-panel" class={toolButton}>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class={iconClass}
+            aria-hidden="true"
+          >
+            <path d="m16 3 4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"></path>
+          </svg>
+          <span class={toolLabel}>{m.toolbar.replace}</span>
+        </button>
+        <button type="button" data-wrap-toggle aria-pressed="true" class={toolButton}>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class={iconClass}
+            aria-hidden="true"
+          >
+            <path d="M3 6h18M3 12h15a3 3 0 1 1 0 6h-4M3 18h7"></path>
+            <path d="m16 16-2 2 2 2"></path>
+          </svg>
+          <span class={toolLabel}>{m.toolbar.wrap}</span>
+        </button>
+      </div>
+
+      <button type="button" data-zen-toggle class={`${toolButton} ml-auto`}>
+        <Icon name="maximize" class={iconClass} />
+        <span class={toolLabel}>{m.toolbar.zen}</span>
+      </button>
+    </div>
+
+    <!-- 2. Notices: file notes and errors, and the Undo offer after Clear -->
+    <div
+      data-notice
+      hidden
+      class="flex items-center gap-2 border-b border-zinc-200 bg-zinc-50 py-1 pr-1 pl-3 dark:border-zinc-800 dark:bg-zinc-950/40"
+    >
+      <p
+        data-message
+        class="min-w-0 flex-1 py-2 text-sm text-zinc-700 data-[tone=error]:font-medium data-[tone=error]:text-rose-700 dark:text-zinc-300 dark:data-[tone=error]:text-rose-400"
+      >
+      </p>
+      <button
+        type="button"
+        data-notice-undo
+        hidden
+        class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold text-accent-800 hover:bg-accent-600/10 dark:text-accent-300 dark:hover:bg-accent-400/10"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="size-4 shrink-0"
+          aria-hidden="true"
+        >
+          <path d="M9 14 4 9l5-5"></path>
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path>
+        </svg>
+        {m.clear.undo}
+      </button>
+    </div>
+
+    <!-- 3. Find & replace -->
+    <div
+      id="np-find-panel"
+      data-find-panel
+      role="search"
+      aria-label={m.find.label}
+      hidden
+      class="flex flex-col gap-2 border-b border-zinc-200 bg-zinc-50 p-2 sm:p-3 dark:border-zinc-800 dark:bg-zinc-950/40"
+    >
+      <div class="flex items-center gap-1 sm:gap-2">
+        <div
+          class="flex min-h-11 min-w-0 flex-1 items-center rounded-lg border border-zinc-300 bg-white focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-accent-700 has-[[aria-invalid=true]]:border-rose-500 dark:border-zinc-700 dark:bg-zinc-950 dark:focus-within:outline-accent-400 dark:has-[[aria-invalid=true]]:border-rose-400"
+        >
+          <input
+            id="np-find"
+            data-find-input
+            type="text"
+            aria-label={m.find.find}
+            aria-describedby="np-find-count np-find-error"
+            placeholder={m.find.find}
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="search"
+            class="min-h-11 w-full min-w-0 flex-1 rounded-lg bg-transparent px-3 text-base text-zinc-900 placeholder:text-zinc-500 focus-visible:outline-none sm:pointer-fine:text-sm dark:text-zinc-100"
+          />
+          <span
+            id="np-find-count"
+            data-find-count
+            class="shrink-0 pr-3 font-mono text-xs whitespace-nowrap text-zinc-600 tabular-nums empty:hidden data-[tone=none]:text-rose-700 dark:text-zinc-400 dark:data-[tone=none]:text-rose-400"
+          ></span>
+        </div>
+        <button type="button" data-find-prev aria-label={m.find.previous} class={iconButtonClass}>
+          <Icon name="chevron-down" class={`${iconClass} rotate-180`} />
+        </button>
+        <button type="button" data-find-next aria-label={m.find.next} class={iconButtonClass}>
+          <Icon name="chevron-down" class={iconClass} />
+        </button>
+      </div>
+
+      <p id="np-find-error" data-find-error hidden class="px-1 text-sm break-words text-rose-700 dark:text-rose-400"></p>
+
+      <div class="flex items-start gap-2">
+        <div role="group" aria-label={m.find.options} class="flex min-w-0 flex-1 flex-wrap gap-2">
+          <button
+            type="button"
+            data-search-option="matchCase"
+            aria-pressed="false"
+            aria-label={m.options.matchCase}
+            class={toggleClass}
+          >
+            <span aria-hidden="true">Aa</span>
+          </button>
+          <button
+            type="button"
+            data-search-option="wholeWord"
+            aria-pressed="false"
+            aria-label={m.options.wholeWord}
+            class={`${toggleBase} gap-1.5`}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="size-4 shrink-0"
+              aria-hidden="true"
+            >
+              <path d="M3 17v3h18v-3"></path>
+            </svg>
+            <span aria-hidden="true">{m.find.word}</span>
+          </button>
+          <button
+            type="button"
+            data-search-option="regex"
+            aria-pressed="false"
+            aria-label={m.options.regex}
+            class={toggleClass}
+          >
+            <span aria-hidden="true">.*</span>
+          </button>
+          <button
+            type="button"
+            data-search-option="multiline"
+            data-regex-only
+            hidden
+            aria-pressed="true"
+            aria-label={m.options.multiline}
+            class={toggleClass}
+          >
+            <span aria-hidden="true">^$</span>
+          </button>
+          <button
+            type="button"
+            data-search-option="dotAll"
+            data-regex-only
+            hidden
+            aria-pressed="false"
+            aria-label={m.options.dotAll}
+            class={toggleClass}
+          >
+            <span aria-hidden="true">.\n</span>
+          </button>
+        </div>
+        <button type="button" data-find-close aria-label={m.find.close} class={iconButtonClass}>
+          <Icon name="close" class={iconClass} />
+        </button>
+      </div>
+
+      <div data-replace-row hidden class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <input
+          id="np-replace"
+          data-replace-input
           type="text"
-          aria-label="Find"
-          aria-describedby="np-find-count np-find-error"
-          placeholder="Find"
+          aria-label={m.find.replaceWith}
+          placeholder={m.find.replaceWith}
           autocomplete="off"
           autocapitalize="off"
           autocorrect="off"
           spellcheck="false"
-          enterkeyhint="search"
-          class="min-h-11 w-full min-w-0 flex-1 rounded-lg bg-transparent px-3 text-base text-zinc-900 placeholder:text-zinc-500 focus-visible:outline-none sm:pointer-fine:text-sm dark:text-zinc-100"
+          enterkeyhint="done"
+          class={`${ui.field} sm:flex-1`}
         />
+        <div class="flex gap-2">
+          <button type="button" data-replace-one class={`${buttonBase} flex-1 sm:flex-none`}>
+            {m.find.replaceOne}
+          </button>
+          <button type="button" data-replace-all class={`${buttonBase} flex-1 sm:flex-none`}>
+            {m.find.replaceAll}
+          </button>
+        </div>
+      </div>
+
+      <div
+        data-replace-result
+        hidden
+        class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-accent-600/20 bg-accent-50 py-1 pr-1 pl-3 dark:border-accent-500/25 dark:bg-accent-500/10"
+      >
+        <p data-replace-result-text class="mr-auto py-2 text-sm font-medium text-accent-900 tabular-nums dark:text-accent-200">
+        </p>
+        <button
+          type="button"
+          data-undo-replace
+          class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold text-accent-800 hover:bg-accent-600/10 dark:text-accent-300 dark:hover:bg-accent-400/10"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="size-4 shrink-0"
+            aria-hidden="true"
+          >
+            <path d="M9 14 4 9l5-5"></path>
+            <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path>
+          </svg>
+          {m.find.undo}
+        </button>
+      </div>
+
+      <details data-preview hidden class="group/preview rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+        <summary
+          class="flex min-h-11 list-none items-center justify-between gap-3 rounded-lg px-3 text-sm font-medium text-zinc-900 dark:text-zinc-100 [&::-webkit-details-marker]:hidden"
+        >
+          <span data-preview-title class="tabular-nums">{m.find.preview}</span>
+          <Icon
+            name="chevron-down"
+            class="size-4 shrink-0 text-zinc-500 transition-transform group-open/preview:rotate-180"
+          />
+        </summary>
+        <ol
+          data-preview-list
+          class="max-h-72 divide-y divide-zinc-200 overflow-y-auto overscroll-contain border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
+        >
+        </ol>
+        <p
+          data-preview-note
+          hidden
+          class="border-t border-zinc-200 px-3 py-2 text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-400"
+        >
+        </p>
+      </details>
+      <template data-preview-item-template>
+        <li class="flex flex-col gap-0.5 px-3 py-2 sm:flex-row sm:gap-3">
+          <span
+            data-preview-line
+            class="shrink-0 font-mono text-xs font-medium text-zinc-600 tabular-nums sm:w-20 sm:pt-0.5 dark:text-zinc-400"
+          ></span>
+          {/* One line on purpose: whitespace between these tags would show (pre-wrap). */}
+          <span class="min-w-0 font-mono text-[0.8125rem] leading-5 break-all whitespace-pre-wrap text-zinc-600 dark:text-zinc-400"><span data-preview-before></span><span class="sr-only">{m.find.srBeforeOld}</span><del data-preview-old class="rounded-sm bg-rose-100 text-rose-900 decoration-rose-600 dark:bg-rose-500/20 dark:text-rose-200 dark:decoration-rose-400"></del><span class="sr-only">{m.find.srBeforeNew}</span><ins data-preview-new class="rounded-sm bg-accent-100 text-accent-900 no-underline dark:bg-accent-500/20 dark:text-accent-200"></ins><span data-preview-after></span></span>
+        </li>
+      </template>
+    </div>
+
+    <!-- 4. Editor: a transparent textarea over a mirror that draws the match highlights -->
+    <div data-editor-wrap data-wrap="on" class="np-editor-wrap relative min-h-48 flex-1">
+      <div
+        data-backdrop
+        aria-hidden="true"
+        translate="no"
+        class="pointer-events-none absolute inset-0 overflow-hidden select-none"
+      >
+        <div data-mirror class={`${surfaceClass} np-mirror group relative min-h-full w-full`}></div>
+      </div>
+      <textarea
+        data-editor
+        id="np-editor"
+        aria-label={m.editor.label}
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        autocorrect="off"
+        placeholder={m.editor.placeholder}
+        class={`${surfaceClass} np-editor absolute inset-0 block size-full bg-transparent text-zinc-900 placeholder:text-zinc-500 focus-visible:outline-none dark:text-zinc-100 dark:placeholder:text-zinc-400`}
+      ></textarea>
+      <template data-mark-template>
+        <mark
+          class="rounded-[3px] bg-amber-200/80 text-transparent group-data-[replace]:line-through group-data-[replace]:decoration-rose-600 group-data-[replace]:decoration-2 data-[current]:bg-orange-300 data-[current]:ring-2 data-[current]:ring-orange-500 dark:bg-amber-400/40 dark:group-data-[replace]:decoration-rose-400 dark:data-[current]:bg-orange-500/60 dark:data-[current]:ring-orange-400"
+        ></mark>
+      </template>
+    </div>
+
+    <!--
+      5. Status bar: caret and counters; save state, autosave switch and line endings (or the zen
+      exit). Sticky with the card's own background, so it stays in view when the window is taller
+      than the screen; the bottom corners follow the card's (radius minus its 1 px border).
+    -->
+    <div
+      data-status
+      class="np-status sticky bottom-0 z-10 flex flex-wrap items-center gap-x-3 rounded-b-[calc(var(--radius-xl)-1px)] border-t border-zinc-200 bg-white px-2 font-mono text-xs text-zinc-600 tabular-nums sm:px-3 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+    >
+      {/* The caret position stays off phones, where the counters and save state need the line. */}
+      <div class="flex min-h-11 min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 px-1 py-1">
+        <span data-caret class="np-zen-hide max-sm:hidden">{m.status.caret(f.number(1), f.number(1))}</span>
+        <span data-selection-count hidden class="np-zen-hide font-medium text-zinc-900 dark:text-zinc-100"></span>
+        <span data-summary="lines" class="font-medium text-zinc-900 dark:text-zinc-100">{m.status.lines(0, zero)}</span>
+        <span data-summary="words" class="font-medium text-zinc-900 dark:text-zinc-100">{m.status.words(0, zero)}</span>
         <span
-          id="np-find-count"
-          data-find-count
-          class="shrink-0 pr-3 text-xs whitespace-nowrap text-zinc-600 tabular-nums empty:hidden data-[tone=none]:text-rose-700 dark:text-zinc-400 dark:data-[tone=none]:text-rose-400"
+          data-save-state
+          class="min-w-0 empty:hidden data-[tone=warning]:text-amber-800 dark:data-[tone=warning]:text-amber-400"
         ></span>
       </div>
-      <button type="button" data-find-prev aria-label="Previous match" class={iconButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <path d="m18 15-6-6-6 6"></path>
-        </svg>
-      </button>
-      <button type="button" data-find-next aria-label="Next match" class={iconButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <path d="m6 9 6 6 6-6"></path>
-        </svg>
-      </button>
-    </div>
-
-    <p id="np-find-error" data-find-error hidden class="px-1 text-sm break-words text-rose-700 dark:text-rose-400"></p>
-
-    <div class="flex items-start gap-2">
-      <div role="group" aria-label="Search options" class="flex min-w-0 flex-1 flex-wrap gap-2">
-        <button type="button" data-search-option="matchCase" aria-pressed="false" aria-label="Match case" class={toggleClass}>
-          <span aria-hidden="true">Aa</span>
-        </button>
-        <button type="button" data-search-option="wholeWord" aria-pressed="false" aria-label="Match whole word" class={`${toggleBase} gap-1.5`}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true">
-            <path d="M3 17v3h18v-3"></path>
-          </svg>
-          <span aria-hidden="true">Word</span>
-        </button>
-        <button type="button" data-search-option="regex" aria-pressed="false" aria-label="Use regular expression" class={toggleClass}>
-          <span aria-hidden="true">.*</span>
-        </button>
+      <div class="ml-auto flex flex-wrap items-center justify-end gap-x-1">
         <button
           type="button"
-          data-search-option="multiline"
-          data-regex-only
-          hidden
-          aria-pressed="true"
-          aria-label="^ and $ match each line"
-          class={toggleClass}
+          role="switch"
+          aria-checked="true"
+          data-autosave-toggle
+          class={`${statusControl} group/switch np-zen-hide disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-transparent`}
         >
-          <span aria-hidden="true">^$</span>
+          <span
+            aria-hidden="true"
+            class="relative inline-flex h-4 w-7 shrink-0 items-center rounded-full border border-zinc-500 transition-colors group-aria-checked/switch:border-accent-700 group-aria-checked/switch:bg-accent-700 dark:border-zinc-400 dark:group-aria-checked/switch:border-accent-500 dark:group-aria-checked/switch:bg-accent-500"
+          >
+            <span
+              class="size-2.5 translate-x-0.5 rounded-full bg-zinc-500 transition-transform group-aria-checked/switch:translate-x-[0.8125rem] group-aria-checked/switch:bg-white dark:bg-zinc-400 dark:group-aria-checked/switch:bg-zinc-950"
+            ></span>
+          </span>
+          {m.status.autosave}
         </button>
-        <button
-          type="button"
-          data-search-option="dotAll"
-          data-regex-only
-          hidden
-          aria-pressed="false"
-          aria-label="Dot matches newline"
-          class={toggleClass}
+        <label for="np-line-ending" class="sr-only">{m.status.lineEnding}</label>
+        <select
+          id="np-line-ending"
+          data-line-ending
+          autocomplete="off"
+          class={`${statusControl} np-zen-hide cursor-pointer border-0 bg-transparent font-mono text-xs [field-sizing:content]`}
         >
-          <span aria-hidden="true">.\n</span>
-        </button>
-      </div>
-      <button type="button" data-find-close aria-label="Close find and replace" class={iconButtonClass}>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class={iconClass} aria-hidden="true">
-          <path d="M18 6 6 18M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-
-    <div data-replace-row hidden class="flex flex-col gap-2 sm:flex-row sm:items-center">
-      <input
-        id="np-replace"
-        data-replace-input
-        type="text"
-        aria-label="Replace with"
-        placeholder="Replace with"
-        autocomplete="off"
-        autocapitalize="off"
-        autocorrect="off"
-        spellcheck="false"
-        enterkeyhint="done"
-        class={`${fieldClass} sm:flex-1`}
-      />
-      <div class="flex gap-2">
-        <button type="button" data-replace-one class={`${buttonBase} flex-1 text-zinc-900 sm:flex-none dark:text-zinc-100`}>
-          Replace
-        </button>
-        <button type="button" data-replace-all class={`${buttonBase} flex-1 text-zinc-900 sm:flex-none dark:text-zinc-100`}>
-          Replace all
+          <option value="lf" selected>{m.status.lf}</option>
+          <option value="crlf">{m.status.crlf}</option>
+        </select>
+        <button type="button" data-zen-exit class={`${statusControl} np-zen-only font-sans text-sm`}>
+          <Icon name="minimize" class="size-4 shrink-0" />
+          {m.zen.exit}
+          <kbd class={`${ui.kbd} pointer-coarse:hidden`} aria-hidden="true">Esc</kbd>
         </button>
       </div>
     </div>
+  </div>
 
-    <div
-      data-replace-result
-      hidden
-      class="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg border border-accent-600/20 bg-accent-50 py-1 pr-1 pl-3 dark:border-accent-500/25 dark:bg-accent-500/10"
+  <details class="np-zen-hide group/stats rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <summary
+      class="flex min-h-11 list-none items-center justify-between gap-3 rounded-xl px-4 text-sm font-medium text-zinc-900 dark:text-zinc-100 [&::-webkit-details-marker]:hidden"
     >
-      <p data-replace-result-text class="mr-auto py-2 text-sm font-medium text-accent-900 tabular-nums dark:text-accent-200"></p>
-      <button
-        type="button"
-        data-undo-replace
-        class="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold text-accent-800 hover:bg-accent-600/10 dark:text-accent-300 dark:hover:bg-accent-400/10"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4 shrink-0" aria-hidden="true">
-          <path d="M9 14 4 9l5-5"></path>
-          <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path>
-        </svg>
-        Undo
-      </button>
-    </div>
+      {m.stats.summary}
+      <Icon name="chevron-down" class="size-4 shrink-0 text-zinc-500 transition-transform group-open/stats:rotate-180" />
+    </summary>
+    <dl class="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-zinc-200 px-4 py-3 sm:grid-cols-4 dark:border-zinc-800">
+      <div>
+        <dt class={statLabelClass}>{m.stats.characters}</dt>
+        <dd data-detail="characters" class={statValueClass}>{zero}</dd>
+      </div>
+      <div>
+        <dt class={statLabelClass}>{m.stats.charactersNoSpaces}</dt>
+        <dd data-detail="charactersNoSpaces" class={statValueClass}>{zero}</dd>
+      </div>
+      <div>
+        <dt class={statLabelClass}>{m.stats.words}</dt>
+        <dd data-detail="words" class={statValueClass}>{zero}</dd>
+      </div>
+      <div>
+        <dt class={statLabelClass}>{m.stats.sentences}</dt>
+        <dd data-detail="sentences" class={statValueClass}>{zero}</dd>
+      </div>
+      <div>
+        <dt class={statLabelClass}>{m.stats.lines}</dt>
+        <dd data-detail="lines" class={statValueClass}>{zero}</dd>
+      </div>
+      <div>
+        <dt class={statLabelClass}>{m.stats.paragraphs}</dt>
+        <dd data-detail="paragraphs" class={statValueClass}>{zero}</dd>
+      </div>
+      <div>
+        <dt class={statLabelClass}>{m.stats.bytes}</dt>
+        <dd data-detail="bytes" class={statValueClass}>{zero}</dd>
+      </div>
+      <div>
+        <dt class={statLabelClass}>{m.stats.readingTime}</dt>
+        <dd data-detail="readingMinutes" class={statValueClass}>{m.stats.minutes(zero)}</dd>
+      </div>
+    </dl>
+  </details>
 
-    <details data-preview hidden class="group rounded-lg border border-zinc-200 dark:border-zinc-800">
-      <summary
-        class="flex min-h-11 list-none items-center justify-between gap-3 rounded-lg px-3 text-sm font-medium text-zinc-900 dark:text-zinc-100 [&::-webkit-details-marker]:hidden"
-      >
-        <span data-preview-title class="tabular-nums">Preview changes</span>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="size-4 shrink-0 text-zinc-500 transition-transform group-open:rotate-180"
-          aria-hidden="true"
-        >
-          <path d="m6 9 6 6 6-6"></path>
-        </svg>
-      </summary>
-      <ol
-        data-preview-list
-        class="max-h-72 divide-y divide-zinc-200 overflow-y-auto overscroll-contain border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800"
-      ></ol>
-      <p data-preview-note hidden class="border-t border-zinc-200 px-3 py-2 text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-400"></p>
-    </details>
-    <template data-preview-item-template>
-      <li class="flex flex-col gap-0.5 px-3 py-2 sm:flex-row sm:gap-3">
-        <span data-preview-line class="shrink-0 text-xs font-medium text-zinc-600 tabular-nums sm:w-20 sm:pt-0.5 dark:text-zinc-400"></span>
-        {/* One line on purpose: whitespace between these tags would show (pre-wrap). */}
-        <span class="min-w-0 font-mono text-[0.8125rem] leading-5 break-all whitespace-pre-wrap text-zinc-600 dark:text-zinc-400"><span data-preview-before></span><span class="sr-only">, replace </span><del data-preview-old class="rounded-sm bg-rose-100 text-rose-900 decoration-rose-600 dark:bg-rose-500/20 dark:text-rose-200 dark:decoration-rose-400"></del><span class="sr-only"> with </span><ins data-preview-new class="rounded-sm bg-accent-100 text-accent-900 no-underline dark:bg-accent-500/20 dark:text-accent-200"></ins><span data-preview-after></span></span>
-      </li>
-    </template>
-  </div>
-
-  <!-- 3. Editor: a transparent textarea over a mirror that draws the match highlights -->
-  <div data-editor-wrap data-wrap="on" class="relative rounded-xl bg-white dark:bg-zinc-900">
-    <div data-backdrop aria-hidden="true" translate="no" class="pointer-events-none absolute inset-0 overflow-hidden rounded-xl select-none">
-      <div data-mirror class={`${surfaceClass} np-mirror group relative min-h-full w-full border-transparent`}></div>
-    </div>
-    <textarea
-      data-editor
-      id="np-editor"
-      aria-label="Text"
-      spellcheck="false"
-      autocapitalize="off"
-      autocomplete="off"
-      autocorrect="off"
-      placeholder="Start typing, or open a text file…"
-      class={`${surfaceClass} np-editor relative block min-h-[55dvh] w-full rounded-xl border-zinc-200 bg-transparent text-zinc-900 placeholder:text-zinc-400 sm:min-h-[60vh] dark:border-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500`}
-    ></textarea>
-    <template data-mark-template>
-      <mark
-        class="rounded-[3px] bg-amber-200/80 text-transparent group-data-[replace]:line-through group-data-[replace]:decoration-rose-600 group-data-[replace]:decoration-2 data-[current]:bg-orange-300 data-[current]:ring-2 data-[current]:ring-orange-500 dark:bg-amber-400/40 dark:group-data-[replace]:decoration-rose-400 dark:data-[current]:bg-orange-500/60 dark:data-[current]:ring-orange-400"
-      ></mark>
-    </template>
-  </div>
-
-  <!-- 4. Status bar -->
-  <div class="flex flex-col gap-2">
-    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-sm text-zinc-600 tabular-nums dark:text-zinc-400">
-      <span data-caret>Ln 1, Col 1</span>
-      <span data-selection-count hidden class="font-medium text-zinc-900 dark:text-zinc-100"></span>
-      <span data-summary="characters">0 characters</span>
-      <span data-summary="words">0 words</span>
-      <span data-summary="sentences" class="max-sm:hidden">0 sentences</span>
-      <span data-summary="lines" class="max-sm:hidden">0 lines</span>
-      <span data-summary="bytes" title="File size as saved (UTF-8)">0 B</span>
-      <span data-save-state class="empty:hidden data-[state=dirty]:text-amber-700 dark:data-[state=dirty]:text-amber-400"></span>
-    </div>
-
-    <details class="group rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <summary
-        class="flex min-h-11 list-none items-center justify-between gap-3 rounded-xl px-4 text-sm font-medium text-zinc-900 dark:text-zinc-100 [&::-webkit-details-marker]:hidden"
-      >
-        More stats
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="size-4 shrink-0 text-zinc-500 transition-transform group-open:rotate-180"
-          aria-hidden="true"
-        >
-          <path d="m6 9 6 6 6-6"></path>
-        </svg>
-      </summary>
-      <dl class="grid grid-cols-2 gap-x-4 gap-y-3 border-t border-zinc-200 px-4 py-3 sm:grid-cols-4 dark:border-zinc-800">
-        <div>
-          <dt class={statLabelClass}>Characters</dt>
-          <dd data-detail="characters" class={statValueClass}>0</dd>
-        </div>
-        <div>
-          <dt class={statLabelClass}>Characters without spaces</dt>
-          <dd data-detail="charactersNoSpaces" class={statValueClass}>0</dd>
-        </div>
-        <div>
-          <dt class={statLabelClass}>Words</dt>
-          <dd data-detail="words" class={statValueClass}>0</dd>
-        </div>
-        <div>
-          <dt class={statLabelClass}>Sentences</dt>
-          <dd data-detail="sentences" class={statValueClass}>0</dd>
-        </div>
-        <div>
-          <dt class={statLabelClass}>Lines</dt>
-          <dd data-detail="lines" class={statValueClass}>0</dd>
-        </div>
-        <div>
-          <dt class={statLabelClass}>Paragraphs</dt>
-          <dd data-detail="paragraphs" class={statValueClass}>0</dd>
-        </div>
-        <div>
-          <dt class={statLabelClass}>Bytes (UTF-8, as saved)</dt>
-          <dd data-detail="bytes" class={statValueClass}>0</dd>
-        </div>
-        <div>
-          <dt class={statLabelClass}>Reading time</dt>
-          <dd data-detail="readingMinutes" class={statValueClass}>0 min</dd>
-        </div>
-      </dl>
-    </details>
-  </div>
-
-  <!-- 5. Save As (sticky on phones with enough height) -->
-  <div
-    data-save-bar
-    class="bottom-0 z-30 border-t border-zinc-200 bg-zinc-50/95 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-md max-md:[@media(min-height:32rem)]:sticky md:border-t-0 md:bg-transparent md:p-0 md:backdrop-blur-none dark:border-zinc-800 dark:bg-zinc-950/95 md:dark:bg-transparent"
+  <!--
+    Confirmation for Clear and for replacing the text with an opened file. Cancel comes first, so
+    showModal() focuses the safe choice; the controller fills in the text.
+  -->
+  <dialog
+    data-confirm
+    aria-labelledby="np-confirm-title"
+    aria-describedby="np-confirm-body"
+    class="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-xl backdrop:bg-zinc-950/40 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
   >
-    <div class="flex flex-wrap items-center gap-2">
-      <label for="np-filename" class="sr-only">File name</label>
-      <input
-        id="np-filename"
-        data-filename
-        type="text"
-        value="untitled.txt"
-        placeholder="File name"
-        autocomplete="off"
-        autocapitalize="off"
-        autocorrect="off"
-        spellcheck="false"
-        enterkeyhint="done"
-        class="min-h-11 min-w-0 flex-[999_1_8rem] rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900 placeholder:text-zinc-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500"
-      />
-      <label for="np-line-ending" class="sr-only">Line endings</label>
-      <select
-        id="np-line-ending"
-        data-line-ending
-        autocomplete="off"
-        class="min-h-11 shrink-0 rounded-lg border border-zinc-300 bg-white px-3 text-base text-zinc-900 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
-      >
-        <option value="lf" selected>LF</option>
-        <option value="crlf">CRLF (Windows)</option>
-      </select>
-      <button
-        type="button"
-        data-save
-        class="inline-flex min-h-12 grow items-center justify-center gap-2 rounded-lg bg-accent-700 px-6 text-base font-semibold text-white shadow-sm hover:bg-accent-800 md:grow-0 dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class={iconClass} aria-hidden="true">
-          <path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path>
-        </svg>
-        Save As
-      </button>
-    </div>
-  </div>
+    <form method="dialog" class="flex flex-col gap-3 p-5 sm:p-6">
+      <h2 id="np-confirm-title" data-confirm-title class="font-serif text-xl font-medium tracking-tight text-balance">
+      </h2>
+      <p id="np-confirm-body" data-confirm-body class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"></p>
+      <div class="mt-2 flex flex-wrap justify-end gap-2">
+        <button type="submit" value="cancel" class={ui.buttonSecondary}>{m.clear.cancel}</button>
+        <button
+          type="submit"
+          value="confirm"
+          data-confirm-ok
+          class={`${ui.buttonPrimary} data-[tone=danger]:bg-rose-700 data-[tone=danger]:hover:bg-rose-800 dark:data-[tone=danger]:bg-rose-400 dark:data-[tone=danger]:text-zinc-950 dark:data-[tone=danger]:hover:bg-rose-300`}
+        >
+          {m.clear.confirm}
+        </button>
+      </div>
+    </form>
+  </dialog>
 </section>
 
 <style is:global>
-  /* Focus scrolling keeps controls clear of the sticky Save As bar (height set by the controller). */
-  @media (width < 48rem) and (min-height: 32rem) {
-    html {
-      scroll-padding-bottom: var(--np-save-bar-height, 0px);
-    }
-  }
-
   /*
-   * The textarea and its highlight mirror must break lines at exactly the same places.
-   * Font family, size, line height, padding and border come from the shared utility classes;
-   * everything else that affects text layout is pinned here for both elements.
+   * The textarea and its highlight mirror must break lines at exactly the same places. Every
+   * property that affects text layout is set here, once, for both elements.
+   *
+   * --np-measure keeps lines readable on wide screens: the side padding grows (percentages of
+   * padding refer to the width of the editor, which both elements share) instead of the line.
+   * The border stays 0 but solid: the highlighter widens the mirror's transparent border to
+   * copy the textarea's scrollbar and iOS's built-in text inset.
    */
   .np-surface {
+    --np-pad-x: 0.75rem;
+    --np-measure: 100ch;
     box-sizing: border-box;
     margin: 0;
+    border: 0 solid transparent;
+    padding-block: 0.625rem;
+    padding-inline: max(var(--np-pad-x), (100% - var(--np-measure)) / 2);
+    /* 16px on touch screens: iOS Safari zooms into smaller focused fields. */
+    font-size: 1rem;
+    line-height: 1.5rem;
     font-style: normal;
     font-weight: 400;
     font-kerning: none;
@@ -427,6 +627,20 @@ const surfaceClass =
     hyphens: none;
   }
 
+  @media (width >= 40rem) {
+    .np-surface {
+      --np-pad-x: 1.25rem;
+      padding-block: 1rem;
+    }
+  }
+
+  @media (width >= 40rem) and (pointer: fine) {
+    .np-surface {
+      font-size: 0.875rem;
+      line-height: 1.375rem;
+    }
+  }
+
   [data-wrap='off'] .np-surface {
     white-space: pre;
     overflow-wrap: normal;
@@ -436,12 +650,6 @@ const surfaceClass =
     appearance: none;
     resize: none;
     overflow: auto;
-  }
-
-  @media (width >= 48rem) {
-    .np-editor {
-      resize: vertical;
-    }
   }
 
   /* The textarea draws the text; the mirror only paints highlight backgrounds. */
@@ -454,6 +662,118 @@ const surfaceClass =
     margin: 0;
     border: 0;
     font: inherit;
+  }
+
+  /*
+   * The window's height comes from its column (see the top of this file); this is the least it
+   * takes, enough for a toolbar, several lines of text and the status bar on any screen.
+   */
+  .np-card {
+    min-height: 20rem;
+  }
+
+  .np-root:not([data-zen]) .np-zen-only {
+    display: none;
+  }
+
+  /*
+   * Zen mode: the tool covers the viewport, above the sticky header (z-40). Where the
+   * Fullscreen API is available the controller also makes the root full screen; these rules
+   * are the whole effect everywhere else (iPhone Safari, embedded frames).
+   */
+  html[data-np-zen] {
+    overflow: hidden;
+  }
+
+  .np-root[data-zen] {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    gap: 0;
+    margin: 0;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background-color: var(--color-zinc-50);
+  }
+
+  .np-root[data-zen] > .np-card {
+    flex: 1 1 auto;
+    min-height: 0;
+    border-color: transparent;
+    border-radius: 0;
+    background-color: transparent;
+    box-shadow: none;
+    animation: np-zen-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .np-root[data-zen] .np-toolbar,
+  .np-root[data-zen] .np-zen-hide {
+    display: none;
+  }
+
+  /* Wider margins, a shorter line and more leading for writing. */
+  .np-root[data-zen] .np-surface {
+    --np-measure: 72ch;
+    padding-block: 2rem 3rem;
+  }
+
+  @media (width >= 40rem) {
+    .np-root[data-zen] .np-surface {
+      padding-block: 4rem 5rem;
+      font-size: 1rem;
+      line-height: 1.75rem;
+    }
+  }
+
+  /* A quiet status line: muted colours that still meet 4.5:1, full strength on hover or focus. */
+  .np-root[data-zen] .np-status {
+    border-top-color: transparent;
+    background-color: transparent;
+    color: var(--color-zinc-500);
+  }
+
+  .np-root[data-zen] .np-status [data-summary],
+  .np-root[data-zen] .np-status button {
+    color: inherit;
+  }
+
+  .np-root[data-zen] .np-status:hover,
+  .np-root[data-zen] .np-status:focus-within {
+    color: var(--color-zinc-700);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .np-root[data-zen] {
+      background-color: var(--color-zinc-950);
+    }
+
+    .np-root[data-zen] .np-status {
+      color: var(--color-zinc-400);
+    }
+
+    .np-root[data-zen] .np-status:hover,
+    .np-root[data-zen] .np-status:focus-within {
+      color: var(--color-zinc-200);
+    }
+  }
+
+  /* Back on the page after zen mode. */
+  .np-card.np-settle {
+    animation: np-settle 200ms ease-out;
+  }
+
+  /* Only opacity and transform; the global reduced-motion rule shortens both to nothing. */
+  @keyframes np-zen-in {
+    from {
+      opacity: 0;
+      transform: scale(0.985);
+    }
+  }
+
+  @keyframes np-settle {
+    from {
+      opacity: 0;
+      transform: translateY(0.375rem);
+    }
   }
 </style>
 

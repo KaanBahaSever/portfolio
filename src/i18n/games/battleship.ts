@@ -124,7 +124,7 @@ const en = {
   heat: {
     toggle: 'Show AI heat map',
     caption:
-      'Shading shows the computer’s probability density over your board: the darker a cell, the more possible ship positions cover it. On Hard, it fires at the darkest cell.',
+      'The tint shows the computer’s probability density over your board: the stronger a cell’s green tint, the more possible ship positions cover it. On Hard, it fires at the most strongly tinted cell.',
     low: 'Low',
     high: 'High',
     peaks: (coordinates: string, count: number) =>
@@ -150,7 +150,7 @@ const tr: BattleshipMessages = {
   meta: {
     title: 'Amiral Battı',
     description:
-      'Olasılık yoğunluğu haritasıyla nişan alan bir bilgisayara karşı Amiral Battı oynayın. Filonuzu yerleştirin, zorluğu seçin ve avlanırken ısı haritasını izleyin.',
+      'Olasılık yoğunluğu haritasıyla nişan alan bir bilgisayara karşı Amiral Battı oynayın. Filonuzu yerleştirin, zorluğu seçin ve bilgisayar hedef ararken ısı haritasını izleyin.',
   },
   lead: 'Filonuzu yerleştirin, ardından sırayla bilgisayarın sularına ateş edin. Zor seviyede bilgisayar, olası gemi konumlarının en çok üst üste bindiği hücreye ateş eder; bu olasılık yoğunluğunu oyun boyunca izleyebilirsiniz.',
   region: 'Amiral Battı oyunu',
@@ -185,12 +185,12 @@ const tr: BattleshipMessages = {
     difficulties: { easy: 'Kolay', normal: 'Normal', hard: 'Zor' },
     difficultyHints: {
       easy: 'Rastgele hücrelere ateş eder.',
-      normal: 'Dama tahtası düzeninde av arar, her isabetten sonra hedefi kıstırır.',
+      normal: 'Dama tahtası düzeninde tarar, her isabetten sonra hedefi kıstırır.',
       hard: 'Olası gemi konumlarının en çok üst üste bindiği hücreye, yani olasılık yoğunluğunun tepesine ateş eder.',
     },
     fleet: 'Filonuz',
-    placed: 'Yerleşti',
-    notPlaced: 'Yerleşmedi',
+    placed: 'Yerleştirildi',
+    notPlaced: 'Yerleştirilmedi',
     rotate: 'Döndür',
     orientations: { horizontal: 'Yatay', vertical: 'Dikey' },
     random: 'Rastgele',
@@ -252,7 +252,7 @@ const tr: BattleshipMessages = {
   heat: {
     toggle: 'Bilgisayarın ısı haritasını göster',
     caption:
-      'Gölgeler, bilgisayarın tahtanız üzerindeki olasılık yoğunluğunu gösterir: bir hücre ne kadar koyuysa onu kapsayan olası gemi konumu o kadar çoktur. Zor seviyede bilgisayar en koyu hücreye ateş eder.',
+      'Renk tonu, bilgisayarın tahtanız üzerindeki olasılık yoğunluğunu gösterir: bir hücrenin yeşil tonu ne kadar yoğunsa onu kapsayan olası gemi konumu o kadar çoktur. Zor seviyede bilgisayar en yoğun renkli hücreye ateş eder.',
     low: 'Düşük',
     high: 'Yüksek',
     peaks: (coordinates, count) => `${count === 1 ? 'En olası hedef' : 'En olası hedefler'}: ${coordinates}`,

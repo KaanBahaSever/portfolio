@@ -95,9 +95,9 @@ const tr: TicTacToeMessages = {
   lead: 'Üç işareti yan yana, alt alta ya da çapraz dizen kazanır. Bilgisayar oyun ağacını minimax ve alfa–beta budamayla tarar; Yenilmez seviyede alabileceğiniz en iyi sonuç beraberliktir. Değerlendirmeyi açarak her kareyi nasıl puanladığını görün.',
   region: 'XOX oyunu',
   board: 'XOX tahtası',
-  boardHelp: 'Ok tuşlarıyla gezinin, Enter ya da Boşluk ile oynayın. 1–9 rakam tuşları doğrudan bir kareye oynar.',
-  squares: ['Sol üst', 'Üst orta', 'Sağ üst', 'Sol orta', 'Orta', 'Sağ orta', 'Sol alt', 'Alt orta', 'Sağ alt'],
-  squaresInline: ['sol üst', 'üst orta', 'sağ üst', 'sol orta', 'orta', 'sağ orta', 'sol alt', 'alt orta', 'sağ alt'],
+  boardHelp: 'Ok tuşlarıyla gezinin, Enter ya da Boşluk ile oynayın. 1–9 rakam tuşlarıyla doğrudan bir kareye oynayabilirsiniz.',
+  squares: ['Sol üst', 'Üst orta', 'Sağ üst', 'Sol orta', 'Merkez', 'Sağ orta', 'Sol alt', 'Alt orta', 'Sağ alt'],
+  squaresInline: ['sol üst', 'üst orta', 'sağ üst', 'sol orta', 'merkez', 'sağ orta', 'sol alt', 'alt orta', 'sağ alt'],
   lines: [
     'üst satır',
     'orta satır',
@@ -132,7 +132,7 @@ const tr: TicTacToeMessages = {
   showEvaluation: 'Değerlendirmeyi göster',
   evaluationHint:
     'Her boş kare, o andan sonra iki taraf da kusursuz oynarsa sıradaki oyuncunun alacağı minimax puanını gösterir: +9 hemen kazanır, daha küçük artı puanlar daha geç kazanır, 0 beraberliktir, eksi puanlar kaybeder.',
-  evaluationFor: (mark) => `Puanlar: ${mark} için`,
+  evaluationFor: (mark) => `${mark} için puanlar`,
   evaluation: (score, result) =>
     `puan ${score}, ${result === 'win' ? 'kazandırır' : result === 'loss' ? 'kaybettirir' : 'beraberlik'}`,
   newRound: 'Yeni tur',

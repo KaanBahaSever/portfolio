@@ -82,6 +82,12 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
     --bad: var(--color-rose-600);
     --bad-fill: color-mix(in oklab, var(--color-rose-500) 16%, transparent);
     --heat-color: var(--color-accent-500);
+    /*
+     * Markers drawn in ink, not accent, so they never read as the accent focus ring and stay visible
+     * on the strongest heat tint (≥ 9:1 light, ≥ 4:1 dark on a 60% tint; accent managed only ~2.2:1).
+     */
+    --tick: var(--color-zinc-900);
+    --peak: var(--color-zinc-900);
     /* Cell boundaries a touch stronger than the page's graph paper, so the cells read as a grid. */
     --graph-line-strong: color-mix(in oklab, var(--color-zinc-900) 17%, transparent);
     --graph-line: color-mix(in oklab, var(--color-zinc-900) 5%, transparent);
@@ -106,6 +112,8 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
       --bad: var(--color-rose-400);
       --bad-fill: color-mix(in oklab, var(--color-rose-400) 18%, transparent);
       --heat-color: var(--color-accent-400);
+      --tick: var(--color-zinc-100);
+      --peak: white;
       --graph-line-strong: color-mix(in oklab, white 15%, transparent);
       --graph-line: color-mix(in oklab, white 4%, transparent);
     }
@@ -250,11 +258,12 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
     display: block;
   }
 
+  /* The density maximum sits on the strongest tint, so its outline is ink rather than accent. */
   .cells[data-heat] .cell[data-peak]::after {
     content: '';
     position: absolute;
     inset: 3px;
-    border: 1.5px dashed var(--mark);
+    border: 1.5px dashed var(--peak);
     border-radius: 3px;
   }
 
@@ -301,12 +310,30 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
     animation: bs-pop 220ms ease-out;
   }
 
+  /*
+   * The last shot: four ink corner ticks, like registration marks. A full accent square would look
+   * the same as the keyboard focus ring (a solid accent outline), and a keyboard player moving the
+   * cursor away from the cell they just fired at could not tell which square is the cursor. The
+   * ticks start 3px in, clear of the focus outline (drawn over the cell's outer 2px), so both marks
+   * stay visible when they fall on the same cell.
+   */
   .cell[data-last]::before {
+    --tick-length: 32%;
+    --tick-width: 2px;
+    --tick-line: linear-gradient(var(--tick), var(--tick));
     content: '';
     position: absolute;
-    inset: 1px;
-    border: 2px solid var(--mark);
-    border-radius: 3px;
+    inset: 3px;
+    background:
+      var(--tick-line) left top / var(--tick-length) var(--tick-width),
+      var(--tick-line) left top / var(--tick-width) var(--tick-length),
+      var(--tick-line) right top / var(--tick-length) var(--tick-width),
+      var(--tick-line) right top / var(--tick-width) var(--tick-length),
+      var(--tick-line) left bottom / var(--tick-length) var(--tick-width),
+      var(--tick-line) left bottom / var(--tick-width) var(--tick-length),
+      var(--tick-line) right bottom / var(--tick-length) var(--tick-width),
+      var(--tick-line) right bottom / var(--tick-width) var(--tick-length);
+    background-repeat: no-repeat;
     animation: bs-ring 300ms ease-out;
   }
 

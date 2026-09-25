@@ -33,7 +33,7 @@ const tr: GamesHubMessages = {
     description:
       'Tarayıcıda Amiral Battı ve XOX oynayın. Bilgisayar rakipler hamlelerini olasılık yoğunluğu ve minimax aramasıyla seçer.',
   },
-  eyebrow: 'Eğlenceli matematik',
+  eyebrow: 'Eğlence matematiği',
   title: 'Oyunlar',
   lead: 'Programlamayı öğrenirken C# ile geliştirdiğim iki klasik oyunu tarayıcı için yeniden yazdım. Her bilgisayar rakibin arkasında küçük bir algoritma var; iki sayfada da onun nasıl düşündüğünü izleyebilirsiniz.',
   figure: (n) => `Şekil ${n}`,

@@ -5,5 +5,10 @@ date: 2019-12-01
 dateLabel: 2019 – 2022
 ---
 
-Served as Vice President of the Istanbul University Rocket Club. The team built a
-medium-altitude rocket with custom guidance and control software.
+Contributed to the design and successful high-power launches of three rockets. Solely
+engineered the flight avionics firmware and the parachute deployment control system, both
+built on onboard sensor fusion of orientation, gyroscope and altimeter telemetry.
+
+Designed the SD-card telemetry logging protocols, alongside the RF telemetry transmission
+modules, and built a desktop telemetry dashboard that parses flight data and renders
+post-flight trajectory plots.

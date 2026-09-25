@@ -1,0 +1,39 @@
+---
+/** Journey chapter 3: autonomous parachute guidance and precision landing. Per-locale prose. */
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Kurtarma sistemi üzerindeki çalışma bir araştırma sorusunu da beraberinde getirdi: Paraşüt açıldıktan sonra
+        faydalı yük kendini yerdeki belirli bir noktaya yönlendirebilir mi?
+      </p>
+      <p>
+        Paraşüt için otonom bir yörünge yönlendirme algoritması geliştirdim. Algoritma, faydalı yükü belirlenen iniş
+        koordinatına ulaştırmak için lineer cebiri atmosferik iniş dinamikleriyle birlikte kullanıyor.
+      </p>
+      <p>
+        Tanımı kesin, küçük bir problem; en sevdiğim türden: Yük nerede, nereye sürükleniyor ve hangi yöne dönmeli?
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        The recovery work raised a research question: once the parachute is open, can the payload steer itself to a
+        chosen point on the ground?
+      </p>
+      <p>
+        I developed an autonomous trajectory-steering algorithm for the parachute. It combines linear algebra with
+        atmospheric descent dynamics to guide the payload to a designated landing coordinate.
+      </p>
+      <p>
+        It is a small problem with a precise statement, the kind I enjoy most: where is the payload, where is it
+        drifting, and which way should it turn?
+      </p>
+    </>
+  )
+}

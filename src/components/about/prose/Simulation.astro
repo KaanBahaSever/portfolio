@@ -1,0 +1,42 @@
+---
+/**
+ * Journey chapter 4: the trajectory simulation (Python, now C++23) and, separately, Rocket-Up.
+ * Keep the two apart: Rocket-Up is a different codebase, not the simulation being ported.
+ */
+import { ui } from '../../ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+const rocketUp = localizePath('/projects/rocket-up/', locale);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Roket yörüngeleri için üç boyutlu sayısal bir simülasyonu önce Python ile yazdım. Şimdi onu yüksek frekanslı
+        fizik modellemesi için modern C++23 ile yeniden tasarlıyorum; bu ölçekte her integrasyon adımının maliyeti önem
+        kazanıyor.
+      </p>
+      <p>
+        Bundan ayrı bir proje olarak <a href={rocketUp} class={ui.inlineLink}>Rocket-Up</a> üzerinde de çalışıyorum:
+        roket uçuşu simülasyonu için erken aşamada, modüler ve açık kaynaklı bir C++ kütüphanesi. Kod tabanı farklı;
+        motorlar, kurtarma donanımı ve atmosfer için kendi modellerini içeriyor.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        I wrote a three-dimensional numerical simulation of rocket trajectories, first in Python. I am now
+        re-architecting it in modern C++23 for high-frequency physics modelling, where the cost of every integration
+        step starts to matter.
+      </p>
+      <p>
+        Separately, I work on <a href={rocketUp} class={ui.inlineLink}>Rocket-Up</a>, an early, modular open-source C++
+        library for rocket flight simulation. It is a different codebase, with its own models of engines, recovery
+        hardware and the atmosphere.
+      </p>
+    </>
+  )
+}

@@ -1,0 +1,54 @@
+---
+/** Journey chapter 5: modern C++ and Go today (Asion, Novacast) and the mathematics degree. */
+import { ui } from '../../ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+const projects = localizePath('/projects/', locale);
+const asion = localizePath('/projects/asion/', locale);
+const novacast = localizePath('/projects/novacast/', locale);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Bugün ağırlıklı olarak modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları ve algoritma
+        odaklı uygulamalar geliştiriyorum. Hepsini <a href={projects} class={ui.inlineLink}>projeler sayfasında</a>{' '}
+        bulabilirsiniz.
+      </p>
+      <p>
+        <a href={asion} class={ui.inlineLink}>Asion</a>, macOS, Linux ve Windows için gizliliği öncelikli bir
+        üretkenlik ve etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek şekilde tasarlandı. Yerel işletim
+        sistemi olay kancaları (OS event hooks), hafif bir daemon mimarisi ve bileşenleri arasında gRPC üzerine kurulu.{' '}
+        <a href={novacast} class={ui.inlineLink}>Novacast</a> ise Go ve MQTT ile yazılmış; yüksek hacimli, gerçek
+        zamanlı bir mesaj yayını ve cihaz orkestrasyonu platformu. Düşük gecikmeli pub/sub veri akışları için tasarlandı.
+      </p>
+      <p>
+        Bunlarla birlikte İstanbul Üniversitesi’ndeki matematik eğitimimi tamamlıyorum. Reel analiz, soyut cebir ve
+        topoloji koduma doğrudan pek yansımıyor; ama öğrettikleri alışkanlıklar, yani kavramları kesin tanımlamak ve her
+        adımı denetlemek, olduğu gibi yazılıma taşınıyor.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        Today I work mostly in modern C++ and Go, on system tools, telemetry and messaging platforms, and
+        algorithm-driven applications. The <a href={projects} class={ui.inlineLink}>projects page</a> has the full list.
+      </p>
+      <p>
+        <a href={asion} class={ui.inlineLink}>Asion</a> is a privacy-first productivity and activity tracker for macOS,
+        Linux and Windows, built with self-hosting in mind. It rests on native OS event hooks, a lightweight daemon
+        architecture and gRPC between its components. <a href={novacast} class={ui.inlineLink}>Novacast</a> is a
+        high-throughput, real-time message broadcasting and device orchestration platform in Go and MQTT, designed for
+        low-latency pub/sub pipelines.
+      </p>
+      <p>
+        Alongside this I am completing my mathematics degree at Istanbul University. Real analysis, abstract algebra and
+        topology rarely appear in my code directly, but the habits they teach, defining things precisely and checking
+        every step, carry straight over.
+      </p>
+    </>
+  )
+}

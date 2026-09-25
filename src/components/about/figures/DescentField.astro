@@ -1,0 +1,67 @@
+---
+/**
+ * A guidance field seen from above: at every grid point, the heading steeringDirection() commands
+ * (towards the target, turned 45°, as a canopy that keeps moving has to circle in). The accent
+ * path is one descent integrated through that field from a release point to the target.
+ * Decorative.
+ */
+import { arrowHead, linePath, steer, steeringDirection, type Point } from '../geometry';
+
+const target: Point = { x: 214, y: 100 };
+const TURN = Math.PI / 4;
+const SPACING = 28;
+const ARROW = 11;
+
+const arrows: { d: string; head: string }[] = [];
+for (let x = 18; x <= 306; x += SPACING) {
+  for (let y = 16; y <= 190; y += SPACING) {
+    const p = { x, y };
+    // Leave the target, its rings and crosshair clear.
+    if (Math.hypot(p.x - target.x, p.y - target.y) < 30) continue;
+    const d = steeringDirection(p, target, TURN);
+    const tail = { x: p.x - (d.x * ARROW) / 2, y: p.y - (d.y * ARROW) / 2 };
+    const tip = { x: p.x + (d.x * ARROW) / 2, y: p.y + (d.y * ARROW) / 2 };
+    arrows.push({ d: linePath([tail, tip]), head: arrowHead(tip, d, 3.2, 0.5) });
+  }
+}
+
+const release: Point = { x: 30, y: 176 };
+const descent = steer(release, target, TURN, 1.5, 1.5);
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+---
+
+<svg
+  viewBox="0 0 320 200"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    {
+      arrows.map((arrow) => (
+        <>
+          <path d={arrow.d} />
+          <path d={arrow.head} />
+        </>
+      ))
+    }
+  </g>
+
+  <g class={ink} stroke="currentColor" stroke-width="1">
+    <circle cx={target.x} cy={target.y} r="12" stroke-dasharray="2 3" />
+    <circle cx={target.x} cy={target.y} r="6" />
+    <path d={`M${target.x - 18} ${target.y} h8 M${target.x + 10} ${target.y} h8`} />
+    <path d={`M${target.x} ${target.y - 18} v8 M${target.x} ${target.y + 10} v8`} />
+    <circle cx={release.x} cy={release.y} r="3" />
+  </g>
+
+  <g class="text-accent-600 dark:text-accent-400">
+    <path d={linePath(descent)} stroke="currentColor" stroke-width="1.5" />
+    <circle cx={target.x} cy={target.y} r="2.25" fill="currentColor" />
+  </g>
+</svg>

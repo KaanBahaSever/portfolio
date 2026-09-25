@@ -5,5 +5,5 @@ dateLabel: '2020'
 ---
 
 Completed 21st Century Competencies, a YetGen programme organised by the Mehmet Zorlu
-Foundation, with seminars and courses on presentation skills, the Excel Solver tool and
-entrepreneurship.
+Foundation, and earned its certificate. The programme covered presentation skills, the Excel
+Solver tool and entrepreneurship in seminars and courses.

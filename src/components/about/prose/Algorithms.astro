@@ -1,0 +1,46 @@
+---
+/** Journey chapter 1: C# and SQL, and the two games. Per-locale prose with links to the games. */
+import { ui } from '../../ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+const battleship = localizePath('/games/battleship/', locale);
+const ticTacToe = localizePath('/games/tic-tac-toe/', locale);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Programlamayı C# ve SQL ile, çoğunlukla kesin olarak tanımlanabilen problemler üzerinde öğrendim: matematiksel
+        hesaplama motorları ve bilgisayarın iyi oynaması gereken küçük oyunlar.
+      </p>
+      <p>
+        Amiral Battı’da bilgisayar rastgele atış yapmaz. Kalan gemilerin tahtaya hâlâ yerleşebileceği bütün yolları
+        sayar ve olasılık yoğunluğunun en yüksek olduğu hücreye ateş eder. XOX’ta ise oyun ağacını özyinelemeli minimax
+        ile tarar ve her hamlede rakibin en iyi karşılığı vereceğini varsayar.
+      </p>
+      <p>
+        İki oyunun da tarayıcı sürümleri artık bu sitede: <a href={battleship} class={ui.inlineLink}>Amiral Battı</a>{' '}
+        ya da <a href={ticTacToe} class={ui.inlineLink}>XOX</a> oynayabilirsiniz.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        I learned to program in C# and SQL, mostly on problems that could be stated exactly: mathematical calculation
+        engines, and small games in which the computer had to play well.
+      </p>
+      <p>
+        In Battleship (Amiral Battı) the computer does not fire at random. It counts every way the remaining ships could
+        still lie on the board and shoots where that probability density peaks. In tic-tac-toe (XOX) it searches the
+        game tree with recursive minimax, assuming the best reply at every turn.
+      </p>
+      <p>
+        Both games now have browser versions on this site: play <a href={battleship} class={ui.inlineLink}>Battleship</a>{' '}
+        or <a href={ticTacToe} class={ui.inlineLink}>tic-tac-toe</a>.
+      </p>
+    </>
+  )
+}

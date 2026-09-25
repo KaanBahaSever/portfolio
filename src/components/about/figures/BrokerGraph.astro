@@ -1,0 +1,88 @@
+---
+/**
+ * Publish/subscribe fan-out: three publishers feed one broker (the accent node), which delivers
+ * to five subscribers. Small squares are messages in flight, placed along the curves with the
+ * Bézier formula so they sit exactly on the edges. Decorative.
+ */
+import { round, type Point } from '../geometry';
+
+const broker: Point = { x: 160, y: 86 };
+const publishers: Point[] = [48, 86, 124].map((y) => ({ x: 40, y }));
+const subscribers: Point[] = [22, 54, 86, 118, 150].map((y) => ({ x: 280, y }));
+
+interface Edge {
+  from: Point;
+  c1: Point;
+  c2: Point;
+  to: Point;
+}
+
+/** A horizontal S-curve from `from` to `to`. */
+function edge(from: Point, to: Point): Edge {
+  const mid = (from.x + to.x) / 2;
+  return { from, c1: { x: mid, y: from.y }, c2: { x: mid, y: to.y }, to };
+}
+
+/** The point at parameter t on a cubic Bézier edge. */
+function at(e: Edge, t: number): Point {
+  const u = 1 - t;
+  const w = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t] as const;
+  return {
+    x: w[0] * e.from.x + w[1] * e.c1.x + w[2] * e.c2.x + w[3] * e.to.x,
+    y: w[0] * e.from.y + w[1] * e.c1.y + w[2] * e.c2.y + w[3] * e.to.y,
+  };
+}
+
+const d = (e: Edge) =>
+  `M${e.from.x} ${e.from.y} C${e.c1.x} ${e.c1.y} ${e.c2.x} ${e.c2.y} ${e.to.x} ${e.to.y}`;
+
+const inbound = publishers.map((p) => edge({ x: p.x + 5, y: p.y }, { x: broker.x - 10, y: broker.y }));
+const outbound = subscribers.map((s) => edge({ x: broker.x + 10, y: broker.y }, { x: s.x - 5, y: s.y }));
+
+// A few messages in flight: two on their way in, a burst on its way out.
+const messages: Point[] = [
+  at(inbound[0], 0.55),
+  at(inbound[2], 0.3),
+  at(outbound[0], 0.62),
+  at(outbound[2], 0.62),
+  at(outbound[4], 0.62),
+];
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+---
+
+<svg
+  viewBox="0 0 320 172"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    {[...inbound, ...outbound].map((e) => <path d={d(e)} />)}
+  </g>
+
+  <g class={ink}>
+    <g stroke="currentColor" stroke-width="1">
+      {publishers.map((p) => <circle cx={p.x} cy={p.y} r="5" />)}
+      {subscribers.map((s) => <circle cx={s.x} cy={s.y} r="4" />)}
+    </g>
+    <g fill="currentColor">
+      {messages.map((p) => <rect x={round(p.x - 2)} y={round(p.y - 2)} width="4" height="4" rx="0.5" />)}
+    </g>
+  </g>
+
+  <g class="text-accent-600 dark:text-accent-400">
+    <circle cx={broker.x} cy={broker.y} r="10" stroke="currentColor" stroke-width="1.25" />
+    <circle cx={broker.x} cy={broker.y} r="4" fill="currentColor" />
+  </g>
+
+  <g class="font-mono text-zinc-500" fill="currentColor" font-size="8" letter-spacing="0.06em" text-anchor="middle">
+    <text x={publishers[0].x} y="166">PUB</text>
+    <text x={broker.x} y="166">BROKER</text>
+    <text x={subscribers[0].x} y="166">SUB</text>
+  </g>
+</svg>

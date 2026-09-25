@@ -1,18 +1,38 @@
 ---
 /**
- * The site's mark: a geometric lambda whose two strokes meet at an accent node — λ for
- * eigenvalues and for lambda calculus, the meeting point of mathematics and computing.
- * Same geometry as public/favicon.svg. Decorative: pair it with the site name.
+ * The site's mark: a λ whose strokes meet at an accent node — λ for eigenvalues and for lambda
+ * calculus, the node for the vertex where its three edges meet.
+ *
+ * The geometry is shared with the favicon and app icons and documented in
+ * scripts/build-favicons.mjs, which checks that the path and circle below still match it. In
+ * short: the node is the centre of a 32-unit box; both strokes rise 10 units for every 6 across
+ * and are 4 units wide measured horizontally, ending in horizontal cuts on whole units.
+ *
+ * The viewBox is the 28-unit square around the node, so at the header's size-7 (28 px) one unit
+ * is one pixel and the terminals land on the pixel grid. The glyph is drawn in currentColor; the
+ * node uses the accent tokens.
+ *
+ * Decorative by default (pair it with the site name). Pass `label` when the mark stands alone
+ * and has to be announced.
  */
 interface Props {
   class?: string;
+  /** Accessible name; when set the SVG is exposed as an image instead of hidden. */
+  label?: string;
 }
 
-const { class: className = 'size-7' } = Astro.props;
+const { class: className = 'size-7', label } = Astro.props;
 ---
 
-<svg class={className} viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
-  <path d="M9 5.5 23 26.5" stroke="currentColor" stroke-width="3.25" stroke-linecap="round"></path>
-  <path d="M16 16 9 26.5" stroke="currentColor" stroke-width="3.25" stroke-linecap="round"></path>
-  <circle cx="16" cy="16" r="3.1" class="fill-accent-600 dark:fill-accent-400"></circle>
+<svg
+  class={className}
+  viewBox="2 2 28 28"
+  fill="none"
+  focusable="false"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  <path d="M8 6H12L24 26H20L16 19.333L12 26H8L14 16Z" fill="currentColor"></path>
+  <circle cx="16" cy="16" r="3" class="fill-accent-600 dark:fill-accent-400"></circle>
 </svg>

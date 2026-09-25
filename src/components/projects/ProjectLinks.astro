@@ -1,0 +1,58 @@
+---
+/**
+ * The live-site and source-code links of a project card or row. They sit above the card's
+ * stretched title link (relative z-10), so each stays separately clickable and focusable.
+ *
+ * Each link is named by a whole phrase in the page language that starts with its visible text
+ * ("Live site of Asion (opens in a new tab)"), which keeps voice control working (WCAG 2.5.3)
+ * and leaves word order to each translation.
+ */
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { liveLink } from './links';
+import { projectsMessages } from '../../i18n/messages/projects';
+import { getLocale } from '../../i18n/server';
+import type { LocalizedProject } from '../../utils/content';
+
+interface Props {
+  project: LocalizedProject;
+  class?: string;
+}
+
+const { project, class: className } = Astro.props;
+const locale = getLocale(Astro);
+const m = projectsMessages[locale].card;
+const { title, repositoryUrl } = project.data;
+const live = liveLink(project.data.liveUrl, locale);
+const link = `${ui.accentLink} relative z-10`;
+---
+
+{
+  (live || repositoryUrl) && (
+    <ul class:list={['flex flex-wrap items-center gap-x-4', className]}>
+      {live && (
+        <li>
+          {live.external ? (
+            <a href={live.href} target="_blank" rel="noopener noreferrer" class={link} aria-label={m.liveName(title)}>
+              {m.live}
+              <Icon name="arrow-up-right" class="size-4" />
+            </a>
+          ) : (
+            <a href={live.href} class={link} aria-label={m.openName(title)}>
+              {m.open}
+              <Icon name="arrow-right" class="size-4" />
+            </a>
+          )}
+        </li>
+      )}
+      {repositoryUrl && (
+        <li>
+          <a href={repositoryUrl} target="_blank" rel="noopener noreferrer" class={link} aria-label={m.sourceName(title)}>
+            {m.source}
+            <Icon name="arrow-up-right" class="size-4" />
+          </a>
+        </li>
+      )}
+    </ul>
+  )
+}

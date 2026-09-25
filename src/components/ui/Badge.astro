@@ -1,25 +1,40 @@
 ---
-/** Small status pill ("Open source", "Private", "Coming soon"). */
+/**
+ * Small status label ("Open source", "Private", "Coming soon"), set in the mono label style.
+ *
+ * Variants:
+ * - accent:  the one status worth drawing the eye to (e.g. "In production").
+ * - muted:   neutral status on a light fill (e.g. "Coming soon", "Early access").
+ * - outline: a secondary fact next to another badge (e.g. "Open source" / "Private").
+ * `dot` adds a small status dot in the text colour (decorative).
+ *
+ * Text is uppercased with CSS, so Turkish needs lang="tr" on the page (BaseLayout sets it)
+ * for i → İ; screen readers read the original casing.
+ */
 interface Props {
-  variant?: 'accent' | 'muted';
+  variant?: 'accent' | 'muted' | 'outline';
+  dot?: boolean;
   class?: string;
 }
 
-const { variant = 'muted', class: className } = Astro.props;
+const { variant = 'muted', dot = false, class: className } = Astro.props;
 
+// Text colours meet WCAG AA (4.5:1) on their fills in both themes.
 const variants = {
   accent:
-    'bg-accent-50 text-accent-800 ring-accent-600/20 dark:bg-accent-500/10 dark:text-accent-300 dark:ring-accent-500/25',
-  muted: 'bg-zinc-100 text-zinc-600 ring-zinc-500/15 dark:bg-zinc-800 dark:text-zinc-400 dark:ring-zinc-400/15',
+    'bg-accent-50 text-accent-800 ring-accent-700/20 dark:bg-accent-400/10 dark:text-accent-300 dark:ring-accent-400/25',
+  muted: 'bg-zinc-100 text-zinc-700 ring-zinc-500/15 dark:bg-zinc-800 dark:text-zinc-300 dark:ring-zinc-400/15',
+  outline: 'bg-transparent text-zinc-600 ring-zinc-300 dark:text-zinc-400 dark:ring-zinc-700',
 } as const;
 ---
 
 <span
   class:list={[
-    'inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset',
+    'inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1 font-mono text-[0.6875rem] leading-none font-medium tracking-[0.06em] whitespace-nowrap uppercase ring-1 ring-inset',
     variants[variant],
     className,
   ]}
 >
+  {dot && <span class="size-1.5 shrink-0 rounded-full bg-current" aria-hidden="true" />}
   <slot />
 </span>

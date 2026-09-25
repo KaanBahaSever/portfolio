@@ -1,0 +1,56 @@
+---
+/**
+ * A project as one row of a ruled list (the "More projects" section): lighter than a card, so
+ * the featured grid keeps the visual weight. Same stretched-link pattern as ProjectCard: the
+ * title link covers the row; the live/source links sit above it.
+ */
+import Icon from '../ui/Icon.astro';
+import TagList from '../ui/TagList.astro';
+import ProjectBadges from './ProjectBadges.astro';
+import ProjectLinks from './ProjectLinks.astro';
+import { localizePath } from '../../i18n/config';
+import { common } from '../../i18n/messages/common';
+import { projectsMessages } from '../../i18n/messages/projects';
+import { getLocale } from '../../i18n/server';
+import type { LocalizedProject } from '../../utils/content';
+
+interface Props {
+  project: LocalizedProject;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { project, headingLevel: Heading = 'h3' } = Astro.props;
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = projectsMessages[locale];
+const { title, shortDescription, techStack, since } = project.data;
+const href = localizePath(`/projects/${project.id}/`, locale);
+const textLang = project.lang === locale ? undefined : project.lang;
+---
+
+<article class="group relative grid gap-4 py-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-x-10 sm:py-8">
+  <div class="min-w-0 space-y-3">
+    <ProjectBadges data={project.data} />
+    <div lang={textLang}>
+      <Heading class="font-serif text-xl leading-tight font-medium tracking-tight text-zinc-900 sm:text-2xl dark:text-zinc-100">
+        <a
+          href={href}
+          class="rounded-sm transition-colors group-hover:text-accent-700 after:absolute after:-inset-x-3 after:inset-y-1 after:rounded-lg focus-visible:outline-hidden focus-visible:after:outline-2 focus-visible:after:outline-solid focus-visible:after:outline-accent-700 dark:group-hover:text-accent-400 dark:focus-visible:after:outline-accent-400"
+        >
+          {title}
+          <Icon
+            name="arrow-right"
+            class="ml-0.5 inline-block size-5 -translate-y-px align-middle text-zinc-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-accent-700 dark:text-zinc-500 dark:group-hover:text-accent-400"
+          />
+        </a>
+      </Heading>
+      <p class="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{shortDescription}</p>
+    </div>
+    <TagList items={techStack} label={t.labels.techStack} />
+  </div>
+
+  <div class="-my-2 flex flex-wrap items-center gap-x-4 sm:flex-col sm:items-end sm:justify-start">
+    {since && <p class="label-mono py-3 text-zinc-500 tabular-nums dark:text-zinc-400">{m.since(String(since))}</p>}
+    <ProjectLinks project={project} class="sm:flex-col sm:items-end" />
+  </div>
+</article>

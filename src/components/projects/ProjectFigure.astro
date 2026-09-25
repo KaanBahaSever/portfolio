@@ -1,0 +1,261 @@
+---
+/**
+ * A small line drawing for a project: thin currentColor strokes on a 240 × 100 grid, with one
+ * accent mark for the idea the figure is about. Decorative (aria-hidden): on project pages the
+ * <figcaption> carries the meaning; on cards the text next to it does.
+ *
+ * Strokes do not scale with the drawing (vector-effect), so lines stay hairlines at any size.
+ * Add a drawing here together with its caption in src/i18n/messages/projects.ts (`figures`).
+ */
+import type { FigureId } from './figures';
+
+interface Props {
+  id: FigureId;
+  class?: string;
+}
+
+const { id, class: className } = Astro.props;
+
+// Three tones: construction lines, the drawing itself, and the single accent mark.
+const faint = 'text-zinc-400 dark:text-zinc-600';
+const ink = 'text-zinc-700 dark:text-zinc-300';
+const accent = 'text-accent-600 dark:text-accent-400';
+
+/* Asion: one row per application; only one window has focus at a time, so segments follow each other. */
+const focusSessions = [
+  { lane: 0, from: 22, to: 58 },
+  { lane: 1, from: 60, to: 90 },
+  { lane: 2, from: 92, to: 104 },
+  { lane: 0, from: 114, to: 140 },
+  { lane: 1, from: 142, to: 178, current: true },
+  { lane: 2, from: 180, to: 192 },
+  { lane: 0, from: 194, to: 206 },
+];
+const laneY = (lane: number) => 22 + lane * 18;
+
+/* Novacast: subscriber devices on the right; each fan-out curve leaves the broker at (107, 50). */
+const subscribers = [14, 32, 50, 68, 86];
+
+/* Karecik: a 21 × 21 QR symbol in module units (finder patterns, timing pattern, some data). */
+const finders = [
+  [0, 0],
+  [14, 0],
+  [0, 14],
+] as const;
+const timing = [8, 10, 12];
+const dataModules = [
+  [9, 1], [11, 2], [12, 3], [10, 4], [9, 8], [11, 9], [14, 9], [16, 8], [18, 10], [20, 9], [8, 11], [10, 12],
+  [13, 11], [15, 12], [17, 13], [19, 12], [9, 14], [12, 15], [14, 14], [16, 16], [18, 15], [20, 17], [10, 17],
+  [13, 18], [15, 19], [17, 18], [19, 20], [11, 20], [8, 19], [2, 9], [4, 10], [1, 11], [3, 8],
+] as const;
+const menuRows = [30, 42, 54, 66];
+
+/* NeoSMBIOS: a record of 13 byte cells; the formatted area ends where the length byte says. */
+const cell = 16;
+const cellX = (index: number) => 16 + index * cell;
+---
+
+<svg
+  viewBox="0 0 240 100"
+  class:list={['**:[vector-effect:non-scaling-stroke]', className]}
+  xmlns="http://www.w3.org/2000/svg"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.25"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  preserveAspectRatio="xMidYMid meet"
+  aria-hidden="true"
+  focusable="false"
+>
+  {
+    id === 'asion' && (
+      <>
+        <g class={faint}>
+          <path d="M20 82H222" />
+          {[20, 44, 68, 92, 116, 140, 164, 188, 212].map((x) => (
+            <path d={`M${x} 82v4`} />
+          ))}
+          {[0, 1, 2].map((lane) => (
+            <path d={`M20 ${laneY(lane) + 5}H222`} stroke-dasharray="1 5" />
+          ))}
+          <path d="M214 12V82" stroke-dasharray="2 3" />
+        </g>
+        <g class={ink}>
+          {focusSessions
+            .filter((s) => !s.current)
+            .map((s) => (
+              <rect x={s.from} y={laneY(s.lane)} width={s.to - s.from} height="10" rx="2" />
+            ))}
+        </g>
+        <g class={accent}>
+          {focusSessions
+            .filter((s) => s.current)
+            .map((s) => (
+              <rect
+                x={s.from}
+                y={laneY(s.lane)}
+                width={s.to - s.from}
+                height="10"
+                rx="2"
+                fill="currentColor"
+                fill-opacity="0.15"
+              />
+            ))}
+        </g>
+      </>
+    )
+  }
+
+  {
+    id === 'novacast' && (
+      <>
+        <g class={faint}>
+          {subscribers.map((y) => (
+            <path d={`M107 50C150 50 150 ${y} 196 ${y}`} />
+          ))}
+        </g>
+        <g class={ink}>
+          <circle cx="28" cy="50" r="5" />
+          <path d="M33 50H87" />
+          <path d="m83 46.5 4 3.5-4 3.5" />
+          {subscribers.map((y) => (
+            <>
+              <rect x="198" y={y - 4} width="8" height="8" rx="1.5" />
+              <circle cx="150.4" cy={25 + y / 2} r="1.6" fill="currentColor" stroke="none" />
+            </>
+          ))}
+        </g>
+        <g class={accent}>
+          <circle cx="98" cy="50" r="9" fill="currentColor" fill-opacity="0.12" />
+          <circle cx="98" cy="50" r="2.5" fill="currentColor" stroke="none" />
+        </g>
+      </>
+    )
+  }
+
+  {
+    id === 'karecik' && (
+      <>
+        <g class={ink} transform="translate(30 10.1) scale(3.8)">
+          {finders.map(([x, y]) => (
+            <>
+              <rect x={x + 0.5} y={y + 0.5} width="6" height="6" rx="0.4" />
+              <rect x={x + 2} y={y + 2} width="3" height="3" fill="currentColor" stroke="none" />
+            </>
+          ))}
+          {timing.map((t) => (
+            <>
+              <rect x={t} y="6" width="1" height="1" fill="currentColor" stroke="none" />
+              <rect x="6" y={t} width="1" height="1" fill="currentColor" stroke="none" />
+            </>
+          ))}
+          {dataModules.map(([x, y]) => (
+            <rect x={x} y={y} width="1" height="1" fill="currentColor" fill-opacity="0.75" stroke="none" />
+          ))}
+        </g>
+        <g class={faint}>
+          <path d="M118 50H148" stroke-dasharray="2 3" />
+          <path d="m145 46.5 4 3.5-4 3.5" />
+          <path d="M174 16H186" />
+          <path d="M173 83H187" />
+        </g>
+        <g class={ink}>
+          <rect x="158" y="10" width="44" height="80" rx="7" />
+          {menuRows
+            .filter((_, index) => index !== 1)
+            .map((y) => (
+              <>
+                <path d={`M166 ${y}H182`} />
+                <path d={`M188 ${y}H194`} />
+              </>
+            ))}
+        </g>
+        <g class={accent}>
+          <rect x="163" y={menuRows[1] - 5} width="34" height="10" rx="2" fill="currentColor" fill-opacity="0.15" />
+          <path d={`M166 ${menuRows[1]}H182`} />
+          <path d={`M188 ${menuRows[1]}H194`} />
+        </g>
+      </>
+    )
+  }
+
+  {
+    id === 'acik-matematik' && (
+      <>
+        <g class={faint}>
+          <path d="M48 84V56.4H68V84M68 84V39.5H88V84M88 84V23.3H108V84M108 84V19.9H128V84M128 84V31.3H148V84M148 84V46.4H168V84M168 84V55.4H188V84M188 84V58H208V84" />
+        </g>
+        <g class={ink}>
+          <path d="M20 84H226" />
+          <path d="m221 80.5 5 3.5-5 3.5" />
+          <path d="M32 92V12" />
+          <path d="m28.5 17 3.5-5 3.5 5" />
+          <path d="M40 65.7L44 64.1L48 62.3L52 60.2L56 57.7L60 55L64 51.9L68 48.6L72 45.1L76 41.4L80 37.7L84 34L88 30.5L92 27.3L96 24.5L100 22.2L104 20.5L108 19.5L112 19.1L116 19.5L120 20.5L124 22.2L128 24.3L132 26.9L136 29.8L140 32.9L144 36.1L148 39.2L152 42.2L156 45L160 47.6L164 49.9L168 51.8L172 53.5L176 54.8L180 55.9L184 56.7L188 57.3L192 57.7L196 58L200 58.1L204 58.1L208 58.1L212 57.9L216 57.8" />
+        </g>
+        <g class={accent}>
+          <path d="M122.9 20.3L177.1 61.2" />
+          <circle cx="150" cy="40.7" r="3" fill="currentColor" stroke="none" />
+        </g>
+      </>
+    )
+  }
+
+  {
+    id === 'neosmbios' && (
+      <>
+        <g class={faint}>
+          <rect x={cellX(9)} y="38" width={cell * 3} height="20" stroke-dasharray="2 3" />
+          {[10, 11].map((i) => (
+            <path d={`M${cellX(i)} 42V54`} stroke-dasharray="2 3" />
+          ))}
+          <rect x={cellX(12)} y="38" width={cell} height="20" />
+          <path d={`M${cellX(12) + 6} 43V53M${cellX(12) + 10} 43V53`} />
+          <path d={`M${cellX(0)} 66v4H${cellX(9)}v-4`} />
+        </g>
+        <g class={ink}>
+          <rect x={cellX(0)} y="38" width={cell * 9} height="20" />
+          {[1, 2, 4, 5, 6, 7, 8].map((i) => (
+            <path d={`M${cellX(i)} 38V58`} />
+          ))}
+          <path d={`M${cellX(3)} 42V54`} stroke-dasharray="2 2" />
+        </g>
+        <g class={accent}>
+          <rect x={cellX(1)} y="38" width={cell} height="20" fill="currentColor" fill-opacity="0.15" />
+          <path d={`M${cellX(1) + cell / 2} 36C${cellX(1) + cell / 2} 14 ${cellX(9)} 12 ${cellX(9)} 30`} />
+          <path d={`m${cellX(9) - 3.5} 25 3.5 5 3.5-5`} />
+          <path d={`M${cellX(9)} 32V74`} stroke-dasharray="2 3" />
+        </g>
+      </>
+    )
+  }
+
+  {
+    id === 'rocket-up' && (
+      <>
+        <g class={faint}>
+          <path d="M128 24V84" stroke-dasharray="1 3" />
+          <path d="M128 20C150 20 180 44 198 84" stroke-dasharray="3 3" />
+        </g>
+        <g class={ink}>
+          <path d="M20 84H226" />
+          <path d="m221 80.5 5 3.5-5 3.5" />
+          <path d="M28 92V12" />
+          <path d="m24.5 17 3.5-5 3.5 5" />
+          <path d="M40 84C56 44 92 20 128 20" />
+          <path d="M53.3 60L63.9 45.5M59.9 47.6L63.9 45.5L63.1 49.9" />
+          <path d="M81.2 33.9L96.5 24.3M92 24.8L96.5 24.3L94.1 28.1" />
+          <circle cx="53.3" cy="60" r="1.6" fill="currentColor" stroke="none" />
+          <circle cx="81.2" cy="33.9" r="1.6" fill="currentColor" stroke="none" />
+          <path d="M157 30Q164.5 20 172 30Z" />
+          <path d="M157 30L164.5 37L172 30" />
+          <circle cx="164.5" cy="37" r="1.6" fill="currentColor" stroke="none" />
+        </g>
+        <g class={accent}>
+          <circle cx="128" cy="20" r="3.5" fill="currentColor" fill-opacity="0.2" />
+          <circle cx="128" cy="20" r="1.4" fill="currentColor" stroke="none" />
+        </g>
+      </>
+    )
+  }
+</svg>

@@ -3,14 +3,21 @@ import type { GetStaticPaths } from 'astro';
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Badge from '../../../components/ui/Badge.astro';
 import Icon from '../../../components/ui/Icon.astro';
 import PostList from '../../../components/ui/PostList.astro';
-import TagList from '../../../components/ui/TagList.astro';
-import { getPostsForProject, getProjects, isInternalHref, type LocalizedProject } from '../../../utils/content';
-import { LOCALES } from '../../../i18n/config';
+import { ui } from '../../../components/ui/styles';
+import EarlyAccessNotice from '../../../components/projects/EarlyAccessNotice.astro';
+import ProjectBadges from '../../../components/projects/ProjectBadges.astro';
+import ProjectFacts from '../../../components/projects/ProjectFacts.astro';
+import ProjectProse from '../../../components/projects/ProjectProse.astro';
+import { codeHostName, liveLink } from '../../../components/projects/links';
+import { getPostsForProject, getProjects, type LocalizedProject } from '../../../utils/content';
+import { LOCALES, localizePath } from '../../../i18n/config';
+import { common } from '../../../i18n/messages/common';
+import { projectsMessages } from '../../../i18n/messages/projects';
 import { getLocale, langParam } from '../../../i18n/server';
 
+// One page per project and locale; the Turkish page shows the Turkish overlay when it exists.
 export const getStaticPaths = (async () => {
   const perLocale = await Promise.all(
     LOCALES.map(async (locale) => (await getProjects(locale)).map((project) => ({ locale, project }))),
@@ -26,85 +33,111 @@ interface Props {
 }
 
 const { project } = Astro.props;
-const { title, shortDescription, techStack, isOpenSource, repositoryUrl, liveUrl, cover, coverAlt } = project.data;
+const locale = getLocale(Astro);
+const t = common[locale];
+const m = projectsMessages[locale];
+const { title, shortDescription, repositoryUrl, cover, coverAlt, stage } = project.data;
 const { Content } = await render(project.body);
-const relatedPosts = await getPostsForProject(project.id, getLocale(Astro));
-const liveIsInternal = liveUrl ? isInternalHref(liveUrl) : false;
-
-const primaryLink =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-accent-700 px-4 text-sm font-semibold text-white hover:bg-accent-800 dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400';
-const secondaryLink =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800';
+const relatedPosts = await getPostsForProject(project.id, locale);
+const live = liveLink(project.data.liveUrl, locale);
+const indexHref = localizePath('/projects/', locale);
+// Text that fell back to English on a Turkish page is marked as such.
+const textLang = project.lang === locale ? undefined : project.lang;
 ---
 
-<BaseLayout title={title} description={shortDescription}>
-  <a
-    href="/projects/"
-    class="-mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
-  >
-    <Icon name="arrow-left" class="size-4" />
-    All projects
-  </a>
+<BaseLayout title={title} description={shortDescription} width="wide">
+  <div class="relative isolate">
+    {/* Same fading graph-paper backdrop as PageHeader, behind the breadcrumb and title. */}
+    <div
+      class="bg-graph mask-fade-radial pointer-events-none absolute -inset-x-4 -top-8 -bottom-4 -z-10 sm:-inset-x-8"
+      aria-hidden="true"
+    />
 
-  <article class="mt-4">
-    <header class="space-y-4">
-      <div class="flex flex-wrap items-center gap-3">
-        <h1 class="max-w-full min-w-0 text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{title}</h1>
-        {isOpenSource ? <Badge variant="accent">Open source</Badge> : <Badge>Private</Badge>}
+    <nav aria-label={t.labels.breadcrumb} class="pt-2 sm:pt-6">
+      <a href={indexHref} class={ui.backLink}>
+        <Icon name="chevron-left" class="size-4" />
+        {m.detail.back}
+      </a>
+    </nav>
+
+    <header class="mt-4 max-w-3xl">
+      <ProjectBadges data={project.data} />
+      <div lang={textLang}>
+        <h1 class:list={[ui.pageTitle, 'mt-5']}>{title}</h1>
+        <p class:list={[ui.lead, 'mt-4']}>{shortDescription}</p>
       </div>
-      <p class="text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">{shortDescription}</p>
-      <TagList items={techStack} label="Tech stack" />
 
       {
-        (liveUrl || repositoryUrl) && (
-          <div class="flex flex-col gap-3 pt-2 sm:flex-row">
-            {liveUrl &&
-              (liveIsInternal ? (
-                <a href={liveUrl} class={primaryLink}>
-                  Open project
-                  <Icon name="arrow-right" class="size-4" />
+        (live || repositoryUrl) && (
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            {live &&
+              (live.external ? (
+                <a
+                  href={live.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class={ui.buttonPrimary}
+                  aria-label={m.detail.visitName(live.host)}
+                >
+                  {m.detail.visit(live.host)}
+                  <Icon name="arrow-up-right" class="size-4" />
                 </a>
               ) : (
-                <a href={liveUrl} target="_blank" rel="noopener noreferrer" class={primaryLink}>
-                  Visit live site
-                  <Icon name="external" class="size-4" />
-                  <span class="sr-only">(opens in a new tab)</span>
+                <a href={live.href} class={ui.buttonPrimary}>
+                  {m.detail.open}
+                  <Icon name="arrow-right" class="size-4" />
                 </a>
               ))}
             {repositoryUrl && (
-              <a href={repositoryUrl} target="_blank" rel="noopener noreferrer" class={secondaryLink}>
-                View repository
-                <Icon name="external" class="size-4" />
-                <span class="sr-only">(opens in a new tab)</span>
+              <a
+                href={repositoryUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={ui.buttonSecondary}
+                aria-label={m.detail.sourceName(codeHostName(repositoryUrl))}
+              >
+                <Icon name="code" class="size-4" />
+                {m.detail.source}
+                <Icon name="arrow-up-right" class="size-4" />
               </a>
             )}
           </div>
         )
       }
     </header>
+  </div>
 
-    {
-      cover && (
-        <Image
-          src={cover}
-          alt={coverAlt ?? ''}
-          widths={[400, 800, 1200]}
-          sizes="(min-width: 768px) 720px, 100vw"
-          class="mt-8 h-auto w-full rounded-xl border border-zinc-200 dark:border-zinc-800"
-        />
-      )
-    }
+  {stage === 'early-access' && <EarlyAccessNotice title={title} live={live} titleLang={textLang} class="mt-10 max-w-3xl" />}
 
-    <div class="prose prose-zinc mt-10 max-w-none dark:prose-invert prose-a:text-accent-700 dark:prose-a:text-accent-400">
-      <Content />
+  <div class="mt-12 grid gap-12 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
+    <ProjectFacts project={project} class="lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:self-start" />
+
+    <div class="min-w-0">
+      {
+        cover && (
+          <Image
+            src={cover}
+            alt={coverAlt ?? ''}
+            widths={[400, 800, 1200]}
+            sizes="(min-width: 1024px) 760px, 100vw"
+            class="mb-10 h-auto w-full rounded-xl border border-zinc-200 dark:border-zinc-800"
+          />
+        )
+      }
+      <ProjectProse lang={textLang}>
+        <Content />
+      </ProjectProse>
     </div>
-  </article>
+  </div>
 
   {
     relatedPosts.length > 0 && (
-      <section aria-labelledby="related-heading" class="mt-14 border-t border-zinc-200 pt-8 dark:border-zinc-800">
-        <h2 id="related-heading" class="text-xl font-semibold tracking-tight">
-          Related posts
+      <section aria-labelledby="related-heading" class="mt-16 max-w-3xl sm:mt-24">
+        <h2
+          id="related-heading"
+          class="border-b border-zinc-200 pb-3 font-serif text-2xl font-medium tracking-tight sm:text-3xl dark:border-zinc-800"
+        >
+          {m.detail.related}
         </h2>
         <div class="mt-6">
           <PostList posts={relatedPosts} headingLevel="h3" />
@@ -113,11 +146,10 @@ const secondaryLink =
     )
   }
 
-  <a
-    href="/projects/"
-    class="-mx-2 mt-10 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm font-medium text-zinc-600 hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400"
-  >
-    <Icon name="arrow-left" class="size-4" />
-    Back to all projects
-  </a>
+  <p class="mt-16 border-t border-zinc-200 pt-6 dark:border-zinc-800">
+    <a href={indexHref} class={ui.backLink}>
+      <Icon name="arrow-left" class="size-4" />
+      {m.detail.backToAll}
+    </a>
+  </p>
 </BaseLayout>

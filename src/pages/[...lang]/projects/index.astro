@@ -1,40 +1,65 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
 import ProjectCard from '../../../components/ui/ProjectCard.astro';
-import { SITE } from '../../../config/site';
+import Section from '../../../components/ui/Section.astro';
+import ProjectRow from '../../../components/projects/ProjectRow.astro';
+import { ui } from '../../../components/ui/styles';
+import { projectsMessages } from '../../../i18n/messages/projects';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
 import { getProjects } from '../../../utils/content';
-import { getLocale } from '../../../i18n/server';
-import { localeStaticPaths } from '../../../i18n/server';
 
 export const getStaticPaths = () => localeStaticPaths();
 
-const projects = await getProjects(getLocale(Astro));
+const locale = getLocale(Astro);
+const m = projectsMessages[locale].index;
+
+// Already sorted by `order`: featured projects get cards, the rest a lighter list below.
+const projects = await getProjects(locale);
+const featured = projects.filter((project) => project.data.featured);
+const more = projects.filter((project) => !project.data.featured);
+const openSourceCount = projects.filter((project) => project.data.isOpenSource).length;
 ---
 
-<BaseLayout
-  title="Projects"
-  description={`Projects by ${SITE.name}: open-source lecture notes, a QR menu platform, a rocket flight simulation library and browser tools.`}
-  wide
->
-  <header class="max-w-2xl pt-2 sm:pt-6">
-    <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">Projects</h1>
-    <p class="mt-4 text-base leading-relaxed text-zinc-600 sm:text-lg dark:text-zinc-400">
-      A selection of things I have built. Open-source projects link to their code; each page describes what the project
-      does and how it is put together.
-    </p>
-  </header>
+<BaseLayout title={m.title} description={m.description} width="wide">
+  <PageHeader eyebrow={m.eyebrow} title={m.title}>
+    <p>{m.lead}</p>
+    {
+      projects.length > 0 && (
+        <p class="font-mono text-sm text-zinc-500 tabular-nums dark:text-zinc-400">
+          {m.summary(projects.length, openSourceCount)}
+        </p>
+      )
+    }
+  </PageHeader>
+
+  {projects.length === 0 && <p class:list={[ui.muted, 'mt-10']}>{m.empty}</p>}
 
   {
-    projects.length > 0 ? (
-      <ul class="mt-10 grid gap-4 sm:grid-cols-2 sm:gap-6">
-        {projects.map((project) => (
-          <li class="min-w-0">
-            <ProjectCard project={project} />
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p class="mt-10 text-zinc-600 dark:text-zinc-400">No projects published yet.</p>
+    featured.length > 0 && (
+      <Section id="featured" index="01" title={m.featured}>
+        <ul class="grid gap-4 sm:grid-cols-2 sm:gap-6">
+          {featured.map((project) => (
+            <li class="min-w-0">
+              <ProjectCard project={project} headingLevel="h3" />
+            </li>
+          ))}
+        </ul>
+      </Section>
+    )
+  }
+
+  {
+    more.length > 0 && (
+      <Section id="more" index={featured.length > 0 ? '02' : '01'} title={m.more}>
+        <ul class="-mt-6 divide-y divide-zinc-200 border-b border-zinc-200 sm:-mt-8 dark:divide-zinc-800 dark:border-zinc-800">
+          {more.map((project) => (
+            <li>
+              <ProjectRow project={project} headingLevel="h3" />
+            </li>
+          ))}
+        </ul>
+      </Section>
     )
   }
 </BaseLayout>

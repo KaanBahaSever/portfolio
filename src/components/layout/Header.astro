@@ -9,9 +9,13 @@ import { getLocale } from '../../i18n/server';
 interface Props {
   /** This page in each locale (site paths), for the language switch. */
   alternates: Partial<Record<Locale, string>>;
+  /** The page's content width, so the header lines up with it (see BaseLayout). */
+  width?: 'prose' | 'wide' | 'full';
 }
 
-const { alternates } = Astro.props;
+const { alternates, width = 'wide' } = Astro.props;
+// Prose pages keep the standard header width; wide and full pages align the header with their content.
+const container = width === 'full' ? 'max-w-screen-2xl' : 'max-w-6xl';
 const locale = getLocale(Astro);
 const t = common[locale];
 
@@ -55,7 +59,7 @@ const languages = LOCALES.map((l) => ({
 <header
   class="sticky top-0 z-40 border-b border-zinc-200/80 bg-zinc-50/85 backdrop-blur-md dark:border-zinc-800/80 dark:bg-zinc-950/80"
 >
-  <div class="px-safe relative mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 sm:h-16">
+  <div class:list={['px-safe relative mx-auto flex h-14 items-center justify-between gap-3 sm:h-16', container]}>
     <a
       href={localizePath('/', locale)}
       class="group -mx-2 flex min-h-11 min-w-0 items-center gap-2.5 rounded-lg px-2 text-zinc-900 dark:text-zinc-100"
@@ -148,7 +152,7 @@ const languages = LOCALES.map((l) => ({
           <div
             class="absolute inset-x-0 top-full max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain border-b border-zinc-200 bg-zinc-50 shadow-sm sm:max-h-[calc(100dvh-4rem)] dark:border-zinc-800 dark:bg-zinc-950"
           >
-            <ul class="px-safe mx-auto flex max-w-6xl flex-col py-2">
+            <ul class:list={['px-safe mx-auto flex flex-col py-2', container]}>
               {
                 links.map((link) => (
                   <li>

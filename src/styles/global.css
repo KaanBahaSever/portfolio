@@ -277,11 +277,6 @@
  * scroll inside their own box so the page never overflows horizontally.
  */
 @layer components {
-  .prose {
-    --tw-prose-links: var(--color-accent-700);
-    --tw-prose-invert-links: var(--color-accent-400);
-  }
-
   .prose :where(h1, h2, h3):not(:where(.not-prose, .not-prose *)) {
     font-family: var(--font-serif);
     font-weight: 500;
@@ -333,50 +328,84 @@
     max-width: 100%;
     height: auto;
   }
+}
 
-  /*
-   * Shiki code blocks with dual themes (astro.config.mjs: defaultColor false): every token
-   * carries --shiki-light / --shiki-dark, and the theme follows the operating system.
-   */
+/*
+ * Unlayered on purpose: Tailwind Typography emits .prose, prose-zinc and prose-invert (and its
+ * pre and inline-code rules) in @layer utilities, which beats anything in @layer components.
+ * These few rules must win over it, so they live outside every layer.
+ */
+.prose {
+  --tw-prose-links: var(--color-accent-700);
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose {
+    --tw-prose-links: var(--color-accent-400);
+  }
+}
+
+/* Inline code: a quiet chip instead of the plugin's literal backticks. */
+.prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *)) {
+  border-radius: 0.25rem;
+  background-color: var(--color-zinc-100);
+  padding: 0.125em 0.3em;
+  font-weight: 500;
+}
+
+.prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *))::before,
+.prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *))::after {
+  content: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *)) {
+    background-color: var(--color-zinc-800);
+  }
+}
+
+/*
+ * Shiki code blocks with dual themes (astro.config.mjs: defaultColor false): every token
+ * carries --shiki-light / --shiki-dark, and the theme follows the operating system.
+ */
+pre.astro-code {
+  background-color: var(--shiki-light-bg);
+  border: 1px solid var(--color-zinc-200);
+  border-radius: 0.75rem;
+  font-size: 0.875em;
+  line-height: 1.7;
+}
+
+pre.astro-code,
+pre.astro-code span {
+  color: var(--shiki-light);
+}
+
+@media (prefers-color-scheme: dark) {
   pre.astro-code {
-    background-color: var(--shiki-light-bg);
-    border: 1px solid var(--color-zinc-200);
-    border-radius: 0.75rem;
-    font-size: 0.875em;
-    line-height: 1.7;
+    background-color: var(--color-zinc-900);
+    border-color: var(--color-zinc-800);
   }
 
   pre.astro-code,
   pre.astro-code span {
-    color: var(--shiki-light);
+    color: var(--shiki-dark);
   }
+}
 
-  @media (prefers-color-scheme: dark) {
-    pre.astro-code {
-      background-color: var(--color-zinc-900);
-      border-color: var(--color-zinc-800);
-    }
+/* KaTeX (rendered at build time; its stylesheet is imported by the blog post page only). */
+.math-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  margin-block: 1.5em;
+  padding-block: 0.25em;
+}
 
-    pre.astro-code,
-    pre.astro-code span {
-      color: var(--shiki-dark);
-    }
-  }
+.math-display .katex-display {
+  margin: 0;
+}
 
-  /* KaTeX (build-time rendered; CSS imported only by the blog post page). */
-  .math-display {
-    overflow-x: auto;
-    overflow-y: hidden;
-    overscroll-behavior-x: contain;
-    margin-block: 1.5em;
-    padding-block: 0.25em;
-  }
-
-  .math-display .katex-display {
-    margin: 0;
-  }
-
-  .katex {
-    font-size: 1.08em;
-  }
+.katex {
+  font-size: 1.08em;
 }

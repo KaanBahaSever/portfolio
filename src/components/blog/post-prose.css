@@ -9,30 +9,6 @@
 
 .post-body {
   counter-reset: figure;
-  /*
-   * global.css sets the prose link colour and the Shiki code-block colours inside
-   * @layer components, but Tailwind Typography's rules (prose-zinc, prose-invert, `pre`) live
-   * in @layer utilities and win, which left links ink-coloured and code blocks on a dark
-   * zinc-800 plate in light mode. These unlayered rules restore the intended values here.
-   */
-  --tw-prose-links: var(--color-accent-700);
-}
-
-.post-body pre.astro-code {
-  border-radius: 0.75rem;
-  background-color: var(--shiki-light-bg);
-  color: var(--shiki-light);
-}
-
-@media (prefers-color-scheme: dark) {
-  .post-body {
-    --tw-prose-links: var(--color-accent-400);
-  }
-
-  .post-body pre.astro-code {
-    background-color: var(--color-zinc-900);
-    color: var(--shiki-dark);
-  }
 }
 
 /* Links: accent text with a quiet underline that firms up on hover. */

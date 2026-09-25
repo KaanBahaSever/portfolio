@@ -33,8 +33,16 @@ interface Props {
    * swapped; pass it explicitly when slugs differ (translated blog posts).
    */
   alternates?: Partial<Record<Locale, string>>;
+  /**
+   * The versions to announce with hreflang (site paths). Defaults to `alternates`; pass only the
+   * locales whose page is its own canonical — e.g. a Turkish-only post is also built under /blog/
+   * (for the language switch) but canonicalises to /tr/blog/…, so it lists just 'tr'.
+   */
+  hreflang?: Partial<Record<Locale, string>>;
   /** Canonical URL or site path when it is not this page (e.g. a post first published on Medium). */
   canonical?: string;
+  /** One browser-chrome colour for both schemes (e.g. the black console) instead of paper/ink. */
+  themeColor?: string;
   /** Hide the site header and footer (the full-screen console). */
   bare?: boolean;
   /** og:type — 'article' for blog posts. */
@@ -48,7 +56,9 @@ const {
   wide = false,
   noindex = false,
   alternates: alternatesProp,
+  hreflang: hreflangProp,
   canonical,
+  themeColor,
   bare = false,
   ogType = 'website',
 } = Astro.props;
@@ -68,15 +78,18 @@ const absolute = (path: string) => (Astro.site ? new URL(path, Astro.site).href 
 const pageURL = absolute(Astro.url.pathname);
 const canonicalURL = canonical ? (/^https?:/.test(canonical) ? canonical : absolute(canonical)) : pageURL;
 // hreflang only for pages that are their own canonical, and only between existing versions.
+const hreflangPaths = hreflangProp ?? alternates;
 const hreflangLinks =
   !noindex && canonicalURL === pageURL
     ? LOCALES.flatMap((l) => {
-        const path = alternates[l];
+        const path = hreflangPaths[l];
         const href = path ? absolute(path) : undefined;
         return href ? [{ hreflang: LOCALE_META[l].htmlLang, href }] : [];
       })
     : [];
-const xDefault = hreflangLinks.length > 1 ? absolute(alternates.en ?? '/') : undefined;
+const xDefault = hreflangLinks.length > 1 ? absolute(hreflangPaths.en ?? '/') : undefined;
+// og:url names the page being shared: the canonical one when this page defers to another.
+const ogURL = noindex ? undefined : canonicalURL;
 ---
 
 <!doctype html>
@@ -111,8 +124,16 @@ const xDefault = hreflangLinks.length > 1 ? absolute(alternates.en ?? '/') : und
     <meta name="description" content={description} />
     <meta name="author" content={SITE.name} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
-    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+    {
+      themeColor ? (
+        <meta name="theme-color" content={themeColor} />
+      ) : (
+        <>
+          <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+        </>
+      )
+    }
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
@@ -121,7 +142,7 @@ const xDefault = hreflangLinks.length > 1 ? absolute(alternates.en ?? '/') : und
     {canonicalURL && !noindex && <link rel="canonical" href={canonicalURL} />}
     {hreflangLinks.map((link) => <link rel="alternate" hreflang={link.hreflang} href={link.href} />)}
     {xDefault && <link rel="alternate" hreflang="x-default" href={xDefault} />}
-    {pageURL && !noindex && <meta property="og:url" content={pageURL} />}
+    {ogURL && <meta property="og:url" content={ogURL} />}
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
@@ -142,7 +163,7 @@ const xDefault = hreflangLinks.length > 1 ? absolute(alternates.en ?? '/') : und
     >
       {t.skipToContent}
     </a>
-    {!bare && <Header alternates={alternates} />}
+    {!bare && <Header alternates={alternates} width={width} />}
     <main
       id="main"
       class:list={[

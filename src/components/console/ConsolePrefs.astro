@@ -2,7 +2,7 @@
 /**
  * Pre-paint script for the console page's <head> (render it with slot="head"): applies the saved
  * font size and phosphor colour before the first frame, so the terminal never flashes the
- * defaults, and paints the browser chrome (theme-color) black to match.
+ * defaults. (The page passes themeColor="#000000" to BaseLayout, so the browser chrome is black too.)
  * The controller (src/scripts/console/controller.ts) owns these settings after load.
  */
 import { FONT_SIZES, PHOSPHORS, STORAGE_KEYS } from '../../lib/console/prefs';
@@ -19,8 +19,5 @@ import { FONT_SIZES, PHOSPHORS, STORAGE_KEYS } from '../../lib/console/prefs';
     } catch (e) {
       // Storage blocked: the defaults apply.
     }
-    document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
-      meta.setAttribute('content', '#000000');
-    });
   })();
 </script>

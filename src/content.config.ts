@@ -42,6 +42,8 @@ const blog = defineCollection({
       draft: z.boolean().default(false),
       heroImage: image().optional(),
       heroImageAlt: z.string().optional(),
+      /** Visible caption under the hero image (the Medium sync fills it from the opening figure). */
+      heroImageCaption: z.string().optional(),
       relatedProject: reference('projects').optional(),
       /** Where the post was first published. Medium posts are imported by `npm run sync:medium`. */
       source: z.enum(['site', 'medium']).default('site'),

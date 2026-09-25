@@ -6,6 +6,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 // KaTeX's stylesheet (font-display: swap build) and the long-form rules load on post pages only.
 import 'katex/dist/katex-swap.min.css';
 import '../../../components/blog/post-prose.css';
+import ScrollableRegions from '../../../components/blog/ScrollableRegions.astro';
 import TableOfContents from '../../../components/blog/TableOfContents.astro';
 import { readingMinutes } from '../../../components/blog/reading-time';
 import { buildToc, shouldShowToc } from '../../../components/blog/toc';
@@ -53,16 +54,14 @@ const {
   mediumUrl,
 } = post.data;
 
-const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const { Content, headings } = await render(post);
 const minutes = readingMinutes(post.body);
 const toc = buildToc(headings);
 const showToc = shouldShowToc(toc, minutes);
 
 // The visible caption of the hero image (the Medium sync fills it from the opening figure, whose
-// caption may say who is who). The blog schema does not declare it yet, so it is read from the
-// raw frontmatter that render() returns; that keeps working once the schema declares it.
-const heroCaptionValue: unknown = remarkPluginFrontmatter.heroImageCaption;
-const heroCaption = typeof heroCaptionValue === 'string' ? heroCaptionValue.trim() : '';
+// caption may say who is who).
+const heroCaption = post.data.heroImageCaption?.trim() ?? '';
 
 // The hero spans the reading column: 100vw minus the page gutters (1rem, 1.5rem from sm) up to
 // the 45rem prose column; with contents, from lg the grid below sets it (100vw − gutters −
@@ -75,11 +74,15 @@ const heroSizes = [
 ].join(', ');
 
 // This post in each language: its translation where one exists, otherwise the same post.
+const counterparts = await Promise.all(LOCALES.map(async (l) => [l, await getPostCounterpart(post, l)] as const));
 const alternates = Object.fromEntries(
-  await Promise.all(
-    LOCALES.map(async (l) => [l, localizePath(`/blog/${(await getPostCounterpart(post, l)).id}/`, l)] as const),
-  ),
+  counterparts.map(([l, other]) => [l, localizePath(`/blog/${other.id}/`, l)]),
 ) as Record<Locale, string>;
+// hreflang announces only real versions, i.e. pages whose text is in that language; a post shown
+// in the other language's interface canonicalises to its own-language page instead.
+const hreflang: Partial<Record<Locale, string>> = Object.fromEntries(
+  counterparts.filter(([l, other]) => other.data.lang === l).map(([l]) => [l, alternates[l]]),
+);
 
 // A Medium import points search engines at the original. A post shown in the other language's
 // interface (no translation exists) points at its page in its own language.
@@ -126,6 +129,7 @@ const jsonLd = JSON.stringify({
   description={description}
   width={showToc ? 'wide' : 'prose'}
   alternates={alternates}
+  hreflang={hreflang}
   canonical={canonical}
   ogType="article"
 >
@@ -252,6 +256,7 @@ const jsonLd = JSON.stringify({
 
         <div class="post-body prose prose-zinc mt-10 max-w-none sm:prose-lg dark:prose-invert">
           <Content />
+          <ScrollableRegions />
         </div>
 
         {

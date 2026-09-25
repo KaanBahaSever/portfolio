@@ -29,8 +29,10 @@ export default defineConfig({
     // KaTeX plugin renders it to HTML + MathML at build time. MDX inherits all of this.
     processor: satteri({ features: { math: true }, mdastPlugins: [katexPlugin] }),
     // Dual themes: colours are CSS variables, switched by prefers-color-scheme in global.css.
+    // The high-contrast GitHub themes keep every token at WCAG AA (≥ 4.5:1) on our code
+    // backgrounds; the regular ones drop to about 3.5:1 for some tokens.
     shikiConfig: {
-      themes: { light: 'github-light', dark: 'github-dark' },
+      themes: { light: 'github-light-high-contrast', dark: 'github-dark-high-contrast' },
       defaultColor: false,
     },
   },

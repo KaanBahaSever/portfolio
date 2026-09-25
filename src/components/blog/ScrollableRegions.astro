@@ -1,0 +1,29 @@
+---
+/**
+ * Wide display formulas and tables scroll sideways inside their own box on narrow screens.
+ * A box that scrolls must be reachable by keyboard (WCAG 2.1.1), so this gives each one a tab
+ * stop — but only while it actually overflows, so wide screens get no extra tab stops.
+ */
+---
+
+<script>
+  const SELECTOR = '.post-body .math-display, .post-body table';
+
+  function update(): void {
+    for (const box of document.querySelectorAll<HTMLElement>(SELECTOR)) {
+      if (box.scrollWidth > box.clientWidth + 1) box.tabIndex = 0;
+      else box.removeAttribute('tabindex');
+    }
+  }
+
+  let frame = 0;
+  function schedule(): void {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(update);
+  }
+
+  update();
+  window.addEventListener('resize', schedule);
+  // Web fonts (KaTeX, Newsreader) change widths once they arrive.
+  document.fonts?.ready.then(schedule, () => {});
+</script>

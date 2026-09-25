@@ -11,6 +11,7 @@ import { ticTacToeMessages } from '../../../i18n/games/tictactoe.ts';
 import { getPageLocale } from '../../../i18n/client.ts';
 import { formatters } from '../../../i18n/format.ts';
 import { moveInGrid } from '../../../lib/games/grid.ts';
+import { isPlainKey } from '../../../lib/games/keys.ts';
 import { mulberry32, randomSeed } from '../../../lib/games/random.ts';
 import { DIFFICULTIES, chooseMove, evaluateMoves, readScore, type Difficulty } from '../../../lib/games/tictactoe/ai.ts';
 import {
@@ -332,6 +333,10 @@ export function initTicTacToe(root: HTMLElement): void {
     const index = squareOf(event.target);
     if (index === null) return;
     setCursor(index);
+    // Safari and Firefox on macOS do not focus a button on click. Focusing the square here keeps
+    // focus in the game in every browser, so the digit and arrow keys work after a click too.
+    // (A no-op where the click already focused it, and for Enter/Space, which click it too.)
+    el.squares[index]?.focus({ preventScroll: true });
     humanPlays(index);
   });
 
@@ -353,7 +358,7 @@ export function initTicTacToe(root: HTMLElement): void {
 
   // Digit keys anywhere in the game (there are no text fields here to type into).
   root.addEventListener('keydown', (event) => {
-    if (event.ctrlKey || event.metaKey || event.altKey || event.repeat) return;
+    if (!isPlainKey(event)) return;
     const index = cellForDigit(event.key, keypad);
     if (index === null) return;
     event.preventDefault();

@@ -2,7 +2,13 @@
 /**
  * The privacy note on /tools/. Prose with a link, so it is written once per language as markup
  * (no translated HTML strings). Keep both versions saying the same thing: nothing is uploaded,
- * and the Notepad draft is the one thing kept, in this browser's local storage.
+ * and of the visitor's files and text only the Notepad draft is kept, in this browser's local
+ * storage. The claim is scoped to user content on purpose: the header's EN|TR switch also
+ * remembers the chosen language in local storage.
+ *
+ * The prose sits inside a {…} expression, where JSX whitespace rules apply: a line break next
+ * to a tag is dropped without leaving a space ("Notepaddraft"). Keep a word on each side of the
+ * link on the link's own line when rewrapping.
  */
 import Icon from '../ui/Icon.astro';
 import { ui } from '../ui/styles';
@@ -33,9 +39,9 @@ const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
             cihazınızda işlenir; hiçbir zaman bir sunucuya yüklenmez.
           </p>
           <p>
-            Saklanan tek şey <a href={notepadHref} class={ui.inlineLink}>Not defteri</a> taslağıdır: sayfayı
-            yenilediğinizde kaybolmasın diye bu tarayıcının yerel depolama alanında (local storage) tutulur ve bu cihazdan
-            çıkmaz.
+            Dosyalarınız ve metinlerinizden saklanan tek
+            şey <a href={notepadHref} class={ui.inlineLink}>Not defteri</a> taslağıdır: sayfayı yenilediğinizde
+            kaybolmasın diye bu tarayıcının yerel depolama alanında (local storage) tutulur ve bu cihazdan çıkmaz.
           </p>
         </>
       ) : (
@@ -45,8 +51,9 @@ const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
             processed on your device and never uploaded to a server.
           </p>
           <p>
-            The one thing kept is the <a href={notepadHref} class={ui.inlineLink}>Notepad</a> draft: it is saved in this
-            browser’s local storage so a reload does not lose it, and it never leaves this device.
+            Of your files and text, the only thing kept is
+            the <a href={notepadHref} class={ui.inlineLink}>Notepad</a> draft: it is saved in this browser’s local
+            storage so a reload does not lose it, and it never leaves this device.
           </p>
         </>
       )

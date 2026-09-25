@@ -114,7 +114,9 @@ const tr: PasswordMessages = {
   typesHint: 'En az bir tür seçili kalmalıdır.',
   advancedLegend: 'Gelişmiş',
   lookAlikes: {
-    label: 'Birbirine benzeyen karakterlerden kaçın',
+    // Describes the setting, like "Seçilen her türü dahil et" below; "…kaçın" read as advice
+    // and could also be taken as "run away".
+    label: 'Birbirine benzeyen karakterleri hariç tut',
     detail: 'Kolayca karıştırılan I, l, 1, |, O, o ve 0 karakterlerini dışarıda bırakır.',
   },
   eachType: {

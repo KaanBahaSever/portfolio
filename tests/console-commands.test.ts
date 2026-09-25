@@ -7,7 +7,7 @@ import {
   closestCommand,
   editDistance,
   execute,
-  findProject,
+  matchProjects,
   resolveCommand,
   slugify,
 } from '../src/lib/console/commands.ts';
@@ -161,15 +161,27 @@ test('open goes to a project page by id, title, file name or unique prefix', () 
   assert.deepEqual(result.output, [{ kind: 'notice', notice: 'opening', title: 'Asion' }]);
   assert.deepEqual(result.effect, { type: 'navigate', href: '/tr/projects/asion/' });
   assert.equal(execute('open projects/neosmbios.txt', context()).effect?.type, 'navigate');
-  assert.equal(findProject(projects, 'Açık Matematik')?.id, 'acik-matematik');
-  assert.equal(findProject(projects, 'rocket')?.id, 'rocket-up');
-  assert.equal(findProject(projects, 'NEO')?.id, 'neosmbios');
-  // 'a' matches two projects: ambiguous.
-  assert.equal(findProject(projects, 'a'), undefined);
-  assert.equal(findProject(projects, '...'), undefined);
+  const ids = (query: string) => matchProjects(projects, query).map((project) => project.id);
+  assert.deepEqual(ids('Açık Matematik'), ['acik-matematik']);
+  assert.deepEqual(ids('rocket'), ['rocket-up']);
+  assert.deepEqual(ids('NEO'), ['neosmbios']);
+  assert.deepEqual(ids('projects/asion.txt'), ['asion']);
+  // An exact id wins over the longer names it is a prefix of.
+  assert.deepEqual(
+    matchProjects([...projects, { id: 'asion-cli', title: 'Asion CLI', page: '/p/' }], 'asion').map((p) => p.id),
+    ['asion'],
+  );
+  assert.deepEqual(ids('...'), []);
   assert.deepEqual(execute('open nope', context()).output, [
     { kind: 'error', error: { code: 'unknown-project', name: 'nope' } },
   ]);
+  // 'a' starts two project names: say which, rather than claiming there is no such project.
+  assert.deepEqual(ids('a'), ['acik-matematik', 'asion']);
+  const ambiguous = execute('open a', context());
+  assert.deepEqual(ambiguous.output, [
+    { kind: 'error', error: { code: 'ambiguous-project', name: 'a', candidates: ['acik-matematik', 'asion'] } },
+  ]);
+  assert.equal(ambiguous.effect, undefined);
   assert.deepEqual(execute('open', context()).output, [
     { kind: 'error', error: { code: 'missing-operand', command: 'open' } },
   ]);

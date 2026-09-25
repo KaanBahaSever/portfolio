@@ -26,6 +26,8 @@ export function describeError(error: ShellError, m: ConsoleMessages): string {
       return e.unterminatedQuote(error.quote);
     case 'unknown-project':
       return e.unknownProject(error.name);
+    case 'ambiguous-project':
+      return e.ambiguousProject(error.name, error.candidates);
     case 'unknown-help-topic':
       return e.unknownHelpTopic(error.topic);
   }

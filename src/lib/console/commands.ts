@@ -83,6 +83,8 @@ export type ShellError =
   | { code: 'too-many-arguments'; command: CommandName }
   | { code: 'unterminated-quote'; quote: Quote }
   | { code: 'unknown-project'; name: string }
+  /** `name` is a prefix of several projects; `candidates` are their ids, in listing order. */
+  | { code: 'ambiguous-project'; name: string; candidates: readonly string[] }
   | { code: 'unknown-help-topic'; topic: string };
 
 export type Output =
@@ -184,8 +186,15 @@ const HANDLERS: Record<CommandName, Handler> = {
   open(args, ctx) {
     if (args.length === 0) return { cwd: ctx.cwd, output: [fail({ code: 'missing-operand', command: 'open' })] };
     if (args.length > 1) return { cwd: ctx.cwd, output: [fail({ code: 'too-many-arguments', command: 'open' })] };
-    const project = findProject(ctx.projects, args[0]!);
-    if (!project) return { cwd: ctx.cwd, output: [fail({ code: 'unknown-project', name: args[0]! })] };
+    const name = args[0]!;
+    const matches = matchProjects(ctx.projects, name);
+    const project = matches[0];
+    if (!project) return { cwd: ctx.cwd, output: [fail({ code: 'unknown-project', name })] };
+    if (matches.length > 1) {
+      // Say which projects it could be, so the next try can be exact.
+      const candidates = matches.map((match) => match.id);
+      return { cwd: ctx.cwd, output: [fail({ code: 'ambiguous-project', name, candidates })] };
+    }
     return {
       cwd: ctx.cwd,
       output: [{ kind: 'notice', notice: 'opening', title: project.title }],
@@ -288,15 +297,15 @@ export function slugify(value: string): string {
 }
 
 /**
- * The project `query` names: its id, its title, its file ('projects/asion.txt') or an
- * unambiguous prefix of any of these ('neo' → NeoSMBIOS).
+ * The projects `query` may name: the one whose id, title or file ('projects/asion.txt') it is
+ * exactly, otherwise every project it is a prefix of ('neo' → NeoSMBIOS; 'a' → Açık Matematik
+ * and Asion). Empty when nothing matches; more than one entry means the query is ambiguous.
  */
-export function findProject(projects: readonly ProjectRef[], query: string): ProjectRef | undefined {
+export function matchProjects(projects: readonly ProjectRef[], query: string): ProjectRef[] {
   const base = query.replace(/\/+$/, '').split('/').pop() ?? '';
   const key = slugify(base.replace(/\.txt$/i, ''));
-  if (key === '') return undefined;
+  if (key === '') return [];
   const exact = projects.find((project) => project.id === key || slugify(project.title) === key);
-  if (exact) return exact;
-  const candidates = projects.filter((project) => project.id.startsWith(key) || slugify(project.title).startsWith(key));
-  return candidates.length === 1 ? candidates[0] : undefined;
+  if (exact) return [exact];
+  return projects.filter((project) => project.id.startsWith(key) || slugify(project.title).startsWith(key));
 }

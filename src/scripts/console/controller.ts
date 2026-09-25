@@ -299,7 +299,13 @@ export function initConsole(root: HTMLElement): void {
 
   els.log.addEventListener('click', (event) => {
     const button = event.target instanceof Element ? event.target.closest<HTMLButtonElement>('button[data-run]') : null;
-    if (button?.dataset.run) run(button.dataset.run);
+    if (!button?.dataset.run) return;
+    run(button.dataset.run);
+    // A mouse click focuses the chip in Chromium, which would leave ↑/↓, Tab, Ctrl+L and Enter
+    // acting on the chip instead of the command line; send mouse users back to it. Keyboard
+    // activation (detail 0) keeps focus on the chip, and touch is left alone so the on-screen
+    // keyboard does not open unasked (the same policy as the initial focus below).
+    if (event.detail > 0 && finePointer.matches) els.input.focus({ preventScroll: true });
   });
 
   els.fontDown.addEventListener('click', () => changeFontSize(-1));

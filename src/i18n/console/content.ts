@@ -203,7 +203,7 @@ const tr: ConsoleContent = {
     text(dim('Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar · İstanbul')),
     blank(),
     text(
-      'Saf matematik altyapısıyla sistem yazılımı geliştiriyorum. İstanbul Üniversitesinde matematik okuyorum; günlük işimde modern C++ ve Go kullanıyorum: sistem araçları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar.',
+      'Sistem yazılımına saf matematik altyapısıyla yaklaşıyorum. İstanbul Üniversitesinde matematik okuyorum; günlük işimde modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları ve algoritma odaklı uygulamalar geliştiriyorum.',
     ),
     blank(),
     text(
@@ -237,7 +237,7 @@ const tr: ConsoleContent = {
     heading('Roketler'),
     indented(
       2,
-      'İstanbul Üniversitesi Roket Kulübü — Başkan Yardımcısı, 2019–2022. Üç yüksek güçlü roketin tasarımına katkı verdim; üçü de başarıyla fırlatıldı.',
+      'İstanbul Üniversitesi Roket Kulübü — Başkan Yardımcısı, 2019–2022. Üç yüksek güçlü roketin tasarımına katkıda bulundum; üçü de başarıyla fırlatıldı.',
     ),
     indented(
       2,
@@ -280,7 +280,7 @@ const tr: ConsoleContent = {
       pair('Python', 'crowd.inc şirketinde Flask API’leri; yörünge simülasyonunun ilk sürümü'),
       pair('C#', 'ilk programlarım: hesaplama motorları, Amiral Battı, XOX'),
       pair('TypeScript, JavaScript', 'bu site ve tarayıcıda çalışan araçları'),
-      pair('SQL', 'PostgreSQL şemaları; ilk C# projeleri'),
+      pair('SQL', 'PostgreSQL şemaları; ilk C# projelerim'),
     ],
     systems: [
       heading('Sistemler ve protokoller'),
@@ -314,12 +314,12 @@ const tr: ConsoleContent = {
         'Uygulamalı',
         'paraşüt yönlendirmede lineer cebir ve iniş dinamiği; roket yörüngelerinin sayısal simülasyonu; olasılık yoğunlukları (Amiral Battı); oyun ağaçları ve minimax (XOX)',
       ),
-      pair('Yazım', 'Açık Matematik: lisans matematiği için açık kaynaklı Türkçe ders kitapları'),
+      pair('Yayın', 'Açık Matematik: lisans matematiği için açık kaynaklı Türkçe ders kitapları'),
     ],
     tools: [
       heading('Araçlar'),
       blank(),
-      pair('Git, GitHub', 'sürüm kontrolü; açık çalışmalarım: ', link('github.com/KaanBahaSever', 'https://github.com/KaanBahaSever')),
+      pair('Git, GitHub', 'sürüm kontrolü; herkese açık çalışmalarım: ', link('github.com/KaanBahaSever', 'https://github.com/KaanBahaSever')),
       pair('MATLAB, Mathematica, R', 'sayısal ve sembolik hesaplama'),
       pair('Quarto', 'Açık Matematik’in yayın altyapısı'),
     ],
@@ -330,7 +330,7 @@ const tr: ConsoleContent = {
       'Karmaşık düzlemde birim çemberin ASCII çizimi: e üzeri i pi, 1’den yarım tur ötede, −1 noktasında. Altında Euler özdeşliği: e üzeri i pi artı 1 eşittir 0.',
     caption: [
       text(
-        'Euler özdeşliği. Birim çember üzerinde yarım tur, 1’i −1’e götürür; bu yüzden e^(iπ) + 1 = 0. Beş sabit, yani e, i, π, 1 ve 0, tek satırda.',
+        'Euler özdeşliği. Birim çember üzerinde yarım tur, 1’i −1’e götürür; bu yüzden e^(iπ) + 1 = 0. Beş temel sabit (e, i, π, 1 ve 0) tek bir satırda buluşuyor.',
       ),
     ],
     gamesIntro: 'Matematiği okumak yerine oynamak isterseniz:',

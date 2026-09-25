@@ -24,7 +24,10 @@ export interface ConsoleProjectInput {
   id: string;
   title: string;
   summary: string;
-  /** Language of `title` and `summary` (English when a Turkish translation is missing). */
+  /**
+   * Language of the project text (English when a Turkish translation is missing). Only the
+   * summary is marked with it; see inLanguage().
+   */
   lang: Locale;
   stack: readonly string[];
   isOpenSource: boolean;
@@ -98,7 +101,11 @@ export interface BuildInput {
 
 const isSitePath = (href: string) => href.startsWith('/') && !href.startsWith('//');
 
-/** Marks a line as written in `lang` when that differs from the page (an untranslated summary). */
+/**
+ * Marks a line as written in `lang` when that differs from the page (an untranslated summary).
+ * Only summaries are marked: titles are proper names ('Açık Matematik', 'Karecik'), and reading
+ * them with the voice of the source text would mispronounce the Turkish ones on /tr/.
+ */
 function inLanguage(line: Line, lang: Locale, locale: Locale): Line {
   return line.type === 'text' && lang !== locale ? { ...line, lang } : line;
 }
@@ -129,7 +136,7 @@ export function buildConsoleData({ locale, copy, projects, games, contact }: Bui
   const projectFile = (project: ConsoleProjectInput): Line[] => {
     const page = pageOf(project.id);
     const lines: Line[] = [
-      inLanguage(heading(project.title), project.lang, locale),
+      heading(project.title),
       inLanguage(text(project.summary), project.lang, locale),
       blank(),
       pair(copy.project.stack, project.stack.join(' · ')),
@@ -150,7 +157,7 @@ export function buildConsoleData({ locale, copy, projects, games, contact }: Bui
     if (project.repositoryUrl) links.push('   ', externalLink(project.repositoryUrl));
     const meta = [project.stack.join(' · '), status(project)].filter(Boolean).join(' — ');
     projectsDoc.push(
-      inLanguage(text(bright(project.title)), project.lang, locale),
+      text(bright(project.title)),
       inLanguage(indented(2, project.summary), project.lang, locale),
       indented(2, dim(meta)),
       indented(2, ...links),

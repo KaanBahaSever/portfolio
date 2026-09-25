@@ -31,7 +31,7 @@ const en = {
     /** Read before each echoed command in the transcript (the prompt itself is hidden from screen readers). */
     commandEcho: 'Command:',
     inputHint:
-      'Type a command and press Enter; try help. Tab completes names; on an empty line Tab moves on to the next control. Up and down arrows recall earlier commands.',
+      'Type a command and press Enter; try help. Tab completes command and file names; on an empty line it moves focus to the next control. Up and down arrows recall earlier commands.',
   },
   noscript: 'The console needs JavaScript. Everything it shows is also on the rest of the site:',
   noscriptLink: 'go to the home page',
@@ -79,6 +79,8 @@ const en = {
     tooManyArguments: (command: string) => `${command}: too many arguments`,
     unterminatedQuote: (quote: string) => `syntax error: unterminated quote ${quote}`,
     unknownProject: (name: string) => `open: no project called ${name} — type 'projects' to see them`,
+    ambiguousProject: (name: string, candidates: readonly string[]) =>
+      `open: ${name} matches several projects: ${candidates.join(', ')}`,
     unknownHelpTopic: (topic: string) => `help: no such command: ${topic}`,
   },
   notices: {
@@ -95,7 +97,7 @@ export type ConsoleMessages = typeof en;
 const tr: ConsoleMessages = {
   title: 'Konsol',
   description:
-    'Siteyi komutlarla keşfetmek için sade bir terminal: projeler, beceriler ve iletişim bilgileri, her seferinde tek komut.',
+    'Projeleri, becerileri ve iletişim bilgilerini komut satırından adım adım keşfedebileceğiniz sade bir terminal.',
   toolbar: {
     label: 'Terminal ayarları',
     fontSize: 'Yazı boyutu',
@@ -112,7 +114,7 @@ const tr: ConsoleMessages = {
     input: 'Komut',
     commandEcho: 'Komut:',
     inputHint:
-      'Bir komut yazıp Enter tuşuna basın; help ile başlayabilirsiniz. Tab adları tamamlar; satır boşken Tab sonraki denetime geçer. Yukarı ve aşağı ok tuşları önceki komutları getirir.',
+      'Bir komut yazıp Enter tuşuna basın; help ile başlayabilirsiniz. Tab tuşu komut ve dosya adlarını tamamlar; satır boşken odağı sonraki öğeye taşır. Yukarı ve aşağı ok tuşları önceki komutları getirir.',
   },
   noscript: 'Konsol için JavaScript gerekiyor. Konsolda gösterilen her şey sitenin geri kalanında da var:',
   noscriptLink: 'ana sayfaya gidin',
@@ -141,9 +143,9 @@ const tr: ConsoleMessages = {
       cat: 'bir ya da daha fazla dosyayı gösterir',
       projects: 'bağlantılarıyla birlikte proje özetleri',
       open: 'projenin sayfasına gider',
-      echo: 'yazdığınız metni geri yazar',
+      echo: 'yazdığınız metni ekrana yazar',
       history: 'önceki komutları listeler',
-      clear: 'ekranı temizler (Ctrl+L de olur)',
+      clear: 'ekranı temizler (kısayol: Ctrl+L)',
       exit: 'konsoldan çıkar',
     },
     keys: 'Tab tamamlar · ↑ ↓ önceki komutlar · Ctrl+L temizler · Ctrl+C satırı iptal eder',
@@ -160,6 +162,8 @@ const tr: ConsoleMessages = {
     tooManyArguments: (command) => `${command}: çok fazla argüman`,
     unterminatedQuote: (quote) => `sözdizimi hatası: kapatılmamış tırnak ${quote}`,
     unknownProject: (name) => `open: proje bulunamadı: ${name} — projeleri görmek için 'projects' yazın`,
+    // The typed name is quoted and is the subject, so it needs no case suffix.
+    ambiguousProject: (name, candidates) => `open: “${name}” birden çok projeyle eşleşiyor: ${candidates.join(', ')}`,
     unknownHelpTopic: (topic) => `help: böyle bir komut yok: ${topic}`,
   },
   notices: {

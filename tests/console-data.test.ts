@@ -154,10 +154,18 @@ test('project files show the stack, status, page and links in the page language'
 });
 
 test('an untranslated project summary is marked as English on the Turkish page', () => {
-  const lines = fileLines(build('tr'), ['projects', 'asion.txt']);
+  const data = build('tr');
+  const lines = fileLines(data, ['projects', 'asion.txt']);
   const summary = lines.find((line) => line.type === 'text' && plainText(line).startsWith('A cross-platform'));
   assert.ok(summary && summary.type === 'text');
   assert.equal(summary.lang, 'en');
+  // Titles are proper names ('Açık Matematik'): never read with another language's voice.
+  const titles = [lines[0], ...data.docs.projects.filter((line) => plainText(line) === 'Asion')];
+  assert.equal(titles.length, 2);
+  for (const title of titles) {
+    assert.ok(title?.type === 'text' && plainText(title) === 'Asion');
+    assert.equal(title.lang, undefined);
+  }
   const translated = fileLines(build('tr'), ['projects', 'karecik.txt'])[1];
   assert.ok(translated?.type === 'text');
   assert.equal(translated.lang, undefined);
@@ -221,6 +229,7 @@ test('every error code has a message in both languages that keeps the values', (
     { code: 'too-many-arguments', command: 'cd' },
     { code: 'unterminated-quote', quote: '"' },
     { code: 'unknown-project', name: 'zeta' },
+    { code: 'ambiguous-project', name: 'a', candidates: ['acik-matematik', 'asion'] },
     { code: 'unknown-help-topic', topic: 'zeta' },
   ];
   for (const locale of LOCALES) {
@@ -228,7 +237,7 @@ test('every error code has a message in both languages that keeps the values', (
     for (const error of errors) {
       const message = describeError(error, m);
       assert.ok(message.length > 0);
-      for (const value of Object.values(error)) {
+      for (const value of Object.values(error).flat()) {
         if (value !== error.code) assert.ok(message.includes(String(value)), `${locale} ${error.code}: ${message}`);
       }
     }

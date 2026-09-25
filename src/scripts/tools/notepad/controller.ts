@@ -36,6 +36,7 @@ import { convertLineEndings, countCharactersBounded, lineColumnAt } from '../../
 import type { LineEnding, TextStats } from '../../../lib/text/stats.ts';
 import { createAutosave } from './autosave.ts';
 import { createConfirmDialog } from './confirm-dialog.ts';
+import { hasFiles, installPageDropGuard } from './drop.ts';
 import { createHighlighter } from './highlighter.ts';
 import { IS_APPLE, ariaShortcut, hasPrimaryModifier, isLetter, shortcutLabel } from './keyboard.ts';
 import { createSearchRunner } from './search-runner.ts';
@@ -127,11 +128,6 @@ function isHighSurrogate(code: number): boolean {
 
 function isLowSurrogate(code: number): boolean {
   return code >= 0xdc00 && code <= 0xdfff;
-}
-
-function hasFiles(event: DragEvent): boolean {
-  const types = event.dataTransfer?.types;
-  return !!types && Array.from(types).includes('Files');
 }
 
 function isComposing(event: KeyboardEvent): boolean {
@@ -1614,7 +1610,9 @@ export function initNotepad(root: HTMLElement): void {
   // Android's picker greys out files whose extension it can't map to a type (such as .md).
   if (/Android/i.test(navigator.userAgent)) el.openInput.removeAttribute('accept');
 
-  // Dropping a file anywhere on the tool opens it (instead of the browser leaving the page).
+  // Dropping a file anywhere on the tool opens it (instead of the browser leaving the page);
+  // a file dropped elsewhere on the page is refused rather than opened in the tab.
+  installPageDropGuard(window);
   root.addEventListener('dragover', (event) => {
     if (!hasFiles(event)) return;
     event.preventDefault();

@@ -1,0 +1,410 @@
+---
+/**
+ * Image compressor UI. Behaviour lives in src/scripts/tools/image-compressor/controller.ts;
+ * every hook is a data-* attribute scoped to the root section. Text comes from
+ * src/i18n/tools/image-compressor.ts (the controller reads the same catalogue).
+ */
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { formatters } from '../../i18n/format';
+import { getLocale } from '../../i18n/server';
+import { imageCompressorMessages } from '../../i18n/tools/image-compressor';
+import { DEFAULT_QUALITY, MAX_DIMENSION_CHOICES, MAX_QUALITY, MIN_QUALITY } from '../../lib/image/compress/settings';
+
+const locale = getLocale(Astro);
+const m = imageCompressorMessages[locale];
+const f = formatters(locale);
+const defaultQualityText = f.percent(DEFAULT_QUALITY / 100);
+
+/** One option of a segmented control: a visually hidden radio inside its label. */
+const segment =
+  'relative flex min-h-10 cursor-pointer items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors select-none hover:text-zinc-900 has-checked:bg-white has-checked:text-zinc-900 has-checked:shadow-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent-700 has-disabled:cursor-not-allowed has-disabled:opacity-45 has-disabled:hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-100 dark:has-checked:bg-zinc-700 dark:has-checked:text-zinc-50 dark:has-focus-visible:outline-accent-400 dark:has-disabled:hover:text-zinc-400';
+const segmentGroup =
+  'flex rounded-lg border border-zinc-200 bg-zinc-100/80 p-0.5 dark:border-zinc-800 dark:bg-zinc-950';
+/** A margin note next to the control it explains; amber for things that change the picture. */
+const note =
+  'border-l-2 border-zinc-300 pl-3 text-sm leading-relaxed text-zinc-700 data-[tone=warning]:border-amber-500 dark:border-zinc-600 dark:text-zinc-300 dark:data-[tone=warning]:border-amber-400';
+/** Small label on the image corners. */
+const chip =
+  'label-mono pointer-events-none absolute rounded-md bg-white/85 px-2 py-1 text-zinc-700 shadow-sm backdrop-blur-sm transition-opacity duration-200 dark:bg-zinc-950/80 dark:text-zinc-300';
+/** Sizes an image (or its frame) from the output size: fit the box, or 1:1 in CSS pixels. */
+const sized =
+  'aspect-[var(--w)/var(--h)] w-[min(100%,calc(var(--stage-max)*var(--w)/var(--h)))] max-w-none group-data-[zoom=actual]/compare:w-[calc(var(--w)*1px)]';
+const frame =
+  'relative isolate overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900';
+const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case tracking-normal`;
+---
+
+<section data-image-compressor aria-label={m.toolLabel} class="mt-8 sm:mt-10">
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <noscript>
+    <p
+      class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+    >
+      {m.noscript}
+    </p>
+  </noscript>
+
+  <!-- 1. Drop zone / file picker (compact once an image is open) -->
+  <label
+    data-dropzone
+    class="group relative isolate flex min-h-64 cursor-pointer flex-col items-center justify-center gap-4 overflow-hidden rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-10 text-center transition-colors hover:border-accent-600 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent-700 data-[compact]:min-h-0 data-[compact]:flex-row data-[compact]:justify-start data-[compact]:gap-3 data-[compact]:px-4 data-[compact]:py-2.5 data-[compact]:text-left data-[dragover]:border-accent-600 data-[dragover]:bg-accent-50 sm:min-h-80 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent-500 dark:has-focus-visible:outline-accent-400 dark:data-[dragover]:border-accent-500 dark:data-[dragover]:bg-accent-500/10"
+  >
+    <input data-file-input type="file" accept="image/*" class="sr-only" />
+    <div class="bg-graph mask-fade-radial pointer-events-none absolute inset-0 -z-10 group-data-[compact]:hidden" aria-hidden="true">
+    </div>
+    <!--
+      An 8 × 8 block and the zigzag order in which JPEG stores its frequencies: the
+      highlighted cell is the block's average (DC) value, the part compression keeps best.
+    -->
+    <svg
+      viewBox="-1 -1 66 66"
+      class="size-16 shrink-0 text-zinc-400 group-data-[compact]:size-9 dark:text-zinc-500"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="0" y="0" width="8" height="8" class="fill-accent-600/25 dark:fill-accent-400/25"></rect>
+      <path
+        d="M0 0h64v64H0zM8 0v64M16 0v64M24 0v64M32 0v64M40 0v64M48 0v64M56 0v64M0 8h64M0 16h64M0 24h64M0 32h64M0 40h64M0 48h64M0 56h64"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1"
+        vector-effect="non-scaling-stroke"
+        opacity="0.6"></path>
+      <path
+        d="M4 4H12L4 12V20L12 12L20 4H28L20 12L12 20L4 28V36L12 28L20 20L28 12L36 4"
+        fill="none"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+        vector-effect="non-scaling-stroke"
+        class="stroke-accent-700 dark:stroke-accent-400"></path>
+      <circle cx="4" cy="4" r="2.25" class="fill-accent-700 dark:fill-accent-400"></circle>
+    </svg>
+    <span class="flex min-w-0 flex-col items-center gap-1 group-data-[compact]:items-start">
+      <span data-dropzone-title class="text-lg font-semibold text-zinc-900 group-data-[compact]:text-sm dark:text-zinc-100">
+        {m.dropzone.title}
+      </span>
+      <span class="text-sm text-zinc-600 pointer-coarse:hidden dark:text-zinc-400">{m.dropzone.drop}</span>
+      <span class="hidden text-sm text-zinc-600 group-data-[compact]:hidden pointer-fine:inline dark:text-zinc-400">
+        {
+          locale === 'tr' ? (
+            <>
+              <kbd data-paste-key class={ui.kbd}>Ctrl V</kbd> ile panodan da yapıştırabilirsiniz.
+            </>
+          ) : (
+            <>
+              You can also paste it with <kbd data-paste-key class={ui.kbd}>Ctrl V</kbd>.
+            </>
+          )
+        }
+      </span>
+    </span>
+    <span class="flex flex-col items-center gap-0.5 group-data-[compact]:hidden">
+      <span class="font-mono text-xs tracking-wide text-zinc-700 dark:text-zinc-300">{m.dropzone.formats}</span>
+      <span class="text-xs text-zinc-600 dark:text-zinc-400">{m.dropzone.formatsHint}</span>
+    </span>
+  </label>
+
+  <p data-status class="mt-3 text-sm text-zinc-600 empty:hidden dark:text-zinc-400" aria-hidden="true"></p>
+
+  <!-- 2. Errors and notices -->
+  <div
+    data-error
+    hidden
+    class="mt-4 flex items-start gap-3 rounded-xl border border-rose-300 bg-rose-50 py-1.5 pr-1.5 pl-4 text-sm text-rose-950 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-100"
+  >
+    <Icon name="alert" class="mt-3 size-4 shrink-0" />
+    <div role="alert" class="min-w-0 flex-1 py-2">
+      <p data-error-message class="font-medium break-words"></p>
+      <p data-error-hint class="mt-1 empty:hidden"></p>
+    </div>
+    <button
+      type="button"
+      data-error-dismiss
+      aria-label={m.errors.dismiss}
+      class="flex size-11 shrink-0 items-center justify-center rounded-lg opacity-70 transition-opacity hover:bg-black/5 hover:opacity-100 dark:hover:bg-white/10"
+    >
+      <Icon name="close" class="size-5" />
+    </button>
+  </div>
+
+  <p data-notice hidden class="mt-4 flex items-start gap-2 text-sm text-zinc-700 dark:text-zinc-300">
+    <Icon name="info" class="mt-0.5 size-4 shrink-0 text-zinc-500" />
+    <span data-notice-message></span>
+  </p>
+
+  <!-- 3. Workspace: comparison, result, settings -->
+  <div
+    data-workspace
+    hidden
+    class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]"
+  >
+    <figure
+      data-compare
+      data-view="split"
+      data-zoom="fit"
+      aria-busy="false"
+      class="group/compare min-w-0 [--h:3] [--stage-max:min(62svh,34rem)] [--w:4] lg:row-span-2 lg:[--stage-max:min(74svh,46rem)]"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+        <div class="flex min-w-0 flex-1 items-center gap-2">
+          <span class="label-mono shrink-0 text-accent-700 dark:text-accent-400" aria-hidden="true">{m.compare.figure}</span>
+          <h2 class="sr-only">{m.compare.heading}</h2>
+          <p data-file-name class="min-w-0 truncate text-sm font-medium text-zinc-900 dark:text-zinc-100"></p>
+          <button type="button" data-remove-file aria-label={m.file.remove} class:list={[ui.iconButton, 'hover:text-rose-700 dark:hover:text-rose-400']}>
+            <Icon name="close" class="size-5" />
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <fieldset class="hidden md:block">
+            <legend class="sr-only">{m.compare.view}</legend>
+            <div class={segmentGroup}>
+              <label class={segment}>
+                <input type="radio" name="ic-view" value="split" data-view class="sr-only" />
+                {m.compare.viewSplit}
+              </label>
+              <label class={segment}>
+                <input type="radio" name="ic-view" value="side" data-view class="sr-only" />
+                {m.compare.viewSide}
+              </label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend class="sr-only">{m.compare.zoom}</legend>
+            <div class={segmentGroup}>
+              <label class={segment}>
+                <input type="radio" name="ic-zoom" value="fit" data-zoom class="sr-only" checked />
+                {m.compare.zoomFit}
+              </label>
+              <label class:list={[segment, 'font-mono']}>
+                <input type="radio" name="ic-zoom" value="actual" data-zoom class="sr-only" aria-label={m.compare.zoomActualLabel} />
+                <span aria-hidden="true">{m.compare.zoomActual}</span>
+              </label>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+
+      <!-- Split view: one image, the divider shows the original on the left -->
+      <div data-split-view class="mt-3">
+        <div data-stage class:list={[frame, 'group-data-[zoom=actual]/compare:cursor-grab data-[panning]:cursor-grabbing']}>
+          <div class="bg-graph-fine absolute inset-0 -z-10" aria-hidden="true"></div>
+          <div
+            data-viewport
+            class="max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:overflow-auto"
+          >
+            <div data-canvas class:list={['relative mx-auto', sized]}>
+              <img data-before alt="" hidden decoding="async" class="absolute inset-0 size-full max-w-none select-none" />
+              <img data-after alt="" hidden decoding="async" class="absolute inset-0 size-full max-w-none select-none" />
+            </div>
+          </div>
+          <div data-divider aria-hidden="true" class="group/divider pointer-events-none absolute top-0 left-0 w-0">
+            <div class="absolute inset-y-0 -left-px w-0.5 bg-white shadow-[0_0_0_1px_rgb(0_0_0/0.3)]"></div>
+            <div
+              data-handle
+              class="pointer-events-auto absolute top-1/2 left-0 flex size-11 -translate-x-1/2 -translate-y-1/2 cursor-ew-resize touch-none items-center justify-center"
+            >
+              <span
+                class="flex size-8 items-center justify-center rounded-full border-2 border-white bg-accent-700 text-white shadow-md transition-transform duration-150 group-data-[dragging]/divider:scale-110 group-data-[focused]/divider:outline-2 group-data-[focused]/divider:outline-offset-2 group-data-[focused]/divider:outline-accent-700 dark:bg-accent-500 dark:text-zinc-950 dark:group-data-[focused]/divider:outline-accent-400"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4" focusable="false">
+                  <path d="m9 7-5 5 5 5M15 7l5 5-5 5"></path>
+                </svg>
+              </span>
+            </div>
+          </div>
+          <span data-label-before class:list={[chip, 'top-2 left-2']} aria-hidden="true">{m.compare.before}</span>
+          <span data-label-after class:list={[chip, 'top-2 right-2']} aria-hidden="true">{m.compare.after}</span>
+          <span data-busy hidden class={busyChip}>
+            <span class="size-1.5 rounded-full bg-accent-600 motion-safe:animate-pulse dark:bg-accent-400"></span>
+            {m.status.compressing}
+          </span>
+        </div>
+        <label for="ic-divider" class="sr-only">{m.compare.divider}</label>
+        <input
+          id="ic-divider"
+          data-divider-input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          value="50"
+          class="mt-1 block h-11 w-full cursor-pointer accent-accent-700 dark:accent-accent-500"
+        />
+      </div>
+
+      <!-- Side-by-side view (medium screens and up) -->
+      <div data-side-view hidden class="mt-3 grid gap-3 md:grid-cols-2">
+        <div class={frame}>
+          <div class="bg-graph-fine absolute inset-0 -z-10" aria-hidden="true"></div>
+          <div
+            data-side-viewport
+            class="max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:cursor-grab group-data-[zoom=actual]/compare:overflow-auto data-[panning]:cursor-grabbing"
+          >
+            <img data-side-before alt="" hidden decoding="async" class:list={['mx-auto block select-none', sized]} />
+          </div>
+          <span class:list={[chip, 'top-2 left-2']} aria-hidden="true">{m.compare.before}</span>
+        </div>
+        <div class={frame}>
+          <div class="bg-graph-fine absolute inset-0 -z-10" aria-hidden="true"></div>
+          <div
+            data-side-viewport
+            class="max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:cursor-grab group-data-[zoom=actual]/compare:overflow-auto data-[panning]:cursor-grabbing"
+          >
+            <img data-side-after alt="" hidden decoding="async" class:list={['mx-auto block select-none', sized]} />
+          </div>
+          <span class:list={[chip, 'top-2 left-2']} aria-hidden="true">{m.compare.after}</span>
+          <span data-busy hidden class={busyChip}>
+            <span class="size-1.5 rounded-full bg-accent-600 motion-safe:animate-pulse dark:bg-accent-400"></span>
+            {m.status.compressing}
+          </span>
+        </div>
+      </div>
+
+      <figcaption class="mt-1 grid gap-x-4 gap-y-1 font-mono text-xs text-zinc-600 tabular-nums sm:grid-cols-2 dark:text-zinc-400">
+        <span data-caption-before class="min-w-0 break-words"></span>
+        <span data-caption-after class="min-w-0 break-words sm:text-right group-data-[view=side]/compare:sm:text-left"></span>
+      </figcaption>
+    </figure>
+
+    <!-- Result -->
+    <section data-result aria-labelledby="ic-result-heading" aria-busy="false" class:list={[ui.card, 'p-5 sm:p-6']}>
+      <div class="flex items-center justify-between gap-3">
+        <h2 id="ic-result-heading" class="label-mono text-zinc-600 dark:text-zinc-400">{m.result.heading}</h2>
+        <span data-result-busy hidden class="flex items-center gap-2 font-mono text-xs text-zinc-600 dark:text-zinc-400">
+          <span class="size-1.5 rounded-full bg-accent-600 motion-safe:animate-pulse dark:bg-accent-400"></span>
+          {m.status.compressing}
+        </span>
+      </div>
+      <div data-result-body class="transition-opacity duration-200 data-[busy]:opacity-55">
+        <p
+          data-headline
+          class="mt-3 font-serif text-3xl leading-tight font-medium tracking-tight text-balance text-zinc-900 tabular-nums data-[tone=larger]:text-amber-800 dark:text-zinc-50 dark:data-[tone=larger]:text-amber-300"
+        >
+          —
+        </p>
+        <p data-sizes class="mt-1 font-mono text-sm text-zinc-600 tabular-nums dark:text-zinc-400"></p>
+
+        <div aria-hidden="true" class="mt-5 grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2">
+          <span class="label-mono text-zinc-600 dark:text-zinc-400">{m.compare.before}</span>
+          <span class="block h-1.5 bg-zinc-100 dark:bg-zinc-800">
+            <span data-bar-before class="block h-full origin-left bg-zinc-400 transition-transform duration-300 dark:bg-zinc-500"></span>
+          </span>
+          <span class="label-mono text-zinc-600 dark:text-zinc-400">{m.compare.after}</span>
+          <span class="block h-1.5 bg-zinc-100 dark:bg-zinc-800">
+            <span
+              data-bar-after
+              style="transform: scaleX(0)"
+              class="block h-full origin-left bg-accent-600 transition-transform duration-300 dark:bg-accent-400"
+            ></span>
+          </span>
+        </div>
+
+        <p data-advice hidden class="mt-4 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">{m.result.notSmallerAdvice}</p>
+
+        <div class="mt-5 flex flex-col gap-2">
+          <button type="button" data-download-original hidden class:list={[ui.buttonPrimary, 'min-h-12 w-full']}>
+            <Icon name="download" class="size-4" />
+            {m.result.downloadOriginal}
+          </button>
+          <button
+            type="button"
+            data-download
+            data-variant="primary"
+            aria-disabled="true"
+            aria-describedby="ic-output-name"
+            class:list={[
+              ui.buttonPrimary,
+              'min-h-12 w-full aria-disabled:cursor-not-allowed aria-disabled:opacity-60',
+              'data-[variant=secondary]:border data-[variant=secondary]:border-zinc-300 data-[variant=secondary]:bg-white data-[variant=secondary]:font-medium data-[variant=secondary]:text-zinc-900 data-[variant=secondary]:shadow-none data-[variant=secondary]:hover:bg-zinc-100',
+              'dark:data-[variant=secondary]:border-zinc-700 dark:data-[variant=secondary]:bg-zinc-900 dark:data-[variant=secondary]:text-zinc-100 dark:data-[variant=secondary]:hover:bg-zinc-800',
+            ]}
+          >
+            <Icon name="download" class="size-4" />
+            <span data-download-label>{m.result.download}</span>
+          </button>
+        </div>
+        <p id="ic-output-name" data-output-name class="mt-2 truncate text-center font-mono text-xs text-zinc-600 dark:text-zinc-400"></p>
+        <p data-original-meta hidden class="mt-2 text-center text-xs text-zinc-600 dark:text-zinc-400">
+          {m.result.originalKeepsMetadata}
+        </p>
+
+        <p data-details class="mt-5 border-t border-zinc-200 pt-4 font-mono text-xs text-zinc-600 tabular-nums empty:hidden dark:border-zinc-800 dark:text-zinc-400"></p>
+        <p class="mt-3 flex items-start gap-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
+          <Icon name="lock" class="mt-0.5 size-4 shrink-0 text-accent-700 dark:text-accent-400" />
+          <span>{m.result.metadata}</span>
+        </p>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <form data-settings aria-labelledby="ic-settings-heading" class:list={[ui.card, 'p-5 sm:p-6']}>
+      <h2 id="ic-settings-heading" class="label-mono text-zinc-600 dark:text-zinc-400">{m.settings.heading}</h2>
+      <div class="mt-4 flex flex-col gap-7">
+        <div>
+          <div class="flex items-baseline justify-between gap-3">
+            <label for="ic-quality" class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{m.settings.quality}</label>
+            <output data-quality-output for="ic-quality" class="font-mono text-sm text-zinc-900 tabular-nums dark:text-zinc-100">
+              {defaultQualityText}
+            </output>
+          </div>
+          <input
+            id="ic-quality"
+            data-quality
+            type="range"
+            min={MIN_QUALITY}
+            max={MAX_QUALITY}
+            step="1"
+            value={DEFAULT_QUALITY}
+            aria-valuetext={defaultQualityText}
+            aria-describedby="ic-quality-hint ic-quality-note"
+            class="mt-1 block h-11 w-full cursor-pointer accent-accent-700 transition-opacity data-[inactive]:opacity-50 dark:accent-accent-500"
+          />
+          <div aria-hidden="true" class="flex justify-between gap-3 font-mono text-[0.6875rem] text-zinc-600 dark:text-zinc-400">
+            <span>{m.settings.qualityMin}</span>
+            <span class="text-right">{m.settings.qualityMax}</span>
+          </div>
+          <p id="ic-quality-hint" class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{m.settings.qualityHint}</p>
+          <p id="ic-quality-note" data-quality-note hidden class:list={[note, 'mt-3']}></p>
+        </div>
+
+        <fieldset aria-describedby="ic-format-notes">
+          <legend class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{m.settings.format}</legend>
+          <div class:list={[segmentGroup, 'mt-2 grid grid-cols-3 gap-0.5']}>
+            <label class:list={[segment, 'min-h-12 flex-col px-1 leading-tight']}>
+              <input type="radio" name="ic-format" value="original" data-format class="sr-only" checked />
+              <span>{m.settings.formatOriginal}</span>
+              <span data-original-format class="font-mono text-[0.6875rem] font-normal text-zinc-600 empty:hidden dark:text-zinc-400"></span>
+            </label>
+            <label class:list={[segment, 'min-h-12 px-1']}>
+              <input type="radio" name="ic-format" value="webp" data-format class="sr-only" />
+              {m.settings.formatWebp}
+            </label>
+            <label class:list={[segment, 'min-h-12 px-1']}>
+              <input type="radio" name="ic-format" value="jpeg" data-format class="sr-only" />
+              {m.settings.formatJpeg}
+            </label>
+          </div>
+          <div id="ic-format-notes" data-format-notes data-note-class={note} class="mt-3 flex flex-col gap-2 empty:hidden"></div>
+        </fieldset>
+
+        <div>
+          <label for="ic-size" class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{m.settings.size}</label>
+          <select id="ic-size" data-max-dimension aria-describedby="ic-size-hint ic-size-note" class:list={[ui.field, 'mt-2 cursor-pointer']}>
+            <option value="">{m.settings.sizeOriginal}</option>
+            {MAX_DIMENSION_CHOICES.map((pixels) => <option value={pixels}>{m.settings.sizeOption(pixels)}</option>)}
+          </select>
+          <p id="ic-size-hint" class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{m.settings.sizeHint}</p>
+          <p id="ic-size-note" data-size-note hidden class:list={[note, 'mt-3']}></p>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<script>
+  import { initImageCompressor } from '../../scripts/tools/image-compressor/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-image-compressor]').forEach(initImageCompressor);
+</script>

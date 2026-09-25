@@ -1,0 +1,121 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ImageCompressor from '../../../components/tools/ImageCompressor.astro';
+import Icon from '../../../components/ui/Icon.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import { ui } from '../../../components/ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { formatters } from '../../../i18n/format';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { imageCompressorMessages } from '../../../i18n/tools/image-compressor';
+import { MOBILE_MAX_CANVAS_AREA } from '../../../lib/image/compress/fit';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = imageCompressorMessages[locale];
+const t = common[locale];
+const canvasPixels = formatters(locale).number(MOBILE_MAX_CANVAS_AREA);
+const strong = 'font-medium text-zinc-900 dark:text-zinc-100';
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="full">
+  <PageHeader
+    eyebrow={m.header.eyebrow}
+    title={m.meta.title}
+    lead={m.header.lead}
+    back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+  />
+
+  <ImageCompressor />
+
+  <div class="mt-12 grid max-w-5xl gap-6 sm:mt-16 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
+    <aside
+      aria-label={m.privacy.label}
+      class="flex gap-3 rounded-xl border border-accent-600/20 bg-accent-50 p-4 text-sm leading-relaxed text-accent-950 sm:p-5 dark:border-accent-500/25 dark:bg-accent-500/10 dark:text-accent-100"
+    >
+      <Icon name="lock" class="mt-0.5 size-5 shrink-0 text-accent-700 dark:text-accent-400" />
+      <p><strong class="font-semibold">{m.privacy.title}</strong> {m.privacy.body}</p>
+    </aside>
+
+    <details class:list={['group', ui.card]}>
+      <summary
+        class="flex min-h-12 list-none items-center justify-between gap-3 rounded-xl px-4 text-base font-semibold sm:px-5 [&::-webkit-details-marker]:hidden"
+      >
+        {m.tips}
+        <Icon name="chevron-down" class="size-5 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180" />
+      </summary>
+      {
+        locale === 'tr' ? (
+          <ul class="flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400">
+            <li>
+              <strong class={strong}>Hangi biçim?</strong> WebP, aynı görsel kalitede genellikle en küçük dosyayı verir ve
+              saydamlığı korur. JPEG her yerde, eski yazılımlarda bile açılır. PNG kayıpsızdır: ekran görüntüleri ve
+              diyagramlar için uygundur, ancak yeniden kodlanan bir PNG nadiren orijinalinden küçük olur.
+            </li>
+            <li>
+              <strong class={strong}>Doğru kaliteyi bulmak.</strong> 75 ile başlayın, 1:1 görünüme geçin ve ayırıcıyı
+              kenarların, gökyüzünün ve yazıların üzerinde gezdirin: bloklanma ve hale gibi bozulmalar ilk orada görünür.
+              Bozulmaları fark edene kadar kaliteyi düşürün, sonra bir adım geri çıkın.
+            </li>
+            <li>
+              <strong class={strong}>Sıkıştırmadan önce boyutlandırın.</strong> Piksel sayısı kenar uzunluğunun karesiyle
+              artar: genişliği ve yüksekliği yarıya indirmek piksellerin yalnızca dörtte birini bırakır. Çoğu ekranda tam
+              ekran bir fotoğraf için 1920 px yeterlidir; e-posta ve mesajlaşma için 1280 px uygundur.
+            </li>
+            <li>
+              <strong class={strong}>Klavye.</strong> Bir görseli <kbd class={ui.kbd}>Ctrl</kbd>{' '}
+              <kbd class={ui.kbd}>V</kbd> ile yapıştırın (Mac’te <kbd class={ui.kbd}>⌘</kbd> <kbd class={ui.kbd}>V</kbd>).
+              Ayırıcı ve kalite kaydırıcıları ok tuşlarıyla hareket eder; <kbd class={ui.kbd}>Home</kbd> ve{' '}
+              <kbd class={ui.kbd}>End</kbd> tuşları uçlara atlar.
+            </li>
+            <li>
+              <strong class={strong}>Neler kaldırılır?</strong> Sıkıştırılmış kopyada EXIF verisi bulunmaz: kamera
+              modeli, çekim zamanı ya da GPS konumu yer almaz. Renkler, web’in standart renk uzayı olan sRGB’ye
+              dönüştürülür.
+            </li>
+            <li>
+              <strong class={strong}>Telefon ve tabletlerde büyük fotoğraflar.</strong> Araç bu cihazlarda en fazla{' '}
+              {canvasPixels} piksellik (4096 × 4096) bir tuvalle çalışır; bu, iOS Safari’nin izin verdiği en büyük
+              tuvaldir. Daha büyük fotoğraflar sığacak şekilde küçültülür ve araç bunu size bildirir.
+            </li>
+          </ul>
+        ) : (
+          <ul class="flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400">
+            <li>
+              <strong class={strong}>Which format?</strong> WebP is usually the smallest at the same visual quality and
+              keeps transparency. JPEG opens everywhere, even in older software. PNG is lossless: right for screenshots
+              and diagrams, but a re-encoded PNG is rarely smaller than the original.
+            </li>
+            <li>
+              <strong class={strong}>Finding the quality.</strong> Start at 75, switch to 1:1 and move the divider across
+              edges, skies and text: blocky patches and halos show up there first. Lower the quality until you notice
+              them, then go back up a step.
+            </li>
+            <li>
+              <strong class={strong}>Resize before you compress.</strong> The pixel count grows with the square of the
+              side: halving the width and height leaves only a quarter of the pixels. 1920 px is enough for a full-screen
+              photo on most displays; 1280 px suits email and chat.
+            </li>
+            <li>
+              <strong class={strong}>Keyboard.</strong> Paste an image with <kbd class={ui.kbd}>Ctrl</kbd>{' '}
+              <kbd class={ui.kbd}>V</kbd> (<kbd class={ui.kbd}>⌘</kbd> <kbd class={ui.kbd}>V</kbd> on a Mac). The divider
+              and quality sliders move with the arrow keys; <kbd class={ui.kbd}>Home</kbd> and{' '}
+              <kbd class={ui.kbd}>End</kbd> jump to the ends.
+            </li>
+            <li>
+              <strong class={strong}>What is removed.</strong> The compressed copy carries no EXIF data: no camera model,
+              capture time or GPS location. Colors are converted to sRGB, the standard color space of the web.
+            </li>
+            <li>
+              <strong class={strong}>Large photos on phones and tablets.</strong> On these devices the tool works within
+              a canvas of at most {canvasPixels} pixels (4096 × 4096), the largest that iOS Safari allows. Larger photos
+              are scaled down to fit, and the tool tells you when that happens.
+            </li>
+          </ul>
+        )
+      }
+    </details>
+  </div>
+</BaseLayout>

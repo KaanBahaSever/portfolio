@@ -1,11 +1,20 @@
 /**
  * Compress PDF: DOM wiring and state (browser only).
  * Everything happens on the device; nothing is uploaded.
+ *
+ * Interface text comes from src/i18n/tools/pdf-compress.ts in the page's language
+ * (<html lang>). The worker, the engine and the libraries report codes; this file is the one
+ * place that turns them into sentences. Console messages stay in English for developers.
  */
 
+import { getPageLocale } from '../../../i18n/client.ts';
+import { formatters } from '../../../i18n/format.ts';
+import { pdfCompressMessages } from '../../../i18n/tools/pdf-compress.ts';
 import { saveBlob } from '../../../lib/download.ts';
-import { formatBytes, toPdfFilename } from '../../../lib/files/filename.ts';
+import { toPdfFilename } from '../../../lib/files/filename.ts';
 import type { CompressProgress, CompressStats, PdfSummary, TranscodeRequest } from '../../../lib/pdf/compress/compress-pdf.ts';
+import { compressOutcome, displayedSaving, imageOutlook } from '../../../lib/pdf/compress/outcome.ts';
+import type { CompressOutcome } from '../../../lib/pdf/compress/outcome.ts';
 import { DEFAULT_LEVEL, isCompressionLevel } from '../../../lib/pdf/compress/plan.ts';
 import type { CompressionLevel } from '../../../lib/pdf/compress/plan.ts';
 import { PDF_SNIFF_BYTES, compressedBaseName, looksLikePdf } from '../../../lib/pdf/compress/sniff.ts';
@@ -24,12 +33,8 @@ type NoticeTone = 'info' | 'warning';
 const LARGE_FILE_BYTES_TOUCH = 100 * 1024 * 1024;
 /** Largest image (in pixels) decoded for recompression; phones have far less memory. */
 const MAX_IMAGE_PIXELS = { touch: 30_000_000, other: 100_000_000 };
-/** Results that save less than this are reported as "nothing to gain". */
-const MIN_USEFUL_SAVING = 0.01;
 /** In-app browsers (social apps) that often ignore downloads of generated files. */
 const IN_APP_BROWSER = /FBAN|FBAV|Instagram|LinkedInApp|Line\/|Snapchat|musical_ly|BytedanceWebview/i;
-
-const LEVEL_NAMES: Record<CompressionLevel, string> = { light: 'Light', balanced: 'Balanced', strong: 'Strong' };
 
 function isAbortError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && (error as { name?: unknown }).name === 'AbortError';
@@ -53,10 +58,6 @@ function looksLikeOutOfMemory(error: unknown): boolean {
 function isUnreadableFile(error: unknown): boolean {
   const name = errorName(error);
   return name === 'NotReadableError' || name === 'NotFoundError' || name === 'SecurityError';
-}
-
-function plural(count: number, word: string): string {
-  return `${count} ${word}${count === 1 ? '' : 's'}`;
 }
 
 function hasFiles(event: DragEvent): boolean {
@@ -117,6 +118,7 @@ function getElements(root: HTMLElement) {
     barResultLabel: query<HTMLElement>(root, '[data-bar-result-label]'),
     resultDetails: query<HTMLElement>(root, '[data-result-details]'),
     download: query<HTMLAnchorElement>(root, '[data-download]'),
+    downloadLabel: query<HTMLElement>(root, '[data-download-label]'),
   };
 }
 
@@ -125,6 +127,9 @@ export function initPdfCompress(root: HTMLElement): void {
   root.dataset.initialized = 'true';
 
   const el = getElements(root);
+  const locale = getPageLocale();
+  const m = pdfCompressMessages[locale];
+  const f = formatters(locale);
 
   let phase: Phase = 'empty';
   let file: File | null = null;
@@ -198,14 +203,18 @@ export function initPdfCompress(root: HTMLElement): void {
 
   // ---------------------------------------------------------------- rendering
 
+  /** What the chosen level can do with the loaded PDF's images (no full stop). */
   function imagesText(level: CompressionLevel): string {
     if (!summary) return '';
-    const count = summary.imageCounts[level];
-    if (count > 0) return `${plural(count, 'image')} can be recompressed at ${LEVEL_NAMES[level]}`;
-    if (level === 'light' && summary.imageCounts.balanced > 0) {
-      return `No JPEG photos to recompress at Light; Balanced can convert ${plural(summary.imageCounts.balanced, 'image')}`;
+    const outlook = imageOutlook(summary.imageCounts, level);
+    switch (outlook.kind) {
+      case 'recompressible':
+        return m.outlook.recompressible(outlook.count, outlook.level);
+      case 'lossless-only':
+        return m.outlook.losslessOnly(outlook.count);
+      default:
+        return m.outlook.none;
     }
-    return 'No large images found, so expect only a small reduction';
   }
 
   function updateUi(): void {
@@ -214,18 +223,18 @@ export function initPdfCompress(root: HTMLElement): void {
 
     if (hasFile) el.dropzone.dataset.compact = '';
     else delete el.dropzone.dataset.compact;
-    el.dropzoneTitle.textContent = hasFile ? 'Choose a different PDF' : 'Choose a PDF';
+    el.dropzoneTitle.textContent = hasFile ? m.chooseAnother : m.chooseFile;
     el.input.disabled = compressing;
     if (compressing) el.dropzone.dataset.disabled = '';
     else delete el.dropzone.dataset.disabled;
 
     el.fileCard.hidden = !hasFile;
     if (file) {
-      el.fileName.textContent = file.name || 'Untitled.pdf';
+      el.fileName.textContent = file.name || m.untitled;
       el.fileName.title = file.name;
-      const parts = [formatBytes(file.size)];
-      if (summary) parts.push(plural(summary.pageCount, 'page'));
-      else if (phase === 'opening') parts.push('Reading PDF…');
+      const parts = [f.bytes(file.size)];
+      if (summary) parts.push(m.pages(summary.pageCount));
+      else if (phase === 'opening') parts.push(m.readingPdf);
       el.fileMeta.textContent = parts.join(' · ');
       el.fileImages.textContent = imagesText(selectedLevel());
       el.fileImages.hidden = !summary;
@@ -252,80 +261,88 @@ export function initPdfCompress(root: HTMLElement): void {
     el.download.removeAttribute('href');
   }
 
-  function percent(value: number): string {
-    const rounded = Math.round(value * 100);
-    if (rounded === 0 && value > 0) return '<1%';
-    if (rounded === 100 && value < 1) return '99%'; // never claim the whole file is gone
-    return `${rounded}%`;
+  /** "54%" / "%54"; a smaller file never shows as 100% smaller. */
+  function percent(saving: number): string {
+    return f.percent(displayedSaving(saving));
   }
 
-  /** Lossless images that Light skipped but Balanced would convert (0 at other levels). */
-  function skippedAtLight(stats: CompressStats): number {
-    return stats.level === 'light' && stats.imagesConsidered === 0 ? (summary?.imageCounts.balanced ?? 0) : 0;
-  }
-
-  function detailsText(stats: CompressStats): string {
-    const parts = [`${LEVEL_NAMES[stats.level]} level`];
+  /** "Balanced level · 3 of 12 images recompressed · metadata removed" (no full stop). */
+  function detailsText(stats: CompressStats, outcome: CompressOutcome): string {
+    const parts = [m.details.level(stats.level)];
     if (stats.imagesConsidered === 0) {
-      parts.push(skippedAtLight(stats) > 0 ? 'no JPEG photos to recompress' : 'no large images to recompress');
+      parts.push(outcome.skippedAtLight > 0 ? m.details.noJpegPhotos : m.details.noLargeImages);
+    } else {
+      parts.push(m.details.recompressed(stats.imagesReplaced, stats.imagesConsidered));
     }
-    else parts.push(`${stats.imagesReplaced} of ${plural(stats.imagesConsidered, 'image')} recompressed`);
-    if (stats.duplicatesMerged > 0) parts.push(`${plural(stats.duplicatesMerged, 'duplicate')} merged`);
-    if (stats.metadataRemoved) parts.push('metadata removed');
+    if (stats.duplicatesMerged > 0) parts.push(m.details.duplicatesMerged(stats.duplicatesMerged));
+    if (stats.metadataRemoved) parts.push(m.details.metadataRemoved);
     return parts.join(' · ');
   }
 
+  function hintText(outcome: CompressOutcome): string {
+    switch (outcome.hint) {
+      case 'convert-lossless':
+        return m.hints['convert-lossless'](outcome.skippedAtLight);
+      case 'stronger-level':
+      case 'text-only':
+        return m.hints[outcome.hint];
+      default:
+        return '';
+    }
+  }
+
+  /** Joins sentences that already end with their own punctuation. */
+  function sentences(...parts: string[]): string {
+    return parts.filter(Boolean).join(' ');
+  }
+
+  /** Shows the result and returns what to announce (a separate message, written to be heard). */
   function showResult(blob: Blob, filename: string, originalSize: number, stats: CompressStats): string {
     revokeResult();
     const size = blob.size;
-    const saving = originalSize > 0 ? (originalSize - size) / originalSize : 0;
-    const smaller = size < originalSize && saving >= MIN_USEFUL_SAVING;
+    const outcome = compressOutcome(originalSize, size, stats, summary?.imageCounts.balanced ?? 0);
     const largest = Math.max(originalSize, size, 1);
+    const originalText = f.bytes(originalSize);
+    const sizeText = f.bytes(size);
 
     el.barOriginal.style.width = `${Math.max(1, (originalSize / largest) * 100)}%`;
     el.barResult.style.width = `${Math.max(1, (size / largest) * 100)}%`;
-    el.barOriginalLabel.textContent = formatBytes(originalSize);
-    el.barResultLabel.textContent = formatBytes(size);
+    el.barOriginalLabel.textContent = originalText;
+    el.barResultLabel.textContent = sizeText;
 
-    const sizes = `Original ${formatBytes(originalSize)} → ${formatBytes(size)}`;
+    const sizes = m.sizes(originalText, sizeText);
+    const details = detailsText(stats, outcome);
     let announcement: string;
-    if (smaller) {
+    if (outcome.kind === 'smaller') {
       el.result.dataset.tone = 'success';
-      el.resultTitle.textContent = `${sizes} (−${percent(saving)})`;
-      let details = `${detailsText(stats)}. The download has started.`;
-      if (inAppBrowser) details += ' If it doesn’t, open this page in Safari or Chrome.';
-      el.resultDetails.textContent = details;
-      el.download.textContent = 'Download again';
-      announcement = `Compressed. ${sizes}, ${percent(saving)} smaller. The download has started.`;
+      el.resultTitle.textContent = `${sizes} ${m.changeSmaller(percent(outcome.saving))}`;
+      el.resultDetails.textContent = sentences(`${details}.`, m.downloadStarted, inAppBrowser ? m.inAppDownloadHint : '');
+      el.downloadLabel.textContent = m.downloadAgain;
+      announcement = m.smallerAnnouncement(originalText, sizeText, percent(outcome.saving));
     } else {
       el.result.dataset.tone = 'neutral';
-      const skipped = skippedAtLight(stats);
-      const title = skipped > 0 ? 'Light can’t shrink this PDF — try Balanced' : 'This PDF is already well optimized — nothing to gain';
-      el.resultTitle.textContent = title;
-      const change = size < originalSize ? ` (−${percent(saving)})` : size > originalSize ? ' (larger)' : '';
-      let hint = '';
-      if (skipped > 0) {
-        hint = ` Balanced can convert ${plural(skipped, 'losslessly stored image')} to JPEG for a smaller file.`;
-      } else if (stats.level !== 'strong' && stats.imagesConsidered > 0) {
-        hint = ' A stronger level may still help, at lower image quality.';
-      } else if (stats.imagesConsidered === 0) {
-        hint = ' Text and vector graphics are already stored compactly.';
-      }
-      el.resultDetails.textContent = `${sizes}${change} · ${detailsText(stats)}.${hint}`;
-      el.download.textContent = 'Download anyway';
-      announcement = `${title.replace(' — ', ', ')}. ${sizes}.${hint}`;
+      const text = m.notSmaller[outcome.kind];
+      el.resultTitle.textContent = text.title;
+      const change =
+        outcome.change === 'smaller'
+          ? m.changeSmaller(percent(outcome.saving))
+          : outcome.change === 'larger'
+            ? m.changeLarger
+            : '';
+      const hint = hintText(outcome);
+      el.resultDetails.textContent = sentences(`${sentences(sizes, change)} · ${details}.`, hint);
+      el.downloadLabel.textContent = m.downloadAnyway;
+      announcement = sentences(text.announcement, m.sizesSpoken(originalText, sizeText), hint);
     }
 
-    // Offer the file when it is smaller, or when the user asked for metadata removal.
-    const offer = smaller || stats.metadataRemoved;
-    if (offer) {
+    if (outcome.offerDownload) {
       resultUrl = URL.createObjectURL(blob);
       el.download.href = resultUrl;
       el.download.download = filename;
     }
-    el.download.hidden = !offer;
+    el.download.hidden = !outcome.offerDownload;
     el.result.hidden = false;
-    if (smaller) saveBlob(blob, filename);
+    if (outcome.kind === 'smaller') saveBlob(blob, filename);
     return announcement;
   }
 
@@ -345,20 +362,12 @@ export function initPdfCompress(root: HTMLElement): void {
   }
 
   function describeOpenError(error: unknown, fileName: string): string {
-    if (error instanceof CompressEngineLoadError) {
-      return 'Couldn’t load the PDF engine. Check your connection and reload the page.';
-    }
-    if (error instanceof CompressFailure && error.code === 'encrypted') {
-      return `“${fileName}” is password-protected or encrypted, which isn’t supported. Remove the protection in a PDF app, then try again.`;
-    }
-    if (error instanceof CompressFailure && error.code === 'invalid') {
-      return `“${fileName}” couldn’t be read. The file may be damaged.`;
-    }
-    if (isUnreadableFile(error)) return `Couldn’t read “${fileName}”. Choose the file again.`;
-    if (looksLikeOutOfMemory(error)) {
-      return `This device ran out of memory while reading “${fileName}”. Close other tabs or apps, or try a smaller file.`;
-    }
-    return `Something went wrong while reading “${fileName}”. Reload the page and try again.`;
+    if (error instanceof CompressEngineLoadError) return m.errors.engine;
+    if (error instanceof CompressFailure && error.code === 'encrypted') return m.errors.encrypted(fileName);
+    if (error instanceof CompressFailure && error.code === 'invalid') return m.errors.invalid(fileName);
+    if (isUnreadableFile(error)) return m.errors.unreadable(fileName);
+    if (looksLikeOutOfMemory(error)) return m.errors.memoryOpening(fileName);
+    return m.errors.unknownOpening(fileName);
   }
 
   async function sniff(picked: File): Promise<boolean> {
@@ -380,7 +389,7 @@ export function initPdfCompress(root: HTMLElement): void {
     if (pick !== pickGeneration || phase === 'compressing') return;
     if (!isPdf) {
       // Keep whatever PDF was loaded (or is still being opened) before.
-      const message = `“${picked.name || 'This file'}” isn’t a PDF. Choose a PDF file.`;
+      const message = picked.name ? m.notPdf(picked.name) : m.notPdfUnnamed;
       showNotice({ key: 'file-error', tone: 'warning', message });
       announce(message);
       return;
@@ -395,11 +404,12 @@ export function initPdfCompress(root: HTMLElement): void {
     phase = 'opening';
     updateUi();
 
-    let announcement = `Reading ${picked.name}…`;
+    const displayName = picked.name || m.untitled;
+    let announcement = m.reading(displayName);
     if (coarsePointer && picked.size > LARGE_FILE_BYTES_TOUCH) {
-      const warning = `Large file (${formatBytes(picked.size)}). Compressing it needs several times this much memory, so on a phone or tablet the page may reload. Close other tabs and apps first, or use a computer.`;
+      const warning = m.largeFile(f.bytes(picked.size));
       showNotice({ key: 'large-file', tone: 'warning', message: warning });
-      announcement += ` ${warning}`;
+      announcement = sentences(announcement, warning);
     }
     announce(announcement);
 
@@ -415,11 +425,11 @@ export function initPdfCompress(root: HTMLElement): void {
       summary = opened.summary;
       phase = 'ready';
       updateUi();
-      announce(`${picked.name}: ${plural(summary.pageCount, 'page')}. ${imagesText(selectedLevel())}.`);
+      announce(m.loaded(displayName, m.pages(summary.pageCount), imagesText(selectedLevel())));
     } catch (error) {
       if (generation !== fileGeneration || isAbortError(error)) return;
       console.error('Compress PDF: could not open the file:', error);
-      const message = describeOpenError(error, picked.name);
+      const message = describeOpenError(error, displayName);
       file = null;
       summary = null;
       phase = 'empty';
@@ -447,7 +457,7 @@ export function initPdfCompress(root: HTMLElement): void {
     removeNotice('canvas-blocked');
     updateUi();
     el.input.focus();
-    announce('Removed the PDF');
+    announce(m.removed);
   }
 
   function acceptFiles(files: ArrayLike<File>): void {
@@ -457,7 +467,7 @@ export function initPdfCompress(root: HTMLElement): void {
     if (!first) return;
     const pdf = list.length > 1 ? (list.find((candidate) => /\.pdf$/i.test(candidate.name)) ?? first) : first;
     if (list.length > 1) {
-      showNotice({ key: 'one-file', tone: 'info', message: `One PDF at a time: using “${pdf.name}”.` });
+      showNotice({ key: 'one-file', tone: 'info', message: m.oneFileAtATime(pdf.name || m.untitled) });
     } else {
       removeNotice('one-file');
     }
@@ -521,14 +531,14 @@ export function initPdfCompress(root: HTMLElement): void {
   function onProgress(progress: CompressProgress): void {
     switch (progress.stage) {
       case 'cleanup':
-        setProgress(null, 0, 'Removing unused data…');
+        setProgress(null, 0, m.progress.cleanup);
         break;
       case 'images':
-        setProgress(progress.done, progress.total, `Optimizing image ${progress.done + 1} of ${progress.total}…`);
+        setProgress(progress.done, progress.total, m.progress.image(progress.done + 1, progress.total));
         break;
       case 'saving':
-        setProgress(null, 0, 'Saving…');
-        announce('Saving…');
+        setProgress(null, 0, m.progress.saving);
+        announce(m.progress.saving);
         break;
       default:
         break;
@@ -536,17 +546,13 @@ export function initPdfCompress(root: HTMLElement): void {
   }
 
   function describeRunError(error: unknown, fileName: string): string {
-    if (error instanceof CompressEngineLoadError) {
-      return 'Couldn’t load the PDF engine. Check your connection and reload the page.';
-    }
+    if (error instanceof CompressEngineLoadError) return m.errors.engine;
     if (error instanceof CompressFailure && (error.code === 'encrypted' || error.code === 'invalid')) {
       return describeOpenError(error, fileName);
     }
-    if (isUnreadableFile(error)) return `Couldn’t read “${fileName}” again. Choose the file again.`;
-    if (looksLikeOutOfMemory(error)) {
-      return 'This device ran out of memory while compressing. Close other tabs or apps, or try a smaller file, then try again.';
-    }
-    return 'Something went wrong while compressing the PDF. Try another level, or reload the page and try again.';
+    if (isUnreadableFile(error)) return m.errors.unreadableAgain(fileName);
+    if (looksLikeOutOfMemory(error)) return m.errors.memoryCompressing;
+    return m.errors.unknownCompressing;
   }
 
   async function transcodeImage(request: TranscodeRequest, signal: AbortSignal) {
@@ -573,12 +579,7 @@ export function initPdfCompress(root: HTMLElement): void {
     if (readback) {
       removeNotice('canvas-blocked');
     } else {
-      showNotice({
-        key: 'canvas-blocked',
-        tone: 'warning',
-        message:
-          'Your browser’s privacy settings block reading image data from a canvas, so images can’t be recompressed here. Other clean-up still runs; for smaller images, try another browser.',
-      });
+      showNotice({ key: 'canvas-blocked', tone: 'warning', message: m.canvasBlocked });
     }
 
     const controller = new AbortController();
@@ -587,15 +588,15 @@ export function initPdfCompress(root: HTMLElement): void {
     phase = 'compressing';
     updateUi();
     if (focusWasOnCompress) el.cancel.focus();
-    setProgress(null, 0, 'Starting…');
-    announce('Compressing PDF…');
+    setProgress(null, 0, m.progress.starting);
+    announce(m.compressing);
 
     let announcement = '';
     try {
       if (!session?.alive) {
         // Each worker serves one run (and a cancelled or crashed one is gone): read the file again.
         session = null;
-        setProgress(null, 0, 'Reading PDF…');
+        setProgress(null, 0, m.progress.reading);
         const opened = await openSession(picked, controller.signal);
         if (generation !== fileGeneration) {
           opened.dispose();
@@ -617,11 +618,11 @@ export function initPdfCompress(root: HTMLElement): void {
     } catch (error) {
       if (session && !session.alive) session = null;
       if (isAbortError(error)) {
-        setStatus('Cancelled.');
-        announcement = 'Cancelled';
+        setStatus(m.cancelledStatus);
+        announcement = m.cancelled;
       } else {
         console.error('Compress PDF failed:', error);
-        const message = describeRunError(error, picked.name);
+        const message = describeRunError(error, picked.name || m.untitled);
         setStatus(message, 'error');
         announcement = message;
         if (isUnreadableFile(error)) {
@@ -650,7 +651,7 @@ export function initPdfCompress(root: HTMLElement): void {
   el.cancel.addEventListener('click', () => {
     if (!runController) return;
     runController.abort();
-    el.progressText.textContent = 'Cancelling…';
+    el.progressText.textContent = m.progress.cancelling;
   });
 
   // ---------------------------------------------------------------- lifecycle
@@ -664,11 +665,7 @@ export function initPdfCompress(root: HTMLElement): void {
   }
 
   if (inAppBrowser) {
-    showNotice({
-      key: 'in-app-browser',
-      tone: 'info',
-      message: 'Downloads may not work inside this app. Open the page in your browser for the best results.',
-    });
+    showNotice({ key: 'in-app-browser', tone: 'info', message: m.inAppBrowser });
   }
 
   window.addEventListener('pagehide', (event) => {

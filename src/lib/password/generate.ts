@@ -165,30 +165,33 @@ export function entropyBits(options: PasswordOptions): number {
   return options.length * Math.log2(characterPool(options).length);
 }
 
-export type StrengthLabel = 'Very weak' | 'Weak' | 'Fair' | 'Strong' | 'Very strong';
 export type StrengthScore = 0 | 1 | 2 | 3 | 4;
 
+/**
+ * Strength levels by score, as stable codes. The page turns them into words from its message
+ * catalogue (src/i18n/tools/password-generator.ts), so this module stays language-free.
+ */
+export const STRENGTH_LEVELS = ['very-weak', 'weak', 'fair', 'strong', 'very-strong'] as const;
+export type StrengthLevel = (typeof STRENGTH_LEVELS)[number];
+
 export interface Strength {
-  label: StrengthLabel;
   score: StrengthScore;
+  level: StrengthLevel;
 }
 
 /**
- * Maps entropy bits to a label. Rough guide for random passwords facing offline guessing at
+ * Maps entropy bits to a score. Rough guide for random passwords facing offline guessing at
  * billions of guesses per second:
- * - under 40 bits: Very weak (found in minutes or less);
- * - 40 to under 60: Weak (hours to days);
- * - 60 to under 80: Fair (years for a single machine, much less for well-funded attackers);
- * - 80 to under 100: Strong (beyond practical brute force today);
- * - 100 and above: Very strong (a comfortable margin for the future).
+ * - under 40 bits: 0, very weak (found in minutes or less);
+ * - 40 to under 60: 1, weak (hours to days);
+ * - 60 to under 80: 2, fair (years for a single machine, much less for well-funded attackers);
+ * - 80 to under 100: 3, strong (beyond practical brute force today);
+ * - 100 and above: 4, very strong (a comfortable margin for the future).
  * NaN counts as 0.
  */
 export function strength(bits: number): Strength {
-  if (!(bits >= 40)) return { label: 'Very weak', score: 0 };
-  if (bits < 60) return { label: 'Weak', score: 1 };
-  if (bits < 80) return { label: 'Fair', score: 2 };
-  if (bits < 100) return { label: 'Strong', score: 3 };
-  return { label: 'Very strong', score: 4 };
+  const score: StrengthScore = !(bits >= 40) ? 0 : bits < 60 ? 1 : bits < 80 ? 2 : bits < 100 ? 3 : 4;
+  return { score, level: STRENGTH_LEVELS[score] };
 }
 
 /** Which set a character belongs to (for colouring). Characters outside every set count as symbols. */

@@ -1,22 +1,32 @@
 ---
 title: Hello, world
-description: Why this site exists and what you can expect to find here.
+description: A development draft that puts every element of a post on one page, from formulas and code to tables, footnotes and the contents list.
 pubDate: 2026-08-28
 lang: en
 tags: [meta]
-# Kept as a draft MDX example (components + expressions); it only appears in `npm run dev`.
+# Kept as a draft MDX example (components, expressions, math, code, a table, footnotes and a
+# contents list); it only appears in `npm run dev`. Long enough on purpose: posts of four
+# minutes or more with three or more headings get the contents list.
 draft: true
 ---
 
 import { SITE } from '../../config/site';
 import Badge from '../../components/ui/Badge.astro';
 
-export const topics = ['Projects I have built', 'Notes on web development', 'Small tools that respect your privacy'];
+export const topics = [
+  'Projects I have built',
+  'Notes on mathematics and systems programming',
+  'Small tools that respect your privacy',
+];
 
-{/* Draft example post: shows how MDX mixes Markdown with components and expressions. */}
+{/* Draft example post: shows how MDX mixes Markdown with components, expressions, math and code. */}
 
 Welcome to the personal site of **{SITE.name}**. This post is written in
-MDX, so it can mix Markdown with components and expressions.
+MDX, so it can mix Markdown with components and expressions. It stays a draft: `astro dev`
+shows it and production builds leave it out. Its job is to put every element of a post on a
+single page (inline and display math, highlighted code, a table, footnotes and the contents
+list that longer posts get) so that a change to the styles can be checked in both colour
+schemes at a glance.
 
 <Badge variant="accent">Written in MDX</Badge>
 
@@ -26,5 +36,111 @@ MDX, so it can mix Markdown with components and expressions.
   {topics.map((topic) => <li>{topic}</li>)}
 </ul>
 
-Everything on this site is static, and the tools run entirely in your browser.
-Thanks for stopping by!
+Posts are written in English or Turkish. A post that exists in one language only is still
+listed in the other interface, marked with its language, and two posts that translate each
+other share a `translationKey`, so each version links to the other.
+
+## Math
+
+Math is rendered to HTML and MathML when the site is built, so pages load no math scripts.
+Inline formulas sit in the sentence: to approximate $\sqrt{2}$, look for the positive root of
+$f(x) = x^2 - 2$. Newton's method refines a guess $x_n$ with
+
+$$
+x_{n+1} = x_n - \frac{f(x_n)}{f'(x_n)} = \frac{1}{2}\left(x_n + \frac{2}{x_n}\right),
+$$
+
+and near the root the error is roughly squared at every step. A literal dollar sign is
+written as `\$`, so a price such as \$5 stays text.
+
+## A worked example
+
+The rest of this page follows that one formula a little further, because a real argument
+exercises the typography better than placeholder text does.
+
+### The iteration
+
+Newton's method replaces a function by its tangent line at the current guess and takes the
+point where the tangent crosses zero as the next guess. For $f(x) = x^2 - a$ with $a > 0$ the
+step simplifies to the average of $x_n$ and $a / x_n$:
+
+$$
+x_{n+1} = \frac{1}{2}\left(x_n + \frac{a}{x_n}\right).
+$$
+
+This is the rule the Babylonians already used for square roots, and it is also known as
+Heron's method.[^heron] It has a pleasant invariant. By the inequality of arithmetic and
+geometric means, $x_{n+1} \geq \sqrt{x_n \cdot a / x_n} = \sqrt{a}$, so every iterate after
+$x_0$ lies on or above the root. Above the root $a / x_n \leq x_n$, so each step moves
+down. A sequence that decreases and is bounded below converges, and its limit $L$ must satisfy
+$L = \tfrac{1}{2}(L + a/L)$, that is $L^2 = a$.
+
+### How fast it converges
+
+Write $e_n = x_n - \sqrt{a}$ for the error. Substituting it into the step gives an exact
+identity, not just an estimate:
+
+$$
+e_{n+1} = \frac{\left(x_n - \sqrt{a}\right)^2}{2 x_n} = \frac{e_n^2}{2 x_n}.
+$$
+
+Once $x_n$ is close to $\sqrt{a}$, the denominator is about $2\sqrt{a}$, so the number of
+correct digits roughly doubles with every step. This is quadratic convergence. The table
+follows it for $a = 2$ and $x_0 = 1$, with exact fractions:
+
+| $n$ | $x_n$ | Decimal value | $\lvert e_n \rvert$ |
+| --: | :-- | :-- | --: |
+| 0 | $1$ | 1 | $4.1 \times 10^{-1}$ |
+| 1 | $\tfrac{3}{2}$ | 1.5 | $8.6 \times 10^{-2}$ |
+| 2 | $\tfrac{17}{12}$ | 1.41666 66666 66666 67 | $2.5 \times 10^{-3}$ |
+| 3 | $\tfrac{577}{408}$ | 1.41421 56862 74509 80 | $2.1 \times 10^{-6}$ |
+| 4 | $\tfrac{665857}{470832}$ | 1.41421 35623 74689 91 | $1.6 \times 10^{-12}$ |
+| 5 | $\tfrac{886731088897}{627013566048}$ | 1.41421 35623 73095 05 | $9.0 \times 10^{-25}$ |
+
+From $n = 3$ on, each error is close to the square of the one above it divided by
+$2\sqrt{2} \approx 2.83$: for example $(2.45 \times 10^{-3})^2 / 2.83 \approx 2.1 \times 10^{-6}$.
+The fifth iterate is already more accurate than any `double` can represent.[^double]
+
+## Code
+
+The same iteration in C++23, highlighted at build time in both colour schemes:
+
+```cpp
+#include <print>
+
+int main() {
+    double x = 1.0;
+    for (int n = 1; n <= 5; ++n) {
+        x = 0.5 * (x + 2.0 / x);  // one Newton step for x² = 2
+        std::println("x{} = {:.15f}", n, x);
+    }
+}
+```
+
+The program prints the decimal column of the table, rounded to fifteen places. A sixth step
+would print the same digits as the fifth: in floating point the iteration has reached the
+precision of the type, and further steps change nothing.
+
+A shell session and a short configuration file, for the other common kinds of code block:
+
+```sh
+npm run dev
+# then open http://localhost:4321/blog/hello-world/
+```
+
+```json
+{ "draft": true, "lang": "en", "tags": ["meta"] }
+```
+
+## Notes on this page
+
+Everything on this site is static, and the tools run entirely in your browser. When the
+styles change, this page is the quickest check: the contents list should mark the section
+being read, the table should scroll inside its own box on a phone, and the formulas should
+keep the colour of the text around them in both themes. Thanks for stopping by.
+
+[^heron]: Heron of Alexandria describes it in his *Metrica* (first century AD), which is why
+    the method carries his name.
+
+[^double]: A `double` holds about 16 significant decimal digits, while $x_5$ differs from
+    $\sqrt{2}$ by less than $10^{-24}$.

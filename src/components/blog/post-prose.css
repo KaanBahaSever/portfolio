@@ -1,0 +1,255 @@
+/*
+ * Long-form typography for blog posts, imported by src/pages/[...lang]/blog/[id].astro only
+ * (like KaTeX's stylesheet). It refines Tailwind Typography's .prose and builds on the shared
+ * rules in global.css: dual-theme Shiki code blocks, tables and display math that scroll inside
+ * their own box. Plain CSS over the theme variables, so it needs no Tailwind processing.
+ *
+ * Everything is scoped to .post-body, the element that wraps the rendered Markdown.
+ */
+
+.post-body {
+  counter-reset: figure;
+  /*
+   * global.css sets the prose link colour and the Shiki code-block colours inside
+   * @layer components, but Tailwind Typography's rules (prose-zinc, prose-invert, `pre`) live
+   * in @layer utilities and win, which left links ink-coloured and code blocks on a dark
+   * zinc-800 plate in light mode. These unlayered rules restore the intended values here.
+   */
+  --tw-prose-links: var(--color-accent-700);
+}
+
+.post-body pre.astro-code {
+  border-radius: 0.75rem;
+  background-color: var(--shiki-light-bg);
+  color: var(--shiki-light);
+}
+
+@media (prefers-color-scheme: dark) {
+  .post-body {
+    --tw-prose-links: var(--color-accent-400);
+  }
+
+  .post-body pre.astro-code {
+    background-color: var(--color-zinc-900);
+    color: var(--shiki-dark);
+  }
+}
+
+/* Links: accent text with a quiet underline that firms up on hover. */
+.post-body a:not(:where(.not-prose, .not-prose *)) {
+  font-weight: 500;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+  transition: text-decoration-color 150ms ease;
+}
+
+.post-body a:not(:where(.not-prose, .not-prose *)):hover {
+  text-decoration-color: currentColor;
+}
+
+/* Headings: serif (global.css); a hairline above each section, like a notebook's ruled page. */
+.post-body :where(h2):not(:where(.not-prose, .not-prose *)) {
+  padding-top: 1em;
+  border-top: 1px solid var(--color-zinc-200);
+}
+
+.post-body > :where(h2:first-child) {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Figures: images on a hairline frame; captions numbered in the article's language. */
+.post-body :where(figure):not(:where(.not-prose, .not-prose *)) {
+  margin-block: 2.25em;
+}
+
+.post-body :where(figure > p):not(:where(.not-prose, .not-prose *)) {
+  margin: 0;
+}
+
+/*
+ * The width and height attributes Astro writes reserve the box before a lazy image loads, so
+ * nothing here may override the width (width: auto, or a max-height that forces it, would
+ * collapse unloaded images and make the page jump).
+ */
+.post-body :where(img):not(:where(.not-prose, .not-prose *)) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border: 1px solid var(--color-zinc-200);
+  border-radius: 0.75rem;
+  background-color: var(--color-zinc-100);
+}
+
+.post-body :where(figure:has(> figcaption)) {
+  counter-increment: figure;
+}
+
+.post-body :where(figcaption):not(:where(.not-prose, .not-prose *)) {
+  margin-top: 0.875em;
+  font-size: 0.875em;
+  line-height: 1.55;
+  color: var(--color-zinc-600);
+  text-align: start;
+}
+
+.post-body figcaption::before {
+  content: "Fig. " counter(figure);
+  margin-inline-end: 0.75em;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-zinc-500);
+}
+
+.post-body:lang(tr) figcaption::before {
+  content: "Şekil " counter(figure);
+}
+
+/* Inline code: a small ink-on-paper chip instead of Typography's literal backticks. */
+.post-body :where(:not(pre) > code):not(:where(.not-prose, .not-prose *)) {
+  padding: 0.125em 0.375em;
+  border: 1px solid var(--color-zinc-200);
+  border-radius: 0.375rem;
+  background-color: var(--color-zinc-100);
+  font-size: 0.85em;
+  font-weight: 500;
+}
+
+.post-body :where(:not(pre) > code):not(:where(.not-prose, .not-prose *))::before,
+.post-body :where(:not(pre) > code):not(:where(.not-prose, .not-prose *))::after {
+  content: none;
+}
+
+/* Code blocks: pre.astro-code carries colours and frame (global.css); keep its padding generous. */
+.post-body :where(pre):not(:where(.not-prose, .not-prose *)) {
+  padding: 1em 1.25em;
+  font-size: 0.8125em;
+}
+
+/* Tables: mono column labels, hairline rules, figures aligned. */
+.post-body :where(table):not(:where(.not-prose, .not-prose *)) {
+  font-size: 0.875em;
+  font-variant-numeric: tabular-nums;
+}
+
+.post-body :where(thead th):not(:where(.not-prose, .not-prose *)) {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-zinc-600);
+  white-space: nowrap;
+}
+
+/*
+ * Math in a column label keeps its case and its own spacing: uppercasing would turn x_n into
+ * X_N, a different symbol. Next to the small mono labels it is set a little larger.
+ */
+.post-body thead th .katex {
+  font-size: 1.2em;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.post-body :where(thead):not(:where(.not-prose, .not-prose *)) {
+  border-bottom-color: var(--color-zinc-300);
+}
+
+/* Blockquotes: a serif aside on a hairline, without Typography's added quotation marks. */
+.post-body :where(blockquote):not(:where(.not-prose, .not-prose *)) {
+  border-inline-start: 2px solid var(--color-zinc-300);
+  font-family: var(--font-serif);
+  font-size: 1.125em;
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-zinc-700);
+}
+
+.post-body :where(blockquote p:first-of-type):not(:where(.not-prose, .not-prose *))::before,
+.post-body :where(blockquote p:last-of-type):not(:where(.not-prose, .not-prose *))::after {
+  content: none;
+}
+
+/* Thematic break: a section sign instead of a rule. */
+.post-body :where(hr):not(:where(.not-prose, .not-prose *)) {
+  height: auto;
+  margin-block: 2.5em;
+  border: 0;
+  text-align: center;
+}
+
+.post-body :where(hr):not(:where(.not-prose, .not-prose *))::after {
+  content: "§";
+  font-family: var(--font-serif);
+  font-size: 1.25em;
+  color: var(--color-zinc-400);
+}
+
+/*
+ * Math: KaTeX inherits the text colour; display equations get room and scroll sideways.
+ * KaTeX's own stylesheet sets 1.21em (sized for Computer Modern next to a serif); next to
+ * Plex Sans, whose x-height is large, 1.1em matches better. (global.css asks for 1.08em but
+ * sits in a cascade layer, which KaTeX's unlayered rule beats.)
+ */
+.post-body .katex {
+  font-size: 1.1em;
+}
+
+.post-body .math-display {
+  margin-block: 1.75em;
+}
+
+/* GFM footnotes. */
+.post-body :where(.footnotes, [data-footnotes]) {
+  margin-top: 3em;
+  padding-top: 1em;
+  border-top: 1px solid var(--color-zinc-200);
+  font-size: 0.875em;
+  color: var(--color-zinc-600);
+}
+
+@media (prefers-color-scheme: dark) {
+  .post-body :where(h2):not(:where(.not-prose, .not-prose *)),
+  .post-body :where(.footnotes, [data-footnotes]) {
+    border-color: var(--color-zinc-800);
+  }
+
+  .post-body :where(img):not(:where(.not-prose, .not-prose *)) {
+    border-color: var(--color-zinc-800);
+    background-color: var(--color-zinc-900);
+  }
+
+  .post-body :where(figcaption):not(:where(.not-prose, .not-prose *)),
+  .post-body :where(thead th):not(:where(.not-prose, .not-prose *)),
+  .post-body :where(.footnotes, [data-footnotes]) {
+    color: var(--color-zinc-400);
+  }
+
+  .post-body :where(:not(pre) > code):not(:where(.not-prose, .not-prose *)) {
+    border-color: var(--color-zinc-800);
+    background-color: var(--color-zinc-900);
+  }
+
+  .post-body :where(thead):not(:where(.not-prose, .not-prose *)) {
+    border-bottom-color: var(--color-zinc-700);
+  }
+
+  .post-body :where(blockquote):not(:where(.not-prose, .not-prose *)) {
+    border-inline-start-color: var(--color-zinc-700);
+    color: var(--color-zinc-300);
+  }
+
+  .post-body :where(hr):not(:where(.not-prose, .not-prose *))::after {
+    color: var(--color-zinc-600);
+  }
+
+  .post-body figcaption::before {
+    color: var(--color-zinc-400);
+  }
+}

@@ -1,24 +1,28 @@
 ---
 /**
- * Renders a <time> element. Dates from frontmatter are parsed as UTC midnight,
- * so format in UTC to avoid off-by-one days in other build time zones.
+ * Renders a <time> element, formatted for the page's locale ("March 1, 2020" / "1 Mart 2020")
+ * through formatters(). Dates from frontmatter are parsed as UTC midnight, and formatters()
+ * formats in UTC, so other build time zones cannot shift the day.
  */
+import { formatters, type DateStyle } from '../../i18n/format';
+import type { Locale } from '../../i18n/config';
+import { getLocale } from '../../i18n/server';
+
 interface Props {
   date: Date;
-  format?: 'long' | 'short' | 'year';
+  /** 'long' (default), 'short', 'year', 'monthYear' ("Mar 2020") or 'monthYearLong' ("March 2020"). */
+  format?: DateStyle;
   class?: string;
+  /** Format in another locale than the page's (rarely needed). */
+  locale?: Locale;
 }
 
-const { date, format = 'long', class: className } = Astro.props;
+const { date, format = 'long', class: className, locale = getLocale(Astro) } = Astro.props;
 
-const options: Record<NonNullable<Props['format']>, Intl.DateTimeFormatOptions> = {
-  long: { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' },
-  short: { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' },
-  year: { year: 'numeric', timeZone: 'UTC' },
-};
-
-const label = new Intl.DateTimeFormat('en-US', options[format]).format(date);
-const datetime = format === 'year' ? String(date.getUTCFullYear()) : date.toISOString().slice(0, 10);
+const label = formatters(locale).date(date, format);
+// Machine-readable value at the precision that is shown.
+const iso = date.toISOString();
+const datetime = format === 'year' ? iso.slice(0, 4) : format.startsWith('monthYear') ? iso.slice(0, 7) : iso.slice(0, 10);
 ---
 
 <time datetime={datetime} class={className}>{label}</time>

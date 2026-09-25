@@ -165,8 +165,10 @@ const jsonLd = JSON.stringify({
 
       <article lang={postLang} aria-labelledby="post-title" class="mt-2">
         <header class="relative isolate">
+          {/* The backdrop bleeds exactly into the page gutter (1rem, 1.5rem from sm), like PageHeader's:
+              any wider and it sticks out of the viewport while the column is as wide as the screen. */}
           <div
-            class="bg-graph mask-fade-radial pointer-events-none absolute -inset-x-4 -top-10 -bottom-2 -z-10 sm:-inset-x-8"
+            class="bg-graph mask-fade-radial pointer-events-none absolute -inset-x-4 -top-10 -bottom-2 -z-10 sm:-inset-x-6"
             aria-hidden="true"
           >
           </div>

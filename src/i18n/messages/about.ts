@@ -140,7 +140,8 @@ const tr: AboutMessages = {
   },
   resume: {
     title: 'Özgeçmiş',
-    text: 'Deneyim, eğitim ve yetkinlikler ana sayfada özetleniyor.',
+    // "beceriler" matches the home page's skills heading ("Beceriler") this sentence points to.
+    text: 'Deneyim, eğitim ve beceriler ana sayfada özetleniyor.',
     experienceLink: 'Ana sayfadaki deneyim bölümü',
     cvFormat: '(İngilizce, PDF)',
   },

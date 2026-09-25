@@ -116,9 +116,11 @@ test('plan summaries in both languages', () => {
 
 test('grid counts and tile names use each language’s number format', () => {
   assert.equal(en.grid.countSome(4, 12), '4 of 12 pages selected');
-  assert.equal(tr.grid.countSome(4, 12), '4 / 12 sayfa seçildi');
+  assert.equal(tr.grid.countSome(4, 12), '4 sayfa seçildi (toplam 12)');
   assert.equal(en.grid.countSome(1234, 2000), '1,234 of 2,000 pages selected');
-  assert.equal(tr.grid.countSome(1234, 2000), '1.234 / 2.000 sayfa seçildi');
+  assert.equal(tr.grid.countSome(1234, 2000), '1.234 sayfa seçildi (toplam 2.000)');
+  // Announced through a live region: no slash, which Turkish speech output reads as "bölü".
+  assert.doesNotMatch(tr.grid.countSome(4, 12), /\//);
   assert.equal(en.grid.countAll(12), 'All 12 pages selected');
   assert.equal(en.grid.countFiles(7, 3), '7 pages in 3 files');
   assert.equal(en.grid.countFiles(1, 1), '1 page in 1 file');
@@ -128,7 +130,8 @@ test('grid counts and tile names use each language’s number format', () => {
   assert.equal(en.grid.tile(3, 2, 1), 'Page 3, file 2');
   assert.equal(en.grid.tile(3, 0, 2), 'Page 3, used 2 times');
   assert.equal(tr.grid.tile(3, 2, 1), 'Sayfa 3, dosya 2');
-  assert.equal(tr.grid.tile(3, 0, 2), 'Sayfa 3, 2 kez');
+  assert.equal(tr.grid.tile(3, 0, 2), 'Sayfa 3, 2 kez kullanılıyor');
+  assert.equal(tr.grid.tile(3, 1, 2), 'Sayfa 3, dosya 1, 2 kez kullanılıyor');
 });
 
 test('results, progress and errors', () => {

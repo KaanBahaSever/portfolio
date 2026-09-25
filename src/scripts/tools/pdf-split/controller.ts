@@ -450,6 +450,8 @@ export function initPdfSplit(root: HTMLElement): void {
     } catch (error) {
       if (token !== previewToken || isAbortError(error)) return;
       console.warn('Split PDF: previews are unavailable for this file:', error);
+      // Each tile says so where the thumbnail would be; the notice explains that splitting still works.
+      grid.setAllUnavailable();
       showPreviewNotice(m.grid.previewsFailed, false);
     }
   }

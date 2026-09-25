@@ -271,10 +271,11 @@ const tr: PdfSplitMessages = {
     hintReadOnly: 'Etiketler, her sayfanın hangi dosyaya gireceğini gösterir.',
     customOrder: 'Özel sıra: sayfalar yukarıda yazdığınız sırayla kaydedilir; yeni seçtiğiniz sayfalar sona eklenir.',
     countNone: 'Seçili sayfa yok',
-    countSome: (selected, total) => `${ft.number(selected)} / ${pagesTr(total)} seçildi`,
+    // Not "4 / 14": speech output reads the slash as "bölü" (divided by), and this is announced.
+    countSome: (selected, total) => `${pagesTr(selected)} seçildi (toplam ${ft.number(total)})`,
     countAll: (total) => (total === 1 ? 'Tek sayfa seçildi' : `Tüm sayfalar seçildi (${ft.number(total)})`),
     countFiles: (pages, files) => `${ft.number(files)} dosyada ${pagesTr(pages)}`,
-    tile: (page, file, uses) => `Sayfa ${page}${file > 0 ? `, dosya ${file}` : ''}${uses > 1 ? `, ${uses} kez` : ''}`,
+    tile: (page, file, uses) => `Sayfa ${page}${file > 0 ? `, dosya ${file}` : ''}${uses > 1 ? `, ${uses} kez kullanılıyor` : ''}`,
     fileTag: (file) => `Dosya ${file}`,
     previewUnavailable: 'Önizleme yok',
     previewsFailed: 'Bu PDF için önizleme gösterilemiyor. Yine de sayfa seçip dosyayı bölebilirsiniz.',

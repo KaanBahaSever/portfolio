@@ -46,7 +46,13 @@ export interface PageGrid {
   stopPreviews(): void;
   /** Shows a page's thumbnail (`width` × `height` pixels) at its own shape inside the tile. */
   setThumbnail(page: number, url: string, width: number, height: number): void;
+  /** One page could not be rendered: its tile says "Preview unavailable". */
   setPageUnavailable(page: number): void;
+  /**
+   * The preview engine can't show this document at all (it failed to open it, or counts a
+   * different number of pages): stops previews and labels every tile without a thumbnail.
+   */
+  setAllUnavailable(): void;
   readonly pageCount: number;
 }
 
@@ -193,11 +199,25 @@ export function createPageGrid({ list, template, messages: m, onPick, onSelectAl
     label.textContent = file > 0 ? m.grid.fileTag(file) : uses > 1 ? `×${uses}` : '';
   }
 
+  /**
+   * Layout size of the sheets (all share page 1's box). offsetWidth/offsetHeight ignore CSS
+   * transforms: a selected sheet is drawn scaled down (and mid-transition in between), which
+   * getBoundingClientRect() would report, so thumbnails would render too small and look soft
+   * once stretched. Transforms don't trigger the ResizeObserver either, so that would stick.
+   */
   function measureBox(): void {
     const sheet = tiles[0]?.sheet;
     if (!sheet || !service) return;
-    const rect = sheet.getBoundingClientRect();
-    service.setBox({ width: rect.width, height: rect.height });
+    service.setBox({ width: sheet.offsetWidth, height: sheet.offsetHeight });
+  }
+
+  /** The tile keeps its numbered placeholder and says why no thumbnail follows. */
+  function markUnavailable(tile: Tile): void {
+    tile.done = true;
+    observer?.unobserve(tile.button);
+    delete tile.placeholder.dataset.loading;
+    tile.unavailable.textContent = m.grid.previewUnavailable;
+    tile.unavailable.hidden = false;
   }
 
   function stopPreviews(): void {
@@ -333,12 +353,12 @@ export function createPageGrid({ list, template, messages: m, onPick, onSelectAl
 
     setPageUnavailable(page) {
       const tile = tiles[page - 1];
-      if (!tile) return;
-      tile.done = true;
-      observer?.unobserve(tile.button);
-      delete tile.placeholder.dataset.loading;
-      tile.unavailable.textContent = m.grid.previewUnavailable;
-      tile.unavailable.hidden = false;
+      if (tile) markUnavailable(tile);
+    },
+
+    setAllUnavailable() {
+      stopPreviews();
+      for (const tile of tiles) if (!tile.done) markUnavailable(tile);
     },
   };
 }

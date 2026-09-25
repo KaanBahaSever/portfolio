@@ -250,9 +250,10 @@ This is the only composition series of $S_5$ (a subnormal series with simple fac
 <div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-3 py-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-graph mask-fade-b"></div>
 <svg class="relative mx-auto block h-auto w-full max-w-xs text-zinc-900 dark:text-zinc-100" viewBox="48 0 288 316" role="img" aria-label="Two ladders on a common logarithmic scale. Degree 4: S4, A4, V4, C2 and the trivial group, with the abelian factors C2, C3, C2 and C2. Degree 5: S5, A5 and the trivial group, with the factors C2 and A5; the long final rung, A5, is not abelian." xmlns="http://www.w3.org/2000/svg">
-<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
-<text x="100" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 4</text>
-<text x="220" y="24" text-anchor="middle"><tspan font-style="italic">n</tspan> = 5</text>
+<!-- Math labels use KaTeX's fonts, which the formulas on this page already load: they match the text and cost no extra download. -->
+<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: KaTeX_Main, var(--font-serif); font-size: 15px">
+<text x="100" y="24" text-anchor="middle"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">n</tspan> = 4</text>
+<text x="220" y="24" text-anchor="middle"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">n</tspan> = 5</text>
 </g>
 <g stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-opacity="0.6">
 <line x1="100" y1="143.7" x2="100" y2="164.4"/>
@@ -272,27 +273,27 @@ This is the only composition series of $S_5$ (a subnormal series with simple fac
 <circle cx="100" cy="296" r="3.5"/>
 <circle cx="220" cy="296" r="3.5"/>
 </g>
-<g fill="currentColor" text-anchor="end" style="font-family: var(--font-serif); font-size: 17px">
-<text x="86" y="142.2"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">4</tspan></text>
-<text x="86" y="176.9"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">4</tspan></text>
-<text x="86" y="232"><tspan font-style="italic">V</tspan><tspan font-size="12" dy="4">4</tspan></text>
-<text x="86" y="266.8"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="86" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
-<text x="206" y="61.5"><tspan font-style="italic">S</tspan><tspan font-size="12" dy="4">5</tspan></text>
-<text x="206" y="96.3"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
-<text x="206" y="301.5">{<tspan font-style="italic">e</tspan>}</text>
+<g fill="currentColor" text-anchor="end" style="font-family: KaTeX_Main, var(--font-serif); font-size: 17px">
+<text x="86" y="142.2"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">S</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="176.9"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">A</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="232"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">V</tspan><tspan font-size="12" dy="4">4</tspan></text>
+<text x="86" y="266.8"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="86" y="301.5">{<tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">e</tspan>}</text>
+<text x="206" y="61.5"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">S</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="96.3"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="206" y="301.5">{<tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">e</tspan>}</text>
 </g>
-<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: var(--font-serif); font-size: 15px">
-<text x="114" y="159"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="114" y="204"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">3</tspan></text>
-<text x="114" y="249"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="114" y="283.6"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
-<text x="234" y="78.4"><tspan font-style="italic">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: KaTeX_Main, var(--font-serif); font-size: 15px">
+<text x="114" y="159"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="204"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">3</tspan></text>
+<text x="114" y="249"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="114" y="283.6"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
+<text x="234" y="78.4"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">C</tspan><tspan font-size="12" dy="4">2</tspan></text>
 </g>
 <g class="text-accent-700 dark:text-accent-400" fill="currentColor">
 <line x1="220" y1="97.8" x2="220" y2="289" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
 <circle cx="220" cy="90.8" r="3.5"/>
-<text x="234" y="192" style="font-family: var(--font-serif); font-size: 17px"><tspan font-style="italic">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
+<text x="234" y="192" style="font-family: KaTeX_Main, var(--font-serif); font-size: 17px"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">A</tspan><tspan font-size="12" dy="4">5</tspan></text>
 <text x="234" y="212" style="font-family: var(--font-mono); font-size: 13px">non-abelian</text>
 </g>
 </svg>
@@ -328,7 +329,7 @@ started at $x_0 = 0$ gives $0.5$, then $0.508474\ldots$, $0.508499484434\ldots$ 
 
 **It does not say that no quintic can be solved by radicals.** Particular quintics can. The roots of $x^5 - 2$ are $\sqrt[5]{2}\,\zeta^k$ for $k = 0, 1, \dots, 4$, where $\zeta = e^{2\pi i/5}$, and $\zeta$ itself is expressible by radicals, for instance through $\cos(2\pi/5) = (\sqrt{5} - 1)/4$. The Galois group of $x^5 - 2$ has order 20 and is solvable: it has a normal cyclic subgroup of order 5 with a cyclic quotient of order 4. The theorem rules out a single formula that works for *every* quintic; Galois's criterion then decides, equation by equation, which ones are solvable.
 
-**It does not say there is no closed form at all.** Only radicals are ruled out. Add one new function, the *Bring radical* (for real $a$, the unique real root of $x^5 + x + a = 0$, viewed as a function of $a$), and every quintic can be solved in closed form. In 1858 Charles Hermite solved the quintic with elliptic modular functions, much as the cubic can be solved with trigonometric functions, and Felix Klein later explained the whole picture through the symmetries of the icosahedron, whose rotation group is exactly $A_5$.
+**It does not say there is no closed form at all.** Only radicals are ruled out. Add one new function, the *Bring radical* (the unique real root of $x^5 + x + a = 0$ for real $a$, viewed as a function of $a$ and continued analytically to complex $a$), and every quintic can be solved in closed form. In 1858 Charles Hermite solved the quintic with elliptic modular functions, much as the cubic can be solved with trigonometric functions, and Felix Klein later explained the whole picture through the symmetries of the icosahedron, whose rotation group is exactly $A_5$.
 
 ## The takeaway: symmetry dictates solvability
 
@@ -339,4 +340,4 @@ A formula in radicals is a machine for undoing symmetry. Each radical breaks the
 - David S. Dummit and Richard M. Foote, <cite>Abstract Algebra</cite>, 3rd edition (Wiley, 2004), Chapter 14; Section 14.7 covers solvable and radical extensions and the insolvability of the quintic.
 - Ian Stewart, <cite>Galois Theory</cite> (CRC Press): the theory developed alongside its history.
 - V. B. Alekseev, <cite>Abel's Theorem in Problems and Solutions</cite>, based on the lectures of V. I. Arnold: a problem-driven route through groups, complex functions and Riemann surfaces.
-- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques, où l'on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): the original proof, in a famously short pamphlet.
+- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques où on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): the original proof, in a famously short pamphlet.

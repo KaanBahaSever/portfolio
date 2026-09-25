@@ -103,7 +103,20 @@ export function canvasLimits(mobile: boolean): Pick<FitLimits, 'maxArea' | 'maxS
 export const MOBILE_MAX_DECODE_PIXELS = 64_000_000;
 export const DESKTOP_MAX_DECODE_PIXELS = 250_000_000;
 
+/** The decode limit for this kind of device, in pixels. */
+export function maxDecodePixels(mobile: boolean): number {
+  return mobile ? MOBILE_MAX_DECODE_PIXELS : DESKTOP_MAX_DECODE_PIXELS;
+}
+
 /** Whether an image of this stored size may be decoded on this kind of device. */
 export function canDecode(width: number, height: number, mobile: boolean): boolean {
-  return width * height <= (mobile ? MOBILE_MAX_DECODE_PIXELS : DESKTOP_MAX_DECODE_PIXELS);
+  return width * height <= maxDecodePixels(mobile);
+}
+
+/**
+ * A pixel count in megapixels for display, rounded up to one decimal: an image just over a
+ * limit must never read as equal to it ("64.1 MP; the limit is 64 MP", not "64 MP … 64 MP").
+ */
+export function megapixels(pixels: number): number {
+  return Math.ceil(Math.max(0, pixels) / 100_000) / 10;
 }

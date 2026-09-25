@@ -38,8 +38,17 @@ const en = {
     undecodable: (name: string, format: string) => `This browser cannot open “${name}” (${format}).`,
     heicHint: 'HEIC photos open in Safari. In other browsers, convert them to JPEG first.',
     unreadable: (name: string) => `“${name}” could not be read. It may have been moved or deleted.`,
+    /** Refused before decoding: the stored size is over this device's decode limit. */
+    tooManyPixels: (name: string, megapixels: string, limit: string) =>
+      `“${name}” has too many pixels to open on this device (${megapixels}; the limit is ${limit}). Resize it in another app first.`,
+    /** Decoded, but the browser ran out of memory while taking the image in. */
+    openMemory: (name: string) =>
+      `“${name}” could not be opened: the browser ran out of memory. Close other tabs and try again, or resize the image in another app first.`,
+    /** Encoding ran out of memory on a phone or tablet. */
     memory:
       'This image is too large for the memory available on this device. Choose a smaller maximum size, or use a computer.',
+    /** Encoding ran out of memory on a computer. */
+    memoryDesktop: 'This image is too large for the memory available to the browser. Choose a smaller maximum size.',
     encodeFailed: 'The image could not be compressed. Try another format or a smaller maximum size.',
     pasteEmpty: 'The clipboard has no image. Copy an image, then paste again.',
     dismiss: 'Dismiss',
@@ -101,6 +110,10 @@ const en = {
     after: 'Compressed',
     altBefore: (name: string) => `Original: ${name}`,
     altAfter: (name: string) => `Compressed: ${name}`,
+    /** Names of the image areas at 1:1, where they scroll and take keyboard focus. */
+    scrollSplit: 'Comparison at actual size, scrollable',
+    scrollBefore: 'Original at actual size, scrollable',
+    scrollAfter: 'Compressed at actual size, scrollable',
   },
   result: {
     heading: 'Result',
@@ -161,9 +174,15 @@ const tr: ImageCompressorMessages = {
     undecodable: (name, format) => `“${name}” bu tarayıcıda açılamıyor (${format}).`,
     heicHint: 'HEIC fotoğraflar Safari’de açılır. Diğer tarayıcılarda önce JPEG biçimine dönüştürün.',
     unreadable: (name) => `“${name}” okunamadı. Taşınmış ya da silinmiş olabilir.`,
+    tooManyPixels: (name, megapixels, limit) =>
+      `“${name}” bu cihazda açılamayacak kadar çok piksel içeriyor (${megapixels}; sınır: ${limit}). Önce başka bir uygulamada küçültün.`,
+    openMemory: (name) =>
+      `“${name}” açılamadı: tarayıcının belleği yetmedi. Diğer sekmeleri kapatıp yeniden deneyin ya da görseli önce başka bir uygulamada küçültün.`,
     memory:
-      'Bu görsel, cihazdaki kullanılabilir bellek için fazla büyük. Daha küçük bir en büyük boyut seçin ya da bir bilgisayar kullanın.',
-    encodeFailed: 'Görsel sıkıştırılamadı. Başka bir biçim ya da daha küçük bir en büyük boyut deneyin.',
+      'Bu görsel, cihazdaki kullanılabilir bellek için fazla büyük. “En büyük boyut” için daha küçük bir değer seçin ya da bir bilgisayar kullanın.',
+    memoryDesktop:
+      'Bu görsel, tarayıcının kullanabildiği bellek için fazla büyük. “En büyük boyut” için daha küçük bir değer seçin.',
+    encodeFailed: 'Görsel sıkıştırılamadı. Başka bir biçim deneyin ya da “En büyük boyut” değerini düşürün.',
     pasteEmpty: 'Panoda görsel yok. Bir görsel kopyalayıp yeniden yapıştırın.',
     dismiss: 'Kapat',
   },
@@ -222,6 +241,9 @@ const tr: ImageCompressorMessages = {
     after: 'Sıkıştırılmış',
     altBefore: (name) => `Orijinal: ${name}`,
     altAfter: (name) => `Sıkıştırılmış: ${name}`,
+    scrollSplit: 'Gerçek boyutta karşılaştırma, kaydırılabilir',
+    scrollBefore: 'Gerçek boyutta orijinal görsel, kaydırılabilir',
+    scrollAfter: 'Gerçek boyutta sıkıştırılmış görsel, kaydırılabilir',
   },
   result: {
     heading: 'Sonuç',
@@ -235,7 +257,7 @@ const tr: ImageCompressorMessages = {
     quality: (percent) => `kalite ${percent}`,
     lossless: 'kayıpsız',
     download: 'İndir',
-    downloadAnyway: 'Yine de sıkıştırılmışı indir',
+    downloadAnyway: 'Sıkıştırılmış dosyayı yine de indir',
     downloadOriginal: 'Orijinali indir',
     originalKeepsMetadata: 'Orijinal dosya meta verilerini hâlâ içerir.',
     metadata: 'Kamera bilgileri, GPS konumu ve diğer meta veriler sıkıştırılmış kopyadan kaldırılır.',
@@ -244,7 +266,7 @@ const tr: ImageCompressorMessages = {
   privacy: {
     label: 'Gizlilik',
     title: 'Hiçbir şey cihazınızdan çıkmaz.',
-    body: 'Görseli tarayıcınız kendisi çözer ve yeniden kodlar; hiçbir yere yüklenmez. Yeniden kodlama, kamera bilgileri ve GPS konumu gibi meta verileri de kaldırır; böylece sıkıştırılmış kopyayı paylaşmak daha güvenlidir.',
+    body: 'Görseli tarayıcınızın kendisi çözer ve yeniden kodlar; hiçbir yere yüklenmez. Yeniden kodlama, kamera bilgileri ve GPS konumu gibi meta verileri de kaldırır; böylece sıkıştırılmış kopyayı paylaşmak daha güvenlidir.',
   },
   tips: 'İpuçları',
 };

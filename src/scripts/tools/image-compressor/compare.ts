@@ -33,6 +33,8 @@ export interface CompareController {
 interface Options {
   /** aria-valuetext of the divider input for a split fraction (0 = all compressed). */
   dividerText(split: number): string;
+  /** Names of the image areas while they scroll (1:1): the split view and the two panels. */
+  scrollLabels: { split: string; before: string; after: string };
 }
 
 /** Wide screens start with side-by-side panels; narrow ones only have the split view. */
@@ -87,6 +89,23 @@ export function initCompare(root: HTMLElement, options: Options): CompareControl
     return sideQuery.matches ? chosenView : 'split';
   }
 
+  /**
+   * A scrolling image area takes keyboard focus, so the arrow keys can pan it: Safari does
+   * not make scroll containers focusable on its own. At Fit nothing scrolls, and the area
+   * leaves the tab order again. The role gives the label something to name.
+   */
+  function setScrollable(viewport: HTMLElement, scrollable: boolean, label: string): void {
+    if (scrollable) {
+      viewport.tabIndex = 0;
+      viewport.setAttribute('role', 'group');
+      viewport.setAttribute('aria-label', label);
+    } else {
+      viewport.removeAttribute('tabindex');
+      viewport.removeAttribute('role');
+      viewport.removeAttribute('aria-label');
+    }
+  }
+
   function applyView(): void {
     const view = effectiveView();
     root.dataset.view = view;
@@ -98,6 +117,15 @@ export function initCompare(root: HTMLElement, options: Options): CompareControl
     // Touch: in Fit, horizontal drags move the divider and vertical ones still scroll the
     // page; at 1:1 the image area scrolls natively (the handle keeps touch-action: none).
     el.stage.style.touchAction = zoom === 'fit' ? 'pan-y' : 'auto';
+    const actual = zoom === 'actual';
+    setScrollable(el.viewport, actual && view === 'split', options.scrollLabels.split);
+    el.sideViewports.forEach((viewport, index) =>
+      setScrollable(
+        viewport,
+        actual && view === 'side',
+        index === 0 ? options.scrollLabels.before : options.scrollLabels.after,
+      ),
+    );
     schedule();
   }
 

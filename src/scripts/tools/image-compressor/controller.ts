@@ -12,7 +12,7 @@ import { getPageLocale } from '../../../i18n/client.ts';
 import { formatters } from '../../../i18n/format.ts';
 import { imageCompressorMessages } from '../../../i18n/tools/image-compressor.ts';
 import { outputFileName } from '../../../lib/image/compress/filename.ts';
-import { WEBP_MAX_SIDE, canDecode, canvasLimits } from '../../../lib/image/compress/fit.ts';
+import { WEBP_MAX_SIDE, canDecode, canvasLimits, maxDecodePixels, megapixels } from '../../../lib/image/compress/fit.ts';
 import { FORMAT_LABELS, isWritableSource, type EncoderSupport } from '../../../lib/image/compress/formats.ts';
 import { planEncode, samePlanOutput, type EncodePlan } from '../../../lib/image/compress/plan.ts';
 import {
@@ -69,6 +69,18 @@ interface Result {
   plan: EncodePlan;
   fileName: string;
 }
+
+/** An image with its latest result, set aside while another image opens. */
+interface OpenState {
+  image: OpenImage;
+  result: Result | null;
+}
+
+/**
+ * Where the visible error came from: a file that could not be opened, or a failed encode.
+ * A later successful encode clears only the latter.
+ */
+type ErrorSource = 'file' | 'encode';
 
 function query<T extends Element>(root: ParentNode, selector: string): T {
   const element = root.querySelector<T>(selector);
@@ -184,11 +196,15 @@ export function initImageCompressor(root: HTMLElement): void {
   const device = canvasLimits(mobile);
   const compare = initCompare(el.compare, {
     dividerText: (split) => m.compare.dividerValue(f.percent(split), f.percent(1 - split)),
+    scrollLabels: { split: m.compare.scrollSplit, before: m.compare.scrollBefore, after: m.compare.scrollAfter },
   });
 
   let phase: Phase = 'empty';
   let image: OpenImage | null = null;
   let result: Result | null = null;
+  /** The image that was open when another one started to open: it returns if that one fails. */
+  let previous: OpenState | null = null;
+  let errorSource: ErrorSource | null = null;
   /** Incremented per file: only the latest pick may install its image. */
   let loadGeneration = 0;
   /** Incremented per encode request: only the latest request may show its result. */
@@ -216,13 +232,15 @@ export function initImageCompressor(root: HTMLElement): void {
     }, 50);
   }
 
-  function showError(message: string, hint = ''): void {
+  function showError(message: string, hint = '', source: ErrorSource = 'file'): void {
+    errorSource = source;
     el.error.hidden = false;
     el.errorMessage.textContent = message;
     el.errorHint.textContent = hint;
   }
 
   function clearError(): void {
+    errorSource = null;
     el.error.hidden = true;
     el.errorMessage.textContent = '';
     el.errorHint.textContent = '';
@@ -243,10 +261,23 @@ export function initImageCompressor(root: HTMLElement): void {
     el.input.focus();
   });
 
-  /** Memory-type failures suggest a smaller size; anything else is a failed encode. */
-  function engineErrorText(error: unknown): string {
+  /** 'memory', 'canvas' (no 2D context) and 'crashed' (the worker died) all mean: out of memory. */
+  function isMemoryFailure(error: unknown): boolean {
     const code = error instanceof EngineError ? error.code : 'encode';
-    return code === 'memory' || code === 'canvas' || code === 'crashed' ? m.errors.memory : m.errors.encodeFailed;
+    return code === 'memory' || code === 'canvas' || code === 'crashed';
+  }
+
+  /**
+   * A failed encode. Out of memory, a smaller maximum size helps (the settings are on screen);
+   * only on a phone or tablet is a computer worth suggesting too.
+   */
+  function encodeErrorText(error: unknown): string {
+    if (!isMemoryFailure(error)) return m.errors.encodeFailed;
+    return mobile ? m.errors.memory : m.errors.memoryDesktop;
+  }
+
+  function megapixelText(pixels: number): string {
+    return `${f.number(megapixels(pixels), { maximumFractionDigits: 1 })} MP`;
   }
 
   // ---------------------------------------------------------------- settings
@@ -466,7 +497,7 @@ export function initImageCompressor(root: HTMLElement): void {
       if (isAbortError(error) || stale()) return;
       if (error instanceof EngineError && error.code === 'crashed') needsReload = true;
       setBusy(false);
-      showError(engineErrorText(error));
+      showError(encodeErrorText(error), '', 'encode');
     }
   }
 
@@ -481,7 +512,7 @@ export function initImageCompressor(root: HTMLElement): void {
       URL.revokeObjectURL(url);
       return;
     }
-    const previous = result;
+    const replaced = result;
     result = { blob, url, plan, fileName: outputFileName(target.name, plan.format) };
     compare.setSize(plan.width, plan.height);
     compare.setImages({
@@ -490,8 +521,9 @@ export function initImageCompressor(root: HTMLElement): void {
       afterUrl: url,
       afterAlt: m.compare.altAfter(target.name),
     });
-    if (previous) URL.revokeObjectURL(previous.url);
-    clearError();
+    if (replaced) URL.revokeObjectURL(replaced.url);
+    // A new result settles an earlier failed encode, but not a file that could not be opened.
+    if (errorSource === 'encode') clearError();
     setBusy(false);
     renderResult();
     announce(summary());
@@ -512,13 +544,18 @@ export function initImageCompressor(root: HTMLElement): void {
     if (visible) compare.refresh();
   }
 
-  /** Frees everything that belongs to the open image. */
-  function closeImage(): void {
+  /** Revokes the object URLs of an image and its result. */
+  function release(state: OpenState | null): void {
+    if (!state) return;
+    URL.revokeObjectURL(state.image.url);
+    if (state.result) URL.revokeObjectURL(state.result.url);
+  }
+
+  /** Stops all work on the open image and empties the view; the caller decides what to keep. */
+  function detach(): void {
     window.clearTimeout(encodeTimer);
     encodeGeneration += 1;
     engine.unload();
-    if (image) URL.revokeObjectURL(image.url);
-    if (result) URL.revokeObjectURL(result.url);
     image = null;
     result = null;
     needsReload = false;
@@ -527,16 +564,72 @@ export function initImageCompressor(root: HTMLElement): void {
     renderResult();
   }
 
+  /** Frees everything that belongs to the open image, and any image set aside. */
+  function closeImage(): void {
+    release(image ? { image, result } : null);
+    release(previous);
+    previous = null;
+    detach();
+  }
+
   /**
-   * A file that cannot be opened. An open image stays as it is; but if this pick replaced one
-   * that was still opening, that one is gone too, so the tool returns to its empty state.
+   * Sets the open image aside while another one opens, so that it can return if that one
+   * fails. When an earlier pick was still opening, the image set aside before it stays the
+   * one to return to. The engine forgets it either way: memory goes to the new image.
+   */
+  function setAside(): void {
+    if (image) {
+      release(previous);
+      previous = { image, result };
+    }
+    detach();
+  }
+
+  /** Brings back the image set aside, with its result. False when there is none. */
+  function restorePrevious(): boolean {
+    const kept = previous;
+    previous = null;
+    if (!kept) return false;
+    image = kept.image;
+    result = kept.result;
+    // The engine let go of this image when the other one started to open: the next encode
+    // decodes it again from its file.
+    needsReload = true;
+    el.fileName.textContent = image.name;
+    el.fileName.title = image.name;
+    renderFormatOptions();
+    const shown = result?.plan ?? image;
+    compare.setSize(shown.width, shown.height);
+    compare.setImages({
+      beforeUrl: image.url,
+      beforeAlt: m.compare.altBefore(image.name),
+      afterUrl: result?.url ?? null,
+      afterAlt: result ? m.compare.altAfter(image.name) : '',
+    });
+    setBusy(false);
+    setPhase('ready');
+    renderResult();
+    captions();
+    // The settings may have changed while the other image was opening: encode only if the
+    // result no longer matches them.
+    const plan = currentPlan();
+    if (plan && samePlanOutput(plan, result?.plan ?? null)) renderNotes(plan);
+    else requestEncode(0);
+    return true;
+  }
+
+  /**
+   * A file that cannot be opened. An open image stays as it is. If this pick replaced one that
+   * was still opening, that one stops too, and the image open before it (if any) returns.
    */
   function rejectFile(message: string): void {
     if (!image && phase === 'opening') {
       engine.unload(); // frees the half-opened image, whose own open now stops
       el.status.textContent = '';
-      setBusy(false);
-      setPhase('empty');
+      if (!restorePrevious()) {
+        setBusy(false);
+        setPhase('empty');
+      }
     }
     showError(message);
   }
@@ -573,11 +666,14 @@ export function initImageCompressor(root: HTMLElement): void {
     }
     const stored = readImageDimensions(format, head);
     if (stored && !canDecode(stored.width, stored.height, mobile)) {
-      rejectFile(m.errors.memory);
+      // Refused before decoding, so no setting can help: only a smaller file.
+      rejectFile(m.errors.tooManyPixels(name, megapixelText(stored.width * stored.height), megapixelText(maxDecodePixels(mobile))));
       return;
     }
 
-    closeImage();
+    // The open image stays in memory until this one has decoded: if it cannot be, the
+    // open image returns instead of leaving the tool empty.
+    setAside();
     setPhase('opening');
     setBusy(true);
     el.fileName.textContent = name;
@@ -605,17 +701,22 @@ export function initImageCompressor(root: HTMLElement): void {
     } catch (error) {
       if (generation !== loadGeneration || isAbortError(error)) return;
       el.status.textContent = '';
-      setBusy(false);
-      setPhase('empty');
-      if (error instanceof EngineError && error.code === 'decode') {
+      if (!restorePrevious()) {
+        setBusy(false);
+        setPhase('empty');
+      }
+      if (isMemoryFailure(error)) {
+        showError(m.errors.openMemory(name));
+      } else {
         const label = FORMAT_LABELS[format] === '?' ? file.type || '?' : FORMAT_LABELS[format];
         showError(m.errors.undecodable(name, label), format === 'heic' ? m.errors.heicHint : '');
-      } else {
-        showError(engineErrorText(error));
       }
       return;
     }
 
+    // The new image is in: the one set aside for a failure is no longer needed.
+    release(previous);
+    previous = null;
     el.status.textContent = '';
     el.fileName.textContent = name;
     el.fileName.title = name;

@@ -2,12 +2,16 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DESKTOP_MAX_CANVAS_AREA,
+  DESKTOP_MAX_DECODE_PIXELS,
   MAX_CANVAS_SIDE,
   MOBILE_MAX_CANVAS_AREA,
+  MOBILE_MAX_DECODE_PIXELS,
   WEBP_MAX_SIDE,
   canDecode,
   canvasLimits,
   fitSize,
+  maxDecodePixels,
+  megapixels,
   type FitLimits,
 } from '../src/lib/image/compress/fit.ts';
 
@@ -95,4 +99,19 @@ test('decode limits refuse images that would exhaust memory', () => {
   assert.equal(canDecode(16320, 12240, true), false, '200 MP photo on a phone');
   assert.equal(canDecode(16320, 12240, false), true, '200 MP photo on a desktop');
   assert.equal(canDecode(20000, 20000, false), false);
+  assert.equal(maxDecodePixels(true), MOBILE_MAX_DECODE_PIXELS);
+  assert.equal(maxDecodePixels(false), DESKTOP_MAX_DECODE_PIXELS);
+  assert.equal(canDecode(8000, 8000, true), true, 'exactly at the mobile limit');
+  assert.equal(canDecode(8001, 8000, true), false, 'one column over the mobile limit');
+});
+
+test('megapixels round up to one decimal, so an image over a limit never equals it', () => {
+  assert.equal(megapixels(72_000_000), 72);
+  assert.equal(megapixels(12_192_768), 12.2, '4032 × 3024');
+  assert.equal(megapixels(64_000_001), 64.1);
+  assert.equal(megapixels(MOBILE_MAX_DECODE_PIXELS), 64);
+  assert.equal(megapixels(DESKTOP_MAX_DECODE_PIXELS), 250);
+  assert.equal(megapixels(1), 0.1);
+  assert.equal(megapixels(0), 0);
+  assert.ok(megapixels(8001 * 8000) > megapixels(MOBILE_MAX_DECODE_PIXELS));
 });

@@ -16,9 +16,13 @@ const m = imageCompressorMessages[locale];
 const f = formatters(locale);
 const defaultQualityText = f.percent(DEFAULT_QUALITY / 100);
 
-/** One option of a segmented control: a visually hidden radio inside its label. */
+/**
+ * One option of a segmented control: a visually hidden radio inside its label, at least
+ * 44 × 44 px. The checked option is marked by an accent hairline (≥ 3:1 against the track in
+ * both themes), as in the site's other option cards; the lighter fill alone would be too faint.
+ */
 const segment =
-  'relative flex min-h-10 cursor-pointer items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors select-none hover:text-zinc-900 has-checked:bg-white has-checked:text-zinc-900 has-checked:shadow-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent-700 has-disabled:cursor-not-allowed has-disabled:opacity-45 has-disabled:hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-100 dark:has-checked:bg-zinc-700 dark:has-checked:text-zinc-50 dark:has-focus-visible:outline-accent-400 dark:has-disabled:hover:text-zinc-400';
+  'relative flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors select-none hover:text-zinc-900 has-checked:bg-white has-checked:text-zinc-900 has-checked:shadow-sm has-checked:ring-1 has-checked:ring-accent-600 has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent-700 has-disabled:cursor-not-allowed has-disabled:opacity-45 has-disabled:hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-100 dark:has-checked:bg-zinc-800 dark:has-checked:text-zinc-50 dark:has-checked:ring-accent-500 dark:has-focus-visible:outline-accent-400 dark:has-disabled:hover:text-zinc-400';
 const segmentGroup =
   'flex rounded-lg border border-zinc-200 bg-zinc-100/80 p-0.5 dark:border-zinc-800 dark:bg-zinc-950';
 /** A margin note next to the control it explains; amber for things that change the picture. */
@@ -33,6 +37,13 @@ const sized =
 const frame =
   'relative isolate overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900';
 const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case tracking-normal`;
+/**
+ * An image area that scrolls at 1:1 and then takes keyboard focus (compare.ts). Its frame
+ * clips overflow, so the focus ring is drawn inside the edge, following the frame's corners.
+ */
+const scrollArea = 'rounded-[inherit] focus-visible:-outline-offset-2';
+const sideViewport =
+  'max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:cursor-grab group-data-[zoom=actual]/compare:overflow-auto data-[panning]:cursor-grabbing';
 ---
 
 <section data-image-compressor aria-label={m.toolLabel} class="mt-8 sm:mt-10">
@@ -135,10 +146,17 @@ const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case t
   </p>
 
   <!-- 3. Workspace: comparison, result, settings -->
+  {
+    /*
+     * The single column below lg is minmax(0, 1fr), not the implicit auto: an auto column grows
+     * to the widest min-content (a long, unbreakable output file name) and pushes the cards past
+     * the viewport.
+     */
+  }
   <div
     data-workspace
     hidden
-    class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]"
+    class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:grid-rows-[auto_1fr] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]"
   >
     <figure
       data-compare
@@ -192,7 +210,7 @@ const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case t
           <div class="bg-graph-fine absolute inset-0 -z-10" aria-hidden="true"></div>
           <div
             data-viewport
-            class="max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:overflow-auto"
+            class:list={['max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:overflow-auto', scrollArea]}
           >
             <div data-canvas class:list={['relative mx-auto', sized]}>
               <img data-before alt="" hidden decoding="async" class="absolute inset-0 size-full max-w-none select-none" />
@@ -240,7 +258,7 @@ const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case t
           <div class="bg-graph-fine absolute inset-0 -z-10" aria-hidden="true"></div>
           <div
             data-side-viewport
-            class="max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:cursor-grab group-data-[zoom=actual]/compare:overflow-auto data-[panning]:cursor-grabbing"
+            class:list={[sideViewport, scrollArea]}
           >
             <img data-side-before alt="" hidden decoding="async" class:list={['mx-auto block select-none', sized]} />
           </div>
@@ -250,7 +268,7 @@ const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case t
           <div class="bg-graph-fine absolute inset-0 -z-10" aria-hidden="true"></div>
           <div
             data-side-viewport
-            class="max-h-(--stage-max) overflow-hidden overscroll-contain group-data-[zoom=actual]/compare:cursor-grab group-data-[zoom=actual]/compare:overflow-auto data-[panning]:cursor-grabbing"
+            class:list={[sideViewport, scrollArea]}
           >
             <img data-side-after alt="" hidden decoding="async" class:list={['mx-auto block select-none', sized]} />
           </div>
@@ -269,7 +287,7 @@ const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case t
     </figure>
 
     <!-- Result -->
-    <section data-result aria-labelledby="ic-result-heading" aria-busy="false" class:list={[ui.card, 'p-5 sm:p-6']}>
+    <section data-result aria-labelledby="ic-result-heading" aria-busy="false" class:list={[ui.card, 'min-w-0 p-5 sm:p-6']}>
       <div class="flex items-center justify-between gap-3">
         <h2 id="ic-result-heading" class="label-mono text-zinc-600 dark:text-zinc-400">{m.result.heading}</h2>
         <span data-result-busy hidden class="flex items-center gap-2 font-mono text-xs text-zinc-600 dark:text-zinc-400">
@@ -339,7 +357,7 @@ const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case t
     </section>
 
     <!-- Settings -->
-    <form data-settings aria-labelledby="ic-settings-heading" class:list={[ui.card, 'p-5 sm:p-6']}>
+    <form data-settings aria-labelledby="ic-settings-heading" class:list={[ui.card, 'min-w-0 p-5 sm:p-6']}>
       <h2 id="ic-settings-heading" class="label-mono text-zinc-600 dark:text-zinc-400">{m.settings.heading}</h2>
       <div class="mt-4 flex flex-col gap-7">
         <div>
@@ -375,7 +393,7 @@ const busyChip = `${chip} right-2 bottom-2 flex items-center gap-2 normal-case t
             <label class:list={[segment, 'min-h-12 flex-col px-1 leading-tight']}>
               <input type="radio" name="ic-format" value="original" data-format class="sr-only" checked />
               <span>{m.settings.formatOriginal}</span>
-              <span data-original-format class="font-mono text-[0.6875rem] font-normal text-zinc-600 empty:hidden dark:text-zinc-400"></span>
+              <span data-original-format class="font-mono text-[0.6875rem] font-normal text-zinc-600 empty:hidden dark:text-zinc-300"></span>
             </label>
             <label class:list={[segment, 'min-h-12 px-1']}>
               <input type="radio" name="ic-format" value="webp" data-format class="sr-only" />

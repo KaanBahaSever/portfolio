@@ -24,9 +24,15 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
 ---
 
 <BaseLayout title={m.page.title} description={m.page.description} width="full">
-  <PageHeader title={m.page.title} lead={m.page.lead} back={{ href: localizePath('/tools/', locale), label: t.nav.tools }} />
-
-  <Notepad class="mt-6 sm:mt-8" />
+  {/* The title and the whole tool window fill the first screen; the tips follow below. */}
+  <div class="np-page flex flex-col">
+    <PageHeader
+      title={m.page.title}
+      lead={m.page.lead}
+      back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+    />
+    <Notepad class="mt-4 grow sm:mt-5" />
+  </div>
 
   <details class="group/tips mt-8 rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
     <summary
@@ -79,8 +85,9 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   <code class={code}>veri.json</code>. Uzantısız adlara <code class={code}>.txt</code> eklenir.
                 </li>
                 <li>
-                  Bunu bekleyen Windows programları için durum çubuğunda <strong class={strong}>CRLF</strong> seçeneğini
-                  seçin. CRLF kullanan bir dosya açtığınızda bu seçenek kendiliğinden seçilir.
+                  Satır sonu olarak CRLF bekleyen Windows programları için durum çubuğunda{' '}
+                  <strong class={strong}>CRLF</strong>’yi seçin; CRLF kullanan bir dosya açtığınızda bu ayar
+                  kendiliğinden seçilir.
                 </li>
                 <li>
                   <strong class={strong}>Aç</strong>, en fazla 20 MB boyutundaki UTF-8 ya da UTF-16 metin dosyalarını
@@ -98,8 +105,9 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
               <h2 class={heading}>Odak modu</h2>
               <ul class={list}>
                 <li>
-                  <strong class={strong}>Odak modu</strong> ekranı yalnızca metne ayırır: araç çubuğu çekilir, sade bir
-                  durum satırı satır ve kelime sayısını göstermeyi sürdürür. Tarayıcı izin veriyorsa tam ekrana da geçer.
+                  <strong class={strong}>Odak modu</strong> ekranı yalnızca metne ayırır: araç çubuğu gizlenir, sade bir
+                  durum satırında satır ve kelime sayısı görünmeye devam eder. Tarayıcı izin veriyorsa tam ekrana da
+                  geçer.
                 </li>
                 <li>
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Enter</kbd> (Mac’te{' '}
@@ -109,8 +117,8 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   olarak kalır.
                 </li>
                 <li>
-                  <kbd class={kbd}>Esc</kbd> odak modundan çıkar. Bul paneli açıksa ilk <kbd class={kbd}>Esc</kbd> paneli
-                  kapatır, ikincisi odak modundan çıkar.
+                  <kbd class={kbd}>Esc</kbd> tuşu odak modunu kapatır. Bul paneli açıksa ilk <kbd class={kbd}>Esc</kbd>{' '}
+                  paneli, ikincisi odak modunu kapatır.
                 </li>
               </ul>
             </section>
@@ -149,9 +157,9 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   <kbd class={kbd}>O</kbd>: dosya aç.
                 </li>
                 <li>
-                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Z</kbd> yazdıklarınızı ve tek tek yapılan değiştirmeleri
-                  geri alır. Tümünü değiştir ya da Temizle sonrasında hemen beliren <strong class={strong}>Geri al</strong>{' '}
-                  düğmesi uzun metinlerde de çalışır.
+                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Z</kbd> yazdıklarınızı, tek tek yapılan değiştirmeleri ve
+                  temizlemeyi (dosya adıyla birlikte) geri alır. Tümünü değiştir ya da Temizle sonrasında hemen beliren{' '}
+                  <strong class={strong}>Geri al</strong> düğmesi uzun metinlerde de çalışır.
                 </li>
               </ul>
             </section>
@@ -316,9 +324,9 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   <kbd class={kbd}>O</kbd>: open a file.
                 </li>
                 <li>
-                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Z</kbd> undoes typing and single replacements. The{' '}
-                  <strong class={strong}>Undo</strong> button that appears after Replace all or Clear works for long
-                  texts too.
+                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Z</kbd> undoes typing, single replacements and Clear
+                  (file name included). The <strong class={strong}>Undo</strong> button that appears after Replace all
+                  or Clear works for long texts too.
                 </li>
               </ul>
             </section>
@@ -384,3 +392,35 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
     </div>
   </details>
 </BaseLayout>
+
+<style>
+  /*
+   * The title and the tool window share a column as tall as the first screen, and the window
+   * (`grow`) takes whatever the title leaves, however the lead wraps. The numbers mirror
+   * BaseLayout: the sticky site header (h-14 plus its 1px border, h-16 from sm) and main's top
+   * padding (pt-8, pt-12 from sm), of which a tool page takes some back for the editor. The tail
+   * is what follows the window inside the tool (gap-3 and the closed "More stats" row: min-h-11
+   * plus its border): the column reaches that far past the fold, so the window itself ends just
+   * above the bottom of the screen. The air under the window equals that gap, so no sliver of the
+   * row below shows at the bottom edge. svh (the viewport with the browser bars shown) keeps the
+   * height from jumping while mobile browsers slide their address bar; vh is the fallback.
+   */
+  .np-page {
+    --site-top: calc(3.5rem + 1px);
+    --main-top: 2rem;
+    --pull: 1rem;
+    --air: 0.75rem;
+    --tail: calc(0.75rem + 2.75rem + 2px);
+    margin-top: calc(-1 * var(--pull));
+    min-height: calc(100vh - var(--site-top) - var(--main-top) + var(--pull) - var(--air) + var(--tail));
+    min-height: calc(100svh - var(--site-top) - var(--main-top) + var(--pull) - var(--air) + var(--tail));
+  }
+
+  @media (width >= 40rem) {
+    .np-page {
+      --site-top: calc(4rem + 1px);
+      --main-top: 3rem;
+      --pull: 2rem;
+    }
+  }
+</style>

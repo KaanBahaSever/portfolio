@@ -131,6 +131,23 @@ export function restoreDraft(text: string | null | undefined, rawMeta: string | 
   };
 }
 
+/**
+ * A stored draft plus text typed into the editor before the page's script ran (on a slow
+ * connection the empty editor is usable a moment before the draft appears). Neither is dropped:
+ * - 'draft': nothing was typed (or exactly the draft, which a browser may put back itself);
+ * - 'early': the typed text already starts with the draft, so it contains it;
+ * - 'both': the typed text goes after the draft, on a line of its own.
+ */
+export function combineDraftWithEarlyText(
+  draft: string,
+  early: string,
+): { text: string; kept: 'draft' | 'early' | 'both' } {
+  if (early === '' || early === draft) return { text: draft, kept: 'draft' };
+  if (early.startsWith(draft)) return { text: early, kept: 'early' };
+  const separator = draft.endsWith('\n') ? '' : '\n';
+  return { text: `${draft}${separator}${early}`, kept: 'both' };
+}
+
 /** Autosave is on unless the visitor turned it off. */
 export function parseAutosavePreference(raw: string | null | undefined): boolean {
   return raw !== '0';

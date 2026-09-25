@@ -8,6 +8,7 @@
  *
  * Pure: no `astro:*` imports, so node:test and the controller can import it.
  */
+import type { RegexErrorCode } from '../../lib/text/regex-error.ts';
 import type { Localized } from '../config.ts';
 
 const en = {
@@ -15,7 +16,8 @@ const en = {
     title: 'Notepad',
     description:
       'A distraction-free plain-text editor in your browser: zen mode, autosave in this browser, find and replace with regular expressions, and live line and word counts. Your text is never uploaded.',
-    lead: 'A plain-text editor for notes and drafts. It keeps your text in this browser, never uploads it, and saves it as a file when you press Download.',
+    /** One line on wide screens: the tool window should fit the first screen. */
+    lead: 'Plain-text notes, kept in this browser and never uploaded.',
     tips: 'Tips',
   },
 
@@ -101,7 +103,30 @@ const en = {
     /** When the position in a very long list is unknown: "10,000+ matches". */
     matches: (total: string) => `${total} matches`,
     atLine: (position: string, line: string) => `${position}, line ${line}`,
-    invalidRegex: (detail: string) => `Invalid regular expression: ${detail}`,
+    /** `reason`: one of `regexErrors`. */
+    invalidRegex: (reason: string) => `Invalid regular expression: ${reason}.`,
+    /**
+     * A mistake the notepad doesn't recognise, with the browser's own explanation, which is
+     * always in English: shown in English only.
+     */
+    invalidRegexOther: (detail: string) => `Invalid regular expression: ${detail}`,
+    /** See src/lib/text/regex-error.ts. */
+    regexErrors: {
+      unterminatedGroup: 'a group opened with ( is never closed',
+      unmatchedParen: 'a ) has no matching (',
+      nothingToRepeat: '*, +, ? or {…} has nothing before it to repeat',
+      loneBracket: 'a lone ] or } needs a backslash in front: \\] or \\}',
+      incompleteQuantifier: 'a count in { is never finished; to find the character itself, write \\{',
+      quantifierOrder: 'the numbers in {…} are in the wrong order',
+      unterminatedClass: 'a character class opened with [ is never closed',
+      classRange: 'a range in […] runs backwards or contains a class such as \\d',
+      trailingBackslash: 'the pattern ends with a lone \\',
+      invalidEscape: 'an escape sequence (\\ and the character after it) is not valid here',
+      duplicateGroupName: 'two groups have the same name',
+      groupName: 'a group name is not valid, or \\k<…> refers to a name that doesn’t exist',
+      invalidGroup: '(? must be followed by :, =, !, <=, <! or <name>',
+      propertyName: '\\p{…} names an unknown Unicode property',
+    } satisfies Record<Exclude<RegexErrorCode, 'unknown'>, string>,
     timeout: 'Search took too long. Simplify the pattern: nested quantifiers like (a+)+ can run forever.',
     tooLarge: 'The text is too large to search with this pattern.',
     failed: 'Search failed. Try again.',
@@ -140,12 +165,14 @@ const en = {
     /** The same on narrow screens. */
     savedShort: (time: string) => `Saved · ${time}`,
     unsaved: 'Unsaved changes',
-    full: 'Too large to keep in this browser. Download the text to save a copy.',
+    full: 'The text is too long to keep in this browser. Download it to save a copy.',
     unavailable: 'This browser blocks storage, so the text isn’t kept here. Download it to save a copy.',
     error: 'Couldn’t save in this browser. Download the text to save a copy.',
     autosaveOn: 'Autosave on. The text is kept in this browser.',
     autosaveOff: 'Autosave off. The copy in this browser was removed.',
     fromOtherTab: 'Updated with changes made in another tab.',
+    /** The stored draft came back after the visitor had already typed into the empty editor. */
+    earlyTextKept: 'Your saved text is back. What you typed while the page was loading is at the end.',
   },
 
   stats: {
@@ -205,7 +232,7 @@ const tr: NotepadMessages = {
     title: 'Not defteri',
     description:
       'Tarayıcınızda çalışan, dikkat dağıtmayan bir düz metin düzenleyici: odak modu, bu tarayıcıda otomatik kayıt, düzenli ifadelerle bul ve değiştir, anlık satır ve kelime sayacı. Metniniz hiçbir yere yüklenmez.',
-    lead: 'Notlar ve taslaklar için bir düz metin düzenleyici. Metninizi bu tarayıcıda saklar, hiçbir yere yüklemez; İndir düğmesiyle dosya olarak kaydedersiniz.',
+    lead: 'Düz metin notlarınız bu tarayıcıda kalır, hiçbir yere yüklenmez.',
     tips: 'İpuçları',
   },
 
@@ -286,7 +313,24 @@ const tr: NotepadMessages = {
     positionSpoken: (index, total) => `Eşleşme ${index}, toplam ${total}`,
     matches: (total) => `${total} eşleşme`,
     atLine: (position, line) => `${position}, satır ${line}`,
-    invalidRegex: (detail) => `Geçersiz düzenli ifade: ${detail}`,
+    invalidRegex: (reason) => `Geçersiz düzenli ifade: ${reason}.`,
+    invalidRegexOther: () => 'Geçersiz düzenli ifade.',
+    regexErrors: {
+      unterminatedGroup: '( ile açılan bir grup kapatılmamış',
+      unmatchedParen: 'eşi olmayan bir ) var',
+      nothingToRepeat: '*, +, ? ya da {…} önünde yinelenecek bir şey yok',
+      loneBracket: 'tek başına bir ] ya da } kullanılamaz; önüne ters eğik çizgi koyun: \\] ya da \\}',
+      incompleteQuantifier: '{ ile başlayan niceleyici tamamlanmamış; karakterin kendisini aramak için \\{ yazın',
+      quantifierOrder: '{…} içindeki sayıların sırası ters',
+      unterminatedClass: '[ ile açılan karakter sınıfı kapatılmamış',
+      classRange: '[…] içindeki bir aralık ters sırada ya da \\d gibi bir sınıf içeriyor',
+      trailingBackslash: 'desen tek başına bir \\ ile bitiyor',
+      invalidEscape: 'bir kaçış dizisi (\\ ve ardından gelen karakter) burada geçersiz',
+      duplicateGroupName: 'iki grubun adı aynı',
+      groupName: 'bir grup adı geçersiz ya da \\k<…> var olmayan bir ada başvuruyor',
+      invalidGroup: '(? işaretinin ardından :, =, !, <=, <! ya da <ad> gelmeli',
+      propertyName: '\\p{…} içindeki Unicode özelliği bilinmiyor',
+    },
     timeout: 'Arama çok uzun sürdü. Deseni sadeleştirin: (a+)+ gibi iç içe niceleyiciler hiç bitmeyebilir.',
     tooLarge: 'Metin, bu desenle aranamayacak kadar büyük.',
     failed: 'Arama başarısız oldu. Tekrar deneyin.',
@@ -324,12 +368,13 @@ const tr: NotepadMessages = {
     saved: (time) => `Bu tarayıcıya kaydedildi · ${time}`,
     savedShort: (time) => `Kaydedildi · ${time}`,
     unsaved: 'Kaydedilmemiş değişiklikler',
-    full: 'Bu tarayıcıda saklanamayacak kadar büyük. Bir kopyasını almak için indirin.',
+    full: 'Metin, bu tarayıcıda saklanamayacak kadar uzun. Bir kopyasını almak için indirin.',
     unavailable: 'Bu tarayıcı depolamaya izin vermiyor; metin burada saklanmıyor. Bir kopyasını almak için indirin.',
     error: 'Bu tarayıcıya kaydedilemedi. Bir kopyasını almak için metni indirin.',
     autosaveOn: 'Otomatik kayıt açık. Metin bu tarayıcıda saklanıyor.',
     autosaveOff: 'Otomatik kayıt kapalı. Bu tarayıcıdaki kopya silindi.',
     fromOtherTab: 'Başka bir sekmede yapılan değişiklikler alındı.',
+    earlyTextKept: 'Kayıtlı metniniz geri geldi. Sayfa yüklenirken yazdıklarınız sona eklendi.',
   },
 
   stats: {

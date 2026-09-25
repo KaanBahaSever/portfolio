@@ -78,6 +78,21 @@ test('shortcut hints and saved times read naturally', () => {
   assert.equal(tr.status.saved('14:05'), 'Bu tarayıcıya kaydedildi · 14:05');
 });
 
+test('regular-expression errors read in the page language', () => {
+  const detail = 'Unterminated group';
+  assert.equal(
+    en.search.invalidRegex(en.search.regexErrors.unterminatedGroup),
+    'Invalid regular expression: a group opened with ( is never closed.',
+  );
+  assert.equal(
+    tr.search.invalidRegex(tr.search.regexErrors.unterminatedGroup),
+    'Geçersiz düzenli ifade: ( ile açılan bir grup kapatılmamış.',
+  );
+  // The browser's own explanation is English: the Turkish page never shows it.
+  assert.equal(en.search.invalidRegexOther(detail), `Invalid regular expression: ${detail}`);
+  assert.ok(!tr.search.invalidRegexOther(detail).includes(detail));
+});
+
 test('the default file names survive sanitizing unchanged', () => {
   for (const messages of [en, tr] satisfies NotepadMessages[]) {
     assert.equal(sanitizeFilename(messages.defaultFilename), messages.defaultFilename);

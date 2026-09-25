@@ -8,16 +8,17 @@
  */
 
 import { getPageLocale } from '../../../i18n/client.ts';
-import { LOCALE_META } from '../../../i18n/config.ts';
+import { LOCALES, LOCALE_META } from '../../../i18n/config.ts';
 import { formatters } from '../../../i18n/format.ts';
 import { notepadMessages } from '../../../i18n/tools/notepad.ts';
 import { saveBlob } from '../../../lib/download.ts';
 import { mimeTypeForFilename, sanitizeFilename } from '../../../lib/files/save-file.ts';
 import { localStore } from '../../../lib/storage.ts';
 import { decodeTextFile } from '../../../lib/text/decode.ts';
-import { DRAFT_KEYS } from '../../../lib/text/draft.ts';
+import { DRAFT_KEYS, combineDraftWithEarlyText } from '../../../lib/text/draft.ts';
 import type { RestoredDraft } from '../../../lib/text/draft.ts';
 import { buildReplacementPreview } from '../../../lib/text/preview.ts';
+import { classifyRegexError, regexErrorDetail } from '../../../lib/text/regex-error.ts';
 import {
   MATCH_LIMIT,
   advanceIndex,
@@ -110,17 +111,6 @@ const OPTION_SHORTCUTS: ReadonlyArray<[OptionKey, string]> = [
   ['regex', 'r'],
 ];
 
-/**
- * The engine's explanation of a bad pattern ("Unterminated group") without its own prefix, in
- * any engine's wording. The explanation itself stays in the browser's language.
- */
-function regexErrorDetail(message: string): string {
-  const detail = message
-    .replace(/^(?:SyntaxError:\s*)?Invalid regular expression:\s*/i, '')
-    .replace(/^\/.*\/[a-z]*:\s*/s, '');
-  return detail || message;
-}
-
 function detectLineEnding(text: string): LineEnding {
   let crlf = 0;
   let lf = 0;
@@ -203,6 +193,7 @@ function getElements(root: HTMLElement) {
     mirror: query<HTMLElement>(root, '[data-mirror]'),
     markTemplate: query<HTMLTemplateElement>(root, 'template[data-mark-template]'),
     editor: query<HTMLTextAreaElement>(root, '[data-editor]'),
+    status: query<HTMLElement>(root, '[data-status]'),
     caret: query<HTMLElement>(root, '[data-caret]'),
     selectionCount: query<HTMLElement>(root, '[data-selection-count]'),
     saveState: query<HTMLElement>(root, '[data-save-state]'),
@@ -249,12 +240,19 @@ export function initNotepad(root: HTMLElement): void {
   let undoState: UndoState | null = null;
   /** Clear can be undone until the text is edited or another notice replaces it. */
   let clearedState: ClearedState | null = null;
+  /**
+   * The browser's own undo (Ctrl+Z) can also bring back a text Clear removed through its editing
+   * commands, even after more typing and undoing. What Clear reset besides the text is kept for
+   * that, until the text is replaced some other way.
+   */
+  let clearedForNativeUndo: ClearedState | null = null;
   let wrapLines = true;
   let openGeneration = 0;
   /** Changes whenever the notice line changes, so a delayed "Replacing…" only clears itself. */
   let messageToken = 0;
   let renderedSaveState = '';
-
+  /** The autosave problem (full, error, unavailable) last announced; null while there is none. */
+  let announcedProblem: string | null = null;
 
   const search = {
     open: false,
@@ -368,13 +366,33 @@ export function initNotepad(root: HTMLElement): void {
     return m.search.positionSpoken(formatNumber(search.current + 1), countLabel());
   }
 
+  /**
+   * Engines explain a bad pattern in English only, so the common mistakes are explained from
+   * the catalogue; for the rest the catalogue decides whether the engine's words are shown.
+   */
+  function regexProblem(message: string): string {
+    const code = classifyRegexError(message);
+    if (code === 'unknown') return m.search.invalidRegexOther(regexErrorDetail(message));
+    return m.search.invalidRegex(m.search.regexErrors[code]);
+  }
+
   function statusProblem(status: SearchStatus): string {
-    if (status.status === 'error') return m.search.invalidRegex(regexErrorDetail(status.message));
+    if (status.status === 'error') return regexProblem(status.message);
     if (status.status === 'unfinished') return status.message;
     return '';
   }
 
   // ---------------------------------------------------------------- saved state
+
+  /**
+   * The file name to show for a stored draft. Both language versions of the page share one
+   * draft, so a default name saved on the other one ("adsız.txt" on the English page) becomes
+   * this page's default: the visitor never typed it.
+   */
+  function storedFilename(name: string | null): string {
+    if (name === null) return m.defaultFilename;
+    return LOCALES.some((other) => notepadMessages[other].defaultFilename === name) ? m.defaultFilename : name;
+  }
 
   function formatSavedAt(time: number): string {
     const date = new Date(time);
@@ -400,6 +418,14 @@ export function initNotepad(root: HTMLElement): void {
     } else if (state === 'full' || state === 'error' || (state === 'unavailable' && knownLength > 0)) {
       long = short = m.status[state];
       warning = true;
+    }
+
+    // The status bar isn't a live region (it changes on every save). Screen readers hear once
+    // when the text stops being kept here; turning autosave off is the visitor's own choice.
+    const problem = warning && state !== 'off' ? state : null;
+    if (problem !== announcedProblem) {
+      announcedProblem = problem;
+      if (problem) announce(long);
     }
 
     const key = `${long}\n${short}\n${warning}`;
@@ -567,12 +593,31 @@ export function initNotepad(root: HTMLElement): void {
     if (hadFocus) editor.focus({ preventScroll: true });
   }
 
-  /** `byUser`: typed, pasted, dropped or undone in the textarea (not an edit made by this code). */
-  function handleTextChange(byUser: boolean): void {
+  /**
+   * The browser's undo brought back the text Clear removed: the file name and line endings come
+   * back with it, unless they were changed since. Returns false for any other undo.
+   */
+  function undoClearSettings(): boolean {
+    const state = clearedForNativeUndo;
+    if (!state || editor.value !== state.text) return false;
+    clearedForNativeUndo = null;
+    if (el.filename.value === m.defaultFilename) el.filename.value = state.filename;
+    if (getLineEnding() === 'lf') el.lineEnding.value = state.lineEnding;
+    if (state.wasClean) cleanVersion = textVersion;
+    setMessage('');
+    announce(m.clear.undone);
+    return true;
+  }
+
+  /**
+   * `byUser`: typed, pasted, dropped or undone in the textarea (not an edit made by this code);
+   * `inputType` comes from its input event.
+   */
+  function handleTextChange(byUser: boolean, inputType = ''): void {
     textVersion++;
     if (byUser && !applyingEdit) {
       hideReplaceResult();
-      dismissClearUndo();
+      if (!(inputType === 'historyUndo' && undoClearSettings())) dismissClearUndo();
     }
     stats.schedule();
     scheduleCaretUpdate();
@@ -581,7 +626,7 @@ export function initNotepad(root: HTMLElement): void {
     if (search.open && search.options.query !== '') scheduleSearch(false);
   }
 
-  editor.addEventListener('input', () => handleTextChange(true));
+  editor.addEventListener('input', (event) => handleTextChange(true, (event as InputEvent).inputType ?? ''));
 
   /**
    * Replaces [start, end) with `replacement`. Small edits use the browser's editing command so
@@ -964,7 +1009,11 @@ export function initNotepad(root: HTMLElement): void {
     const header = document.querySelector('body > header');
     const headerBottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
     const top = Math.max(viewport?.offsetTop ?? 0, headerBottom) + 8;
-    const bottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
+    // Above the status bar, which sticks to the bottom of the viewport while the window is taller.
+    const bottom = Math.min(
+      viewport ? viewport.offsetTop + viewport.height : window.innerHeight,
+      el.status.getBoundingClientRect().top,
+    );
     if (rect.top < top) window.scrollBy({ top: rect.top - top - 16 });
     else if (rect.bottom > bottom) window.scrollBy({ top: rect.bottom - bottom + 16 });
   }
@@ -1472,6 +1521,7 @@ export function initNotepad(root: HTMLElement): void {
 
   function loadText(text: string, filename: string): void {
     const lineEnding = detectLineEnding(text);
+    clearedForNativeUndo = null;
     editor.value = text;
     editor.setSelectionRange(0, 0);
     editor.scrollTop = 0;
@@ -1580,7 +1630,8 @@ export function initNotepad(root: HTMLElement): void {
 
   /**
    * Clear: starts over with an empty, untitled page and removes the stored draft. It asks first,
-   * and can be undone right afterwards (Ctrl+Z too, for texts the browser's own undo can take).
+   * and can be undone right afterwards with the Undo button, and with Ctrl+Z for texts the
+   * browser's own undo can take (undoClearSettings restores the name and line endings then).
    */
   async function clearText(): Promise<void> {
     if (confirmDialog.open) return;
@@ -1622,6 +1673,8 @@ export function initNotepad(root: HTMLElement): void {
     openGeneration++; // a file still being read won't fill the cleared page
     hideReplaceResult();
     replaceWholeText(text, '');
+    // replaceWholeText used the browser's editing commands, which Ctrl+Z can undo.
+    clearedForNativeUndo = !coarsePointer && text.length <= UNDOABLE_EDIT_LIMIT ? cleared : null;
     el.filename.value = m.defaultFilename;
     el.lineEnding.value = 'lf';
     stats.schedule(true);
@@ -1640,6 +1693,7 @@ export function initNotepad(root: HTMLElement): void {
     const state = clearedState;
     if (!state) return;
     clearedState = null;
+    clearedForNativeUndo = null;
     replaceWholeText(editor.value, state.text);
     el.filename.value = state.filename;
     el.lineEnding.value = state.lineEnding;
@@ -1715,6 +1769,7 @@ export function initNotepad(root: HTMLElement): void {
     const changed = text !== editor.value;
     if (changed) {
       const { selectionStart, selectionEnd, scrollTop, scrollLeft } = editor;
+      clearedForNativeUndo = null;
       editor.value = text;
       const length = editor.value.length;
       editor.setSelectionRange(Math.min(selectionStart, length), Math.min(selectionEnd, length));
@@ -1727,7 +1782,7 @@ export function initNotepad(root: HTMLElement): void {
       scheduleCaretUpdate();
       if (search.open && search.options.query !== '') scheduleSearch(false);
     }
-    el.filename.value = draft?.filename ?? m.defaultFilename;
+    el.filename.value = storedFilename(draft?.filename ?? null);
     el.lineEnding.value = draft?.lineEnding ?? 'lf';
     if (draft?.wrap != null && draft.wrap !== wrapLines) setWrap(draft.wrap);
     stats.schedule(true);
@@ -1885,15 +1940,37 @@ export function initNotepad(root: HTMLElement): void {
   // aria-keyshortcuts names the key, not the symbol shown on Apple keyboards.
   el.zenToggle.setAttribute('aria-keyshortcuts', ariaShortcut({ ...ZEN_SHORTCUT, key: 'Enter' }));
 
-  /** Brings back the draft an earlier visit left in this browser. */
-  function restoreStoredDraft(): void {
+  /**
+   * Brings back the draft an earlier visit left in this browser. `early` is text typed into the
+   * editor before this script ran: it never replaces the draft (the first save would overwrite
+   * a draft the visitor hasn't seen), and goes after it instead.
+   */
+  function restoreStoredDraft(early: string): void {
     const draft = autosave.load();
-    if (!draft) return;
-    editor.value = draft.text;
-    el.filename.value = draft.filename ?? m.defaultFilename;
+    if (!draft) {
+      if (early !== '') handleTextChange(false);
+      return;
+    }
+    const { text, kept } = combineDraftWithEarlyText(draft.text, early);
+    if (text !== editor.value) editor.value = text;
+    el.filename.value = storedFilename(draft.filename);
     // A textarea turns CRLF into LF, so the choice comes from the metadata, not the text.
     el.lineEnding.value = draft.lineEnding ?? 'lf';
     if (draft.wrap !== null && draft.wrap !== wrapLines) setWrap(draft.wrap);
+
+    if (kept !== 'draft') {
+      // Continue where the typing was: at the end. The combined text is saved like any edit.
+      if (kept === 'both') {
+        const end = editor.value.length;
+        editor.setSelectionRange(end, end);
+        editor.scrollTop = editor.scrollHeight;
+        setMessage(m.status.earlyTextKept);
+        announce(m.status.earlyTextKept);
+      }
+      handleTextChange(false);
+      return;
+    }
+
     // Restored text counts as changed: opening a file over it asks first.
     textVersion++;
     if (draft.selection) editor.setSelectionRange(draft.selection.start, draft.selection.end);
@@ -1909,14 +1986,14 @@ export function initNotepad(root: HTMLElement): void {
   // Browsers may restore earlier form input on reload: start from the stored draft (or an empty
   // page) instead. Only text typed before this script ran is kept.
   const typedEarly = document.activeElement === editor && editor.value !== '';
+  const early = typedEarly ? editor.value : '';
   if (!typedEarly) editor.value = '';
   el.filename.value = m.defaultFilename;
   el.lineEnding.value = 'lf';
   el.findInput.value = '';
   el.replaceInput.value = '';
   el.editorWrap.dataset.wrap = 'on';
-  if (typedEarly) handleTextChange(false);
-  else restoreStoredDraft();
+  restoreStoredDraft(early);
   stats.schedule(true);
   updateCaret();
   renderAutosaveToggle();

@@ -4,6 +4,7 @@ import {
   DRAFT_FORMAT,
   DRAFT_KEYS,
   autosaveDelay,
+  combineDraftWithEarlyText,
   parseAutosavePreference,
   parseDraftMeta,
   restoreDraft,
@@ -124,6 +125,17 @@ test('a blank stored file name falls back to the default', () => {
 test('a selection beyond the text is dropped', () => {
   const draft = restoreDraft('Hello world', serializeDraftMeta(meta({ selectionEnd: 40 })));
   assert.equal(draft?.selection, null);
+});
+
+test('text typed before start-up never replaces the stored draft', () => {
+  assert.deepEqual(combineDraftWithEarlyText('Draft', ''), { text: 'Draft', kept: 'draft' });
+  assert.deepEqual(combineDraftWithEarlyText('Draft', 'Draft'), { text: 'Draft', kept: 'draft' });
+  // The typed text already holds the draft (it was there when typing began).
+  assert.deepEqual(combineDraftWithEarlyText('Draft', 'Draft and more'), { text: 'Draft and more', kept: 'early' });
+  // Anything else goes after the draft, on its own line.
+  assert.deepEqual(combineDraftWithEarlyText('Draft', 'new'), { text: 'Draft\nnew', kept: 'both' });
+  assert.deepEqual(combineDraftWithEarlyText('Draft\n', 'new'), { text: 'Draft\nnew', kept: 'both' });
+  assert.deepEqual(combineDraftWithEarlyText('Draft', 'Dr'), { text: 'Draft\nDr', kept: 'both' });
 });
 
 test('autosave is on unless it was turned off', () => {

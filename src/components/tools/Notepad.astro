@@ -4,9 +4,12 @@
  * data-* attribute scoped to the root section, and all text comes from src/i18n/tools/notepad.ts.
  *
  * Layout: one "window" (.np-card) holds the toolbar, a notice line, the find panel, the editor
- * and a status bar, and is as tall as the viewport below the sticky site header. In zen mode the
- * root section covers the whole viewport instead (styles at the end) and only the text, an open
- * find panel and a quiet status line remain.
+ * and a status bar. The root is a flex column and the window grows with it: give the root
+ * `grow` inside a column that reaches the bottom of the screen (the notepad page does) and the
+ * whole window fits the first screen. Where the screen is too short for its minimum height, the
+ * status bar sticks to the bottom of the viewport, so the counters and the save state stay in
+ * view. In zen mode the root section covers the whole viewport instead (styles at the end) and
+ * only the text, an open find panel and a quiet status line remain.
  */
 import Icon from '../ui/Icon.astro';
 import { ui } from '../ui/styles';
@@ -30,6 +33,11 @@ const toolButton =
 /** Visible from lg up; below that the buttons show their icon and keep the name for screen readers. */
 const toolLabel = 'max-lg:sr-only';
 const divider = 'mx-1 hidden h-6 w-px shrink-0 bg-zinc-200 sm:block dark:bg-zinc-800';
+/**
+ * Button groups in the toolbar. Below 360 px the gaps go, so the six 44 px buttons still share
+ * one row on a 320 px phone instead of pushing Zen mode onto a row of its own.
+ */
+const toolGroup = 'flex gap-0 min-[22.5rem]:gap-1';
 const buttonBase =
   'inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-zinc-200 bg-white px-3 text-sm font-medium text-zinc-900 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800';
 const iconButtonClass =
@@ -67,11 +75,11 @@ const surfaceClass = 'np-surface font-mono';
 
   <div
     data-card
-    class="np-card flex flex-col rounded-xl border border-zinc-200 bg-white shadow-xs transition-[border-color,box-shadow] has-[.np-editor:focus-visible]:border-accent-600 has-[.np-editor:focus-visible]:ring-1 has-[.np-editor:focus-visible]:ring-accent-600 dark:border-zinc-800 dark:bg-zinc-900 dark:has-[.np-editor:focus-visible]:border-accent-400 dark:has-[.np-editor:focus-visible]:ring-accent-400"
+    class="np-card flex grow flex-col rounded-xl border border-zinc-200 bg-white shadow-xs transition-[border-color,box-shadow] has-[.np-editor:focus-visible]:border-accent-600 has-[.np-editor:focus-visible]:ring-1 has-[.np-editor:focus-visible]:ring-accent-600 dark:border-zinc-800 dark:bg-zinc-900 dark:has-[.np-editor:focus-visible]:border-accent-400 dark:has-[.np-editor:focus-visible]:ring-accent-400"
   >
     <!-- 1. Toolbar: the document (name, download), file actions, search and view -->
     <div
-      class="np-toolbar flex flex-wrap items-center gap-x-1 gap-y-1.5 border-b border-zinc-200 p-1.5 sm:p-2 dark:border-zinc-800"
+      class="np-toolbar flex flex-wrap items-center gap-x-1 gap-y-1.5 border-b border-zinc-200 p-1 min-[22.5rem]:p-1.5 sm:p-2 dark:border-zinc-800"
     >
       <div class="flex min-w-0 grow basis-full items-center gap-1.5 sm:grow-0 sm:basis-auto">
         <div class="relative min-w-0 flex-1 sm:w-48 sm:flex-none xl:w-64">
@@ -102,7 +110,7 @@ const surfaceClass = 'np-surface font-mono';
 
       <span class={divider} aria-hidden="true"></span>
 
-      <div role="group" aria-label={m.toolbar.file} class="flex gap-1">
+      <div role="group" aria-label={m.toolbar.file} class={toolGroup}>
         <button type="button" data-open class={toolButton}>
           <svg
             viewBox="0 0 24 24"
@@ -134,7 +142,7 @@ const surfaceClass = 'np-surface font-mono';
 
       <span class={divider} aria-hidden="true"></span>
 
-      <div role="group" aria-label={m.toolbar.view} class="flex gap-1">
+      <div role="group" aria-label={m.toolbar.view} class={toolGroup}>
         <button type="button" data-find-toggle aria-expanded="false" aria-controls="np-find-panel" class={toolButton}>
           <svg
             viewBox="0 0 24 24"
@@ -451,9 +459,14 @@ const surfaceClass = 'np-surface font-mono';
       </template>
     </div>
 
-    <!-- 5. Status bar: caret and counters; save state, autosave switch and line endings (or the zen exit) -->
+    <!--
+      5. Status bar: caret and counters; save state, autosave switch and line endings (or the zen
+      exit). Sticky with the card's own background, so it stays in view when the window is taller
+      than the screen; the bottom corners follow the card's (radius minus its 1 px border).
+    -->
     <div
-      class="np-status flex flex-wrap items-center gap-x-3 border-t border-zinc-200 px-2 font-mono text-xs text-zinc-600 tabular-nums sm:px-3 dark:border-zinc-800 dark:text-zinc-400"
+      data-status
+      class="np-status sticky bottom-0 z-10 flex flex-wrap items-center gap-x-3 rounded-b-[calc(var(--radius-xl)-1px)] border-t border-zinc-200 bg-white px-2 font-mono text-xs text-zinc-600 tabular-nums sm:px-3 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
     >
       {/* The caret position stays off phones, where the counters and save state need the line. */}
       <div class="flex min-h-11 min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 px-1 py-1">
@@ -652,20 +665,11 @@ const surfaceClass = 'np-surface font-mono';
   }
 
   /*
-   * The window fills the viewport below the sticky site header (3.5rem, 4rem from sm), with a
-   * little air above and below. svh (the viewport with the browser bars shown) keeps it from
-   * jumping while mobile browsers slide their address bar; vh is the fallback.
+   * The window's height comes from its column (see the top of this file); this is the least it
+   * takes, enough for a toolbar, several lines of text and the status bar on any screen.
    */
   .np-card {
-    min-height: max(24rem, calc(100vh - 4.5rem));
-    min-height: max(24rem, calc(100svh - 4.5rem));
-  }
-
-  @media (width >= 40rem) {
-    .np-card {
-      min-height: max(28rem, calc(100vh - 5.5rem));
-      min-height: max(28rem, calc(100svh - 5.5rem));
-    }
+    min-height: 20rem;
   }
 
   .np-root:not([data-zen]) .np-zen-only {
@@ -723,6 +727,7 @@ const surfaceClass = 'np-surface font-mono';
   /* A quiet status line: muted colours that still meet 4.5:1, full strength on hover or focus. */
   .np-root[data-zen] .np-status {
     border-top-color: transparent;
+    background-color: transparent;
     color: var(--color-zinc-500);
   }
 

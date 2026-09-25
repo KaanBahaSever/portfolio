@@ -10,6 +10,7 @@
  */
 import type { Localized } from '../config.ts';
 import { common } from '../messages/common.ts';
+import { projectsMessages } from '../messages/projects.ts';
 import type { ConsoleCopy } from '../../lib/console/data.ts';
 import { blank, dim, heading, indented, link, pair, run, text } from '../../lib/console/rich.ts';
 
@@ -174,8 +175,9 @@ const en = {
     source: 'source',
     openSource: common.en.badges.openSource,
     private: common.en.badges.private,
+    // The same stage names as the project cards and pages, so a status reads alike everywhere.
     stages: {
-      production: 'In production',
+      production: projectsMessages.en.stage.production,
       'early-access': common.en.badges.earlyAccess,
       'in-development': common.en.badges.inDevelopment,
     },
@@ -352,7 +354,7 @@ const tr: ConsoleContent = {
     openSource: common.tr.badges.openSource,
     private: common.tr.badges.private,
     stages: {
-      production: 'Yayında',
+      production: projectsMessages.tr.stage.production,
       'early-access': common.tr.badges.earlyAccess,
       'in-development': common.tr.badges.inDevelopment,
     },

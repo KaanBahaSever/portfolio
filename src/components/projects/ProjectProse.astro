@@ -21,8 +21,10 @@ const { lang, class: className } = Astro.props;
 const locale = getLocale(Astro);
 const html = locale === DEFAULT_LOCALE ? undefined : localizeProseLinks(await Astro.slots.render('default'), locale);
 const classes = [
-  // prose-zinc would turn links ink-coloured; links stay in the accent, as everywhere else.
-  'prose prose-zinc max-w-[68ch] dark:prose-invert prose-a:text-accent-700 prose-a:underline-offset-4 dark:prose-a:text-accent-400 prose-table:text-sm',
+  // The page's reading column sets the measure (max-w-none here), and the text is set like a
+  // blog post's (18 px from sm), the size that measure is chosen for. prose-zinc would turn
+  // links ink-coloured; links stay in the accent, as everywhere else.
+  'prose prose-zinc max-w-none sm:prose-lg dark:prose-invert prose-a:text-accent-700 prose-a:underline-offset-4 dark:prose-a:text-accent-400 prose-table:text-sm',
   // Inline code: the typography plugin wraps it in literal backticks (code::before/::after).
   // Bodies name components and types (`asion-agent`, `std::span`), so a quiet chip reads
   // cleaner. Scoped to code outside <pre> so fenced blocks keep their Shiki frame; the

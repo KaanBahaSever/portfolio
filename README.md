@@ -13,11 +13,14 @@ Live at [kaanbahasever.com](https://kaanbahasever.com).
   header moves between the two versions of a page and remembers the choice.
 - **No backend, no third-party requests**: fonts, KaTeX and PDF.js are self-hosted; no CDNs,
   analytics or cookies. Tools process files and text entirely in the browser; nothing is
-  uploaded. `localStorage` holds only the language choice, the Notepad draft and the console's
+  uploaded. `localStorage` holds only the language and theme choices, the Notepad draft and the console's
   preferences (see [Browser storage](#browser-storage)).
 - **Mobile-first**: base styles target phones (320–430 px), with `sm:`/`md:`/`lg:`
   enhancements for larger screens. Touch targets are at least 44×44 px.
-- **Light and dark** themes follow the operating system (`prefers-color-scheme`).
+- **Light and dark**: the theme follows the operating system (`prefers-color-scheme`) until the
+  visitor picks one with the sun/moon button in the header. The choice is remembered, applied
+  before the first paint and synced across open tabs; without JavaScript the site still follows
+  the operating system.
 
 ## Pages
 
@@ -100,7 +103,7 @@ Run from the project root (Node 22.18+, see `.node-version`; the tests run TypeS
 ├── src/
 │   ├── assets/                         # Images optimized at build time (blog, timeline)
 │   ├── components/
-│   │   ├── layout/                     # Header (nav, language switch, console button), Footer
+│   │   ├── layout/                     # Header (nav, language switch, theme toggle, console button), Footer
 │   │   ├── ui/                         # Shared kit: styles.ts, Icon, PageHeader, Section, BrandMark,
 │   │   │                               # Badge, Tag(List), ProjectCard, PostList, ResumeEntry…
 │   │   ├── home/ about/ projects/ blog/ # Page sections and their line-art figures
@@ -116,15 +119,15 @@ Run from the project root (Node 22.18+, see `.node-version`; the tests run TypeS
 │   │   ├── format.ts                   # Locale-aware numbers, bytes, percent, dates, lists
 │   │   ├── server.ts / client.ts       # getLocale(Astro), localeStaticPaths(), getPageLocale()
 │   │   └── messages/ tools/ games/ console/   # Typed EN/TR message catalogues
-│   ├── layouts/BaseLayout.astro        # <html lang>, SEO + hreflang, language script, header/footer
+│   ├── layouts/BaseLayout.astro        # <html lang>, SEO + hreflang, language and theme scripts, header/footer
 │   ├── lib/                            # Framework-free, unit-tested modules (no DOM):
 │   │                                   # console, games, geo, geometry, image, markdown (KaTeX),
-│   │                                   # math, password, pdf, text, zip, files, storage
+│   │                                   # math, password, pdf, text, zip, files, storage, theme
 │   ├── pages/
 │   │   ├── [...lang]/                  # Every route, built once per locale
 │   │   ├── 404.astro                   # English 404
 │   │   └── tr/404.astro                # Turkish 404
-│   ├── scripts/                        # Client-side controllers: tools/*, games/*, console/
+│   ├── scripts/                        # Client-side controllers: tools/*, games/*, console/, theme.ts
 │   ├── styles/global.css               # Tailwind entry, fonts, design tokens, prose/code/math
 │   └── utils/                          # Content queries (with Turkish overlays), résumé dates
 ├── tests/                              # node --test unit tests
@@ -163,6 +166,15 @@ Run from the project root (Node 22.18+, see `.node-version`; the tests run TypeS
 - **Geometry**: `bg-graph` / `bg-graph-fine` graph paper with `mask-fade-*`, thin-stroke SVG
   figures in `currentColor` with a single accent node, `label-mono` indices such as "§ 02".
 - **Shared classes** for buttons, cards, fields and links live in `src/components/ui/styles.ts`.
+- **Themes**: `<html data-theme="light|dark">` is set before the first paint by the inline script in
+  `BaseLayout.astro` (rules in `src/lib/theme.ts`; runtime in `src/scripts/theme.ts`: live OS changes,
+  other tabs, the header toggle). Use Tailwind's `dark:` variant: it matches `[data-theme=dark]`, or
+  the OS dark mode when no theme is set (no JavaScript). Hand-written CSS repeats the same pair,
+  `:where([data-theme="dark"]) .x { … }` plus `@media (prefers-color-scheme: dark) {
+  :where(:root:not([data-theme])) .x { … } }` (wrap the root part in `:global()` in scoped Astro
+  styles), ideally through component variables. Scripts that read colours at runtime re-read them
+  on the `themechange` event dispatched on `document`. `tests/theme.test.ts` checks the rules, the
+  pre-paint script and that pairing; `tests/theme-controller.test.ts` runs the runtime controller.
 - The brand mark (a λ whose strokes meet at an accent node) is constructed in
   `scripts/build-favicons.mjs`; `src/components/ui/BrandMark.astro` must match it.
 
@@ -277,6 +289,7 @@ Nothing is sent anywhere. `localStorage` holds:
 | Key                                                 | Written by                                          |
 | --------------------------------------------------- | --------------------------------------------------- |
 | `locale`                                            | The header language switch (explicit choices only)  |
+| `theme`                                             | The header theme button: `light` or `dark` (explicit choices only; otherwise the OS decides) |
 | `notepad:v1:text`, `notepad:v1:meta`, `notepad:v1:autosave` | The Notepad's autosave (can be switched off) |
 | `kbs-console:font-size`, `kbs-console:phosphor`, `kbs-console:history` | The console's preferences and history |
 

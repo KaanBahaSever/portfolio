@@ -4,8 +4,6 @@
  * and the desktop games of the graduation projects, with links to the browser versions.
  * Keep the order of events: the Battleship opponent's Hunt & Target algorithm came LATER than
  * the high-school game, so do not credit the desktop version with it.
- * Why Battleship: it was the game the owner played with his father as a child, so he wanted to
- * design his own. That is all he told; do not add details to it.
  */
 import { ui } from '../../ui/styles';
 import { localizePath } from '../../../i18n/config';
@@ -22,21 +20,23 @@ const battleshipSource = 'https://github.com/KaanBahaSever/BattleShips';
   locale === 'tr' ? (
     <>
       <p>
-        Programlamaya 2016’da meslek lisesinde C# ile başladım. Önce temelleri öğrendim, ardından veri yapılarına ve
-        algoritmik problem çözmeye geçtim; bu arada küçük matematiksel hesaplama motorları da yazdım. 2019’a
-        gelindiğinde Microsoft SQL Server (MSSQL) üzerinde çalışan kapsamlı veritabanı uygulamaları geliştiriyordum.
+        Programlamaya 2016’da meslek lisesinde, C# ile başladım. Önce temelleri öğrendim, sonra veri yapılarına ve
+        algoritmik problem çözmeye geçtim. Bu arada küçük matematik hesaplama motorları da yazdım. 2019’da artık
+        Microsoft SQL Server (MSSQL) kullanan eksiksiz veritabanı uygulamaları geliştiriyordum.
       </p>
       <p>
         Lise bitirme projelerim XOX ve Amiral Battı oyunlarının masaüstü sürümleriydi. Amiral Battı, çocukken babamla
         oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu. O ilk sürümün{' '}
-        <a href={battleshipSource} class={ui.inlineLink}>C# kaynak kodu</a> GitHub’da. Bilgisayarın Amiral Battı’daki
-        atışlarını bugün yöneten Av ve Hedef (<span lang="en">Hunt &amp; Target</span>) algoritmasını ise sonradan
-        geliştirdim: Önce tahtada gemi arıyor, bir gemiyi vurduğunda da onu batırana kadar çevresine ateş ediyor.
+        <a href={battleshipSource} class={ui.inlineLink}>C# kaynak kodu</a> GitHub’da duruyor. Av ve Hedef
+        (<span lang="en">Hunt &amp; Target</span>) algoritmasını ise sonradan geliştirdim. Bugün Amiral Battı’da
+        bilgisayarın nereye ateş edeceğine bu algoritma karar veriyor: Önce tahtada gemi arıyor, bir gemiyi vurduğunda
+        da atışlarını o noktanın çevresine topluyor.
       </p>
       <p>
-        İki oyunun tarayıcı sürümleri de artık bu sitede ve rakipleri algoritmik: Amiral Battı’da Av ve Hedef, XOX’ta
-        alfa–beta budamalı bir minimax araması. <a href={battleship} class={ui.inlineLink}>Amiral Battı</a>{' '}
-        ya da <a href={ticTacToe} class={ui.inlineLink}>XOX</a> oynayabilirsiniz.
+        İki oyunun tarayıcı sürümleri de artık bu sitede. Bilgisayar rakip ikisinde de bir algoritmayla oynuyor: Amiral
+        Battı’da Av ve Hedef, XOX’ta ise alfa–beta budamalı minimax araması. Buradan{' '}
+        <a href={battleship} class={ui.inlineLink}>Amiral Battı</a> ya da{' '}
+        <a href={ticTacToe} class={ui.inlineLink}>XOX</a> oynayabilirsiniz.
       </p>
     </>
   ) : (
@@ -48,11 +48,10 @@ const battleshipSource = 'https://github.com/KaanBahaSever/BattleShips';
         Server (MSSQL).
       </p>
       <p>
-        My graduation projects were desktop versions of tic-tac-toe and Battleship. Battleship was the game I played
-        with my father as a child, which is why I wanted to design my own; the{' '}
-        <a href={battleshipSource} class={ui.inlineLink}>C# source of that first version</a> is on GitHub. The Hunt
-        &amp; Target algorithm that now aims the computer’s Battleship shots came later: it hunts for ships across the
-        board, then closes in on every hit.
+        My graduation projects were desktop versions of tic-tac-toe and Battleship; the{' '}
+        <a href={battleshipSource} class={ui.inlineLink}>C# source of Battleship</a> is on GitHub. The Hunt &amp; Target
+        algorithm that now aims the computer’s Battleship shots came later: it hunts for ships across the board, then
+        closes in on every hit.
       </p>
       <p>
         Both games now have browser versions on this site, with algorithmic opponents: Hunt &amp; Target for

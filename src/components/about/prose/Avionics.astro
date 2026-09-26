@@ -13,18 +13,19 @@ const locale = getLocale(Astro);
   locale === 'tr' ? (
     <>
       <p>
-        Kasım 2019’da üniversiteye başladım ve İstanbul Üniversitesi Roket Kulübüne katıldım; 2022’ye kadar kulübün
-        başkan yardımcısıydım. Ekip olarak üç roket tasarlayıp ürettik: hedef irtifası 5.000 ft olan bir alçak irtifa
-        roketi ve 10.000 ft olan iki yüksek irtifa roketi.
+        Kasım 2019’da üniversiteye başladım ve İstanbul Üniversitesi Roket Kulübüne katıldım. 2022’ye kadar kulübün
+        başkan yardımcısıydım. Ekip olarak üç roket tasarlayıp ürettik. Biri, hedef irtifası 5.000 ft olan alçak irtifa
+        roketiydi; diğer ikisi ise hedef irtifası 10.000 ft olan yüksek irtifa roketleriydi.
       </p>
       <p>
-        Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrol sistemini tek başıma geliştirdim. İkisi de roketteki
-        sensörlerden gelen yönelim, jiroskop ve altimetre telemetrisini birleştiren sensör füzyonuna dayanıyordu.
+        Uçuş aviyoniğinin gömülü yazılımı ve paraşüt açma kontrol sistemi tamamen benim sorumluluğumdaydı. İki sistem de
+        sensör füzyonuna dayanıyordu; yani roketteki sensörlerden gelen yönelim, jiroskop ve altimetre verilerini
+        birleştirerek çalışıyordu.
       </p>
       <p>
-        Telemetriyi SD karta kaydeden protokolleri, RF telemetri iletim modülleriyle birlikte çalışacak şekilde
-        tasarladım. Uçuş verisini ayrıştırıp uçuş sonrasında yörünge grafiklerini çizen bir masaüstü telemetri arayüzü de
-        geliştirdim.
+        Telemetrinin SD karta nasıl kaydedileceğini belirleyen protokolleri de ben tasarladım. SD karttaki kayıt,
+        telemetriyi RF ile ileten modüllerle birlikte çalışıyordu. Ayrıca bir masaüstü telemetri paneli geliştirdim.
+        Bu panel uçuş verisini ayrıştırıyor ve uçuştan sonra yörünge grafiklerini çiziyor.
       </p>
     </>
   ) : (

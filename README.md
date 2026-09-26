@@ -166,6 +166,11 @@ Run from the project root (Node 22.18+, see `.node-version`; the tests run TypeS
 - **Geometry**: `bg-graph` / `bg-graph-fine` graph paper with `mask-fade-*`, thin-stroke SVG
   figures in `currentColor` with a single accent node, `label-mono` indices such as "§ 02".
 - **Shared classes** for buttons, cards, fields and links live in `src/components/ui/styles.ts`.
+- **Reading layout**: blog posts and project pages share one centred reading column
+  (`src/components/reading/reading.css`: a 48rem measure; figures, display maths and the hero may
+  reach 6rem past it on each side). The numbers are mirrored in `layout.ts` for image `sizes`.
+  A post's contents are a collapsible block before the body; a project's facts are a band in its
+  header.
 - **Themes**: `<html data-theme="light|dark">` is set before the first paint by the inline script in
   `BaseLayout.astro` (rules in `src/lib/theme.ts`; runtime in `src/scripts/theme.ts`: live OS changes,
   other tabs, the header toggle). Use Tailwind's `dark:` variant: it matches `[data-theme=dark]`, or

@@ -75,6 +75,6 @@ test('image sizes match the laid-out width at every viewport', () => {
 test('the wide sizes attribute reads as expected', () => {
   assert.equal(
     readingImageSizes('wide'),
-    '(min-width: 976px) 928px, (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)',
+    '(min-width: 1008px) 960px, (min-width: 640px) calc(100vw - 3rem), calc(100vw - 2rem)',
   );
 });

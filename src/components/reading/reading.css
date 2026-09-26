@@ -24,7 +24,7 @@
  * (image `sizes`); tests/reading-layout.test.ts keeps them in step.
  */
 .reading {
-  --reading-measure: 46rem;
+  --reading-measure: 48rem;
   --reading-bleed-max: 6rem;
   /*
    * Room beside the column, per side, capped at the bleed. Resolved where it is used, so 100cqw

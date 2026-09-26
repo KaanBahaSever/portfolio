@@ -1,43 +1,44 @@
 ---
 title: Rocket-Up — Yüksek Güçlü Roket Simülasyonu
-shortDescription: Yüksek güçlü roketler için bir uçuş simülasyonu. 2020’de tek bir iş için yazdığım Python prototipiyle başladı. Şimdi onu modern C++ ile, açık kaynak bir simülasyon motoru olarak baştan yazıyorum.
+shortDescription: Yüksek güçlü roketler için bir uçuş simülasyonu. 2020’de tek bir iş için yazdığım Python prototipiyle başladı. Şimdi onu modern C++ ile, açık kaynak bir aerodinamik simülasyon motoru olarak baştan yazıyorum.
 ---
 
 ## Nedir?
 
-Rocket-Up, yüksek güçlü roketler için yazdığım bir uçuş simülasyonu. 2020’de bir Python
-prototipi olarak başladı. Şimdi onu modern C++ ile, bir aerodinamik simülasyon motoru olarak
-baştan yazıyorum. Yani iki ayrı proje yok; zamanla şekil değiştiren tek bir proje var. Yeni sürüm
-açık kaynak, MIT Lisansı ile yayımlanıyor.
+Rocket-Up, yüksek güçlü roketler için yazdığım bir uçuş simülasyonu. Ortada iki ayrı proje yok:
+2020’deki Python prototipi de şimdi modern C++ ile baştan yazdığım aerodinamik simülasyon motoru
+da aynı proje, sadece zamanla şekil değiştirdi. Yeni sürüm açık kaynak ve MIT Lisansı ile
+yayımlanıyor.
 
 ## Ne değişti?
 
 2020’deki prototip tek bir iş için yazılmıştı; genel amaçlı bir araç değildi.
 
-Yeni sürümde tersinden başladım: Tek ve sabit bir model yok, her şey parçalardan kuruluyor. Roket
-bileşenlerinden birleştiriliyor ve bir gezegenin ortamında uçuyor. Uçuşun ayrıntıları koda gömülü
-değil, ayar olarak veriliyor. Fizik hesaplarının hızlı olması gerekiyor; bunu C++ sağlıyor.
-Fiziğin her parçası da kendi yerinde duruyor. Böylece bir parçayı, gerisine dokunmadan test
-edebiliyor, iyileştirebiliyor ya da değiştirebiliyorum.
+Yeni sürümde işe tersinden başladım. Tek ve sabit bir model yok; simülasyon parçalardan
+oluşuyor. Roket, bileşenleri birleştirilerek kuruluyor ve bir gezegenin ortamında uçuyor.
+Uçuşun ayrıntıları koda yazılmıyor, ayar olarak veriliyor. Fizik hesaplarının hızlı olması
+gerekiyor; bunu C++ sağlıyor. Bu hesapların her parçası da kodda ayrı bir yerde duruyor.
+Böylece bir parçayı gerisine dokunmadan test edebiliyor, iyileştirebiliyor ya da
+değiştirebiliyorum.
 
 ## Şu an neler var?
 
-Yeni sürüm daha yolun başında ama herkese açık depoda şunlar şimdiden hazır:
+Yeni sürüm daha yolun başında ama herkese açık kodunda şimdiden şunlar var:
 
-- **Ayrı parçalar**: roketin kendisi, motoru ve paraşüt gibi kurtarma donanımları.
+- **Ayrı roket parçaları**: roketin kendisi, motoru ve paraşüt gibi kurtarma donanımları.
 - **Motor modeli**: yakıt kütlesi, özgül itki (yakıtın ne kadar verimli kullanıldığı),
-  ayarlanabilir bir itki eğrisi, motoru kısabilme ve havanın basıncına göre düzeltilen itki.
-- **Ortamlar ve gezegenler**: Dünya modeli, yükseldikçe havanın sıcaklığının ve basıncının nasıl
-  değiştiğini 1976 ABD Standart Atmosfer modelinin katmanlarına göre hesaplıyor. Gezegen kodu da
-  yeni gezegenler eklenebilecek şekilde yazıldı.
+  ayarlanabilir bir itki eğrisi, motoru kısabilme ve hava basıncına göre düzeltilen itki.
+- **Ortamlar ve gezegenler**: Dünya için, yükseldikçe sıcaklığın ve basıncın nasıl değiştiği
+  1976 ABD Standart Atmosfer modelinin katmanlarına göre hesaplanıyor. Gezegen kodunu da yeni
+  gezegenler eklenebilecek şekilde yazdım.
 - **Ayarlanabilir uçuş değerleri**, bir de vektör ve matris hesapları için küçük yardımcılar.
 
-Projeyi derlemek için CMake kullanıyorum.
+Projeyi CMake ile derliyorum.
 
 ## Sırada ne var?
 
 - Daha fazla roket parçası: kanatçıklar, gövde tüpleri ve burun konileri.
-- Daha doğru sonuçlar için fizik kütüphaneleriyle birlikte çalışmak.
+- Daha doğru sonuçlar için fizik kütüphaneleri desteği.
 - Birden çok gezegen ortamı.
 - Daha hızlı çalışma; hesapları ekran kartına (GPU) yaptırmak da buna dâhil.
 

@@ -76,11 +76,11 @@ const tr: ProjectsMessages = {
   index: {
     title: 'Projeler',
     description:
-      'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik, yüksek güçlü roketler için bir uçuş simülasyonu ve açık kaynak C++ kütüphaneleri. Her projenin ne yaptığı ve nasıl yapıldığı kendi sayfasında anlatılıyor.',
+      'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik, yüksek güçlü roketler için bir uçuş simülasyonu ve açık kaynak C++ kütüphaneleri. Her projenin ne işe yaradığı ve nasıl yapıldığı kendi sayfasında anlatılıyor.',
     // Same wording as the home page's "Selected work" link and section that lead here.
     eyebrow: 'Seçili işler',
     // Everyday words for the English "native daemons" and "Go services".
-    lead: 'Bilgisayarın arka planında çalışan C++ programlarından Go ile yazdığım sunucu yazılımlarına ve açık kaynak matematik notlarına kadar, yaptığım işler burada. Her sayfada bir projenin ne işe yaradığını ve nasıl yapıldığını anlatıyorum.',
+    lead: 'Yaptığım işleri burada topladım: arka planda sessizce çalışan C++ programlarından Go ile yazdığım sunucu yazılımlarına, açık kaynak matematik notlarına kadar. Her sayfada bir projenin ne işe yaradığını ve nasıl yapıldığını anlatıyorum.',
     summary: (total, openSource) => `${total} proje · ${openSource} açık kaynak`,
     featured: 'Öne çıkanlar',
     more: 'Diğer projeler',
@@ -119,13 +119,13 @@ const tr: ProjectsMessages = {
   figures: {
     asion: 'Bir zaman çizgisi: Hangi pencere ne kadar süre ön plandaydı?',
     novacast: 'Tek mesaj, birçok cihaz: Gönderilen mesaj, aradaki sunucu üzerinden abone olan her cihaza ulaşıyor.',
-    karecik: 'QR koddan menüye: Müşteri kodu okutunca işletmenin menüsü telefonunda açılıyor.',
+    karecik: 'QR koddan menüye: Kodu okutan müşterinin telefonunda işletmenin menüsü açılıyor.',
     'acik-matematik':
-      'Birinci sınıf analiz dersinden bir sayfa: eğrinin altındaki alanı dikdörtgenlerle yaklaşık olarak hesaplayan bir Riemann toplamı ve bir teğet doğrusu.',
-    neosmbios: 'Bir SMBIOS kaydı: Hiçbir alan, kaydın uzunluğunu söyleyen bayta bakılmadan okunmuyor.',
+      'Birinci sınıf analiz dersinden bir sayfa: eğrinin altındaki alanı dikdörtgenlerle yaklaşık hesaplayan bir Riemann toplamı ve bir teğet doğrusu.',
+    neosmbios: 'Bir SMBIOS kaydı: Her alan okunmadan önce, kaydın kendi uzunluğunu söyleyen bayta bakılıyor.',
     'rocket-up': 'Bir roket uçuşu: motor çalışırken yükseliş, en yüksek nokta, ardından paraşütle iniş.',
     'i18n-cpp':
-      'Bir çeviriyi bulmak: Anahtar seçili dilin .properties dosyasından okunuyor. Sonra metindeki süslü parantezli boşluk program çalışırken dolduruluyor.',
+      'Bir çeviriyi bulmak: Metin, anahtarıyla seçili dilin .properties dosyasında bulunuyor. Sonra metinde süslü parantezle boş bırakılan yer, program çalışırken dolduruluyor.',
   },
 };
 

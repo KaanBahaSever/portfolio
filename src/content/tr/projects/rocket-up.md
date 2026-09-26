@@ -15,8 +15,8 @@ simülasyon motoru açık kaynak ve MIT Lisansı ile yayımlanıyor.
 2020'deki prototip dar kapsamlı ve tek bir amaca yönelikti: genel bir araç olarak değil, belirli
 bir iş için yazılmıştı.
 
-Yeniden yazım işe öbür uçtan başlıyor. Tek ve sabit bir model yerine simülasyon parçalardan
-kuruluyor: roket bileşenlerden oluşuyor, bir gezegenin ortamında uçuyor; uçuşun kendisi de koda
+Yeniden yazımda yaklaşım bunun tam tersi: tek ve sabit bir model yerine simülasyon parçalardan
+kuruluyor. Roket bileşenlerden oluşuyor, bir gezegenin ortamında uçuyor; uçuşun kendisi de koda
 gömülmek yerine parametrelerle tanımlanıyor. C++, fizik döngüsünün ihtiyaç duyduğu performansı
 sağlıyor; temiz bir mimari de fiziğin her parçasını kendi yerinde tutuyor. Böylece her parça,
 geri kalanına dokunmadan sınanabiliyor, geliştirilebiliyor ya da değiştirilebiliyor.
@@ -47,6 +47,7 @@ Proje CMake ile derleniyor.
 
 Bu simülasyon, roketçilik çalışmalarımla aynı yolun parçası. 2019–2022 yılları arasında
 İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım; ekibimizle üç roket tasarlayıp
-ürettik: biri alçak irtifa (5.000 ft), ikisi yüksek irtifa (10.000 ft) roketi. Bu roketlerin
-uçuş aviyoniği yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma yazdım. Aviyonikten bu simülasyona uzanan hikâyeyi [Hakkımda sayfasında](/about/#journey)
+ürettik: bir alçak irtifa roketi (5.000 ft) ve iki yüksek irtifa roketi (10.000 ft). Bu
+roketlerin uçuş aviyoniği yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma
+yazdım. Aviyonikten bu simülasyona uzanan hikâyeyi [Hakkımda sayfasında](/about/#journey)
 anlatıyorum.

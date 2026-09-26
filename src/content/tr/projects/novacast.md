@@ -11,7 +11,7 @@ gecikmeli publish/subscribe boru hatları üzerine kuruldu: bir kez yayımlanan 
 ihtiyaç duyan her cihaza hızla ulaşmalı; bir cihaz filosu da tek bir yerden yönetilebilmeli.
 Ayrıntılar: [novacast.app](https://novacast.app).
 
-## Nereden çıktı?
+## Nasıl ortaya çıktı?
 
 Novacast'i 2025'te, çalıştığım bir bilgisayar firmasında kullanılan ve ihtiyacı karşılamayan
 eski bir yazılımın yerini alması için geliştirdim. İlk sürüm Python ile yazılmış bir

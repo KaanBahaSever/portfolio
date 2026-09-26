@@ -4,7 +4,7 @@ shortDescription: An open-source publishing platform and modern textbook initiat
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/acik-matematik
 liveUrl: https://acik-matematik.com
-techStack: [Quarto, Markdown, Python]
+techStack: [Markdown, Python, Quarto]
 stage: production
 since: 2023
 featured: true

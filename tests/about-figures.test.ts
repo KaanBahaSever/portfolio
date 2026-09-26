@@ -241,7 +241,7 @@ test('ideaNetwork: private ideas keep their links inside the private region, pub
   }
 });
 
-test('ideaNetwork: nodes do not overlap, links pass clear of other nodes and never cross', () => {
+test('ideaNetwork: nodes do not overlap; links read as lines, pass clear of other nodes and never cross', () => {
   const nodes = [
     ...network.ideas.map((idea, i) => ({ at: idea.at, r: radius.idea, name: `idea ${i}` })),
     ...network.users.map((user, u) => ({ at: user.at, r: radius.user, name: `user ${u}` })),
@@ -256,7 +256,7 @@ test('ideaNetwork: nodes do not overlap, links pass clear of other nodes and nev
       assert.ok(gap >= 4, `${n.name} and ${m.name} are ${gap.toFixed(1)} apart`);
     }
   }
-  // Nothing touches the dashed boundary: private nodes keep inside it, public ones outside.
+  // Clear air around the dashed boundary: private nodes keep well inside it, public ones outside.
   for (const n of nodes) {
     const right = region.x + region.width;
     const bottom = region.y + region.height;
@@ -265,9 +265,13 @@ test('ideaNetwork: nodes do not overlap, links pass clear of other nodes and nev
       Math.max(region.x - n.at.x, 0, n.at.x - right),
       Math.max(region.y - n.at.y, 0, n.at.y - bottom),
     );
-    assert.ok((insideRect(n.at, region) ? inside : outside) >= n.r + 4, `${n.name} is clear of the boundary`);
+    assert.ok((insideRect(n.at, region) ? inside : outside) >= n.r + 8, `${n.name} is clear of the boundary`);
   }
   for (const { user, idea } of network.links) {
+    // The figure draws a link from the dot's edge to the idea's circle: long enough to read as a
+    // line even at 320 px, not a stub that leaves the dot looking unconnected.
+    const drawn = Math.hypot(userAt(user).x - ideaAt(idea).x, userAt(user).y - ideaAt(idea).y) - radius.user - radius.idea;
+    assert.ok(drawn >= 10, `link ${user}→${idea} is only ${drawn.toFixed(1)} long`);
     for (const n of nodes) {
       if (n.at === userAt(user) || n.at === ideaAt(idea)) continue;
       const clearance = segmentDistance(n.at, userAt(user), ideaAt(idea)) - n.r;

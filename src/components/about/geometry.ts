@@ -558,25 +558,27 @@ export function ideaNetwork(spec: IdeaNetworkSpec): IdeaNetwork {
  * seven more public ideas around it (clockwise from the top left), and two private ideas inside
  * the region on the right. Schematic, like the counts, and the caption says so. `radius` is the
  * drawn size of an idea and of a person, which the tests use to check that nothing overlaps.
+ * The rings start 20 units out, so that even the shortest link, from a dot to an idea's circle,
+ * is a line of 11 units and still reads as one at 320 px.
  */
 export const IDEA_NETWORK = {
   radius: { idea: 7, user: 2 },
   region: { x: 228, y: 22, width: 84, height: 144 },
   ideas: [
-    { at: { x: 100, y: 98 }, helpers: 11, ring: [16, 32], phase: 273 },
-    { at: { x: 34, y: 50 }, helpers: 4, ring: [15, 20], phase: 3 },
-    { at: { x: 96, y: 34 }, helpers: 2, ring: [15, 16], phase: 210 },
-    { at: { x: 160, y: 42 }, helpers: 5, ring: [15, 21], phase: 333 },
-    { at: { x: 200, y: 98 }, helpers: 3, ring: [15, 18], phase: 3 },
-    { at: { x: 172, y: 148 }, helpers: 4, ring: [15, 19], phase: 3 },
-    { at: { x: 102, y: 158 }, helpers: 1, ring: [15, 15], phase: 267 },
-    { at: { x: 30, y: 138 }, helpers: 3, ring: [15, 18], phase: 33 },
-    { at: { x: 266, y: 58 }, helpers: 3, ring: [15, 19], phase: -90, private: true },
-    { at: { x: 272, y: 126 }, helpers: 3, ring: [15, 18], phase: 0, private: true },
+    { at: { x: 100, y: 98 }, helpers: 11, ring: [21, 33], phase: 273 },
+    { at: { x: 34, y: 50 }, helpers: 4, ring: [20, 25], phase: 3 },
+    { at: { x: 96, y: 34 }, helpers: 2, ring: [20, 21], phase: 210 },
+    { at: { x: 160, y: 42 }, helpers: 5, ring: [20, 26], phase: -57 },
+    { at: { x: 200, y: 98 }, helpers: 3, ring: [20, 23], phase: -99 },
+    { at: { x: 172, y: 148 }, helpers: 4, ring: [20, 24], phase: 129 },
+    { at: { x: 102, y: 158 }, helpers: 1, ring: [20, 20], phase: 267 },
+    { at: { x: 30, y: 138 }, helpers: 3, ring: [20, 23], phase: 33 },
+    { at: { x: 266, y: 58 }, helpers: 3, ring: [20, 24], phase: -90, private: true },
+    { at: { x: 272, y: 126 }, helpers: 3, ring: [20, 23], phase: 0, private: true },
   ],
   shared: [
-    [0, 1, 4],
-    [0, 3, -6],
+    [0, 1, 6],
+    [0, 3, -8],
     [0, 5, -4],
     [0, 7, -6],
     [2, 1, 4],

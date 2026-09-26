@@ -259,8 +259,9 @@ const tr: AboutMessages = {
         label: 'crowd.inc',
         // "crowd.inc" is read "kraud ink", so the suffix is "’te", after the typographic apostrophe.
         title: 'crowd.inc’te yazılım geliştirici',
+        // "Fikirler için yardım", in the words the chapter opens with ("bu fikirler için yardım bulduğu").
         caption:
-          'Şematik bir resim: crowd.inc’te insanlar fikirlerini paylaşıyor, başkaları da bu fikirlere yardım ediyordu. Büyük daireler fikirler, küçük noktalar kullanıcılar; çizgiler kimin hangi fikre yardım ettiğini gösteriyor. Vurgulu daire, en çok yardım alan fikir. Sağdaki kesikli sınırın içinde, son dönemde yöneldiğimiz özel fikirler var; bunlar yalnızca kendi üyelerine açık.',
+          'Şematik bir resim: crowd.inc’te insanlar fikirlerini paylaşıyor, başkaları da bu fikirler için yardım ediyordu. Büyük daireler fikirler, küçük noktalar kullanıcılar; çizgiler kimin hangi fikir için yardım ettiğini gösteriyor. Vurgulu daire, en çok yardım alan fikir. Sağdaki kesikli sınırın içinde, son dönemde yöneldiğimiz özel fikirler var; bunlar yalnızca kendi üyelerine açık.',
         figureLabels: { public: 'HERKESE AÇIK', private: 'ÖZEL' },
       },
       community: {

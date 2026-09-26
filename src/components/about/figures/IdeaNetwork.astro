@@ -22,21 +22,24 @@ const { labels } = Astro.props;
 const { radius, region } = IDEA_NETWORK;
 const network = ideaNetwork(IDEA_NETWORK);
 
-/** A link from a person to an idea, stopping just short of both so the circles stay clear. */
+/**
+ * A link from a person to an idea: from the edge of the dot to the idea's circle, touching both
+ * the way the other figures' edges meet their nodes, so that even a short link reads as a line.
+ */
 function link(from: Point, to: Point): string {
   const length = Math.hypot(to.x - from.x, to.y - from.y);
   const ux = (to.x - from.x) / length;
   const uy = (to.y - from.y) / length;
-  const start = radius.user + 1;
-  const end = length - radius.idea - 1.5;
+  const end = length - radius.idea;
   return linePath([
-    { x: from.x + ux * start, y: from.y + uy * start },
+    { x: from.x + ux * radius.user, y: from.y + uy * radius.user },
     { x: from.x + ux * end, y: from.y + uy * end },
   ]);
 }
 
+// ideaNetwork() only hands out indices into its own lists.
 const links = network.links.map(({ user, idea }) => ({
-  d: link(network.users[user]?.at ?? { x: 0, y: 0 }, network.ideas[idea]?.at ?? { x: 0, y: 0 }),
+  d: link(network.users[user]!.at, network.ideas[idea]!.at),
   busiest: idea === network.busiest,
 }));
 const ideas = network.ideas.map((idea, i) => ({ ...idea, busiest: i === network.busiest }));

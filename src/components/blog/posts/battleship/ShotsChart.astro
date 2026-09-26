@@ -1,0 +1,247 @@
+---
+/**
+ * How long games last: for each strategy, the share of the simulated games that were over within
+ * n shots (an empirical distribution function), plus the exact curve for random fire. Drawn twice,
+ * a compact version for phones and a wide one from sm, so the labels keep a readable size; only
+ * one is displayed (and exposed to assistive technology) at a time.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import Figure from './Figure.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { STRATEGIES, randomFinishedBy, simulation, type Strategy } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+const f = formatters(lang);
+const results = simulation();
+
+const X_MIN = 15;
+const X_MAX = 100;
+const xTicks = [20, 30, 40, 50, 60, 70, 80, 90, 100];
+const yTicks = [0, 0.25, 0.5, 0.75, 1];
+
+interface Layout {
+  width: number;
+  height: number;
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+  font: number;
+}
+
+const layouts: { key: 'compact' | 'wide'; class: string; layout: Layout }[] = [
+  {
+    key: 'compact',
+    class: 'sm:hidden',
+    layout: { width: 320, height: 250, left: 36, right: 10, top: 26, bottom: 36, font: 11 },
+  },
+  {
+    key: 'wide',
+    class: 'hidden sm:block',
+    layout: { width: 640, height: 340, left: 48, right: 16, top: 30, bottom: 42, font: 12 },
+  },
+];
+
+function chart(l: Layout) {
+  const plotW = l.width - l.left - l.right;
+  const plotH = l.height - l.top - l.bottom;
+  const x = (n: number) => l.left + ((n - X_MIN) / (X_MAX - X_MIN)) * plotW;
+  const y = (p: number) => l.top + (1 - p) * plotH;
+  /** Step function through the points (n, share finished within n shots). */
+  const steps = (share: (n: number) => number) => {
+    let d = `M${x(X_MIN).toFixed(1)} ${y(share(X_MIN)).toFixed(1)}`;
+    let previous = share(X_MIN);
+    for (let n = X_MIN + 1; n <= X_MAX; n++) {
+      const value = share(n);
+      if (value !== previous) d += `H${x(n).toFixed(1)}V${y(value).toFixed(1)}`;
+      previous = value;
+    }
+    return d + `H${x(X_MAX).toFixed(1)}`;
+  };
+  const series = STRATEGIES.map((strategy) => {
+    const summary = results[strategy];
+    return { strategy, d: steps((n) => (summary.finished[n] ?? 0) / summary.games) };
+  });
+  // The exact curve for random fire is smooth enough to draw as a polyline.
+  const theory = Array.from({ length: X_MAX - X_MIN + 1 }, (_, i) => X_MIN + i)
+    .map((n, i) => `${i === 0 ? 'M' : 'L'}${x(n).toFixed(1)} ${y(randomFinishedBy(n)).toFixed(1)}`)
+    .join('');
+  return { plotW, plotH, x, y, series, theory };
+}
+
+const styleOf: Record<Strategy, string> = {
+  random: 'series-random',
+  'no-parity': 'series-no-parity',
+  parity: 'series-parity',
+  density: 'series-density',
+};
+
+const label = m.chart.aria(
+  STRATEGIES.map((strategy) => m.chart.line(m.strategy[strategy], results[strategy].median, results[strategy].p90)).join(' '),
+);
+---
+
+<Figure>
+  <div slot="graphic" class="bs-chart">
+    {
+      layouts.map(({ class: className, layout: l }) => {
+        const c = chart(l);
+        return (
+          <svg
+            class:list={['h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+            viewBox={`0 0 ${l.width} ${l.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={label}
+            focusable="false"
+          >
+            <g class="font-mono axis" font-size={l.font}>
+              {yTicks.map((p) => (
+                <>
+                  <line x1={l.left} x2={l.width - l.right} y1={c.y(p)} y2={c.y(p)} class="gridline" />
+                  <text x={l.left - 6} y={c.y(p) + l.font / 3} text-anchor="end">
+                    {f.percent(p)}
+                  </text>
+                </>
+              ))}
+              {xTicks.map((n) => (
+                <>
+                  <line x1={c.x(n)} x2={c.x(n)} y1={l.top + c.plotH} y2={l.top + c.plotH + 4} class="tick" />
+                  <text x={c.x(n)} y={l.top + c.plotH + 6 + l.font} text-anchor="middle">
+                    {n}
+                  </text>
+                </>
+              ))}
+              <text x={l.left + c.plotW} y={l.height - 4} text-anchor="end" class="title">
+                {m.chart.xAxis} →
+              </text>
+              <text x={l.left - 6} y={l.top - 12} text-anchor="start" class="title">
+                ↑ {m.chart.yAxis}
+              </text>
+            </g>
+            <line x1={l.left} x2={l.width - l.right} y1={l.top + c.plotH} y2={l.top + c.plotH} class="baseline" />
+            <path d={c.theory} class="series-theory" fill="none" />
+            {c.series.map((s) => (
+              <path d={s.d} class={styleOf[s.strategy]} fill="none" />
+            ))}
+          </svg>
+        );
+      })
+    }
+  </div>
+  <ul
+    slot="legend"
+    class="bs-chart grid gap-x-6 gap-y-2 text-xs text-zinc-700 sm:grid-cols-2 dark:text-zinc-300"
+  >
+    {
+      [...STRATEGIES].reverse().map((strategy) => (
+        <li class="flex items-center gap-2.5">
+          <svg class="h-2 w-7 shrink-0" viewBox="0 0 28 8" aria-hidden="true" focusable="false">
+            <line x1="1" x2="27" y1="4" y2="4" class={styleOf[strategy]} />
+          </svg>
+          {m.strategy[strategy]}
+        </li>
+      ))
+    }
+    <li class="flex items-center gap-2.5">
+      <svg class="h-2 w-7 shrink-0" viewBox="0 0 28 8" aria-hidden="true" focusable="false">
+        <line x1="1" x2="27" y1="4" y2="4" class="series-theory" />
+      </svg>
+      {m.chart.theory}
+    </li>
+  </ul>
+  <slot />
+</Figure>
+
+<style>
+  .bs-chart {
+    --ink: var(--color-zinc-900);
+    --random: var(--color-zinc-500);
+    --no-parity: var(--color-zinc-500);
+    --parity: var(--color-zinc-800);
+    --density: var(--color-accent-600);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .bs-chart {
+      --ink: var(--color-zinc-100);
+      --random: var(--color-zinc-400);
+      --no-parity: var(--color-zinc-400);
+      --parity: var(--color-zinc-200);
+      --density: var(--color-accent-400);
+    }
+  }
+
+  .axis text {
+    fill: var(--color-zinc-600);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis .title {
+    fill: var(--color-zinc-700);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .axis text {
+      fill: var(--color-zinc-400);
+    }
+
+    .axis .title {
+      fill: var(--color-zinc-300);
+    }
+  }
+
+  .gridline {
+    stroke: currentColor;
+    stroke-opacity: 0.1;
+  }
+
+  .tick,
+  .baseline {
+    stroke: currentColor;
+    stroke-opacity: 0.45;
+  }
+
+  .series-random,
+  .series-no-parity,
+  .series-parity,
+  .series-density,
+  .series-theory {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .series-random {
+    stroke: var(--random);
+    stroke-width: 1.75;
+  }
+
+  .series-no-parity {
+    stroke: var(--no-parity);
+    stroke-width: 1.75;
+    stroke-dasharray: 5 3;
+  }
+
+  .series-parity {
+    stroke: var(--parity);
+    stroke-width: 1.75;
+  }
+
+  .series-density {
+    stroke: var(--density);
+    stroke-width: 2.5;
+  }
+
+  .series-theory {
+    stroke: var(--ink);
+    stroke-width: 1;
+    stroke-dasharray: 1 3;
+  }
+</style>

@@ -1,0 +1,53 @@
+---
+/**
+ * The simulation's numbers as a table (the post's prose table styles apply). Same data as
+ * ShotsChart: every strategy against the same GAMES seeded fleets, computed during the build.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { battleshipPostMessages } from './messages.ts';
+import { GAMES, STRATEGIES, simulation } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+const f = formatters(lang);
+const results = simulation();
+const oneDecimal = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
+---
+
+<table>
+  <caption class="sr-only">{m.table.caption(f.number(GAMES))}</caption>
+  <thead>
+    <tr>
+      <th scope="col">{m.table.strategy}</th>
+      <th scope="col" class="text-right">{m.table.mean}</th>
+      <th scope="col" class="text-right">{m.table.median}</th>
+      <th scope="col" class="text-right">{m.table.range}</th>
+      <th scope="col" class="text-right">{m.table.best}</th>
+      <th scope="col" class="text-right">{m.table.worst}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {
+      STRATEGIES.map((strategy) => {
+        const s = results[strategy];
+        return (
+          <tr>
+            <th scope="row" class="font-normal">
+              {m.strategy[strategy]}
+            </th>
+            <td class="text-right">{f.number(s.mean, oneDecimal)}</td>
+            <td class="text-right">{s.median}</td>
+            <td class="text-right whitespace-nowrap">{m.table.rangeValue(s.p10, s.p90)}</td>
+            <td class="text-right">{s.min}</td>
+            <td class="text-right">{s.max}</td>
+          </tr>
+        );
+      })
+    }
+  </tbody>
+</table>

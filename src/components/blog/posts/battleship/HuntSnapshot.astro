@@ -1,0 +1,50 @@
+---
+/**
+ * The Hard computer hunting: the first shots of a real seeded game (all misses in this one), and
+ * the density it computes for the next shot. Shows how misses carve holes in the density and why
+ * the shots spread out without any lattice being programmed in.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { coordinateLabel } from '../../../../lib/games/battleship/rules.ts';
+import Board from './Board.astro';
+import Figure from './Figure.astro';
+import Legend from './Legend.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { HUNT_EXAMPLE, densityMap, replayHunt } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+const f = formatters(lang);
+
+const { shots, knowledge } = replayHunt(HUNT_EXAMPLE.seed, HUNT_EXAMPLE.shots);
+// The caption says the shots are all misses and never side by side: keep the build honest.
+if (shots.some((shot) => shot.result !== 'miss')) throw new Error('HuntSnapshot: the example should be all misses');
+const fired = new Set(shots.map((shot) => shot.index));
+const sideBySide = shots.some(({ index }) =>
+  [index % 10 > 0 ? index - 1 : -1, index % 10 < 9 ? index + 1 : -1, index - 10, index + 10].some((n) => fired.has(n)),
+);
+if (sideBySide) throw new Error('HuntSnapshot: two misses are side by side');
+const map = densityMap(knowledge);
+const label = m.hunt.aria(
+  shots.length,
+  f.list(shots.map((shot) => coordinateLabel(shot.index))),
+  f.list(map.peaks.map((index) => coordinateLabel(index))),
+);
+---
+
+<Figure class="max-w-sm">
+  <Board
+    slot="graphic"
+    heat={map.density}
+    peaks={map.peaks}
+    markers={shots.map((shot, i) => ({ index: shot.index, text: String(i + 1), kind: 'miss' as const }))}
+    label={label}
+  />
+  <Legend slot="legend" lang={lang} items={['shotMiss', 'heat', 'peak']} />
+  <slot />
+</Figure>

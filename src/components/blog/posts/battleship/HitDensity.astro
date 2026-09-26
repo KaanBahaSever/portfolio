@@ -1,0 +1,60 @@
+---
+/**
+ * Target mode inside the density: the Hard computer's map after one hit (E5) and after a second
+ * hit next to it (F5), on an otherwise fresh board. Under each board, the peak value written in
+ * base w, the way the post explains the weights: digit k counts placements covering k hits.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { coordinateLabel } from '../../../../lib/games/battleship/rules.ts';
+import Board from './Board.astro';
+import Figure from './Figure.astro';
+import Legend from './Legend.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { weightDigits, weightFormula } from './format.ts';
+import { cell, densityMap, knowledgeOf } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+const f = formatters(lang);
+
+const panels = [
+  { title: m.hits.one, hits: ['E5'] },
+  { title: m.hits.two, hits: ['E5', 'F5'] },
+].map(({ title, hits }) => {
+  const map = densityMap(knowledgeOf({ hits }));
+  return {
+    title,
+    map,
+    hits: hits.map((label) => cell(label)),
+    peaks: f.list(map.peaks.map((index) => coordinateLabel(index))),
+    value: f.number(map.max),
+    formula: weightFormula(weightDigits(map.max, map.weight), map.weight, f),
+  };
+});
+
+const [one, two] = panels;
+const label = m.hits.aria(one?.peaks ?? '', one?.value ?? '', two?.peaks ?? '', two?.value ?? '');
+---
+
+<Figure>
+  <div slot="graphic" role="img" aria-label={label} class="grid gap-6 sm:grid-cols-2">
+    {
+      panels.map((panel) => (
+        <div class="mx-auto w-full max-w-xs">
+          <p class="label-mono mb-2 text-center text-zinc-600 dark:text-zinc-400">{panel.title}</p>
+          <Board heat={panel.map.density} peaks={panel.map.peaks} hits={panel.hits} />
+          <p class="mt-2 text-center font-mono text-xs text-zinc-700 tabular-nums dark:text-zinc-300">
+            {panel.peaks}: {panel.formula} = {panel.value}
+          </p>
+        </div>
+      ))
+    }
+  </div>
+  <Legend slot="legend" lang={lang} items={['hit', 'heat', 'peak']} />
+  <slot />
+</Figure>

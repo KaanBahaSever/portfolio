@@ -1,0 +1,366 @@
+---
+/**
+ * A Battleship board drawn as a thin-line SVG, in the visual language of the game's own boards
+ * (src/components/games/BattleshipBoard.astro): A–J across, 1–10 down in mono, an accent tint for
+ * the probability density, ink dots for misses, rose crosses for hits, an ink dashed square on
+ * the density maximum. The figure components compute what to draw from the game's library.
+ *
+ * Presentational only: the enclosing figure carries the accessible description, so the SVG is
+ * role="img" with a label when `label` is given, and hidden from assistive technology otherwise.
+ */
+import { BOARD_SIZE } from './model.ts';
+
+export interface Marker {
+  index: number;
+  /** Shown inside the marker, e.g. the shot's number. */
+  text: string;
+  kind: 'miss' | 'hit';
+}
+
+export interface ShipOutline {
+  cells: readonly number[];
+  sunk?: boolean;
+  /** Drawn dashed: a position under discussion rather than a ship that was found. */
+  ghost?: boolean;
+}
+
+interface Props {
+  size?: number;
+  /** A rectangular window of the board to draw (default: the whole board). */
+  view?: { row: number; col: number; rows: number; cols: number };
+  /** Density per cell; tinted relative to the largest value. */
+  heat?: readonly number[];
+  /** Cells shaded in ink (a hunting lattice). */
+  lattice?: readonly number[];
+  /** Cells filled with the accent (the one highlighted element of a figure). */
+  highlight?: readonly number[];
+  /** Cells outlined with a dashed square (the density maximum). */
+  peaks?: readonly number[];
+  /** Text per cell (density values); null or '' draws nothing. */
+  values?: readonly (string | null)[];
+  misses?: readonly number[];
+  hits?: readonly number[];
+  markers?: readonly Marker[];
+  ships?: readonly ShipOutline[];
+  /** Accessible name; without it the SVG is decorative (aria-hidden). */
+  label?: string;
+  class?: string;
+}
+
+const {
+  size = BOARD_SIZE,
+  view = { row: 0, col: 0, rows: size, cols: size },
+  heat,
+  lattice = [],
+  highlight = [],
+  peaks = [],
+  values,
+  misses = [],
+  hits = [],
+  markers = [],
+  ships = [],
+  label,
+  class: className,
+} = Astro.props;
+
+const CELL = 28;
+/** Room for the coordinate labels above and to the left of the board. */
+const GUTTER = 18;
+const width = GUTTER + view.cols * CELL + 1;
+const height = GUTTER + view.rows * CELL + 1;
+
+const inView = (index: number) => {
+  const row = Math.floor(index / size);
+  const col = index % size;
+  return row >= view.row && row < view.row + view.rows && col >= view.col && col < view.col + view.cols;
+};
+/** Top-left corner of a cell in SVG units. */
+const at = (index: number) => ({
+  x: GUTTER + ((index % size) - view.col) * CELL,
+  y: GUTTER + (Math.floor(index / size) - view.row) * CELL,
+});
+const centre = (index: number) => {
+  const { x, y } = at(index);
+  return { cx: x + CELL / 2, cy: y + CELL / 2 };
+};
+
+const max = heat ? Math.max(0, ...heat) : 0;
+const heatCells = heat
+  ? heat.flatMap((value, index) => (value > 0 && inView(index) ? [{ index, level: value / max }] : []))
+  : [];
+
+const cols = Array.from({ length: view.cols }, (_, i) => view.col + i);
+const rows = Array.from({ length: view.rows }, (_, i) => view.row + i);
+
+const shipBoxes = ships.map((ship) => {
+  const points = ship.cells.filter(inView).map(at);
+  const x = Math.min(...points.map((p) => p.x));
+  const y = Math.min(...points.map((p) => p.y));
+  const w = Math.max(...points.map((p) => p.x)) - x + CELL;
+  const h = Math.max(...points.map((p) => p.y)) - y + CELL;
+  return { x: x + 3, y: y + 3, w: w - 6, h: h - 6, sunk: Boolean(ship.sunk), ghost: Boolean(ship.ghost) };
+});
+---
+
+<svg
+  class:list={['bs-board block h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+  viewBox={`0 0 ${width} ${height}`}
+  xmlns="http://www.w3.org/2000/svg"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  {/* Coordinates: letters across, numbers down, as on the game's boards. */}
+  <g class="coords font-mono" text-anchor="middle">
+    {
+      cols.map((col, i) => (
+        <text x={GUTTER + i * CELL + CELL / 2} y={GUTTER - 6}>
+          {String.fromCharCode(65 + col)}
+        </text>
+      ))
+    }
+    {
+      rows.map((row, i) => (
+        <text x={GUTTER / 2 - 1} y={GUTTER + i * CELL + CELL / 2 + 3.5}>
+          {row + 1}
+        </text>
+      ))
+    }
+  </g>
+
+  <rect class="sea" x={GUTTER} y={GUTTER} width={view.cols * CELL} height={view.rows * CELL} rx="3" />
+
+  {
+    lattice.filter(inView).map((index) => {
+      const { x, y } = at(index);
+      return <rect class="lattice" x={x} y={y} width={CELL} height={CELL} />;
+    })
+  }
+  {
+    heatCells.map(({ index, level }) => {
+      const { x, y } = at(index);
+      return <rect class="heat" x={x + 0.5} y={y + 0.5} width={CELL - 1} height={CELL - 1} style={`--level:${level.toFixed(4)}`} />;
+    })
+  }
+  {
+    highlight.filter(inView).map((index) => {
+      const { x, y } = at(index);
+      return <rect class="highlight" x={x + 0.5} y={y + 0.5} width={CELL - 1} height={CELL - 1} />;
+    })
+  }
+
+  {/* Cell lines, then the frame. */}
+  <g class="grid" stroke="currentColor" stroke-width="0.75">
+    {
+      Array.from({ length: view.cols - 1 }, (_, i) => (
+        <line x1={GUTTER + (i + 1) * CELL} y1={GUTTER} x2={GUTTER + (i + 1) * CELL} y2={GUTTER + view.rows * CELL} />
+      ))
+    }
+    {
+      Array.from({ length: view.rows - 1 }, (_, i) => (
+        <line x1={GUTTER} y1={GUTTER + (i + 1) * CELL} x2={GUTTER + view.cols * CELL} y2={GUTTER + (i + 1) * CELL} />
+      ))
+    }
+  </g>
+  <rect
+    class="frame"
+    x={GUTTER}
+    y={GUTTER}
+    width={view.cols * CELL}
+    height={view.rows * CELL}
+    rx="3"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1"
+  />
+
+  {
+    shipBoxes.map((box) => (
+      <rect
+        class:list={['ship', box.sunk && 'is-sunk', box.ghost && 'is-ghost']}
+        x={box.x}
+        y={box.y}
+        width={box.w}
+        height={box.h}
+        rx={Math.min(box.w, box.h) / 2}
+        stroke="currentColor"
+        stroke-width="1.5"
+      />
+    ))
+  }
+
+  {
+    values &&
+      values.map((text, index) =>
+        text && inView(index) ? (
+          <text class="value font-mono" x={centre(index).cx} y={centre(index).cy + 3.5} text-anchor="middle">
+            {text}
+          </text>
+        ) : null,
+      )
+  }
+
+  {
+    peaks.filter(inView).map((index) => {
+      const { x, y } = at(index);
+      return (
+        <rect
+          class="peak"
+          x={x + 3}
+          y={y + 3}
+          width={CELL - 6}
+          height={CELL - 6}
+          rx="2.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-dasharray="3 2"
+        />
+      );
+    })
+  }
+
+  {
+    misses.filter(inView).map((index) => {
+      const { cx, cy } = centre(index);
+      return <circle class="miss" cx={cx} cy={cy} r="3.25" />;
+    })
+  }
+  {
+    hits.filter(inView).map((index) => {
+      const { cx, cy } = centre(index);
+      return <path class="hit" d={`M${cx - 6} ${cy - 6}l12 12M${cx + 6} ${cy - 6}l-12 12`} stroke-width="2" stroke-linecap="round" />;
+    })
+  }
+  {
+    markers.filter((marker) => inView(marker.index)).map((marker) => {
+      const { cx, cy } = centre(marker.index);
+      return (
+        <g class:list={['marker', `is-${marker.kind}`]}>
+          <circle cx={cx} cy={cy} r="8.5" stroke-width="1.25" />
+          <text class="font-mono" x={cx} y={cy + 3.25} text-anchor="middle">
+            {marker.text}
+          </text>
+        </g>
+      );
+    })
+  }
+</svg>
+
+<style>
+  .bs-board {
+    --heat-color: var(--color-accent-500);
+    --heat-strength: 0.6;
+    --sea: white;
+    --miss: var(--color-zinc-500);
+    --hit: var(--color-rose-600);
+    --on-hit: white;
+    overflow: visible;
+  }
+
+  /*
+   * Dark theme: a weaker tint keeps the density numbers above 4.5:1 on the strongest cells
+   * (zinc-100 on 45% accent-400 over zinc-900 is about 5.6:1; at 60% it would drop to about 4:1).
+   */
+  @media (prefers-color-scheme: dark) {
+    .bs-board {
+      --heat-color: var(--color-accent-400);
+      --heat-strength: 0.45;
+      --sea: var(--color-zinc-900);
+      --miss: var(--color-zinc-400);
+      --hit: var(--color-rose-400);
+      --on-hit: var(--color-zinc-950);
+    }
+  }
+
+  .coords {
+    font-size: 9px;
+    fill: var(--color-zinc-500);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .coords {
+      fill: var(--color-zinc-400);
+    }
+  }
+
+  .sea {
+    fill: var(--sea);
+  }
+
+  .grid {
+    stroke-opacity: 0.16;
+  }
+
+  .frame {
+    stroke-opacity: 0.4;
+  }
+
+  .lattice {
+    fill: currentColor;
+    fill-opacity: 0.14;
+  }
+
+  .heat {
+    fill: var(--heat-color);
+    fill-opacity: calc(0.05 + var(--level, 0) * (var(--heat-strength) - 0.05));
+  }
+
+  .highlight {
+    fill: var(--heat-color);
+    fill-opacity: var(--heat-strength);
+  }
+
+  .ship {
+    fill: none;
+    stroke-opacity: 0.75;
+  }
+
+  .ship.is-ghost {
+    stroke-dasharray: 3 2.5;
+  }
+
+  .ship.is-sunk {
+    fill: currentColor;
+    fill-opacity: 0.08;
+  }
+
+  .value {
+    font-size: 9.5px;
+    fill: currentColor;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .miss {
+    fill: var(--miss);
+  }
+
+  .hit {
+    fill: none;
+    stroke: var(--hit);
+  }
+
+  .marker.is-miss circle {
+    fill: var(--sea);
+    stroke: var(--miss);
+  }
+
+  .marker.is-miss text {
+    fill: currentColor;
+  }
+
+  .marker.is-hit circle {
+    fill: var(--hit);
+    stroke: var(--hit);
+  }
+
+  .marker.is-hit text {
+    fill: var(--on-hit);
+    font-weight: 600;
+  }
+
+  .marker text {
+    font-size: 9.5px;
+  }
+</style>

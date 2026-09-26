@@ -1,0 +1,38 @@
+---
+/**
+ * The frame shared by the post's figures: a hairline card over faint graph paper, the drawing,
+ * an optional legend, and the caption written in the MDX (the default slot), so captions can use
+ * Markdown and math. The post page numbers captions itself ("Fig. 3" / "Şekil 3", post-prose.css).
+ *
+ * not-prose: the drawings bring their own typography; the caption is styled here to match the
+ * captions of ordinary Markdown figures.
+ */
+interface Props {
+  /** Extra classes for the drawing area (e.g. a max width for small diagrams). */
+  class?: string;
+  id?: string;
+  /**
+   * Nearly no side padding on phones, for text-heavy drawings that would otherwise shrink below
+   * a legible size at 320 px (the drawing keeps its own margin inside its viewBox).
+   */
+  bleed?: boolean;
+}
+
+const { class: className, id, bleed = false } = Astro.props;
+---
+
+<figure id={id} class="bs-figure not-prose my-10">
+  <div
+    class:list={[
+      'relative overflow-hidden rounded-xl border border-zinc-200 bg-white py-5 sm:px-6 sm:py-6 dark:border-zinc-800 dark:bg-zinc-900',
+      bleed ? 'px-1' : 'px-2',
+    ]}
+  >
+    <div aria-hidden="true" class="bg-graph mask-fade-b pointer-events-none absolute inset-0"></div>
+    <div class:list={['relative mx-auto', className]}>
+      <slot name="graphic" />
+    </div>
+    {Astro.slots.has('legend') && <div class="relative mx-auto mt-4"><slot name="legend" /></div>}
+  </div>
+  <figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"><slot /></figcaption>
+</figure>

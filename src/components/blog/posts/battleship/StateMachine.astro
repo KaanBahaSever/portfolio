@@ -1,0 +1,218 @@
+---
+/**
+ * The hunt & target state machine as a statechart: Hunt, a Targeting superstate holding Target
+ * and Line, and the Sunk bookkeeping step. Laid out portrait, with the viewBox trimmed to the
+ * drawing and a near-bleed frame on phones, so the smallest label still renders at about 10 px on
+ * a 320 px screen. The one accent is the initial-state dot. Text comes from messages.ts in the
+ * post's language. Arrowheads are drawn as paths (no <marker> ids to collide with other figures).
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import Figure from './Figure.astro';
+import { battleshipPostMessages } from './messages.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang].machine;
+
+/**
+ * The drawing spans x 7–347: the return edge on the left, the superstate's edge on the right (the
+ * longest loop label, Turkish "bir uçta ıska", ends near x 337).
+ */
+const VIEW = { x: 2, y: 0, w: 347, h: 504 };
+/** Font sizes and the line pitch of two-line labels, in viewBox units. */
+const TYPE = { title: 13.5, text: 13, superstate: 13, pitch: 15 };
+const NODE = { x: 70, w: 156, h: 62 };
+const RIGHT_EDGE = NODE.x + NODE.w;
+const MID = NODE.x + NODE.w / 2;
+/** The two vertical edges between stacked nodes (down on the left, up on the right). */
+const DOWN_X = MID - 30;
+const UP_X = MID + 30;
+/** Where the self-loop labels start: just past the loops' widest point (edge + 33). */
+const LOOP_LABEL_X = RIGHT_EDGE + 40;
+const SUPER = { x: 22, y: 138, w: 324, h: 260 };
+const RETURN_X = 8;
+const nodes = [
+  { key: 'hunt', y: 34, ...m.hunt },
+  { key: 'target', y: 172, ...m.target },
+  { key: 'line', y: 316, ...m.line },
+  { key: 'sunk', y: 436, ...m.sunk },
+] as const;
+const [HUNT_Y, TARGET_Y, LINE_Y, SUNK_Y] = nodes.map((node) => node.y) as [number, number, number, number];
+const SUPER_BOTTOM = SUPER.y + SUPER.h;
+
+/** A filled arrowhead with its tip at (x, y), pointing along angle (radians). */
+const head = (x: number, y: number, angle: number, size = 7) => {
+  const spread = 0.42;
+  const ax = x - size * Math.cos(angle - spread);
+  const ay = y - size * Math.sin(angle - spread);
+  const bx = x - size * Math.cos(angle + spread);
+  const by = y - size * Math.sin(angle + spread);
+  return `M${x.toFixed(2)} ${y.toFixed(2)}L${ax.toFixed(2)} ${ay.toFixed(2)}L${bx.toFixed(2)} ${by.toFixed(2)}Z`;
+};
+const DOWN = Math.PI / 2;
+const UP = -Math.PI / 2;
+const RIGHT = 0;
+
+/** Self-loop on the right edge of a node, entering it again lower down (tip pointing left). */
+const loop = (y: number) => ({
+  path: `M${RIGHT_EDGE} ${y + 18}C${RIGHT_EDGE + 44} ${y + 4} ${RIGHT_EDGE + 44} ${y + 52} ${RIGHT_EDGE + 1} ${y + 44}`,
+  // Direction of the curve's end: from the last control point towards the end point.
+  head: head(RIGHT_EDGE + 1, y + 44, Math.atan2(y + 44 - (y + 52), RIGHT_EDGE + 1 - (RIGHT_EDGE + 44))),
+});
+
+const edges = [
+  // Initial state → Hunt.
+  { d: `M${MID} 16V${HUNT_Y - 2}`, head: head(MID, HUNT_Y - 1, DOWN) },
+  // Hunt → Target.
+  { d: `M${MID} ${HUNT_Y + NODE.h}V${TARGET_Y - 2}`, head: head(MID, TARGET_Y - 1, DOWN) },
+  // Target → Line and back.
+  { d: `M${DOWN_X} ${TARGET_Y + NODE.h}V${LINE_Y - 2}`, head: head(DOWN_X, LINE_Y - 1, DOWN) },
+  { d: `M${UP_X} ${LINE_Y}V${TARGET_Y + NODE.h + 2}`, head: head(UP_X, TARGET_Y + NODE.h + 1, UP) },
+  // Targeting → Sunk and back to Targeting.
+  { d: `M${DOWN_X} ${SUPER_BOTTOM}V${SUNK_Y - 2}`, head: head(DOWN_X, SUNK_Y - 1, DOWN) },
+  { d: `M${UP_X} ${SUNK_Y}V${SUPER_BOTTOM + 2}`, head: head(UP_X, SUPER_BOTTOM + 1, UP) },
+  // Sunk → Hunt, along the left edge.
+  {
+    d: `M${NODE.x} ${SUNK_Y + NODE.h / 2}H${RETURN_X}V${HUNT_Y + NODE.h / 2}H${NODE.x - 2}`,
+    head: head(NODE.x - 1, HUNT_Y + NODE.h / 2, RIGHT),
+  },
+];
+const loops = [HUNT_Y, TARGET_Y, LINE_Y].map(loop);
+
+/** Edge labels: [x, y of the first line, anchor, lines]. */
+const labels: [number, number, 'start' | 'end', readonly string[]][] = [
+  [LOOP_LABEL_X, HUNT_Y + 36, 'start', [m.edges.miss]],
+  [MID + 7, (HUNT_Y + NODE.h + SUPER.y) / 2 + 5, 'start', [m.edges.hit]],
+  [LOOP_LABEL_X, TARGET_Y + 36, 'start', [m.edges.miss]],
+  [DOWN_X - 6, TARGET_Y + NODE.h + 36, 'end', m.edges.inLine],
+  [UP_X + 6, TARGET_Y + NODE.h + 36, 'start', m.edges.blocked],
+  [LOOP_LABEL_X, LINE_Y + 29, 'start', m.edges.extend],
+  [DOWN_X - 6, (SUPER_BOTTOM + SUNK_Y) / 2 + 5, 'end', [m.edges.sunk]],
+  [UP_X + 6, (SUPER_BOTTOM + SUNK_Y) / 2 + 5, 'start', [m.edges.hitsLeft]],
+  [RETURN_X + 6, SUNK_Y + 4, 'start', m.edges.noHits],
+];
+---
+
+<Figure class="max-w-[24rem]" bleed>
+  <svg
+    slot="graphic"
+    class="block h-auto w-full text-zinc-900 dark:text-zinc-100"
+    viewBox={`${VIEW.x} ${VIEW.y} ${VIEW.w} ${VIEW.h}`}
+    xmlns="http://www.w3.org/2000/svg"
+    role="img"
+    aria-label={m.aria}
+    focusable="false"
+  >
+    {/* The Targeting superstate. */}
+    <rect
+      x={SUPER.x}
+      y={SUPER.y}
+      width={SUPER.w}
+      height={SUPER.h}
+      rx="14"
+      class="superstate"
+      stroke="currentColor"
+      stroke-width="1"
+    />
+    <text
+      x={SUPER.x + 12}
+      y={SUPER.y + 20}
+      class="font-mono"
+      font-size={TYPE.superstate}
+      letter-spacing="0.08em"
+      fill="currentColor"
+      fill-opacity="0.7"
+    >
+      {m.targeting.toLocaleUpperCase(lang)}
+    </text>
+
+    <g fill="none" stroke="currentColor" stroke-width="1.25" stroke-opacity="0.75">
+      {edges.map((edge) => <path d={edge.d} />)}
+      {loops.map((l) => <path d={l.path} />)}
+    </g>
+    <g fill="currentColor" fill-opacity="0.85">
+      {edges.slice(1).map((edge) => <path d={edge.head} />)}
+      {loops.map((l) => <path d={l.head} />)}
+    </g>
+    <g class="text-accent-600 dark:text-accent-400" fill="currentColor">
+      <circle cx={MID} cy="10" r="5" />
+      <path d={edges[0]?.head ?? ''} />
+    </g>
+
+    {
+      nodes.map((node) => (
+        <g>
+          <rect
+            x={NODE.x}
+            y={node.y}
+            width={NODE.w}
+            height={NODE.h}
+            rx="10"
+            class="node"
+            stroke="currentColor"
+            stroke-width="1.25"
+          />
+          <text
+            x={MID}
+            y={node.y + 21}
+            text-anchor="middle"
+            class="font-mono"
+            font-size={TYPE.title}
+            font-weight="600"
+            letter-spacing="0.08em"
+            fill="currentColor"
+          >
+            {node.title.toLocaleUpperCase(lang)}
+          </text>
+          {node.lines.map((line, i) => (
+            <text
+              x={MID}
+              y={node.y + 39 + i * TYPE.pitch}
+              text-anchor="middle"
+              class="font-sans"
+              font-size={TYPE.text}
+              fill="currentColor"
+              fill-opacity="0.8"
+            >
+              {line}
+            </text>
+          ))}
+        </g>
+      ))
+    }
+
+    <g class="font-sans italic" font-size={TYPE.text} fill="currentColor" fill-opacity="0.8">
+      {
+        labels.map(([x, y, anchor, lines]) =>
+          lines.map((line, i) => (
+            <text x={x} y={y + i * TYPE.pitch} text-anchor={anchor}>
+              {line}
+            </text>
+          )),
+        )
+      }
+    </g>
+  </svg>
+  <slot />
+</Figure>
+
+<style>
+  .superstate {
+    fill: currentColor;
+    fill-opacity: 0.025;
+    stroke-opacity: 0.35;
+  }
+
+  .node {
+    fill: white;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .node {
+      fill: var(--color-zinc-900);
+    }
+  }
+</style>

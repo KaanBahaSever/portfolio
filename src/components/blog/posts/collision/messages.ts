@@ -38,6 +38,8 @@ const en = {
     falseHit: (gap: string) => `SAT: colliding — wrong, the shapes are ${gap} px apart`,
     agreeOverlapping: 'Colliding — SAT agrees',
     agreeTouching: 'Touching — SAT agrees',
+    /** The concave figure: the square only touches the U, but SAT on the whole U sees an overlap. */
+    touchingSatOverlaps: 'Touching — SAT says colliding',
   },
   relations: { separated: 'separated', touching: 'touching', overlapping: 'colliding' },
   readout: {
@@ -97,13 +99,13 @@ const tr: CollisionMessages = {
     sat: 'Döndürülmüş bir A dikdörtgeni ve dışbükey bir B çokgeni',
     concave: 'U biçiminde bir A çokgeni ve küçük bir B karesi',
   },
-  shapeRole: 'taşınabilir şekil',
+  shapeRole: 'hareket ettirilebilir şekil',
   shapes: {
     aabb: { a: 'A kutusu', b: 'B kutusu' },
     circles: { a: 'A dairesi', b: 'B dairesi' },
     'circle-box': { a: 'A kutusu', b: 'B dairesi' },
     sat: { a: 'A dikdörtgeni', b: 'B çokgeni' },
-    concave: { a: 'A U şekli', b: 'B karesi' },
+    concave: { a: 'U biçimli A çokgeni', b: 'B karesi' },
   },
   polygons: { rectangle: 'Dikdörtgen', triangle: 'Üçgen', pentagon: 'Beşgen' },
   status: {
@@ -111,8 +113,9 @@ const tr: CollisionMessages = {
     touching: 'Temas ediyor — derinlik 0 px',
     separated: (gap) => `Çarpışma yok — aralık ${gap} px`,
     falseHit: (gap) => `SAT: çarpışıyor — yanlış, şekiller arasında ${gap} px var`,
-    agreeOverlapping: 'Çarpışıyor — SAT de aynı sonuçta',
-    agreeTouching: 'Temas ediyor — SAT de aynı sonuçta',
+    agreeOverlapping: 'Çarpışıyor — SAT de aynı sonucu veriyor',
+    agreeTouching: 'Temas ediyor — SAT de aynı sonucu veriyor',
+    touchingSatOverlaps: 'Temas ediyor — SAT ise çarpışıyor diyor',
   },
   relations: { separated: 'çarpışma yok', touching: 'temas ediyor', overlapping: 'çarpışıyor' },
   readout: {
@@ -146,9 +149,9 @@ const tr: CollisionMessages = {
   },
   axes: {
     heading: 'Her eksen üzerindeki izdüşümler',
-    hint: 'Şekilde çizilmesi için bir eksen seçin; otomatiğe dönmek için aynı ekseni yeniden seçin.',
-    shownAuto: (axis) => `Şekilde: ${axis} (otomatik)`,
-    shownPinned: (axis) => `Şekilde: ${axis}`,
+    hint: 'Çizimde gösterilmesi için bir eksen seçin; otomatik seçime dönmek için aynı ekseni yeniden seçin.',
+    shownAuto: (axis) => `Çizimde: ${axis} (otomatik)`,
+    shownPinned: (axis) => `Çizimde: ${axis}`,
     name: (source, index) => `${source}${index}`,
     overlap: (value) => `örtüşme ${value} px`,
     gap: (value) => `aralık ${value} px`,
@@ -158,7 +161,7 @@ const tr: CollisionMessages = {
     legendA: 'A şeklinin gölgesi',
     legendB: 'B şeklinin gölgesi',
   },
-  noscript: 'Bu şekil etkileşimlidir ve JavaScript gerektirir; JavaScript olmadan yalnızca başlangıç konumunu görürsünüz.',
+  noscript: 'Bu çizim etkileşimlidir ve JavaScript gerektirir; JavaScript olmadan yalnızca başlangıç konumunu görürsünüz.',
 };
 
 export const collisionMessages = { en, tr } as const satisfies Localized<CollisionMessages>;

@@ -67,7 +67,7 @@ const hit = overlapX >= 0 && overlapY >= 0;
 const depth = hit ? Math.min(overlapX, overlapY) : 0;
 ```
 
-Note that $o_x$ is the length of the push, not the length of the common part of the shadows. The two differ when one box sits inside the other. A shadow $[3, 5]$ inside $[0, 10]$ shares only 2 units with it, yet it must travel 5 units to the right, or 7 to the left, to get out. Drag the small box into the large one below and watch the depth grow past the width of the shaded overlap.
+Note that $o_x$ is the length of the push, not the length of the common part of the shadows. The two differ when one box sits inside the other. A shadow $[3, 5]$ inside $[0, 10]$ shares only 2 units with it, yet it must travel 7 units to the right, or 5 to the left, to get out. Drag the small box into the large one below and watch the depth grow past the height of the shaded overlap.
 
 <CollisionDemo kind="aabb" lang="en">
   Two axis-aligned boxes. Their shadows on the $x$ axis (bottom) and the $y$ axis (left) are drawn along the edges; A's is solid and B's dashed. The boxes collide exactly when both pairs of shadows overlap. The shaded rectangle is the overlap, the arrow is the MTV, and the dashed outline shows where B would rest after moving by it.
@@ -234,7 +234,7 @@ The proof used convexity twice: in step 2, where $A \ominus B$ turned out to be 
   SAT on a concave shape. The U's only edge directions are horizontal and vertical, and on both axes the shadows of the U and the square overlap, so SAT reports a hit. The dashed lines cut the U into three convex pieces; testing the square against each piece gives the true answer.
 </CollisionDemo>
 
-The usual remedy is to split a concave polygon into convex pieces, for instance into triangles by ear clipping or into fewer pieces by a convex decomposition, and to test each piece. The shapes collide when any piece does, and the depth is the largest of the pieces' depths.
+The usual remedy is to split a concave polygon into convex pieces $P_1, \dots, P_k$, for instance into triangles by ear clipping or into fewer pieces by a convex decomposition, and to test each piece. The shapes collide exactly when some piece does. The depth needs more care: the largest of the pieces' depths is only a lower bound for the depth of the whole shape, because a push out of one piece can lead straight into another. For the exact MTV the pieces must be taken together: it is again the shortest way from $\mathbf{0}$ to the boundary, now the boundary of the union of the Minkowski differences $P_i \ominus B$.
 
 ## What it costs
 

@@ -67,7 +67,7 @@ const hit = overlapX >= 0 && overlapY >= 0;
 const depth = hit ? Math.min(overlapX, overlapY) : 0;
 ```
 
-Dikkat: $o_x$, gölgelerin ortak kısmının uzunluğu değil, gereken itmenin uzunluğudur. Kutulardan biri diğerinin içindeyken bu ikisi birbirinden ayrılır. $[0, 10]$ aralığının içindeki $[3, 5]$ gölgesinin onunla ortak kısmı yalnızca 2 birimdir; oysa dışarı çıkmak için 5 birim sağa ya da 7 birim sola gitmesi gerekir. Aşağıda küçük kutuyu büyüğün içine sürükleyin ve derinliğin, taralı örtüşme bölgesinin genişliğini nasıl aştığını izleyin.
+Dikkat: $o_x$, gölgelerin ortak kısmının uzunluğu değil, gereken itmenin uzunluğudur. Kutulardan biri diğerinin içindeyken bu ikisi birbirinden ayrılır. $[0, 10]$ aralığının içindeki $[3, 5]$ gölgesinin onunla ortak kısmı yalnızca 2 birimdir; oysa dışarı çıkmak için 7 birim sağa ya da 5 birim sola gitmesi gerekir. Aşağıda küçük kutuyu büyüğün içine sürükleyin ve derinliğin, taralı örtüşme bölgesinin yüksekliğini nasıl aştığını izleyin.
 
 <CollisionDemo kind="aabb" lang="tr">
   Eksenlere hizalı iki kutu. $x$ eksenindeki (altta) ve $y$ eksenindeki (solda) gölgeleri kenarlar boyunca çizili; A'nınki düz, B'ninki kesik çizgi. Kutular, iki gölge çifti de örtüştüğünde ve yalnızca o zaman çarpışır. Taralı dikdörtgen örtüşme bölgesi, ok MTV'dir; kesik çizgili çerçeve, B'nin bu vektör kadar ötelendiğinde duracağı yeri gösterir.
@@ -94,7 +94,7 @@ Bu, işe yarayan ötelemelerden yalnızca biri değil, *en kısası*dır. $B$ ş
 Bir durumda merkezleri birleştiren doğru hiç yoktur: eş merkezli dairelerde. O zaman her yön ötekiler kadar iyidir; kod da sıfıra bölmek yerine birini seçer, burada $\mathbf{n} = (1, 0)$.
 
 <CollisionDemo kind="circles" lang="tr">
-  İki daire. Kesik çizgi merkezleri birleştiriyor; taralı mercek biçimli bölge örtüşme. Çizimin altındaki değerler merkezler arası uzaklığı yarıçapların toplamıyla karşılaştırır; ok, yani MTV, merkezler doğrusu boyunca B'nin en derindeki noktasından A'nınkine uzanır.
+  İki daire. Kesik çizgi merkezleri birleştiriyor; taralı, mercek biçimli bölge örtüşmeyi gösteriyor. Çizimin altındaki değerler merkezler arası uzaklığı yarıçapların toplamıyla karşılaştırır; ok, yani MTV, merkezler doğrusu boyunca B'nin en derindeki noktasından A'nınkine uzanır.
 </CollisionDemo>
 
 ## Bir daire ile bir kutu
@@ -136,7 +136,7 @@ olur, normal de o kenarın dışa bakan normalidir. Daha kısa bir itme işe yar
 
 ## Ayırıcı eksen teoremi
 
-Dönen kutular ve genel olarak çokgenler daha genel bir fikir ister. Kutu testine yeniden bakın: iki kutu, $x$ ya da $y$ üzerindeki gölgeleri arasında boşluk olduğunda ve yalnızca o zaman ayrıktır. Ayırıcı eksen teoremi (SAT, *separating axis theorem*), doğru eksenler denendiği sürece aynı fikrin her iki dışbükey şekil için geçerli olduğunu söyler.
+Dönen kutular ve genel olarak çokgenler daha genel bir fikir ister. Kutu testine yeniden bakın: iki kutu, $x$ ya da $y$ üzerindeki gölgeleri arasında boşluk olduğunda ve yalnızca o zaman ayrıktır. Ayırıcı eksen teoremi (SAT, *separating axis theorem*), doğru eksenler denendiği sürece aynı fikrin herhangi iki dışbükey şekil için de geçerli olduğunu söyler.
 
 **Teorem.** İki dışbükey $A$ ve $B$ çokgeni, ancak ve ancak izdüşümleri
 
@@ -228,19 +228,19 @@ Bir $\mathbf{a}\mathbf{b}\mathbf{c}$ üçgeni üç eksen getirir. $(\mathbf{b} -
 
 ### Dışbükeylik neden önemli
 
-Kanıt dışbükeyliği iki yerde kullandı: $A \ominus B$ kümesinin dışbükey bir çokgen çıktığı 2. adımda ve dışbükey bir çokgenin dışındaki bir noktanın kenar yarı düzlemlerinden birinin dışında kaldığı 3. adımda. İçbükey bir şekilde sonuç çöker. Aşağıdaki şekilde küçük bir kare, bir U'nun oyuğunda ona değmeden duruyor. Her aday eksende gölgeler örtüşüyor, bu yüzden SAT çarpışma bildiriyor; oysa iki şeklin arasından hiçbir doğru geçemez, çünkü boşluk oyuğun içinde.
+Kanıt dışbükeyliği iki yerde kullandı: $A \ominus B$ kümesinin dışbükey bir çokgen çıktığı 2. adımda ve dışbükey bir çokgenin dışındaki bir noktanın kenar yarı düzlemlerinden birinin dışında kaldığı 3. adımda. İçbükey bir şekil söz konusu olduğunda bu sonuç geçerliliğini yitirir. Aşağıdaki şekilde küçük bir kare, bir U'nun oyuğunda ona değmeden duruyor. Her aday eksende gölgeler örtüşüyor, bu yüzden SAT çarpışma bildiriyor; oysa iki şeklin arasından hiçbir doğru geçemez, çünkü boşluk oyuğun içinde.
 
 <CollisionDemo kind="concave" lang="tr">
   İçbükey bir şekil üzerinde SAT. U'nun kenar yönleri yalnızca yatay ve dikey; iki eksende de U ile karenin gölgeleri örtüştüğü için SAT çarpışma bildiriyor. Kesik çizgiler U'yu üç dışbükey parçaya bölüyor; kareyi her parçayla ayrı ayrı test etmek doğru yanıtı veriyor.
 </CollisionDemo>
 
-Olağan çözüm, içbükey bir çokgeni dışbükey parçalara bölmek, örneğin kulak kesme (*ear clipping*) yöntemiyle üçgenlere ya da bir dışbükey ayrıştırmayla daha az sayıda parçaya ayırmak ve her parçayı ayrı ayrı test etmektir. Parçalardan biri çarpışıyorsa şekiller çarpışıyordur.
+Olağan çözüm, içbükey bir çokgeni $P_1, \dots, P_k$ gibi dışbükey parçalara bölmek, örneğin kulak kesme (*ear clipping*) yöntemiyle üçgenlere ya da bir dışbükey ayrıştırmayla daha az sayıda parçaya ayırmak ve her parçayı ayrı ayrı test etmektir. Şekiller, parçalardan en az biri çarpışıyorsa ve yalnızca o zaman çarpışır. Derinlik ise daha fazla özen ister: parçaların derinliklerinin en büyüğü, bütün şeklin derinliği için yalnızca bir alt sınırdır, çünkü bir parçadan dışarı iten öteleme doğrudan başka bir parçanın içine götürebilir. Kesin MTV için parçaları birlikte ele almak gerekir: MTV yine $\mathbf{0}$ noktasından sınıra giden en kısa yoldur, ama bu kez söz konusu olan, $P_i \ominus B$ Minkowski farklarının birleşiminin sınırıdır.
 
 ## Maliyet
 
 İlk üç test sabit zamanda çalışır: iki kutu için dört karşılaştırma; iki daire için bir uzaklık karesinin bir toplamın karesiyle karşılaştırılması; bir daireyle bir kutu için iki sınırlama ve bir uzaklık karesi.
 
-Köşe sayıları $n$ ve $m$ olan çokgenlerde SAT, en fazla $n + m$ eksenin her birine $n + m$ köşe izdüşürür; bu da ilk boşlukta erken çıkışla birlikte $O\bigl((n + m)^2\bigr)$ iş demektir. Tipik bir oyundaki küçük çokgenler için bu hızlıdır. Çok köşeli şekillerde ya da 3B'de ise Minkowski farkıyla destek noktaları üzerinden çalışan GJK (Gilbert–Johnson–Keerthi) gibi yinelemeli algoritmalar, derinlik için de EPA (*expanding polytope algorithm*) daha iyi ölçeklenir.
+Köşe sayıları $n$ ve $m$ olan çokgenlerde SAT, en fazla $n + m$ eksenin her birine $n + m$ köşe izdüşürür; bu da ilk boşlukta erken çıkışla birlikte $O\bigl((n + m)^2\bigr)$ iş demektir. Tipik bir oyundaki küçük çokgenler için bu hızlıdır. Çok köşeli şekillerde ya da 3B'de ise GJK (Gilbert–Johnson–Keerthi) gibi yinelemeli algoritmalar daha iyi ölçeklenir: GJK, Minkowski farkıyla destek noktaları üzerinden çalışır; derinlik için de yanına EPA (*expanding polytope algorithm*) eklenir.
 
 Asıl maliyet çift sayısındadır. $N$ şekilli bir sahnede $N(N - 1)/2$ çift vardır: bin şekil için her karede 499.500 çift.
 

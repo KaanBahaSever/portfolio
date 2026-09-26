@@ -23,6 +23,7 @@ import {
   localPolygon,
   moveShape,
   notchPieces,
+  placeShape,
   rotateShape,
   shapeBounds,
   withPolygon,
@@ -208,6 +209,51 @@ test('readouts keep the same four keys whatever the state, and statuses match th
   assert.equal(statusText(analyse(touching), m, format), 'Touching — depth 0 px');
   const concave = analyse(initialScene('concave'));
   assert.equal(statusText(concave, collisionMessages.tr, formatters('tr')), 'SAT: çarpışıyor — yanlış, şekiller arasında 25 px var');
+});
+
+test('concave figure: the status says SAT agrees only when its relation matches the pieces', () => {
+  const format = formatters('en');
+  const m = collisionMessages.en;
+  const base = initialScene('concave');
+  const at = (x: number, y: number) => analyse({ ...base, b: placeShape(base.b, vec(x, y)) });
+
+  // Resting on the notch floor (y = 260): the square touches the base piece, but the U's own
+  // shadows overlap by 166 on y, so SAT calls it a collision. The status must not say "agrees".
+  const floor = at(300, 222);
+  assert.ok(floor.kind === 'concave');
+  assert.equal(floor.result.relation, 'touching');
+  assert.equal(floor.sat.relation, 'overlapping');
+  assert.ok(Math.abs(floor.sat.depth - 166) < 1e-9);
+  assert.equal(statusText(floor, m, format), 'Touching — SAT says colliding');
+  assert.equal(statusText(floor, collisionMessages.tr, formatters('tr')), 'Temas ediyor — SAT ise çarpışıyor diyor');
+  assert.deepEqual(
+    readout(floor, m, format).map((item) => item.value),
+    ['colliding', 'touching', '0 px', 'none'],
+  );
+
+  // Against the U's right side (x = 450): both see a touch.
+  const side = at(480, 215);
+  assert.ok(side.kind === 'concave' && side.result.relation === 'touching' && side.sat.relation === 'touching');
+  assert.equal(statusText(side, m, format), 'Touching — SAT agrees');
+
+  // Inside a column: both see an overlap.
+  const column = at(200, 150);
+  assert.ok(column.kind === 'concave' && column.result.relation === 'overlapping' && column.sat.relation === 'overlapping');
+  assert.equal(statusText(column, m, format), 'Colliding — SAT agrees');
+});
+
+test('concave figure: SAT on the whole U never misses a hit, and never calls an overlap a touch', () => {
+  // statusText relies on this: a real overlap is always an SAT overlap (the U stays upright, so
+  // its axes are the pieces' axes and its shadows contain theirs), and any real hit is an SAT hit.
+  const base = initialScene('concave');
+  for (let x = 0; x <= WORLD.width; x += 7) {
+    for (let y = 0; y <= WORLD.height; y += 7) {
+      const analysis = analyse({ ...base, b: placeShape(base.b, vec(x, y)) });
+      assert.ok(analysis.kind === 'concave');
+      if (analysis.result.hit) assert.ok(analysis.sat.hit, `(${x}, ${y})`);
+      if (analysis.result.relation === 'overlapping') assert.equal(analysis.sat.relation, 'overlapping', `(${x}, ${y})`);
+    }
+  }
 });
 
 test('SAT axis rows: names per polygon, bars inside the row, the separating row marked', () => {

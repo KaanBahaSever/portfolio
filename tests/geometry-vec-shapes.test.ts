@@ -274,8 +274,11 @@ test('interval penetration: overlap, touching, gap and containment', () => {
   assert.deepEqual(intervalPenetration(a, { min: 10, max: 12 }), { overlap: 0, direction: 1 });
   assert.deepEqual(intervalPenetration(a, { min: 13, max: 20 }), { overlap: -3, direction: 1 });
   assert.deepEqual(intervalPenetration(a, { min: -9, max: -4 }), { overlap: -4, direction: -1 });
-  // Nested: [3, 5] must travel 5 to the right or 7 to the left, although only 2 units overlap.
+  // Nested (the post's example): [3, 5] must travel 7 to the right (left end 3 → 10) or 5 to the
+  // left (right end 5 → 0), although only 2 units overlap. The cheaper push, left, wins.
   assert.deepEqual(intervalPenetration(a, { min: 3, max: 5 }), { overlap: 5, direction: -1 });
+  // The same shadow nearer the right end: now the push to the right is the cheaper one.
+  assert.deepEqual(intervalPenetration(a, { min: 5, max: 7 }), { overlap: 5, direction: 1 });
   assert.deepEqual(intervalPenetration(a, { min: 6, max: 8 }), { overlap: 4, direction: 1 });
   // A tie (B centred on A) goes the way the caller asks.
   assert.deepEqual(intervalPenetration(a, { min: 4, max: 6 }, -1), { overlap: 6, direction: -1 });

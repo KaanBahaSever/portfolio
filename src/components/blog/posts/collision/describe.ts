@@ -30,7 +30,13 @@ export function statusText(analysis: Analysis, m: CollisionMessages, format: For
       const gap = formatUnits(truth.distance, format);
       return analysis.sat.hit ? m.status.falseHit(gap) : m.status.separated(gap);
     }
-    return truth.relation === 'touching' ? m.status.agreeTouching : m.status.agreeOverlapping;
+    // A true hit is always a SAT hit, but not always the same kind: a square resting on the notch
+    // floor touches the U, while the U's shadows still overlap deeply. Say "agrees" only when the
+    // relations match.
+    if (truth.relation === 'touching') {
+      return analysis.sat.relation === 'touching' ? m.status.agreeTouching : m.status.touchingSatOverlaps;
+    }
+    return m.status.agreeOverlapping;
   }
   const r = analysis.result;
   if (r.relation === 'overlapping') return m.status.overlapping(formatUnits(r.depth, format));

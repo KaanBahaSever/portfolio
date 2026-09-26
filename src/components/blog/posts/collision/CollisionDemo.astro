@@ -88,7 +88,14 @@ const rotateLabel = format.number(ROTATE_STEP);
       </defs>
       <rect width={WORLD.width} height={WORLD.height} fill={`url(#${gridId})`} aria-hidden="true" />
       <rect width={WORLD.width} height={WORLD.height} fill={`url(#${majorId})`} aria-hidden="true" />
-      <g data-layer="under" aria-hidden="true" set:html={under} />
+      {
+        /*
+         * Both drawing layers ignore the pointer: a press on the overlap region, the contact point
+         * or the MTV arrow falls through to the shape beneath, so a box nested inside the other
+         * can still be grabbed anywhere on it.
+         */
+      }
+      <g data-layer="under" aria-hidden="true" pointer-events="none" set:html={under} />
       {
         (['a', 'b'] as const).map((key) => {
           const shape = scene[key];
@@ -119,7 +126,7 @@ const rotateLabel = format.number(ROTATE_STEP);
           );
         })
       }
-      <g data-layer="over" aria-hidden="true" set:html={over} />
+      <g data-layer="over" aria-hidden="true" pointer-events="none" set:html={over} />
     </svg>
 
     <div class="border-t border-zinc-200 p-4 sm:p-5 dark:border-zinc-800">
@@ -135,6 +142,8 @@ const rotateLabel = format.number(ROTATE_STEP);
         <span class="cd-indicator" aria-hidden="true"></span>
         <span data-status>{status}</span>
       </p>
+      {/* The line above changes on every frame; this region repeats it once the reader pauses. */}
+      <p data-live class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 
       <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
         {
@@ -333,7 +342,6 @@ const rotateLabel = format.number(ROTATE_STEP);
   <figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
     <slot />
   </figcaption>
-  <p data-live class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
 </figure>
 
 <style>

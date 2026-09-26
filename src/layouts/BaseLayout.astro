@@ -13,6 +13,7 @@ import {
 } from '../i18n/config';
 import { common } from '../i18n/messages/common';
 import { getLocale } from '../i18n/server';
+import { SYSTEM_DARK_QUERY, THEMES, THEME_COLORS, THEME_STORAGE_KEY } from '../lib/theme';
 
 interface Props {
   title: string;
@@ -128,20 +129,51 @@ const ogURL = noindex ? undefined : canonicalURL;
         }
       } catch {}
     </script>
-    <title>{pageTitle}</title>
-    <meta name="description" content={description} />
-    <meta name="author" content={SITE.name} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {/*
+      Browser-chrome colour. Without JavaScript the media queries pick paper or ink by the
+      operating system; the theme script below gives both the active theme's colour.
+    */}
     {
       themeColor ? (
         <meta name="theme-color" content={themeColor} />
       ) : (
         <>
-          <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
-          <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)" />
+          <meta name="theme-color" content={THEME_COLORS.light} media="(prefers-color-scheme: light)" />
+          <meta name="theme-color" content={THEME_COLORS.dark} media="(prefers-color-scheme: dark)" />
         </>
       )
     }
+    {/*
+      Theme, before first paint: the choice stored by the header's theme button, else the
+      operating system's preference. It sets <html data-theme> (from then on the CSS ignores
+      prefers-color-scheme, see the dark variant in global.css), the root's color-scheme and the
+      theme-color metas above. Without JavaScript nothing is set and the CSS follows the operating
+      system. src/scripts/theme.ts takes over after load (live OS changes, other tabs, the toggle).
+      tests/theme.test.ts runs this script with stubbed browser globals.
+    */}
+    <script
+      is:inline
+      define:vars={{ themes: THEMES, themeStorageKey: THEME_STORAGE_KEY, themeColors: THEME_COLORS, systemDarkQuery: SYSTEM_DARK_QUERY }}
+    >
+      try {
+        let theme = null;
+        try {
+          const stored = localStorage.getItem(themeStorageKey);
+          if (themes.includes(stored)) theme = stored;
+        } catch {}
+        if (!theme) theme = matchMedia(systemDarkQuery).matches ? 'dark' : 'light';
+        const root = document.documentElement;
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+        document.querySelectorAll('meta[name="theme-color"][media]').forEach((meta) => {
+          meta.content = themeColors[theme];
+        });
+      } catch {}
+    </script>
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.name} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
@@ -194,5 +226,11 @@ const ogURL = noindex ? undefined : canonicalURL;
       <slot />
     </main>
     {!bare && <Footer />}
+    <script>
+      // Keeps the theme in step with the operating system and other tabs (the header wires the button).
+      import { initTheme } from '../scripts/theme.ts';
+
+      initTheme();
+    </script>
   </body>
 </html>

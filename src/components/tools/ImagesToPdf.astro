@@ -376,8 +376,13 @@ const removeButtonClass = `${cardButtonBase} hover:text-rose-700 dark:hover:text
     --itp-drag-accent: var(--color-accent-700);
   }
 
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :where([data-theme='dark']) [data-images-to-pdf] {
+    --itp-drag-accent: var(--color-accent-400);
+  }
+
   @media (prefers-color-scheme: dark) {
-    [data-images-to-pdf] {
+    :where(:root:not([data-theme])) [data-images-to-pdf] {
       --itp-drag-accent: var(--color-accent-400);
     }
   }

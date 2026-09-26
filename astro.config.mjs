@@ -28,7 +28,7 @@ export default defineConfig({
     // Astro 7's Rust Markdown engine (Sätteri). `math` parses $…$, $$…$$ and ```math, and the
     // KaTeX plugin renders it to HTML + MathML at build time. MDX inherits all of this.
     processor: satteri({ features: { math: true }, mdastPlugins: [katexPlugin] }),
-    // Dual themes: colours are CSS variables, switched by prefers-color-scheme in global.css.
+    // Dual themes: colours are CSS variables, switched by the site's theme in global.css.
     // The high-contrast GitHub themes keep every token at WCAG AA (≥ 4.5:1) on our code
     // backgrounds; the regular ones drop to about 3.5:1 for some tokens.
     shikiConfig: {

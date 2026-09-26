@@ -256,33 +256,40 @@ const shipBoxes = ships.map((ship) => {
     --miss: var(--color-zinc-500);
     --hit: var(--color-rose-600);
     --on-hit: white;
+    --coords: var(--color-zinc-500);
     overflow: visible;
   }
 
   /*
-   * Dark theme: a weaker tint keeps the density numbers above 4.5:1 on the strongest cells
-   * (zinc-100 on 45% accent-400 over zinc-900 is about 5.6:1; at 60% it would drop to about 4:1).
+   * Dark theme (the visitor's choice, or the OS preference when JavaScript is off: see the dark
+   * variant in global.css): a weaker tint keeps the density numbers above 4.5:1 on the strongest
+   * cells (zinc-100 on 45% accent-400 over zinc-900 is about 5.6:1; at 60% it would drop to 4:1).
    */
+  :global(:where([data-theme='dark'])) .bs-board {
+    --heat-color: var(--color-accent-400);
+    --heat-strength: 0.45;
+    --sea: var(--color-zinc-900);
+    --miss: var(--color-zinc-400);
+    --hit: var(--color-rose-400);
+    --on-hit: var(--color-zinc-950);
+    --coords: var(--color-zinc-400);
+  }
+
   @media (prefers-color-scheme: dark) {
-    .bs-board {
+    :global(:where(:root:not([data-theme]))) .bs-board {
       --heat-color: var(--color-accent-400);
       --heat-strength: 0.45;
       --sea: var(--color-zinc-900);
       --miss: var(--color-zinc-400);
       --hit: var(--color-rose-400);
       --on-hit: var(--color-zinc-950);
+      --coords: var(--color-zinc-400);
     }
   }
 
   .coords {
     font-size: 9px;
-    fill: var(--color-zinc-500);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .coords {
-      fill: var(--color-zinc-400);
-    }
+    fill: var(--coords);
   }
 
   .sea {

@@ -716,6 +716,30 @@ const surfaceClass = 'np-surface font-mono';
     overflow: hidden;
   }
 
+  /*
+   * Zen mode's paper and status-line tones. Dark: the visitor's choice, or the OS preference
+   * when JavaScript is off (see the dark variant in global.css).
+   */
+  .np-root {
+    --np-zen-paper: var(--color-zinc-50);
+    --np-zen-status: var(--color-zinc-500);
+    --np-zen-status-strong: var(--color-zinc-700);
+  }
+
+  :where([data-theme='dark']) .np-root {
+    --np-zen-paper: var(--color-zinc-950);
+    --np-zen-status: var(--color-zinc-400);
+    --np-zen-status-strong: var(--color-zinc-200);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :where(:root:not([data-theme])) .np-root {
+      --np-zen-paper: var(--color-zinc-950);
+      --np-zen-status: var(--color-zinc-400);
+      --np-zen-status-strong: var(--color-zinc-200);
+    }
+  }
+
   .np-root[data-zen] {
     position: fixed;
     inset: 0;
@@ -723,7 +747,7 @@ const surfaceClass = 'np-surface font-mono';
     gap: 0;
     margin: 0;
     padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    background-color: var(--color-zinc-50);
+    background-color: var(--np-zen-paper);
   }
 
   .np-root[data-zen] > .np-card {
@@ -782,7 +806,7 @@ const surfaceClass = 'np-surface font-mono';
   .np-root[data-zen] .np-status {
     border-top-color: transparent;
     background-color: transparent;
-    color: var(--color-zinc-500);
+    color: var(--np-zen-status);
   }
 
   .np-root[data-zen] .np-status [data-summary],
@@ -792,22 +816,7 @@ const surfaceClass = 'np-surface font-mono';
 
   .np-root[data-zen] .np-status:hover,
   .np-root[data-zen] .np-status:focus-within {
-    color: var(--color-zinc-700);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .np-root[data-zen] {
-      background-color: var(--color-zinc-950);
-    }
-
-    .np-root[data-zen] .np-status {
-      color: var(--color-zinc-400);
-    }
-
-    .np-root[data-zen] .np-status:hover,
-    .np-root[data-zen] .np-status:focus-within {
-      color: var(--color-zinc-200);
-    }
+    color: var(--np-zen-status-strong);
   }
 
   /* Back on the page after zen mode. */

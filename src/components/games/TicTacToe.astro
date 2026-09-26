@@ -267,8 +267,17 @@ const scoreLabel = 'label-mono text-zinc-600 max-[359px]:tracking-normal dark:te
     --muted: var(--color-zinc-500);
   }
 
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :global(:where([data-theme='dark'])) .board {
+    --ink: var(--color-zinc-200);
+    --rule: var(--color-zinc-300);
+    --accent: var(--color-accent-400);
+    --accent-text: var(--color-accent-400);
+    --muted: var(--color-zinc-400);
+  }
+
   @media (prefers-color-scheme: dark) {
-    .board {
+    :global(:where(:root:not([data-theme]))) .board {
       --ink: var(--color-zinc-200);
       --rule: var(--color-zinc-300);
       --accent: var(--color-accent-400);

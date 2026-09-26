@@ -2,6 +2,32 @@
 @plugin "@tailwindcss/typography";
 
 /*
+ * Light and dark themes. The inline script at the top of BaseLayout's <head> sets
+ * <html data-theme="light|dark"> before the first paint: the visitor's choice from the header's
+ * theme button, else the operating system's preference (src/lib/theme.ts, src/scripts/theme.ts).
+ * `dark:` (and `@variant dark` in this file) therefore matches an explicit dark theme, or, when
+ * the attribute is missing because JavaScript is off, the operating system's dark mode.
+ * Both selectors sit inside :where(), so a dark rule keeps the specificity of its light rule.
+ *
+ * Component styles and post-prose.css write the same pair by hand, without Tailwind:
+ *   :where([data-theme='dark']) .x { … }
+ *   @media (prefers-color-scheme: dark) { :where(:root:not([data-theme])) .x { … } }
+ * (in scoped Astro styles, wrap the root part in :global()). tests/theme.test.ts checks that no
+ * prefers-color-scheme block misses the :root:not([data-theme]) guard.
+ */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme]), :root:not([data-theme]) *) {
+      @slot;
+    }
+  }
+}
+
+/*
  * Self-hosted variable fonts (no third-party requests). Only the latin and latin-ext subsets
  * are declared: Turkish needs both (ı ç ö ü are in latin; ğ ş İ in latin-ext), and browsers
  * download a file only when the page uses a character in its unicode-range.
@@ -200,13 +226,24 @@
   :root {
     --graph-line: color-mix(in oklab, var(--color-zinc-900) 6%, transparent);
     --graph-line-strong: color-mix(in oklab, var(--color-zinc-900) 11%, transparent);
-  }
 
-  @media (prefers-color-scheme: dark) {
-    :root {
+    @variant dark {
       --graph-line: color-mix(in oklab, white 5%, transparent);
       --graph-line-strong: color-mix(in oklab, white 9%, transparent);
     }
+  }
+
+  /*
+   * Form controls, scrollbars and the canvas follow the active theme. Without JavaScript there is
+   * no data-theme and the browser follows the operating system. (The pre-paint script also sets
+   * color-scheme inline; the console page forces dark with !important.)
+   */
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
   }
 
   html {
@@ -247,10 +284,8 @@
   :focus-visible {
     outline: 2px solid var(--color-accent-700);
     outline-offset: 2px;
-  }
 
-  @media (prefers-color-scheme: dark) {
-    :focus-visible {
+    @variant dark {
       outline-color: var(--color-accent-400);
     }
   }
@@ -337,10 +372,8 @@
  */
 .prose {
   --tw-prose-links: var(--color-accent-700);
-}
 
-@media (prefers-color-scheme: dark) {
-  .prose {
+  @variant dark {
     --tw-prose-links: var(--color-accent-400);
   }
 }
@@ -366,6 +399,10 @@
   background-color: var(--color-zinc-100);
   padding: 0.125em 0.3em;
   font-weight: 500;
+
+  @variant dark {
+    background-color: var(--color-zinc-800);
+  }
 }
 
 .prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *))::before,
@@ -373,15 +410,10 @@
   content: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  .prose :where(:not(pre) > code):not(:where(.not-prose, .not-prose *)) {
-    background-color: var(--color-zinc-800);
-  }
-}
-
 /*
  * Shiki code blocks with dual themes (astro.config.mjs: defaultColor false): every token
- * carries --shiki-light / --shiki-dark, and the theme follows the operating system.
+ * carries --shiki-light / --shiki-dark, and the site's theme picks one. (Two rules rather than
+ * one list, so the nested dark rule keeps each selector's own specificity.)
  */
 pre.astro-code {
   background-color: var(--shiki-light-bg);
@@ -389,23 +421,39 @@ pre.astro-code {
   border-radius: 0.75rem;
   font-size: 0.875em;
   line-height: 1.7;
-}
-
-pre.astro-code,
-pre.astro-code span {
   color: var(--shiki-light);
-}
 
-@media (prefers-color-scheme: dark) {
-  pre.astro-code {
+  @variant dark {
     background-color: var(--color-zinc-900);
     border-color: var(--color-zinc-800);
-  }
-
-  pre.astro-code,
-  pre.astro-code span {
     color: var(--shiki-dark);
   }
+}
+
+pre.astro-code span {
+  color: var(--shiki-light);
+
+  @variant dark {
+    color: var(--shiki-dark);
+  }
+}
+
+/*
+ * Switching themes: every colour changes in the same frame. Without this, each element with a
+ * colour transition (links, buttons, cards) would fade at its own speed. src/scripts/theme.ts
+ * sets the class for one frame; the theme button's icon keeps its own transition.
+ */
+.theme-switching,
+.theme-switching *:not(.theme-icon, .theme-icon *),
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+/* The cross-fade between themes (View Transitions API; not used with reduced motion). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
 }
 
 /* KaTeX (rendered at build time; its stylesheet is imported by the blog post page only). */

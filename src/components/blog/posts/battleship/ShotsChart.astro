@@ -166,35 +166,40 @@ const label = m.chart.aria(
     --no-parity: var(--color-zinc-500);
     --parity: var(--color-zinc-800);
     --density: var(--color-accent-600);
+    --axis-text: var(--color-zinc-600);
+    --axis-title: var(--color-zinc-700);
+  }
+
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :global(:where([data-theme='dark'])) .bs-chart {
+    --ink: var(--color-zinc-100);
+    --random: var(--color-zinc-400);
+    --no-parity: var(--color-zinc-400);
+    --parity: var(--color-zinc-200);
+    --density: var(--color-accent-400);
+    --axis-text: var(--color-zinc-400);
+    --axis-title: var(--color-zinc-300);
   }
 
   @media (prefers-color-scheme: dark) {
-    .bs-chart {
+    :global(:where(:root:not([data-theme]))) .bs-chart {
       --ink: var(--color-zinc-100);
       --random: var(--color-zinc-400);
       --no-parity: var(--color-zinc-400);
       --parity: var(--color-zinc-200);
       --density: var(--color-accent-400);
+      --axis-text: var(--color-zinc-400);
+      --axis-title: var(--color-zinc-300);
     }
   }
 
   .axis text {
-    fill: var(--color-zinc-600);
+    fill: var(--axis-text);
     font-variant-numeric: tabular-nums;
   }
 
   .axis .title {
-    fill: var(--color-zinc-700);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .axis text {
-      fill: var(--color-zinc-400);
-    }
-
-    .axis .title {
-      fill: var(--color-zinc-300);
-    }
+    fill: var(--axis-title);
   }
 
   .gridline {

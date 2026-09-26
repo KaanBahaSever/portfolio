@@ -34,6 +34,13 @@ const en = {
      */
     switchTo: 'Read in English',
   },
+  /** The header's theme button: a toggle (aria-pressed) whose tooltip says what a press does. */
+  theme: {
+    /** Accessible name; fixed, the pressed state says whether the dark theme is on. */
+    toggle: 'Dark theme',
+    toDark: 'Switch to dark theme',
+    toLight: 'Switch to light theme',
+  },
   footer: {
     tagline: 'Static site · the tools run entirely in your browser',
     socialLinks: 'Social links',
@@ -80,6 +87,11 @@ const tr: CommonMessages = {
   language: {
     label: 'Dil',
     switchTo: 'Türkçe oku',
+  },
+  theme: {
+    toggle: 'Koyu tema',
+    toDark: 'Koyu temaya geç',
+    toLight: 'Açık temaya geç',
   },
   footer: {
     tagline: 'Statik site · araçlar tamamen tarayıcınızda çalışır',

@@ -5,9 +5,9 @@ title: crowd.inc’te yazılım geliştirici
 dateLabel: Temmuz 2021 – Mart 2024
 ---
 
-Geliştirme sürecinin her aşamasını üstlendim: PostgreSQL’de ilişkisel veritabanı şemalarını
-tasarladım, Python/Flask ve jQuery ile RESTful API’ler geliştirdim, Linux sunucularını kurup
-yapılandırdım ve otomatik testler yazdım.
+Geliştirme sürecinin her aşamasını üstlendim: PostgreSQL’de ilişkisel veri tabanı şemalarını
+tasarladım, Python ve Flask ile REST API’ler, jQuery ile de ön yüz geliştirdim, Linux
+sunucularını kurup yapılandırdım ve otomatik testler yazdım.
 
 Ayrıntılı yetkilere dayanan bir rol tabanlı erişim kontrolü (RBAC) tasarladım ve herkese açık
 verilerle özel veriler arasında net bir sınır çizdim. İçerik akışı için ölçeklenebilir sayfalama

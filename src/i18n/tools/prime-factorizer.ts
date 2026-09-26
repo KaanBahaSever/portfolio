@@ -206,7 +206,7 @@ const tr: PrimeFactorizerMessages = {
     label: 'Tam sayı',
     hint: (maxDigits) =>
       `En fazla ${trNumber(maxDigits)} basamak. Boşluk, alt çizgi, binlik ayırıcı ve eksi işareti kullanabilirsiniz.`,
-    placeholder: 'ör. 360',
+    placeholder: 'örneğin 360',
     submit: 'Çarpanlara ayır',
     cancel: 'İptal',
     preview: (value, digits) => `= ${value} · ${trNumber(digits)} basamak`,

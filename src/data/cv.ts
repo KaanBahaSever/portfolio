@@ -12,7 +12,8 @@
  * (tests/cv-data.test.ts checks it). English uses British spelling, like the site. Turkish is
  * written natively and plainly, in short first-person sentences like the Turkish résumé
  * bullets, with ’ before suffixes on names and numbers ("2024’ten", "crowd.inc’te") and the
- * site's Turkish terms (CI/CD süreçleri, boru hattı, canlıda, lineer cebir, Amiral Battı, XOX).
+ * site's Turkish terms (CI/CD süreçleri, GitHub Actions iş akışları, runner, yayıncı/abone (pub/sub),
+ * gömülü yazılım, veri tabanı, canlıda, lineer cebir, Amiral Battı, XOX).
  *
  * Pure module (types only from config.ts), so the build script and tests import it with plain Node.
  */
@@ -108,7 +109,7 @@ const tr: CvContent = {
   // off (TDK), as on the home page and in the console. "crowd.inc’te", as on the home page: the
   // name is read "kraud ink". "CI/CD süreçleri", the owner's own term in the skills list.
   summary:
-    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajanları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD süreçlerini de kuruyorum. 2021–2024 arasında crowd.inc’te bir web platformunun geliştirme sürecini baştan sona yürüttüm: veritabanı şemasından Linux sunucularına kadar.',
+    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajan yazılımları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD süreçlerini de kuruyorum. 2021–2024 arasında crowd.inc’te bir web platformunun geliştirme sürecini baştan sona yürüttüm: veri tabanı şemasından Linux sunucularına kadar.',
 
   projects: [
     {
@@ -117,10 +118,12 @@ const tr: CvContent = {
       url: 'https://asion.app',
       period: '2024’ten beri · geliştiriliyor, erken erişimde',
       stack: ['C/C++', 'Objective-C', 'Go', 'gRPC'],
-      // "Barındırılabilecek" (future), as on the Asion page: "built with self-hosting in mind"
-      // is a design goal of a product in early access, not a finished feature. "Boru hatları" for
-      // the pipelines, as on the Asion page: "süreçler" here are the processes that talk over gRPC.
-      text: 'Bireyler ve ekipler için, akademik zaman takibine de uygun bir üretkenlik aracı. İş istasyonundaki etkinliği takip ediyor; gizliliği ön planda tutuyor, farklı platformlarda çalışıyor ve kendi sunucunuzda barındırılabilecek şekilde tasarlanıyor. macOS, Linux ve Windows’ta işletim sisteminin yerel olay kancalarını (OS event hooks) kullanıyor. Mimarisi hafif bir daemon’a dayanıyor; süreçler gRPC/Protobuf ile haberleşiyor, veriler şifreli bir SQLCipher veritabanında tutuluyor. Çok platformlu GitHub Actions boru hatlarını çapraz derleme runner’larıyla ben kurdum: test, paketleme, derleme çıktısı üretme ve dağıtım tek tıkla yapılıyor.',
+      // The site's description of Asion ("gizliliği ön planda tutan bir üretkenlik ve bilgisayar
+      // etkinliği takip aracı"). "Tasarlanıyor" (ongoing): "built with self-hosting in mind" is a
+      // design goal of a product in early access, not a finished feature; "kullanıcıların" rather
+      // than "sizin", since a CV does not address its reader. "GitHub Actions iş akışları" for the
+      // pipelines, as on the Asion page: "süreçler" here are the processes that talk over gRPC.
+      text: 'Bireyler ve ekipler için, gizliliği ön planda tutan bir üretkenlik ve bilgisayar etkinliği takip aracı; akademik zaman takibine de uygun. Farklı platformlarda çalışıyor ve kullanıcıların kendi sunucularına kurabileceği şekilde tasarlanıyor. macOS, Linux ve Windows’ta işletim sisteminin yerel olay kancalarını (OS event hooks) kullanıyor. Mimarisi hafif bir daemon’a dayanıyor; süreçler gRPC/Protobuf ile haberleşiyor, veriler şifreli bir SQLCipher veri tabanında tutuluyor. Çapraz derleme yapan runner’larla çalışan çok platformlu GitHub Actions iş akışlarını da ben kurdum: test, paketleme, derleme çıktısı üretme ve dağıtım tek tıkla yapılıyor.',
     },
     {
       name: 'Novacast',
@@ -128,8 +131,8 @@ const tr: CvContent = {
       url: 'https://novacast.app',
       period: '2025’ten beri · canlıda',
       stack: ['Go', 'MQTT'],
-      // "Boru hatları", the Turkish term for pipelines, as on the Novacast page.
-      text: 'Gerçek zamanlı mesaj yayını ve cihaz orkestrasyonu için bir platform; düşük gecikmeli pub/sub boru hatları üzerine kurulu. Çalıştığım bir bilgisayar firmasında, yetersiz kalan eski bir yazılımın yerine geçmesi için geliştirdim. Önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT ile bir mikroservis olarak baştan tasarladım.',
+      // "Yayıncı/abone (pub/sub) modeli", as on the Novacast page and in the About figure.
+      text: 'Gerçek zamanlı mesaj yayını ve cihaz yönetimi için bir platform; düşük gecikmeli bir yayıncı/abone (pub/sub) modeli üzerine kurulu. Çalıştığım bir bilgisayar firmasında, yetersiz kalan eski bir yazılımın yerine geçmesi için geliştirdim. Önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT ile bir mikroservis olarak baştan tasarladım.',
     },
     {
       name: 'Karecik',
@@ -146,7 +149,7 @@ const tr: CvContent = {
       period: '2023’ten beri · canlıda · açık kaynak',
       stack: ['Quarto', 'Markdown', 'Python'],
       // Passive, as in the English: "launched", "was announced".
-      text: 'Lisans düzeyindeki matematik için Türkçe bir akademik yayın platformu ve modern bir ders kitabı girişimi; yeniden üretilebilir sayısal hesaplamalar da içeriyor. Fikri 2023’te doğdu. Platform Haziran 2026’da yayına girdi, açık kaynak sürümü de Eylül 2026’da duyuruldu.',
+      text: 'Lisans düzeyindeki matematik için Türkçe bir akademik yayın platformu ve modern bir ders kitabı girişimi; yeniden üretilebilir sayısal hesaplamalar da içeriyor. Proje fikri 2023’te doğdu. Platform Haziran 2026’da yayına girdi, açık kaynak sürümü de Eylül 2026’da duyuruldu.',
     },
   ],
 

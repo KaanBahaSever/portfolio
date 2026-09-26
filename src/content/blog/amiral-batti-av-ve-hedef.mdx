@@ -1,6 +1,6 @@
 ---
 title: 'Amiral Battı: Bilgisayar Gemilerinizi Nasıl Buluyor?'
-description: Amiral Battı’da bilgisayar gemilerinizi nasıl buluyor? Av ve hedef algoritmasını ve arkasındaki sade matematiği, oyunun kendi koduyla çizilmiş şekillerle adım adım anlatıyorum.
+description: Av ve hedef algoritmasını ve arkasındaki sade matematiği, oyunun kendi koduyla çizilmiş şekillerle adım adım anlatıyorum.
 pubDate: 2026-09-26
 lang: tr
 translationKey: battleship-hunt-target
@@ -114,7 +114,7 @@ Bu kadar çok filoyu tek tek gözden geçiren bir oyuncu yok; ne insan ne progra
 
 Bir oyunun kaç atış sürdüğüne $T$ diyelim. $T$ her oyunda başka çıkar: Bazen şans yüzünüze güler, bazen son gemi hücresi en sona kalır. Bu yüzden tek bir oyunu değil, çok sayıda oyunun ortalamasını soruyoruz. Sayısız oyun oynayıp $T$ değerlerinin ortalamasını alsaydık, bu ortalama belli bir sayıya otururdu. Bu sayıya $T$’nin *beklenen değeri* denir ve $\mathbb{E}[T]$ diye yazılır (E harfi, İngilizcede “beklenen” anlamına gelen *expected* kelimesinden geliyor).
 
-Bu sayıyı neden hesaplıyoruz? İki sebebi var. Birincisi, akıllı seviyeleri bu sayıyla kıyaslayacağız. İkincisi, yazının sonundaki simülasyonu denetlemek için: Bilgisayarda oynattığımız Kolay oyunların ortalaması, formülün verdiği sayıya çok yakın çıkmalı. Çıkıyor da: simülasyonda {n.mean.random} atış, formülde {n.random.expected} atış.
+Bu sayıyı neden hesaplıyoruz? İki sebebi var. Birincisi, akıllı seviyeleri bu sayıyla kıyaslayacağız. İkincisi, yazının sonundaki simülasyonu bu sayıyla denetleyeceğiz: Bilgisayarda oynattığımız Kolay oyunların ortalaması, formülün verdiği sayıya çok yakın çıkmalı. Çıkıyor da: simülasyonda {n.mean.random} atış, formülde {n.random.expected} atış.
 
 Şimdi hesaplayalım. Şöyle düşünün: Elinizde 100 kartlık bir deste var; kartların {n.shipCells} tanesi kırmızı (gemi hücreleri), geri kalan 83 tanesi siyah (boş su). Rastgele ateş etmek, desteyi iyice karıştırıp kartları sırayla açmak gibi. Oyun, son kırmızı kart açıldığı anda biter.
 
@@ -174,7 +174,7 @@ Bunu gerçek bir oyunda izlemek, anlatmaktan daha kolay. Aşağıda Normal seviy
 
 Bu oyunda desen {n.replay.saved} atış kazandırdı ({n.replay.noParity.shots} yerine {n.replay.parity.shots}) ve farkın çoğu av atışlarından geliyor: av atışları {n.replay.noParity.hunt} yerine {n.replay.parity.hunt}, hedef atışları {n.replay.noParity.target} yerine {n.replay.parity.target}.
 
-Tek bir oyun şansa bağlı olabilir, ama {n.games} oyunun ortalaması da aynı şeyi söylüyor. Yazının sonundaki simülasyonda desen, oyun başına ortalama {n.saved.parity} atış kazandırıyor: Av ve hedef desensiz ortalama {n.mean['no-parity']} atış, desenle {n.mean.parity} atış sürüyor. Desen taranacak hücreleri yarıya indiriyor ama oyun yarıya inmekten çok uzak: Desenden yalnızca av atışları yararlanıyor, onlar da yarıya inmiyor; gemileri bitiren atışlar ise iki durumda da aşağı yukarı aynı. Desen en kötü durumu da iyileştiriyor: {n.games} oyunun en uzunu desenle {n.worst.parity}, desensiz {n.worst['no-parity']} atış sürdü.
+Tek bir oyun şansa bağlı olabilir, ama {n.games} oyunun ortalaması da aynı şeyi söylüyor. Yazının sonundaki simülasyonda desen, oyun başına ortalama {n.saved.parity} atış kazandırıyor: Av ve hedef desensiz ortalama {n.mean['no-parity']} atış, desenle {n.mean.parity} atış sürüyor. Desen taranacak hücreleri yarıya indiriyor ama oyunu yarıya indirmekten çok uzak: Desenden yalnızca av atışları yararlanıyor, onlar da yarıya inmiyor; gemileri bitiren atışlar ise iki durumda da aşağı yukarı aynı. Desen en kötü durumu da iyileştiriyor: {n.games} oyunun en uzunu desenle {n.worst.parity}, desensiz {n.worst['no-parity']} atış sürdü.
 
 ### Durum makinesi
 
@@ -238,7 +238,7 @@ Denemeye değer iki şey var. İki isabeti yan yana koyun ve tepenin çizginin i
 
 ### Sayımın atladıkları
 
-Yoğunluk her gemiyi tek başına düşünür; bu yüzden hiçbir filoda bir arada olamayacak konumları da sayar, örneğin aynı hücrelerde duran bir uçak gemisiyle bir zırhlıyı. Kesin yanıt için, şimdiye kadarki atışlarla çelişmeyen her filoyu tek tek tartmak gerekirdi; ilk atıştan önce bunlar {n.fleets} tane. Üstelik bu bile ancak rakip gemilerini tamamen rastgele yerleştiriyorsa doğru olurdu. Tutarlı filolardan rastgele örnekler çekmek doğal bir sonraki adım olurdu. Gemi başına sayım ise ucuz, anlaşılır ve bir sonraki bölümün gösterdiği gibi şimdiden işe yarıyor. (Bilgisayarın nasıl düşündüğünü bilen biri, gemilerini yoğunluğun en son taradığı kenarlara saklayabilir.)
+Yoğunluk her gemiyi tek başına düşünür; bu yüzden hiçbir filoda bir arada olamayacak konumları da sayar, örneğin aynı hücrelerde duran bir uçak gemisiyle bir zırhlıyı. Kesin yanıt için, şimdiye kadarki atışlarla çelişmeyen her filoyu tek tek tartmak gerekirdi; ilk atıştan önce bunlar {n.fleets} tane. Üstelik bu bile ancak rakip gemilerini tamamen rastgele yerleştiriyorsa doğru olurdu. Bundan sonraki doğal adım, tutarlı filolar arasından rastgele örnekler seçmek olurdu. Gemi başına sayım ise ucuz, anlaşılır ve bir sonraki bölümün gösterdiği gibi şimdiden işe yarıyor. (Bilgisayarın nasıl düşündüğünü bilen biri, gemilerini yoğunluğun en son taradığı kenarlara saklayabilir.)
 
 ## Kaç atış?
 

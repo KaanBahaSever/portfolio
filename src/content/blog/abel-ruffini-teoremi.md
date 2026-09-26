@@ -203,7 +203,7 @@ $$
 S_4 \;\triangleright\; A_4 \;\triangleright\; V_4 \;\triangleright\; C_2 \;\triangleright\; \{e\}.
 $$
 
-Grupların eleman sayıları sırasıyla $24, 12, 4, 2, 1$; bölüm grupları ise $C_2, C_3, C_2, C_2$. Burada $C_2 = \{e, (1\,2)(3\,4)\}$ alıyoruz. Bu grup $V_4$ içinde normal ama $S_4$ içinde değil; bunda sakınca yok, çünkü altnormal seri her grubun yalnızca bir üstündeki grup içinde normal olmasını ister. Bu merdiven, Ferrari yönteminin ta kendisi. İlk iki basamak, çözücü kübiği bir karekök ve bir küpkökle çözer (bu kübiğin köklerini tam olarak $V_4$ yerinde bırakır). Son iki basamak da karekök: $s = \sqrt{2y - p}$ denklemi iki ikinci dereceden denkleme ayırır, ikinci dereceden denklemin kök formülü de işi bitirir.
+Grupların eleman sayıları sırasıyla $24, 12, 4, 2, 1$; bölüm grupları ise $C_2, C_3, C_2, C_2$. Burada $C_2 = \{e, (1\,2)(3\,4)\}$ alıyoruz. Bu grup $V_4$ içinde normal ama $S_4$ içinde değil; bunda sakınca yok, çünkü altnormal seri her grubun yalnızca bir üstündeki grup içinde normal olmasını ister. Bu merdiven, Ferrari yönteminin ta kendisi. İlk iki basamak, çözücü kübiği bir karekök ve bir küpkökle çözer (bu kübiğin köklerini tam olarak $V_4$ yerinde bırakır). Son iki basamak da karekök: $s = \sqrt{2y - p}$ karekökü dördüncü dereceden denklemi iki ikinci dereceden denkleme ayırır, ikinci dereceden denklemin kök formülü de işi bitirir.
 
 ## Beşte kırılan merdiven: 60 elemanlı basit bir grup
 

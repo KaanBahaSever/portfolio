@@ -193,9 +193,9 @@ const tr: AboutMessages = {
     location: 'Yaşadığım yer',
     study: 'Eğitim',
     studyValue: 'Matematik lisansı, İstanbul Üniversitesi',
-    languages: 'Her gün kullandığım',
+    languages: 'Her gün kullandığım diller',
     languagesValue: 'Modern C++ ve Go',
-    building: 'Şu an geliştirdiğim',
+    building: 'Şu an geliştirdiğim proje',
   },
   journey: {
     title: 'Bugüne nasıl geldim',
@@ -216,7 +216,7 @@ const tr: AboutMessages = {
       },
       algorithms: {
         short: 'Temeller',
-        label: 'C# · MSSQL',
+        label: 'C# · MS SQL',
         title: 'Programlamanın temelleri',
         // "Hücre" and "ıska", as the Battleship game itself says.
         caption:
@@ -300,8 +300,8 @@ const tr: AboutMessages = {
   },
   resume: {
     title: 'Özgeçmiş',
-    // "becerilerimi" contains the home page's skills heading ("Beceriler") this sentence points to.
-    text: 'Deneyimimi, eğitimimi ve becerilerimi ana sayfada özetledim.',
+    // "yetkinliklerimi" contains the home page's skills heading ("Yetkinlikler") this sentence points to.
+    text: 'Deneyimimi, eğitimimi ve yetkinliklerimi ana sayfada özetledim.',
     experienceLink: 'Ana sayfadaki deneyim bölümü',
     cvFormat: '(PDF)',
   },

@@ -134,7 +134,7 @@ const tr: HomeMessages = {
   hero: {
     // Short sentences, one idea each. "crowd.inc’te": the name is read "kraud ink", so -te.
     intro:
-      'İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Geliştirdiğim şeylerin çoğunda da bu matematiği kullanıyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun oynayan algoritmalar. Her gün modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te üç yıla yakın yazılım geliştirici olarak çalıştım. Canlıda çalışan bir web platformunun her şeyinden ben sorumluydum: PostgreSQL şemasından Linux sunucularına kadar.',
+      'İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Geliştirdiğim şeylerin çoğunda da öğrendiğim matematiği kullanıyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun oynayan algoritmalar. Her gün modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te üç yıla yakın yazılım geliştirici olarak çalıştım. Canlıda çalışan bir web platformunun her şeyinden ben sorumluydum: PostgreSQL şemasından Linux sunucularına kadar.',
     selectedWork: 'Seçili işler',
     // The button downloads the Turkish CV; the English one is a small link beside it.
     cvFormat: 'PDF',
@@ -165,7 +165,7 @@ const tr: HomeMessages = {
         title: 'Algoritma temelleri',
         meta: '2016 – 2019 · C# · MS SQL',
         // The site's name for the algorithm, with the English one a reader can search for.
-        text: 'Her şey 2016’da meslek lisesinde C# ile başladı. Önce veri yapıları ve algoritmik problem çözme üzerinde çalıştım, ardından MS SQL ile veritabanı uygulamaları geliştirdim. Bitirme projelerim masaüstü XOX ile çocukken babamla oynadığım Amiral Battı oldu. Amiral Battı’nın av ve hedef (hunt & target) algoritmasını ise sonradan yazdım.',
+        text: 'Her şey 2016’da meslek lisesinde C# ile başladı. Önce veri yapıları ve algoritmik problem çözme üzerinde çalıştım, ardından MS SQL ile veri tabanı uygulamaları geliştirdim. Bitirme projelerim iki masaüstü oyunuydu: XOX ve çocukken babamla oynadığım Amiral Battı. Amiral Battı’daki bilgisayar rakibin av ve hedef (hunt & target) algoritmasını ise sonradan yazdım.',
       },
       avionics: {
         title: 'Roket aviyoniği',
@@ -181,7 +181,7 @@ const tr: HomeMessages = {
       simulation: {
         title: 'Uçuş fiziği simülasyonu',
         meta: '2020 prototipi · şimdi C++',
-        text: 'Bu, gelişmeye devam eden tek bir proje. 2020’de Python ile dar kapsamlı bir prototip yazmıştım. Şimdi onu modern C++ ile baştan yazıyorum. Yeni adı Rocket-Up: açık kaynaklı bir aerodinamik simülasyon motoru.',
+        text: 'Bu, gelişmeye devam eden tek bir proje. 2020’de Python ile dar kapsamlı bir prototip yazmıştım. Şimdi onu modern C++ ile baştan yazıyorum. Yeni adı Rocket-Up: açık kaynak bir aerodinamik simülasyon motoru.',
       },
     },
   },
@@ -202,7 +202,8 @@ const tr: HomeMessages = {
     title: 'Özgeçmiş',
     education: 'Eğitim',
     activities: 'Gönüllülük ve etkinlikler',
-    skills: 'Beceriler',
+    // The CV's word for the same list (src/i18n/messages/cv.ts).
+    skills: 'Yetkinlikler',
     languages: 'Diller',
     certificate: 'Sertifika',
     degree: (degree, field) => `${field} (${degree})`,

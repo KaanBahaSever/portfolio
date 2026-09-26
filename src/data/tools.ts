@@ -18,7 +18,7 @@ export const TOOLS: readonly ToolInfo[] = [
     title: { en: 'Images to PDF', tr: 'Görsellerden PDF' },
     description: {
       en: 'Combine photos, scans and screenshots into one PDF: reorder the pages, pick a page size and margins, and keep JPEGs at their original quality.',
-      tr: 'Fotoğrafları, taramaları ve ekran görüntülerini tek bir PDF’te birleştirin. Sayfaları sıralayın, sayfa boyutunu ve kenar boşluklarını seçin. JPEG’ler orijinal kalitesinde kalır.',
+      tr: 'Fotoğrafları, taramaları ve ekran görüntülerini tek bir PDF’de birleştirin. Sayfaları sıralayın, sayfa boyutunu ve kenar boşluklarını seçin. İsterseniz JPEG’leri orijinal kalitesinde bırakın.',
     },
     status: 'ready',
     href: '/tools/images-to-pdf/',
@@ -28,7 +28,7 @@ export const TOOLS: readonly ToolInfo[] = [
     title: { en: 'Notepad', tr: 'Not defteri' },
     description: {
       en: 'A distraction-free plain-text editor with zen mode, autosave in your browser, find & replace with regular expressions, and live line and word counts.',
-      tr: 'Dikkatinizi dağıtmayan sade bir metin düzenleyici. Odak modu, tarayıcıda otomatik kayıt, düzenli ifadelerle bul ve değiştir, anlık satır ve kelime sayacı var.',
+      tr: 'Dikkatinizi dağıtmayan sade bir metin düzenleyici. Odak modu, tarayıcıda otomatik kayıt, düzenli ifadelerle bulup değiştirme, anlık satır ve kelime sayacı var.',
     },
     status: 'ready',
     href: '/tools/notepad/',
@@ -58,7 +58,7 @@ export const TOOLS: readonly ToolInfo[] = [
     title: { en: 'Compress PDF', tr: 'PDF sıkıştırma' },
     description: {
       en: 'Shrink a PDF by re-compressing its images and cleaning out unused objects.',
-      tr: 'PDF’teki görselleri yeniden sıkıştırıp kullanılmayan nesneleri temizleyerek dosyayı küçültün.',
+      tr: 'PDF’deki görselleri yeniden sıkıştırıp kullanılmayan nesneleri temizleyerek dosyayı küçültün.',
     },
     status: 'ready',
     href: '/tools/pdf-compress/',

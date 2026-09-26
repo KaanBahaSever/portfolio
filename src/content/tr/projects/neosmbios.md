@@ -1,16 +1,16 @@
 ---
 title: NeoSMBIOS
-shortDescription: C++23 için tek başlık dosyasından oluşan, veriyi kopyalamadan çalışan bir SMBIOS/DMI ayrıştırıcısı. Firmware tablolarını WMI ya da işletim sistemi başlık dosyaları olmadan okur.
+shortDescription: C++23 için tek başlık dosyasından oluşan, veriyi kopyalamadan çalışan bir SMBIOS/DMI ayrıştırıcısı. Gömülü yazılımın sunduğu tabloları WMI ya da işletim sistemi başlık dosyaları olmadan okur.
 ---
 
 ## Nedir?
 
-NeoSMBIOS, firmware’in sunduğu SMBIOS/DMI tablolarını okur. Bu tablolarda anakart üreticisi,
+NeoSMBIOS, bilgisayarın gömülü yazılımının sunduğu SMBIOS/DMI tablolarını okur. Bu tablolarda anakart üreticisi,
 seri numaraları, BIOS sürümü, işlemci ve bellek modülleri gibi bilgiler bulunur. Kütüphane bu
 bilgileri tipi belli, sınır kontrolü yapılmış view’lar olarak döndürür. MIT Lisansı ile yayımlanan
 tek bir başlık dosyasıdır.
 
-NeoSMBIOS yalnızca veriyi çözer; firmware’in kendisine hiç dokunmaz. Ona bir
+NeoSMBIOS yalnızca veriyi çözer; gömülü yazılımın kendisine hiç dokunmaz. Ona bir
 `std::span<const std::uint8_t>` verirsiniz; baytlar Win32’den, sysfs’ten, bir bellek
 eşlemesinden ya da kaydedilmiş bir dosyadan gelebilir. Bu yüzden Windows’ta WMI bağımlılığı
 olmaz, hiçbir yerde de işletim sistemi başlık dosyası gerekmez.
@@ -25,7 +25,7 @@ olmaz, hiçbir yerde de işletim sistemi başlık dosyası gerekmez.
 - **Sürüm farklarına dayanıklı**: Her alan okunmadan önce kaydın kendi uzunluk baytıyla
   karşılaştırılır. Eski bir BIOS’tan yeni bir alan istendiğinde kaydın sonu aşılmaz;
   `std::nullopt` döner.
-- **İstisna fırlatmaz**: Ayrıştırmada `std::expected`, firmware’in vermeyebileceği alanlarda
+- **İstisna fırlatmaz**: Ayrıştırmada `std::expected`, gömülü yazılımın vermeyebileceği alanlarda
   `std::optional` kullanılır.
 - Yaygın yapı türleri için **sade bir `.get_xxx()` API’si**, tabloyu dolaşmak için de
   `std::ranges` desteği.

@@ -256,7 +256,7 @@ const tr: BinaryTextMessages = {
   },
   options: {
     heading: 'Seçenekler',
-    separator: 'Ayraç',
+    separator: 'Ayırıcı',
     separators: {
       space: 'Boşluk',
       none: 'Yok',
@@ -268,7 +268,7 @@ const tr: BinaryTextMessages = {
       character: 'Karaktere göre',
     },
     groupingHint: 'Karaktere göre gruplarsanız ASCII dışındaki bir karakterin iki, üç ya da dört baytı bir arada kalır.',
-    groupingDisabled: 'Bitleri gruplamak için bir ayraç seçin.',
+    groupingDisabled: 'Bitleri gruplamak için bir ayırıcı seçin.',
     ascii: {
       label: 'Yalnızca ASCII',
       detail: '127’den büyük, yani 7 bitlik ASCII dışında kalan her karakteri işaretler.',

@@ -45,10 +45,13 @@ const STORY: Record<Locale, RegExp> = {
   tr: /Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu/,
 };
 
-/** The algorithm still comes after the desktop game, in the same passage. */
+/**
+ * The algorithm still comes after the desktop game, in the same passage. Turkish writes the
+ * site's name for it in lower case ("av ve hedef"), capitalised only at the start of a sentence.
+ */
 const LATER: Record<Locale, RegExp> = {
   en: /Hunt &(?:amp;)? Target algorithm[^.]* came later/,
-  tr: /(?:Av ve Hedef|av ve hedef)[^.]* sonradan (?:geldi|geliştirdim)/,
+  tr: /[Aa]v ve hedef[^.]* sonradan (?:geldi|geliştirdim)/,
 };
 
 test('the About chapter tells why Battleship, in both languages', () => {

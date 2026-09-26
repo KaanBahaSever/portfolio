@@ -333,7 +333,7 @@ const tr: NotepadMessages = {
     },
     timeout: 'Arama çok uzun sürdü. Deseni sadeleştirin: (a+)+ gibi iç içe tekrarlar aramanın hiç bitmemesine yol açabilir.',
     tooLarge: 'Metin bu desenle aranamayacak kadar büyük.',
-    failed: 'Arama yapılamadı. Tekrar deneyin.',
+    failed: 'Arama yapılamadı. Yeniden deneyin.',
     typeFirst: 'Önce aranacak metni yazın',
   },
 
@@ -342,8 +342,8 @@ const tr: NotepadMessages = {
     timeout:
       'Değiştirme çok uzun sürdü, bu yüzden hiçbir şey değiştirilmedi. Deseni sadeleştirin: (a+)+ gibi iç içe tekrarlar işlemin hiç bitmemesine yol açabilir.',
     tooLarge: 'Tümü değiştirilemedi: ortaya çıkacak metin çok büyük olurdu.',
-    failed: 'Tümü değiştirilemedi. Tekrar deneyin.',
-    textChanged: 'Değiştirme sürerken metin değişti, bu yüzden hiçbir şey değiştirilmedi. Tekrar deneyin.',
+    failed: 'Tümü değiştirilemedi. Yeniden deneyin.',
+    textChanged: 'Değiştirme sürerken metin değişti, bu yüzden hiçbir şey değiştirilmedi. Yeniden deneyin.',
     replacedProblem: (problem) => `Değiştirildi. ${problem}`,
     replacedNoMore: 'Değiştirildi. Başka eşleşme yok.',
     replacedLeft: (_count, text) => `Değiştirildi. Kalan eşleşme: ${text}.`,
@@ -407,7 +407,7 @@ const tr: NotepadMessages = {
     opened: (name) => `“${name}” açıldı`,
     openedWithNote: (name, note) => `“${name}” açıldı. ${note}`,
     downloaded: (name) => `“${name}” indirildi`,
-    downloadFailed: 'Dosya oluşturulamadı. Tekrar deneyin.',
+    downloadFailed: 'Dosya oluşturulamadı. Yeniden deneyin.',
   },
 
   clear: {

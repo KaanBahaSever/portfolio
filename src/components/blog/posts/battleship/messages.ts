@@ -217,7 +217,7 @@ const en = {
 export type BattleshipPostMessages = typeof en;
 
 const tr: BattleshipPostMessages = {
-  cellState: { unknown: 'atış yapılmadı', miss: 'ıska', hit: 'isabet', sunk: 'battı' },
+  cellState: { unknown: 'henüz ateş edilmedi', miss: 'ıska', hit: 'isabet', sunk: 'battı' },
   ships: {
     carrier: 'Uçak gemisi',
     battleship: 'Zırhlı',

@@ -79,7 +79,7 @@ const tr: ProjectsMessages = {
       'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik, yüksek güçlü bir roket simülasyonu ve açık kaynak C++ kütüphaneleri. Her birinin nasıl yapıldığını anlatan notlar da var.',
     // Same wording as the home page's "Selected work" link and section that lead here.
     eyebrow: 'Seçili işler',
-    lead: 'Geliştirdiğim projeler burada: C++ ile yazdığım yerel daemon’lardan Go servislerine, açık kaynak matematik notlarına kadar. Her sayfada bir projenin ne yaptığını ve nasıl kurulduğunu anlatıyorum.',
+    lead: 'Geliştirdiğim projeler burada: C++ ile yazdığım yerel daemon’lardan Go servislerine, açık kaynak matematik notlarına kadar. Her sayfada bir projenin ne işe yaradığını ve nasıl yapıldığını anlatıyorum.',
     summary: (total, openSource) => `${total} proje · ${openSource} açık kaynak`,
     featured: 'Öne çıkanlar',
     more: 'Diğer projeler',
@@ -116,7 +116,7 @@ const tr: ProjectsMessages = {
   figures: {
     asion: 'Zaman ekseninde pencere oturumları: Hangi pencere ne kadar süre etkin kaldı?',
     novacast:
-      'Publish/subscribe dağıtımı: Gönderilen tek bir mesaj, broker üzerinden abone olan her cihaza ulaşır.',
+      'Yayıncı/abone (pub/sub) dağıtımı: Gönderilen tek bir mesaj, broker üzerinden abone olan her cihaza ulaşır.',
     karecik: 'QR koddan menüye: Kod okutulunca işletmenin menüsü müşterinin telefonunda açılır.',
     'acik-matematik': 'Birinci sınıf analiz dersinden bir sayfa: eğrinin altında bir Riemann toplamı ve bir teğet doğrusu.',
     neosmbios: 'Bir SMBIOS kaydı: Hiçbir alan, kaydın kendi uzunluk baytıyla karşılaştırılmadan okunmaz.',

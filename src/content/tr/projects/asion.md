@@ -1,6 +1,6 @@
 ---
 title: Asion
-shortDescription: macOS, Linux ve Windows için gizliliği ön planda tutan bir üretkenlik ve bilgisayar etkinliği takip aracı. İşletim sisteminin olay kancalarıyla ve hafif bir daemon ile çalışır; kendi sunucunuzda barındırılmaya uygundur.
+shortDescription: macOS, Linux ve Windows için gizliliği ön planda tutan bir üretkenlik ve bilgisayar etkinliği takip aracı. İşletim sisteminin olay kancaları ve hafif bir daemon ile çalışıyor; kendi sunucunuza kurulmak üzere tasarlandı.
 ---
 
 ## Nedir?
@@ -10,9 +10,9 @@ O an hangi uygulamanın ve hangi pencerenin etkin olduğunu kaydediyor, bu ham v
 gerçekte nereye gittiğini gösteren bir tablo çıkarıyor. Rize.io gibi araçlar böyle bir tablonun
 ne kadar işe yarayabileceğini gösterdi. Asion ise şu düşünceden yola çıkıyor: Bu kadar kişisel
 bir veri, sahibinin elinde kalmalı. Bu yüzden onu gizliliği ön planda tutarak ve kendi
-sunucunuzda barındırılabilecek şekilde tasarladım.
+sunucunuza kurabileceğiniz şekilde tasarladım.
 
-Asion kimin için? İş gününün dürüst bir kaydını tutmak isteyenler ve yazılım ekipleri için.
+Asion kimin için? İş gününü olduğu gibi kaydetmek isteyenler ve yazılım ekipleri için.
 Akademik zaman takibi de hedeflerden biri: Araştırmacılar ve öğrenciler, bir projeye kaç saat
 harcadıklarını kaydedebilir. 2024’ten beri üzerinde çalışıyorum. Asion hâlâ
 geliştiriliyor; erken erişim [asion.app](https://asion.app) üzerinden açık. Kaynak kodu kapalı.
@@ -37,7 +37,7 @@ Asion, her biri tek bir iş yapan birkaç süreçten oluşur:
 
 Bileşenler birbiriyle **gRPC** üzerinden, **Protobuf** mesajlarıyla konuşur. Mesajların yapısı
 ve alan tipleri önceden tanımlı olduğu için süreçler arasındaki iletişim verimli kalır, her
-sürecin sınırı da net olur. Veriler bilgisayarda, şifreli bir **SQLCipher** veritabanında
+sürecin sınırı da net olur. Veriler bilgisayarda, şifreli bir **SQLCipher** veri tabanında
 saklanır. Anahtarı olmayan biri diskteki kaydı okuyamaz.
 
 ## Tarayıcıyla bağlantı
@@ -52,13 +52,12 @@ bir ağ servisi olmadan mesajlaşır.
 
 Üç işletim sisteminde platforma özel parçaları olan bir yazılım, her değişiklikte bu sistemlerin
 her birinde yeniden derlenmeli, test edilmeli ve paketlenmeli. Bu yüzden Asion ekosistemi için
-**GitHub Actions** üzerinde çok platformlu CI/CD pipeline’ları kurdum:
+**GitHub Actions** üzerinde çok platformlu CI/CD iş akışları kurdum:
 
-- **Çok platformlu iş akışları**: Çapraz derleme yapan runner’lar her platformun yerel
-  derlemesini üretir.
+- **Çapraz derleme**: Runner’lar her platform için yerel derlemeyi üretir.
 - **Özel otomasyon betikleri**: Bash, Batch ve Python ile yazılan bu betikler adımları
   birbirine bağlar.
-- **Tek tıkla test ve paketleme**: Tek bir tıkla testler çalışır, bileşenler paketlenir ve her
-  platform için derleme çıktıları üretilir.
-- **Dağıtım pipeline’ları**: Çok platformlu derleme çıktılarını alır ve yeni bir sürüm olarak
+- **Tek tıkla test ve paketleme**: Testler çalışır, bileşenler paketlenir ve her platform için
+  derleme çıktıları üretilir.
+- **Dağıtım iş akışları**: Her platformun derleme çıktılarını alır ve yeni bir sürüm olarak
   yayımlar.

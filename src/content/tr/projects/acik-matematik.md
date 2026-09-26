@@ -7,9 +7,9 @@ shortDescription: Lisans düzeyindeki matematik dersleri için Türkçe, açık 
 
 Açık Matematik, lisans düzeyindeki matematik dersleri için Türkçe, açık kaynak bir dijital
 yayın platformu ve modern bir ders kitabı girişimi. Türkçe ders materyalleri çoğu zaman
-dağınık, el yazısı ya da okunması zor. Proje bu materyalleri herkesin ulaşabileceği tek bir
-kütüphanede topluyor: özenli bir dizgiyle hazırlanmış notlar, titizlikle yazılmış belgeler,
-reklamsız sayfalar ve tamamen açık kaynak kod.
+dağınık, el yazısıyla hazırlanmış ya da okunması zor. Proje bu materyalleri herkesin
+ulaşabileceği tek bir kütüphanede topluyor. Notlar özenli bir dizgiyle hazırlanıyor, belgeler
+titizlikle yazılıyor. Sayfalarda reklam yok, kaynak kodun tamamı da açık.
 
 ## Nasıl başladı?
 

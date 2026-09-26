@@ -236,7 +236,7 @@ const tr: PdfSplitMessages = {
     labelRanges: 'Sayfa aralıkları',
     hintExtract: 'İstediğiniz sırayla yazın, örneğin 1-3, 5, 8- (8- yazarsanız 8. sayfadan sona kadar alınır).',
     hintRanges: 'Her aralık ayrı bir PDF olur, örneğin 1-4, 5-8, 9-son.',
-    placeholder: 'örn. 1-3, 5, 8-',
+    placeholder: 'örneğin 1-3, 5, 8-',
     prompt: 'Sayfaları seçin ya da yukarıdaki alana yazın.',
   },
   every: {
@@ -293,7 +293,7 @@ const tr: PdfSplitMessages = {
         if (pages === 1) return `1 dosya oluşturulacak: ${items[0]}. sayfa`;
         return `${pagesTr(pages)}lık 1 dosya oluşturulacak: ${list}${more > 0 ? ` ve ${ft.number(more)} aralık daha` : ''}`;
       }
-      return `${ft.number(files)} dosya oluşturulacak. Sayfalar: ${list}${more > 0 ? ` ve ${ft.number(more)} dosya daha` : ''}`;
+      return `${ft.number(files)} dosya oluşturulacak. Sayfalar: ${list}${more > 0 ? ` (ve ${ft.number(more)} dosya daha)` : ''}`;
     },
   },
   actions: {
@@ -337,7 +337,7 @@ const tr: PdfSplitMessages = {
     notPdf: (name) => `“${name}” bir PDF değil. Bir PDF dosyası seçin.`,
     noPages: (name) => `“${name}” içinde hiç sayfa yok.`,
     password:
-      'Bu PDF parolayla korunuyor ya da düzenlemeye kapalı, bu yüzden burada bölünemiyor. Önce korumasız bir kopyasını kaydedin (örneğin Yazdır → PDF olarak kaydet), sonra tekrar deneyin.',
+      'Bu PDF parolayla korunuyor ya da düzenlemeye kapalı, bu yüzden burada bölünemiyor. Önce korumasız bir kopyasını kaydedin (örneğin Yazdır → PDF olarak kaydet), sonra yeniden deneyin.',
     splitFailed: 'PDF bölünürken bir sorun oluştu. Dosya bozuk olabilir.',
     zip: (code, count, limit) =>
       code === 'too-many-entries'

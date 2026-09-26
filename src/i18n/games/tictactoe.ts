@@ -134,7 +134,7 @@ const tr: TicTacToeMessages = {
     'Her boş karede, sıradaki oyuncu oraya oynarsa alacağı minimax puanı görünür; iki tarafın da bundan sonra kusursuz oynadığı varsayılır. +9 hemen kazanmak, daha küçük artı puanlar daha geç kazanmak, 0 beraberlik, eksi puanlar kaybetmek demektir.',
   evaluationFor: (mark) => `${mark} için puanlar`,
   evaluation: (score, result) =>
-    `puan ${score}, ${result === 'win' ? 'kazandırır' : result === 'loss' ? 'kaybettirir' : 'berabere'}`,
+    `puan ${score}, ${result === 'win' ? 'kazandırır' : result === 'loss' ? 'kaybettirir' : 'berabere bitirir'}`,
   newRound: 'Yeni tur',
   resetScore: 'Skoru sıfırla',
   score: 'Skor',

@@ -243,7 +243,7 @@ const tr: ConsoleContent = {
     text(dim('Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar · İstanbul')),
     blank(),
     text(
-      'Sistem yazılımı geliştiriyorum; temelim saf matematik. İstanbul Üniversitesinde matematik okuyorum. Günlük işimde modern C++ ve Go kullanıyorum; sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar yazıyorum. Kodu tek tıkla test eden, paketleyen ve farklı platformlar için derleyip yayına alan pipeline’lar da kuruyorum.',
+      'Sistem yazılımı geliştiriyorum; temelim saf matematik. İstanbul Üniversitesinde matematik okuyorum. Günlük işimde modern C++ ve Go kullanıyorum; sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar yazıyorum. Kodu tek tıkla test eden, paketleyen ve farklı platformlar için derleyip yayına alan CI/CD süreçleri de kuruyorum.',
     ),
     blank(),
     text(
@@ -275,7 +275,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Bugün de özellikle Asion ekosistemi için GitHub Actions ile pipeline’lar kuruyorum. Çapraz derleme runner’larıyla çalışan bu pipeline’lar tek tıkla kodu test ediyor, paketliyor, farklı platformlar için derleme çıktıları üretiyor ve dağıtım yapıyor. Devamı: ',
+      'Bugün de özellikle Asion ekosistemi için GitHub Actions ile CI/CD süreçleri kuruyorum. Çapraz derleme runner’larıyla çalışan bu süreçler kodu tek tıkla test ediyor, paketliyor, farklı platformlar için derleme çıktıları üretiyor ve dağıtıyor. Devamı: ',
       run('cat ~/skills/devops.txt'),
     ),
     blank(),
@@ -297,7 +297,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Roket uçuş simülasyonu, gelişmeye devam eden tek bir proje. 2020’de belirli bir iş için Python’la dar kapsamlı bir prototip yazmıştım. Şimdi onu Rocket-Up adıyla modern C++’la baştan yazıyorum. Rocket-Up, mimarisi daha temiz, performansı daha yüksek, açık kaynaklı bir aerodinamik simülasyon motoru. Proje sayfası: ',
+      'Roket uçuş simülasyonu, gelişmeye devam eden tek bir proje. 2020’de belirli bir iş için Python’la dar kapsamlı bir prototip yazmıştım. Şimdi onu Rocket-Up adıyla modern C++’la baştan yazıyorum. Rocket-Up, mimarisi daha temiz, performansı daha yüksek, açık kaynak bir aerodinamik simülasyon motoru. Proje sayfası: ',
       link('rocket-up', '/projects/rocket-up/'),
       '.',
     ),
@@ -305,7 +305,7 @@ const tr: ConsoleContent = {
     heading('Her şey nasıl başladı'),
     indented(
       2,
-      'Önce uzay vardı. Kod yazmaya başlamadan önce de uzay keşfi, uzay aracı mimarileri, Ay görevlerinin analizi ve kuramsal görev planlaması uzun süredir ilgimi çekiyordu.',
+      'Önce uzay vardı. Daha kod yazmaya başlamadan uzay keşfi, uzay aracı mimarileri, Ay görevlerinin analizi ve kuramsal görev planlaması uzun süredir ilgimi çekiyordu.',
     ),
     indented(
       2,
@@ -321,7 +321,7 @@ const tr: ConsoleContent = {
     heading('Diğer'),
     indented(
       2,
-      'Google Developer Student Clubs çekirdek ekibi, 2023. Flask, HTML ve Git/GitHub üzerine atölyeler ve canlı yayınlar sundum. Siber Güvenlik Haftası etkinliğini düzenledim; programda CCIE sertifikalı bir ağ güvenliği mühendisiyle canlı yayında teknik bir söyleşi de vardı.',
+      'Google Developer Student Clubs çekirdek ekibi, 2023. Flask, HTML ve Git/GitHub üzerine atölyeler ve canlı yayınlar yaptım. Siber Güvenlik Haftası etkinliğini düzenledim; programda CCIE sertifikalı bir ağ güvenliği mühendisiyle canlı yayında teknik bir söyleşi de vardı.',
     ),
     indented(
       2,
@@ -338,7 +338,7 @@ const tr: ConsoleContent = {
       blank(),
       pair('C++', 'modern C++, günlük işlerimde: sistem araçları, NeoSMBIOS (C++23), i18n-cpp, Rocket-Up simülasyon motoru'),
       pair('Go', 'günlük işlerimde: Karecik, Novacast ve Asion’un bazı parçaları'),
-      pair('C', 'Asion’un native katmanı'),
+      pair('C', 'Asion’un platforma özel katmanı'),
       pair('Objective-C', 'Asion’un macOS tarafı'),
       pair('Python', 'crowd.inc’te Flask API’leri; 2020’deki uçuş simülasyonu prototipi; paraşüt güdümü araştırması; derleme betikleri'),
       pair('C#', 'her şeyin başladığı dil (2016): veri yapıları, algoritmalar, masaüstü XOX ve Amiral Battı'),
@@ -350,7 +350,7 @@ const tr: ConsoleContent = {
       heading('Sistemler ve protokoller'),
       blank(),
       pair('gRPC, Protobuf', 'Asion’da ajan, runner, arayüz ve native host arasındaki iletişim'),
-      pair('MQTT', 'Novacast’ın düşük gecikmeli pub/sub hatları'),
+      pair('MQTT', 'Novacast’in düşük gecikmeli yayıncı/abone (pub/sub) modeli'),
       pair('OS event hooks', 'Asion’un macOS, Linux ve Windows’taki etkinlik takibi; arkada hafif bir daemon çalışır'),
       pair('Linux sunucular', 'crowd.inc’te sunucu kurulumu ve otomatik testler'),
       pair('Telemetri', 'roket aviyoniği: RF iletimi, SD karta kayıt ve veriler için bir masaüstü paneli'),
@@ -359,7 +359,7 @@ const tr: ConsoleContent = {
       heading('DevOps ve otomasyon'),
       blank(),
       pair('GitHub Actions', 'çok platformlu CI/CD iş akışları'),
-      pair('Çapraz derleme', 'tek bir pipeline’dan birden çok platform için derleyen runner’lar'),
+      pair('Çapraz derleme', 'tek bir iş akışında birden çok platform için derleme yapan runner’lar'),
       pair('Betikler', 'derleme, paketleme ve sürüm çıkarma için Bash, Batch ve Python'),
       pair('Tek tık', 'test, paketleme, farklı platformlar için derleme çıktısı üretme ve dağıtım; özellikle Asion ekosistemi için'),
     ],

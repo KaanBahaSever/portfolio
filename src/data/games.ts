@@ -17,7 +17,7 @@ export const GAMES: readonly GameInfo[] = [
     description: {
       en: 'Place your fleet and duel a computer admiral that hunts with a probability density map, then closes in on every hit.',
       // "Rakibiniz", not "Amiral": "Amiral gemilerinizi" would read as "your flagships".
-      tr: 'Filonuzu yerleştirin ve bilgisayar amirale karşı savaşın. Rakibiniz gemilerinizi bir olasılık yoğunluğu haritasıyla arar, her isabetten sonra da atışlarını o bölgeye toplar.',
+      tr: 'Filonuzu yerleştirin ve bilgisayara karşı savaşın. Rakibiniz gemilerinizi bir olasılık yoğunluğu haritasıyla arar, her isabetten sonra da atışlarını o bölgeye toplar.',
     },
     algorithm: { en: 'Hunt & target · probability density', tr: 'Av ve hedef · olasılık yoğunluğu' },
     href: '/games/battleship/',

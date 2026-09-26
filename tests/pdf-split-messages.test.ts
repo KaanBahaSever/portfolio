@@ -107,7 +107,7 @@ test('plan summaries in both languages', () => {
 
   const single = summarizePlan(outputs('single', '', 10, 'r'))!;
   assert.equal(en.plan.summary(single), 'Will create 10 files: pages 1, 2, 3, 4, 5, 6 and 4 more');
-  assert.equal(tr.plan.summary(single), '10 dosya oluşturulacak. Sayfalar: 1, 2, 3, 4, 5, 6 ve 4 dosya daha');
+  assert.equal(tr.plan.summary(single), '10 dosya oluşturulacak. Sayfalar: 1, 2, 3, 4, 5, 6 (ve 4 dosya daha)');
 
   const long = summarizePlan(outputs('extract', '1,3,5,7,9,2,4,6', 10, 'r'))!;
   assert.equal(en.plan.summary(long), 'Will create 1 file with 8 pages: 1, 3, 5, 7, 9, 2 and 2 more');

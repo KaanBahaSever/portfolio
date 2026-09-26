@@ -97,7 +97,7 @@ export type ConsoleMessages = typeof en;
 const tr: ConsoleMessages = {
   title: 'Konsol',
   description:
-    'Siteyi komut yazarak gezebileceğiniz sade bir terminal: projeler, beceriler ve iletişim bilgileri, her seferinde tek bir komutla.',
+    'Siteyi komut yazarak gezebileceğiniz sade bir terminal: projeler, yetkinlikler ve iletişim bilgileri, her seferinde tek bir komutla.',
   toolbar: {
     label: 'Terminal ayarları',
     fontSize: 'Yazı boyutu',

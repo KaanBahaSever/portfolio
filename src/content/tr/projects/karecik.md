@@ -1,13 +1,13 @@
 ---
 title: Karecik
-shortDescription: Yerel kafe ve restoranların QR menü, müşteri etkileşimi, menü ve sipariş yönetimi için kullandığı, canlıda çalışan bir SaaS. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı.
+shortDescription: Canlıda çalışan bir QR menü SaaS platformu. Yerel kafe ve restoranlar menülerini, siparişlerini ve müşteri iletişimini bununla yönetiyor. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı.
 ---
 
 ## Nedir?
 
 Karecik, yerel kafe ve restoranların müşterileriyle etkileşim kurmak, menülerini ve
-siparişlerini yönetmek için kullandığı bir SaaS. Şu anda canlıda. Müşteri işletmenin QR kodunu
-okuttuğunda, menü telefonunda açılır. Menü, işletmenin kendi alt alan adından gelir. İşletme
+siparişlerini yönetmek için kullandığı bir SaaS. Şu anda canlıda. Müşteri, işletmenin QR kodunu
+okuttuğunda menü telefonunda açılır. Menü, işletmenin kendi alt alan adından gelir. İşletme
 sahipleri de her şeyi bir yönetim panelinden ayarlar. Menü, kod okutulduğu anda açılmalı. Bu
 yüzden servis kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı.
 
@@ -41,7 +41,7 @@ işletme için yeni bir altyapı kurmak gerekmez.
 | Katman        | Teknoloji                                                            |
 | ------------- | -------------------------------------------------------------------- |
 | API           | Go 1.22, Fiber v2, pgx; HttpOnly çerezli, bellekte tutulan oturumlar |
-| Veritabanı    | PostgreSQL; gömülü SQL migration’ları uygulama açılırken çalışır     |
+| Veri tabanı   | PostgreSQL; gömülü SQL migration’ları uygulama açılırken çalışır     |
 | Ön yüz        | React 18, Vite, Tailwind CSS, dnd-kit                                |
 | Kiracı yapısı | Wildcard alt alan adı çözümlemesi; yedek olarak yol tabanlı adres    |
 | Altyapı       | Cloudflare                                                           |

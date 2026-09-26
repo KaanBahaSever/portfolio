@@ -114,7 +114,7 @@ export const EXPERIENCE: readonly ExperienceItem[] = [
     end: '2024-03',
     summary: {
       en: 'Owned the software development lifecycle end to end, from relational schema design in PostgreSQL to RESTful APIs in Python and Flask with a jQuery front end.',
-      tr: 'Geliştirme sürecinin tamamından ben sorumluydum: PostgreSQL’de ilişkisel veritabanı şemasını tasarladım, Python ve Flask ile REST API’ler yazdım, ön yüzü jQuery ile geliştirdim.',
+      tr: 'Geliştirme sürecinin tamamından ben sorumluydum: PostgreSQL’de ilişkisel veri tabanı şemasını tasarladım, Python ve Flask ile REST API’ler yazdım, ön yüzü jQuery ile geliştirdim.',
     },
     highlights: {
       en: [
@@ -198,7 +198,7 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
     kind: 'volunteering',
     title: { en: 'Mathematics Club', tr: 'Matematik Kulübü' },
     // No dates on record, only "during my upperclassman years": said in words, not guessed.
-    periodLabel: { en: 'Later university years', tr: 'Son sınıflar' },
+    periodLabel: { en: 'Later university years', tr: 'Üniversitenin son yılları' },
     highlights: {
       en: ['Organised and ran academic events, including seminars and logic and mathematics competitions.'],
       tr: ['Seminerler, mantık ve matematik yarışmaları gibi akademik etkinlikler düzenleyip yürüttüm.'],

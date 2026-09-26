@@ -114,7 +114,7 @@ export const EXPERIENCE: readonly ExperienceItem[] = [
     end: '2024-03',
     summary: {
       en: 'Owned the software development lifecycle end to end, from relational schema design in PostgreSQL to RESTful APIs in Python and Flask with a jQuery front end.',
-      tr: 'Yazılım geliştirme yaşam döngüsünü uçtan uca üstlendim: PostgreSQL ile ilişkisel şema tasarımından Python ve Flask ile yazılan RESTful API’lere ve jQuery tabanlı ön yüze kadar.',
+      tr: 'Geliştirme sürecinin tamamından ben sorumluydum: PostgreSQL’de ilişkisel veritabanı şemasını tasarladım, Python ve Flask ile REST API’ler yazdım, ön yüzü jQuery ile geliştirdim.',
     },
     highlights: {
       en: [
@@ -124,10 +124,10 @@ export const EXPERIENCE: readonly ExperienceItem[] = [
         'Kept the system reliable through rigorous unit and integration testing.',
       ],
       tr: [
-        'Herkese açık ve özel veriler arasında katı yetki sınırları çizen, ayrıntılı bir rol tabanlı erişim denetimi (RBAC) tasarladım.',
-        'API ve ön yüz genelinde ölçeklenebilir akış sayfalaması ve dinamik veri yükleme geliştirdim.',
+        'Ayrıntılı bir rol tabanlı erişim kontrolü (RBAC) tasarladım; herkese açık verilerle özel veriler arasına kesin yetki sınırları koydum.',
+        'Akış için ölçeklenebilir sayfalamayı ve dinamik veri yüklemeyi hem API’de hem ön yüzde geliştirdim.',
         'Platformun çalıştığı Linux sunucularını kurup yapılandırdım.',
-        'Kapsamlı birim ve entegrasyon testleriyle sistemin güvenilirliğini sağladım.',
+        'Sistemin güvenilir çalışması için kapsamlı birim ve entegrasyon testleri yazdım.',
       ],
     },
     stack: ['Python', 'Flask', 'PostgreSQL', 'jQuery', 'Linux'],
@@ -149,7 +149,7 @@ export const EDUCATION: readonly EducationItem[] = [
         'Planning a Master’s degree in Computer Science next.',
       ],
       tr: [
-        'Mezuniyete hazırlanıyorum; reel analiz, soyut cebir ve topoloji ağırlıklı bir saf matematik altyapım var.',
+        'Mezun olmak üzereyim. Saf matematikteki temelimi reel analiz, soyut cebir ve topoloji oluşturuyor.',
         'Ardından bilgisayar bilimleri alanında yüksek lisans yapmayı planlıyorum.',
       ],
     },
@@ -171,10 +171,9 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
       ],
       tr: [
         // Turkish groups thousands with a dot: 5.000 ft.
-        'Kulüp ekibiyle bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketinin tasarımında ve üretiminde yer aldım.',
-        // "(firmware)", as on the Rocket-Up page and in the console.
-        'Uçuş aviyoniğinin gömülü yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma geliştirdim; ikisi de yönelim, jiroskop ve altimetre verilerini birleştiren sensör füzyonuna dayanıyordu.',
-        'RF telemetri modülleriyle birlikte çalışan SD kart telemetri kayıt protokolünü tasarladım; uçuş verisini ayrıştırıp uçuş sonrası yörünge grafiklerini çizen bir masaüstü paneli geliştirdim.',
+        'Kulüp ekibiyle birlikte bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik.',
+        'Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrol sistemini tek başıma geliştirdim. İkisi de roketteki yönelim, jiroskop ve altimetre verilerini birleştiren sensör füzyonuyla çalışıyordu.',
+        'Telemetri verisini SD karta kaydeden protokolü tasarladım; bu protokol RF telemetri modülleriyle birlikte çalışıyordu. Uçuştan sonra verileri ayrıştırıp yörüngeyi çizen bir masaüstü paneli de geliştirdim.',
       ],
     },
   },
@@ -190,8 +189,8 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
         'Organised Cyber Security Week, including a live-streamed technical interview with a CCIE-certified network security engineer.',
       ],
       tr: [
-        'Flask, HTML ve Git/GitHub üzerine teknik atölyeler ve canlı yayınlar sundum.',
-        'Siber Güvenlik Haftası etkinliğini düzenledim; programda CCIE sertifikalı bir ağ güvenliği mühendisiyle canlı yayında teknik bir söyleşi de vardı.',
+        'Flask, HTML ve Git/GitHub üzerine teknik atölyeler ve canlı yayınlar yaptım.',
+        'Siber Güvenlik Haftası etkinliğini düzenledim. Programda CCIE sertifikalı bir ağ güvenliği mühendisiyle canlı yayında teknik bir söyleşi de vardı.',
       ],
     },
   },
@@ -229,7 +228,7 @@ export const ACTIVITIES: readonly ActivityItem[] = [
         'Researched cryptography and visual programming logic, including an early prototype of a flowchart-based visual coding tool.',
       ],
       tr: [
-        'Kriptografi ve görsel programlama mantığı üzerine araştırma yaptım; çalışma, akış şemalarıyla kod yazmayı sağlayan görsel bir aracın erken bir prototipini de içeriyordu.',
+        'Kriptografi ve görsel programlama mantığı üzerine araştırma yaptım. Çalışmada, akış şemalarıyla kod yazmaya yarayan görsel bir aracın erken bir prototipi de vardı.',
       ],
     },
   },
@@ -246,7 +245,8 @@ export const ACTIVITIES: readonly ActivityItem[] = [
 /** One-line summary of what the skills below are pointed at. */
 export const FOCUS: Localized<string> = {
   en: 'Modern C++ and Go day to day, for system tools, telemetry and messaging platforms and algorithm-driven applications, on a foundation of pure mathematics. Around the code: GitHub Actions pipelines that test, package, produce multi-platform builds and deploy in one click, notably for the Asion ecosystem.',
-  tr: 'Günlük işimde modern C++ ve Go kullanıyorum: sistem araçları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Hepsinin temelinde saf matematik var. Bunun yanında, özellikle Asion ekosistemi için, GitHub Actions ile tek tıkla test eden, paketleyen, çok platformlu derleme çıktıları üreten ve dağıtım yapan pipeline’lar kuruyorum.',
+  // "CI/CD süreçleri" for the pipelines, the owner's own term in the skills below.
+  tr: 'Her gün modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar geliştiriyorum. Hepsinin temelinde saf matematik var. Kodun yanında, özellikle Asion ekosistemi için, GitHub Actions ile CI/CD süreçleri kuruyorum. Bu süreçler tek tıkla test ediyor, paketliyor, birden çok platform için derliyor ve dağıtıyor.',
 };
 
 /**

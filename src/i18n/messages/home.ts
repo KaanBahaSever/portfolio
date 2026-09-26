@@ -131,8 +131,9 @@ export type HomeMessages = typeof en;
 
 const tr: HomeMessages = {
   hero: {
+    // Short sentences, one idea each. "crowd.inc’te": the name is read "kraud ink", so -te.
     intro:
-      'İstanbul Üniversitesinde matematik lisansımı tamamlıyorum ve geliştirdiğim projelerin çoğunda bu matematiği uygulamaya döküyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun algoritmaları. Günlük işimde modern C++ ve Go kullanıyorum. Öncesinde yaklaşık üç yıl boyunca crowd.inc bünyesinde yazılım geliştirici olarak, canlıdaki bir web platformunun sorumluluğunu uçtan uca üstlendim: PostgreSQL şemasından Linux sunucularına kadar.',
+      'İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Geliştirdiğim şeylerin çoğunda da bu matematiği kullanıyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun oynayan algoritmalar. Her gün modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te yaklaşık üç yıl yazılım geliştirici olarak çalıştım. Orada canlıdaki bir web platformunun her şeyinden ben sorumluydum: PostgreSQL şemasından Linux sunucularına kadar.',
     selectedWork: 'Seçili işler',
     // The button downloads the Turkish CV; the English one is a small link beside it.
     cvFormat: 'PDF',
@@ -142,7 +143,7 @@ const tr: HomeMessages = {
   },
   figure: {
     label: 'Şekil 1',
-    caption: 'Birim çember üzerinde dönen bir nokta. Yüksekliği zaman içinde izlendiğinde bir sinüs dalgası çizer.',
+    caption: 'Birim çember üzerinde bir nokta dönüyor. Noktanın yüksekliğini zamana göre çizince bir sinüs dalgası çıkıyor.',
     pause: 'Animasyonu duraklat',
     play: 'Animasyonu oynat',
   },
@@ -154,39 +155,40 @@ const tr: HomeMessages = {
     all: 'Tüm projeler',
   },
   journey: {
-    title: 'Matematikten sistemlere',
-    lead: 'Matematiğin yazılıma dönüşümü, dört bölümde.',
+    title: 'Matematikten sistem yazılımına',
+    lead: 'Matematiğin nasıl yazılıma dönüştüğünü dört bölümde anlatıyorum.',
     all: 'Hikâyenin tamamı',
     chapter: (n) => `Bölüm ${n}`,
     chapters: {
       foundations: {
-        title: 'Algoritmik temeller',
+        title: 'Algoritma temelleri',
         meta: '2016 – 2019 · C# · MS SQL',
-        text: 'Her şey 2016’da bir meslek lisesinde C# ile başladı: veri yapıları ve algoritmik problem çözme, ardından MS SQL tabanlı veritabanı uygulamaları. Bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; av ve hedef (hunt & target) algoritmasını ise sonradan geliştirdim.',
+        // The site's name for the algorithm, with the English one a reader can search for.
+        text: 'Her şey 2016’da meslek lisesinde C# ile başladı. Önce veri yapıları ve algoritmik problem çözme üzerinde çalıştım, ardından MS SQL ile veritabanı uygulamaları geliştirdim. Bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı. Amiral Battı’nın av ve hedef (hunt & target) algoritmasını ise sonradan yazdım.',
       },
       avionics: {
         title: 'Roket aviyoniği',
         meta: '2019 – 2022 · Roket Kulübü',
-        text: 'İstanbul Üniversitesi Roket Kulübünde ekibimizle bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik. Uçuş aviyoniği yazılımını ve paraşüt açma kontrolünü tek başıma geliştirdim; telemetri kaydını da ben tasarladım.',
+        text: 'İstanbul Üniversitesi Roket Kulübünde ekip olarak bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik. Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrolünü tek başıma yazdım. Telemetri kaydını da ben tasarladım.',
       },
       guidance: {
         title: 'Otonom paraşüt güdümü',
         meta: 'Araştırma · Python',
         // "Lineer cebir", as on the About page and in the console: one term for one subject.
-        text: 'Lineer cebir ve atmosferik iniş dinamiğiyle faydalı yükü belirlenen bir iniş koordinatına yönlendiren bir güdüm algoritması.',
+        text: 'Paraşütle inen bir yükü belirlenen iniş koordinatına yönlendiren bir algoritma. Lineer cebirden ve atmosferdeki iniş dinamiğinden yararlanıyor.',
       },
       simulation: {
         title: 'Uçuş fiziği simülasyonu',
         meta: '2020 prototipi · şimdi C++',
-        text: 'Gelişmeye devam eden tek bir proje: 2020’de Python ile yazdığım dar kapsamlı bir prototipi, şimdi Rocket-Up adıyla modern C++ ile açık kaynaklı bir aerodinamik simülasyon motoru olarak baştan yazıyorum.',
+        text: 'Bu, gelişmeye devam eden tek bir proje. 2020’de Python ile dar kapsamlı bir prototip yazmıştım. Şimdi onu modern C++ ile baştan yazıyorum. Yeni adı Rocket-Up: açık kaynaklı bir aerodinamik simülasyon motoru.',
       },
     },
   },
   playground: {
     title: 'Oyun alanı',
-    lead: 'Hemen burada kullanabileceğiniz küçük şeyler: algoritmik rakiplere karşı oyunlar, bir terminal ve dosyalarınızı cihazınızdan çıkarmayan tarayıcı araçları.',
+    lead: 'Burada hemen kullanabileceğiniz küçük şeyler var: algoritmik rakiplere karşı oyunlar, bir terminal ve dosyalarınızı cihazınızdan çıkarmayan tarayıcı araçları.',
     kinds: { game: 'Oyun', tool: 'Araç', terminal: 'Terminal' },
-    consoleText: 'Bu siteyi bir terminalden, komut komut keşfedin.',
+    consoleText: 'Siteyi bir terminalden, komut yazarak gezin.',
     allGames: 'Tüm oyunlar',
     allTools: 'Tüm araçlar',
     moreLabel: 'Oyun alanında daha fazlası',

@@ -40,18 +40,20 @@ const tr: NotFoundMessages = {
   description: 'Aradığınız sayfa bulunamadı.',
   eyebrow: 'Hata 404',
   heading: 'Sayfa bulunamadı',
-  home: 'Ana sayfaya gidin',
-  popular: 'Sık ziyaret edilen sayfalar',
+  // The usual wording of a 404 page's button.
+  home: 'Ana sayfaya dön',
+  popular: 'Popüler sayfalar',
   figure: {
     label: 'Şekil 404',
     caption: 'f, tek bir nokta dışında her yerde tanımlı.',
   },
   links: {
     projects: 'Sistemler, platformlar ve açık kaynak çalışmalar',
-    blog: 'Matematik ve geliştirdiğim şeyler üzerine notlar',
-    tools: 'Tarayıcınızda çalışan, gizliliğe saygılı araçlar',
+    blog: 'Matematik ve geliştirdiğim şeyler hakkında notlar',
+    // "Private": what the tools do with your data, not "gizliliğe saygılı" (a calque).
+    tools: 'Tarayıcınızda çalışan, verilerinizi dışarı göndermeyen araçlar',
     games: 'Algoritmik rakiplere karşı Amiral Battı ve XOX',
-    about: 'Geçmişim ve matematikten sistem yazılımına uzanan yolum',
+    about: 'Özgeçmişim ve matematikten sistem yazılımına geçişim',
   },
 };
 

@@ -110,6 +110,9 @@ test('the Turkish CV is written with Turkish typography', () => {
   // The site's Turkish terms: "lineer cebir", never "doğrusal cebir".
   assert.match(joined, /lineer cebir/i);
   assert.doesNotMatch(joined, /doğrusal cebir/i);
+  // Plain Turkish, as on the home page: no "bünyesinde" or "uçtan uca", and "crowd.inc’te".
+  assert.doesNotMatch(joined, /bünyesinde|uçtan uca/i);
+  assert.match(CV.tr.summary, /crowd\.inc’te/);
 });
 
 test('the CVs list only the four selected projects, in the owner’s order', () => {

@@ -156,6 +156,16 @@ test('Turkish copy names linear algebra "lineer cebir", as the About page and th
   assert.doesNotMatch(turkish, /doğrusal cebir/i);
 });
 
+test('Turkish copy reads as Turkish, not as a translation of the English', () => {
+  // The calques the owner flagged ("crowd.inc bünyesinde", "yaşam döngüsünü uçtan uca üstlendim").
+  const turkish = [...turkishStrings(), SITE.description.tr].join(' ');
+  for (const calque of [/bünyesinde/i, /uçtan uca/i, /yaşam döngüsü/i, /ortaya koy/i, /gizliliğe saygılı/i]) {
+    assert.doesNotMatch(turkish, calque);
+  }
+  // crowd.inc takes its suffix like any other name (read "kraud ink": -te).
+  assert.match(homeMessages.tr.hero.intro, /crowd\.inc’te/);
+});
+
 test('Turkish copy uses Turkish letters where Turkish needs them', () => {
   // A cheap guard against ASCII-folded Turkish ("Ozgecmis", "Istanbul Universitesi").
   const turkish = [...strings(homeMessages.tr), ...strings(notFoundMessages.tr)].join(' ');

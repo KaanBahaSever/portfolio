@@ -10,9 +10,9 @@
  * "mühendis") — and nothing here may go beyond what the site states. Both languages carry the
  * same facts: the same projects in the same order, with the same links, stacks and years
  * (tests/cv-data.test.ts checks it). English uses British spelling, like the site. Turkish is
- * written natively, in the first person like the Turkish résumé bullets, with ’ before suffixes
- * on names and numbers ("2024’ten") and the site's Turkish terms (boru hattı, canlıda, av ve
- * hedef, bilgisayar rakip, Amiral Battı, XOX, büyük daire mesafesi).
+ * written natively and plainly, in short first-person sentences like the Turkish résumé
+ * bullets, with ’ before suffixes on names and numbers ("2024’ten", "crowd.inc’te") and the
+ * site's Turkish terms (CI/CD süreçleri, canlıda, lineer cebir, Amiral Battı, XOX).
  *
  * Pure module (types only from config.ts), so the build script and tests import it with plain Node.
  */
@@ -105,11 +105,10 @@ const tr: CvContent = {
   headline: 'Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar',
   phone: PHONE,
   // "İstanbul Üniversitesinde" without an apostrophe: suffixes on institution names are not set
-  // off (TDK), as on the home page and in the console. "crowd.inc bünyesinde", as on the home
-  // page: a suffix on "crowd.inc" would depend on how the name is read aloud. "Boru hatlarını
-  // (pipeline)", as on the Novacast page: job ads and applicant-tracking searches use "pipeline".
+  // off (TDK), as on the home page and in the console. "crowd.inc’te", as on the home page: the
+  // name is read "kraud ink". "CI/CD süreçleri", the owner's own term in the skills list.
   summary:
-    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajanları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD boru hatlarını (pipeline) da kuruyorum. 2021–2024 yılları arasında crowd.inc bünyesinde bir web platformunun veritabanı şemasından Linux sunucularına kadar tüm geliştirme sürecini yürüttüm.',
+    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajanları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD süreçlerini de kuruyorum. 2021–2024 arasında crowd.inc’te bir web platformunun geliştirme sürecini baştan sona yürüttüm: veritabanı şemasından Linux sunucularına kadar.',
 
   projects: [
     {
@@ -120,7 +119,7 @@ const tr: CvContent = {
       stack: ['C/C++', 'Objective-C', 'Go', 'gRPC'],
       // "Barındırılabilecek" (future), as on the Asion page: "built with self-hosting in mind"
       // is a design goal of a product in early access, not a finished feature.
-      text: 'Bireysel, ekip ve akademik zaman takibi için gizliliği önceleyen, platformlar arası bir üretkenlik ve iş istasyonu etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek. macOS, Linux ve Windows’ta yerel işletim sistemi olay kancaları, hafif bir daemon mimarisi, gRPC/Protobuf ile süreçler arası iletişim ve şifreli SQLCipher veritabanıyla çalışıyor. Tek tıkla test, paketleme, derleme çıktısı üretimi ve dağıtım yapan, çapraz derleme runner’lı çok platformlu GitHub Actions boru hatlarını kurdum.',
+      text: 'Bireyler, ekipler ve akademik zaman takibi için bir üretkenlik aracı: iş istasyonundaki etkinliği takip ediyor. Gizliliği ön planda tutuyor, farklı platformlarda çalışıyor ve kendi sunucunuzda barındırılabilecek şekilde tasarlanıyor. macOS, Linux ve Windows’ta işletim sisteminin yerel olay kancalarını (OS event hooks) kullanıyor; hafif bir daemon mimarisi, gRPC/Protobuf ile süreçler arası iletişim ve şifreli bir SQLCipher veritabanı üzerine kurulu. Çok platformlu GitHub Actions süreçlerini çapraz derleme runner’larıyla ben kurdum: tek tıkla test, paketleme, derleme çıktısı üretme ve dağıtım.',
     },
     {
       name: 'Novacast',
@@ -128,7 +127,7 @@ const tr: CvContent = {
       url: 'https://novacast.app',
       period: '2025’ten beri · canlıda',
       stack: ['Go', 'MQTT'],
-      text: 'Düşük gecikmeli pub/sub boru hatları üzerine kurulu, gerçek zamanlı bir mesaj yayını ve cihaz orkestrasyonu platformu. Çalıştığım bir bilgisayar firmasında ihtiyacı karşılamayan eski bir yazılımın yerini alması için geliştirdim: önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT tabanlı bir mikroservis olarak baştan tasarladım.',
+      text: 'Gerçek zamanlı mesaj yayını ve cihaz orkestrasyonu için bir platform; düşük gecikmeli pub/sub hatları üzerine kurulu. Çalıştığım bir bilgisayar firmasında, yetersiz kalan eski bir yazılımın yerine geçmesi için geliştirdim. Önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT ile bir mikroservis olarak baştan tasarladım.',
     },
     {
       name: 'Karecik',
@@ -136,7 +135,7 @@ const tr: CvContent = {
       url: 'https://github.com/KaanBahaSever/karecik',
       period: '2021’den beri · canlıda · GPL-3.0',
       stack: ['Go', 'PostgreSQL'],
-      text: 'Yerel kafe ve restoranların menü ve sipariş yönetimi ile müşteri etkileşimi için kullandığı, çok kiracılı (multi-tenant) bir QR menü SaaS platformu; kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarladım. İlk prototiplerini 2021’de, proje henüz başka adlar taşırken geliştirdim; 2026’da canlıya aldım.',
+      text: 'Çok kiracılı (multi-tenant) bir QR menü SaaS platformu. Yerel kafe ve restoranlar menülerini ve siparişlerini bu platformla yönetiyor, müşterileriyle de buradan iletişim kuruyor. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarladım. İlk prototipler 2021’de, proje henüz başka adlar taşırken yazıldı; platform 2026’da canlıya alındı.',
     },
     {
       name: 'Açık Matematik',
@@ -144,7 +143,8 @@ const tr: CvContent = {
       url: 'https://acik-matematik.com',
       period: '2023’ten beri · canlıda · açık kaynak',
       stack: ['Quarto', 'Markdown', 'Python'],
-      text: 'Türkçe lisans matematiği için yeniden üretilebilir sayısal hesaplama destekli bir akademik yayın platformu ve modern ders kitabı girişimi. Fikri 2023’te doğdu; platformu Haziran 2026’da yayına aldım, açık kaynak sürümü Eylül 2026’da duyurdum.',
+      // Passive, as in the English: "launched", "was announced".
+      text: 'Lisans düzeyindeki matematik için Türkçe bir akademik yayın platformu ve modern bir ders kitabı girişimi; yeniden üretilebilir sayısal hesaplamalar da içeriyor. Fikri 2023’te doğdu. Platform Haziran 2026’da yayına girdi, açık kaynak sürümü de Eylül 2026’da duyuruldu.',
     },
   ],
 
@@ -154,7 +154,7 @@ const tr: CvContent = {
       linkLabel: 'github.com/KaanBahaSever/AutonomousParachute',
       url: 'https://github.com/KaanBahaSever/AutonomousParachute',
       // "Lineer cebir", as on the home page, the About page and in the console.
-      text: 'Lineer cebir ve atmosferik iniş dinamiğiyle faydalı yükü belirlenen bir iniş koordinatına yönlendiren, Python ile yazılmış bir yörünge güdüm algoritması.',
+      text: 'Paraşütle inen bir yükü belirlenen iniş koordinatına yönlendiren, Python ile yazılmış bir yörünge güdüm algoritması. Lineer cebirden ve atmosferdeki iniş dinamiğinden yararlanıyor.',
     },
   ],
 };

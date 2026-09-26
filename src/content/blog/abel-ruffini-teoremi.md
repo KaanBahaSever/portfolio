@@ -1,31 +1,31 @@
 ---
-title: Abel–Ruffini Teoremine Sezgisel Bir Rehber
-description: 'Genel beşinci derece denklemi radikallerle çözen bir formül neden yok? Köklerin simetrileri ve Galois teorisi üzerinden sezgisel bir anlatım.'
+title: Abel–Ruffini Teoremini Sezgiyle Anlamak
+description: 'Beşinci dereceden her denklemi radikallerle çözen bir formül neden yok? Çünkü cebirin neyi çözebileceğine köklerin simetrileri karar veriyor. Bu simetrilere Galois teorisiyle bakıyoruz.'
 pubDate: 2026-09-25
 lang: tr
 translationKey: abel-ruffini
 tags: [matematik, cebir, galois-teorisi]
 ---
 
-İkinci dereceden denklemlerin kök formülünü hepimiz okulda öğreniriz:
+İkinci dereceden denklemlerin kök formülünü okulda hepimiz öğreniriz:
 
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}.
 $$
 
-Daha kalın bir kitapta her derece için benzer bir formül bulunduğunu düşünmek doğaldır. Üçüncü ve dördüncü derece için gerçekten de vardır. Beşinci derece için ise yoktur ve hiçbir kitapta da olmayacaktır: Her beşinci derece denklemin köklerini katsayılarından yalnızca toplama, çıkarma, çarpma, bölme ve her dereceden kök alma işlemleriyle veren bir formül yoktur. Abel–Ruffini teoremi tam olarak bunu söyler.
+Daha kalın bir kitapta her derece için böyle bir formül olduğunu düşünmek çok doğal. Üçüncü ve dördüncü derece için gerçekten de var. Beşinci derece için ise yok ve hiçbir kitapta da olmayacak. Beşinci dereceden bütün denklemlerin köklerini katsayılardan yalnızca dört işlemle ve istediğimiz dereceden kök alarak, kısacası *radikallerle* bulan bir formül yoktur. Abel–Ruffini teoremi tam olarak bunu söyler.
 
-Bu hâliyle teorem, insan zekâsının sınırları hakkında verilmiş bir hüküm gibi görünür; oysa asıl söylediği şey simetriyle ilgilidir. Bu yazıda o fikrin izini süreceğiz: Klasik formüllerin neden işe yaradığını, beşinci derecede neyin değiştiğini ve engelin, köklerin bulunmasının zorluğuyla neden hiçbir ilgisi olmadığını göreceğiz.
+Böyle söyleyince teorem, insan zekâsının bir sınırını gösteriyormuş gibi duruyor. Oysa asıl anlattığı şey simetri. Bu yazıda bu fikrin peşinden gideceğiz. Klasik formüller neden işe yarıyor? Beşinci derecede ne değişiyor? Engelin, kökleri bulmanın zor olmasıyla neden hiçbir ilgisi yok?
 
-## Eksik bir formülün kısa tarihi
+## Bulunamayan bir formülün kısa tarihi
 
-Babilli kâtipler ikinci dereceden problemleri neredeyse dört bin yıl önce çözüyordu; tam kareye tamamlama yöntemi ise 9. yüzyılda Harezmî'nin elinde sistematik bir biçim kazandı. Sonraki adım çok daha uzun sürdü: 16. yüzyıl İtalya'sında önce Scipione del Ferro, ardından Niccolò Tartaglia üçüncü dereceden denklemleri çözmeyi başardı. Gerolamo Cardano bu yöntemi 1545'te <cite lang="la">Ars Magna</cite> adlı kitabında, öğrencisi Lodovico Ferrari'nin dördüncü derece için bulduğu çözümle birlikte yayımladı.
+Babilli kâtipler ikinci dereceden problemleri neredeyse dört bin yıl önce çözüyordu. Tam kareye tamamlama yöntemini 9. yüzyılda Harezmî sistemli bir hâle getirdi. Sonraki adım çok daha uzun sürdü. İtalya’da, 16. yüzyılda önce Scipione del Ferro, sonra Niccolò Tartaglia üçüncü dereceden denklemleri çözmeyi başardı. Gerolamo Cardano bu yöntemi, öğrencisi Lodovico Ferrari’nin dördüncü derece için bulduğu çözümle birlikte 1545’te <cite lang="la">Ars Magna</cite> adlı kitabında yayımladı.
 
-Ardından beşinci derece için iki buçuk yüzyıl süren sonuçsuz denemeler geldi. 1770–71'de Joseph-Louis Lagrange soruyu değiştirdi: Eski yöntemlerin *neden* işe yaradığını sordu ve hepsinin köklerin permütasyonları üzerine kurulu olduğunu gördü. Paolo Ruffini bu fikirden yola çıkarak 1799'da genel beşinci derece denklemin radikallerle çözülemeyeceğini savundu. Kanıtı özünde doğruydu, ancak bir çözümde görünen her radikalin köklerin rasyonel bir fonksiyonu olduğunu kanıtlamadan kabul ediyordu. Niels Henrik Abel bu boşluğu 1824'te, basım masrafını kendi cebinden karşıladığı kısa bir risaleyle kapattı. Birkaç yıl sonra, 1832'de henüz yirmi yaşındayken ölen Évariste Galois daha keskin bir soruyu yanıtladı: Hangi denklemler radikallerle çözülebilir? Ancak 1846'da yayımlanabilen çalışmaları, bugün onun adını taşıyan teoriye dönüştü.
+Ardından iki buçuk yüzyıl boyunca beşinci derece için formül arandı ama bulunamadı. Joseph-Louis Lagrange 1770–71’de soruyu değiştirdi. Eski yöntemlerin *neden* işe yaradığını sordu ve hepsinin aslında köklerin permütasyonlarıyla, yani yerlerini değiştirmekle uğraştığını gördü. Paolo Ruffini bu fikirden yola çıkarak 1799’da genel beşinci dereceden denklemin radikallerle çözülemeyeceğini savundu. Kanıtı özünde doğruydu ama bir boşluğu vardı: Ruffini, çözümde geçen her radikalin köklerin rasyonel bir fonksiyonu olduğunu kanıtlamadan kabul etmişti. Niels Henrik Abel bu boşluğu 1824’te, kendi parasıyla bastırdığı kısa bir kitapçıkla kapattı. Birkaç yıl sonra Évariste Galois soruyu bir adım öteye taşıdı ve *hangi* denklemlerin radikallerle çözülebildiğini buldu. Galois 1832’de, yirmi yaşında öldü. Çalışmaları ancak 1846’da yayımlandı ve bugün onun adını taşıyan teoriye dönüştü.
 
 ## Dördüncü dereceye kadar neden formül var?
 
-### 2. derece: bir karekök, bir simetri
+### İkinci derece: bir karekök, bir simetri
 
 $x^2 + px + q = (x - r_1)(x - r_2)$ olsun. Tam kareye tamamlarsak
 
@@ -33,7 +33,7 @@ $$
 x^2 + px + q = \Bigl(x + \frac{p}{2}\Bigr)^2 - \frac{p^2 - 4q}{4}
 $$
 
-olur ve formül buradan çıkar. Ama aynı hesabı bir kez de başka bir gözle okumak daha öğreticidir. $r_1 + r_2 = -p$ toplamı ve $r_1 r_2 = q$ çarpımı *simetriktir*: Kökler yer değiştirince değişmezler ve doğrudan katsayılardan okunurlar. $r_1 - r_2$ farkı ise simetrik değildir, çünkü yer değiştirme onun işaretini değiştirir; ama karesi simetriktir:
+olur ve kök formülü buradan çıkar. Ama aynı hesaba bir de başka açıdan bakmak daha öğretici. Köklerin toplamı $r_1 + r_2 = -p$ ve çarpımı $r_1 r_2 = q$ *simetriktir*: Kökler yer değiştirse de değişmezler ve doğrudan katsayılardan okunurlar. $r_1 - r_2$ farkı ise simetrik değildir, çünkü kökler yer değiştirince işareti değişir. Ama karesi simetriktir:
 
 $$
 \begin{aligned}
@@ -42,23 +42,23 @@ $$
 \end{aligned}
 $$
 
-Tek bir karekök, $r_1 - r_2$ farkını bu işaret belirsizliği dışında geri verir; ardından $r_{1,2} = \tfrac12\bigl((r_1 + r_2) \pm (r_1 - r_2)\bigr)$ bulunur. Karekök tek bir iş görür: İki kökün sahip olduğu tek simetriyi kırar.
+Karekök alınca $r_1 - r_2$ farkını işareti dışında geri buluruz; sonra da $r_{1,2} = \tfrac12\bigl((r_1 + r_2) \pm (r_1 - r_2)\bigr)$ olur. Karekökün tek bir işi var: İki kök arasındaki tek simetriyi, yani yer değiştirmeyi kırmak.
 
-### 3. derece: Cardano yöntemi
+### Üçüncü derece: Cardano yöntemi
 
-$ax^3 + bx^2 + cx + d$ polinomunda $x = y - \frac{b}{3a}$ dönüşümünü yapıp $a$'ya bölünce ikinci dereceden terim yok olur; bu yüzden $x^3 + px + q = 0$ biçimindeki *indirgenmiş* kübiği çözmek yeterlidir. Cardano kökü $x = u + v$ biçiminde arar. $(u + v)^3 = u^3 + v^3 + 3uv(u + v)$ olduğundan denklem
+$ax^3 + bx^2 + cx + d$ polinomunda $x = y - \frac{b}{3a}$ koyup her şeyi $a$’ya bölersek ikinci dereceden terim kaybolur. Bu yüzden $x^3 + px + q = 0$ biçimindeki *indirgenmiş* denklemi çözmek yeter. Cardano kökü $x = u + v$ biçiminde arar. $(u + v)^3 = u^3 + v^3 + 3uv(u + v)$ olduğu için denklem
 
 $$
 u^3 + v^3 + q + (3uv + p)(u + v) = 0
 $$
 
-hâline gelir. İki bilinmeyene karşılık tek denklem olduğundan ikinci bir koşul koyabiliriz: $3uv = -p$. O zaman $u^3 + v^3 = -q$ ve $u^3 v^3 = -p^3/27$ olur; yani $u^3$ ve $v^3$ sayıları
+hâline gelir. Bilinmeyen iki, denklem bir; bu yüzden ikinci bir koşul koymakta serbestiz: $3uv = -p$ diyelim. O zaman $u^3 + v^3 = -q$ ve $u^3 v^3 = -p^3/27$ olur. Toplamı ve çarpımı belli olan $u^3$ ile $v^3$, şu ikinci dereceden *çözücü denklemin* kökleridir:
 
 $$
-t^2 + qt - \frac{p^3}{27} = 0
+t^2 + qt - \frac{p^3}{27} = 0.
 $$
 
-*çözücü ikinci derece denkleminin* kökleridir. Bu denklemi çözüp küpkök alınca Cardano formülü elde edilir:
+Bu denklemi çözüp küpkök alınca Cardano formülünü buluruz:
 
 $$
 \begin{gathered}
@@ -67,11 +67,11 @@ D = \frac{q^2}{4} + \frac{p^3}{27}.
 \end{gathered}
 $$
 
-Burada iki küpkök, çarpımları $-p/3$ olacak biçimde seçilir. Önce bir karekök, sonra bir küpkök: Bu sırayı aklınızda tutun.
+İki küpkökü, çarpımları $-p/3$ olacak şekilde seçeriz. Önce bir karekök, sonra bir küpkök: Bu sırayı aklınızda tutun.
 
-### 4. derece: Ferrari'nin çözücü kübiği
+### Dördüncü derece: Ferrari’nin çözücü kübiği
 
-Benzer bir kaydırmayla dördüncü derece bir denklem $x^4 + px^2 + qx + r = 0$ biçimine getirilir. Ferrari'nin fikri, sol tarafı tam kare yapacak yardımcı bir $y$ bilinmeyeni eklemektir:
+Aynı türden bir kaydırmayla dördüncü dereceden bir denklemi $x^4 + px^2 + qx + r = 0$ biçimine getirebiliriz. Ferrari’nin fikri, yardımcı bir $y$ bilinmeyeni ekleyip sol tarafı tam kare yapmak:
 
 $$
 \begin{aligned}
@@ -80,13 +80,13 @@ $$
 \end{aligned}
 $$
 
-Sağ taraf $x$'e göre ikinci derecedendir ve tam olarak diskriminantı sıfır olduğunda, yani $q^2 = 4(2y - p)(y^2 - r)$ iken tam karedir. Bu, $y$ için üçüncü dereceden bir denklemdir ve *çözücü kübik* adını alır:
+Sağ taraf $x$’e göre ikinci derecedendir ve tam da diskriminantı sıfır olduğunda, yani $q^2 = 4(2y - p)(y^2 - r)$ iken tam kare olur. Bu, $y$ için üçüncü dereceden bir denklemdir; adı *çözücü kübik*:
 
 $$
 8y^3 - 4py^2 - 8ry + 4pr - q^2 = 0.
 $$
 
-Bu denklemi Cardano formülüyle çözelim. $q \ne 0$ ise her $y$ kökü $2y \ne p$ koşulunu sağlar ($q = 0$ ise denklem zaten $x^2$'ye göre ikinci derecedendir); dolayısıyla iki taraf da tam karedir ve $s = \sqrt{2y - p}$ dersek denklem iki ikinci derece denkleme ayrılır:
+Bu denklemi Cardano formülüyle çözelim. $q \ne 0$ ise her $y$ kökü için $2y \ne p$ olur. ($q = 0$ ise denklem zaten $x^2$’ye göre ikinci derecedendir.) O zaman iki taraf da tam karedir ve $s = \sqrt{2y - p}$ dersek denklem iki ikinci dereceden denkleme ayrılır:
 
 $$
 x^2 + y = \pm\Bigl(s\,x - \frac{q}{2s}\Bigr).
@@ -94,18 +94,18 @@ $$
 
 ### Lagrange çözücüleri
 
-Lagrange, bu yardımcı niceliklerin kökler cinsinden *ne olduğunu* sordu. Kökleri $r_1, r_2, r_3$ olan bir kübik için $\omega = e^{2\pi i/3}$ alalım ve
+Lagrange, bu yardımcı sayıların kökler cinsinden aslında *ne olduğunu* sordu. Kökleri $r_1, r_2, r_3$ olan üçüncü dereceden bir denklem için $\omega = e^{2\pi i/3}$ (küpü 1 olan bir karmaşık sayı) alalım ve şu iki sayıyı tanımlayalım:
 
 $$
 \begin{aligned}
 L &= r_1 + \omega r_2 + \omega^2 r_3, \\
-L' &= r_1 + \omega^2 r_2 + \omega r_3
+L' &= r_1 + \omega^2 r_2 + \omega r_3.
 \end{aligned}
 $$
 
-tanımlayalım. $r_1 \mapsto r_2 \mapsto r_3 \mapsto r_1$ devirli permütasyonu $L$ sayısını $\omega^2 L$ sayısına götürür, dolayısıyla $L^3$ bu permütasyon altında değişmez; $r_2 \leftrightarrow r_3$ gibi bir transpozisyon ise $L$ ile $L'$ sayılarının yerini değiştirir. Demek ki altı permütasyonun hepsi altında $L^3$ yalnızca iki değer alır: $L^3$ ve $(L')^3$. Bu iki değerin toplamı ve çarpımı simetriktir, dolayısıyla bilinir. Yani $L^3$ katsayıları bilinen bir ikinci derece denklemi sağlar ve bu denklem, kılık değiştirmiş Cardano çözücüsüdür: $x^3 + px + q$ için $u = L/3$ ve $v = L'/3$ alınabilir.
+Kökleri sırayla kaydıran $r_1 \mapsto r_2 \mapsto r_3 \mapsto r_1$ permütasyonu $L$ sayısını $\omega^2 L$ sayısına götürür; bu yüzden $L^3$ bu permütasyonla değişmez. $r_2 \leftrightarrow r_3$ gibi, yalnızca iki kökün yerini değiştiren bir permütasyon ise (buna *transpozisyon* denir) $L$ ile $L'$ sayılarını birbirine dönüştürür. Demek ki altı permütasyon uygulandığında $L^3$ yalnızca iki değer alır: $L^3$ ve $(L')^3$. Bu iki değerin toplamı ve çarpımı simetrik, dolayısıyla bilinir. Yani $L^3$ katsayıları bilinen ikinci dereceden bir denklemi sağlar; bu denklem de kılık değiştirmiş Cardano çözücüsüdür: $x^3 + px + q$ için $u = L/3$ ve $v = L'/3$ alınabilir.
 
-Dördüncü derecede
+Dördüncü derecede ise
 
 $$
 \begin{gathered}
@@ -115,9 +115,9 @@ r_1 r_4 + r_2 r_3
 \end{gathered}
 $$
 
-nicelikleri, köklerin 24 permütasyonu altında yalnızca kendi aralarında yer değiştirir; dolayısıyla katsayıları bilinen bir kübiğin kökleridir. Bu niceliklerin yarıları da tam olarak Ferrari'nin çözücü kübiğinin kökleridir. Üçünü birden sabit bırakan permütasyonlar *Klein dörtlü grubunu* oluşturur: $V_4 = \{e, (1\,2)(3\,4), (1\,3)(2\,4), (1\,4)(2\,3)\}$.
+sayıları, köklerin 24 permütasyonuyla yalnızca kendi aralarında yer değiştirir. Bu yüzden katsayıları bilinen üçüncü dereceden bir denklemin kökleridir; yarıları da tam olarak Ferrari’nin çözücü kübiğinin kökleri. Üçünü birden yerinde bırakan permütasyonlar *Klein dörtlü grubunu* oluşturur: $V_4 = \{e, (1\,2)(3\,4), (1\,3)(2\,4), (1\,4)(2\,3)\}$. ($e$ hiçbir kökü oynatmaz; $(1\,2)(3\,4)$ ise 1. ile 2. kökün, 3. ile 4. kökün yerini değiştirir.)
 
-Lagrange'ın dersi şudur: Her klasik formül, kökler cinsinden bir ifadeler zinciri hesaplar; zincirin her halkası bir öncekinden daha az permütasyonla sabit kalır ve öncekilerden basit bir denklem çözülerek elde edilir.
+Lagrange’ın dersi şu: Her klasik formül, kökler cinsinden yazılmış bir ifade zinciri hesaplar. Zincirdeki her ifade bir öncekinden daha az simetriktir, yani onu değiştirmeyen permütasyonlar daha azdır. Her ifade de öncekilerden basit bir denklem çözülerek bulunur.
 
 ## Kökler, permütasyonlar ve cisimler
 
@@ -133,11 +133,11 @@ a_0 &= (-1)^n\, r_1 r_2 \cdots r_n
 \end{aligned}
 $$
 
-olur. Bunlar, işaret dışında, temel simetrik polinomlardır. Simetrik polinomların temel teoremine göre kökler cinsinden yazılmış ve köklerin $n!$ permütasyonunun hepsi altında, yani $S_n$ simetrik grubunun tamamı altında değişmeyen her polinom, katsayıların bir polinomudur. Demek ki simetrik ifadeler doğrudan katsayılardan hesaplanır; zorluk, daha az simetriye sahip ifadelerdedir. En uç örnek, yalnızca özdeşlik permütasyonunun sabit bıraktığı kök listesinin kendisidir.
+olur. Bunlar, işaretleri bir yana, temel simetrik polinomlardır. Simetrik polinomların temel teoremi de şunu söyler: Kökler cinsinden yazılan bir polinom, köklerin $n!$ permütasyonunun hiçbiriyle (yani $S_n$ simetrik grubunun hiçbir elemanıyla) değişmiyorsa katsayıların bir polinomudur. Demek ki simetrik ifadeler bedava: Doğrudan katsayılardan hesaplanırlar. Zorluk, daha az simetrik ifadelerde. En uç örnek kök listesinin kendisi: Onu yalnızca özdeşlik permütasyonu değiştirmeden bırakır.
 
 ### Radikallerle çözüm bir cisim kulesidir
 
-Bundan sonra $\mathbb{Q}$ gibi karakteristiği 0 olan bir $F$ cismi üzerinde çalışıyoruz. Radikallerle yazılmış bir formül sonlu bir tariftir: Önce $\alpha_1^{m_1} \in F$ olacak şekilde bir $\alpha_1$ sayısı eklenir, sonra $\alpha_2^{m_2} \in F(\alpha_1)$ olacak şekilde bir $\alpha_2$ sayısı ve böyle devam edilir. Tarif bir cisim genişlemeleri kulesi kurar:
+Bundan sonra rasyonel sayılar $\mathbb{Q}$ gibi, karakteristiği 0 olan bir $F$ cismi üzerinde çalışacağız. (Cisim, dört işlemi rahatça yapabildiğimiz bir sayı sistemidir.) Radikallerle yazılmış bir formül sonlu bir tariftir. Önce $F$’deki bir sayının kökü olan bir $\alpha_1$ ekleriz ($\alpha_1^{m_1} \in F$). Sonra yeni cisim $F(\alpha_1)$’deki bir sayının kökü olan bir $\alpha_2$ ekleriz ($\alpha_2^{m_2} \in F(\alpha_1)$) ve böyle devam ederiz. Bu tarif, iç içe cisimlerden bir kule kurar:
 
 $$
 \begin{gathered}
@@ -146,47 +146,47 @@ F_i = F_{i-1}(\alpha_i), \quad \alpha_i^{m_i} \in F_{i-1}.
 \end{gathered}
 $$
 
-Bir $f \in F[x]$ polinomunun bütün köklerini içeren bir cisimde son bulan böyle bir kule varsa, $f$ polinomuna *radikallerle çözülebilir* denir.
+Katsayıları $F$’de olan bir $f \in F[x]$ polinomu için böyle kulelerden biri $f$ polinomunun bütün köklerini içeren bir cisimde bitiyorsa, $f$ polinomuna *radikallerle çözülebilir* denir.
 
-Birimin yeterince kökü mevcutsa her adım basittir. Birimin köklerini eklemek zararsızdır, çünkü $F(\zeta)/F$ genişlemesinin Galois grubu değişmeli bir gruptur. Bu yüzden, $N$ her $m_i$ sayısına bölünecek şekilde, birimin ilkel bir $N$'inci kökü olan $\zeta$ kulenin en altına eklenebilir. O zaman $F_{i-1}$ cismini sabit bırakan her $F_i$ otomorfizması, $\alpha_i$ elemanını $x^{m_i} - \alpha_i^{m_i}$ polinomunun başka bir köküne, yani $\eta^{m_i} = 1$ olmak üzere $\eta\,\alpha_i$ biçiminde bir elemana götürmek zorundadır; otomorfizmaları bileştirmek de birimin bu köklerini çarpmaya karşılık gelir. Demek ki her radikal adım *devirli*, özel olarak da değişmeli bir genişlemedir.
+Birimin kökleri (bir kuvveti 1 olan sayılar) elimizde yeterince varsa her adım basittir. Birimin köklerini eklemek zararsızdır, çünkü $F(\zeta)/F$ genişlemesinin Galois grubu değişmelidir, yani elemanlarının sırası fark etmez. Bu yüzden kulenin en altına birimin ilkel bir $N$’inci kökü olan $\zeta$ sayısını koyarız; $N$ sayısını da her $m_i$’ye bölünecek şekilde seçeriz. O zaman $F_i$ cisminin, $F_{i-1}$’in her elemanını yerinde bırakan bir otomorfizması (cismi, dört işlemi bozmadan kendine eşleyen bir dönüşüm), $\alpha_i$ sayısını $x^{m_i} - \alpha_i^{m_i}$ polinomunun başka bir köküne götürmek zorundadır. Bu kök de $\eta^{m_i} = 1$ olan bir $\eta$ için $\eta\,\alpha_i$ biçimindedir. Otomorfizmaları art arda uygulamak, birimin bu köklerini çarpmak demektir. Demek ki her radikal adım *devirli*, dolayısıyla değişmeli bir genişlemedir.
 
 ### Galois grubu ve temel teorem
 
-$K$, $f$ polinomunun $F$ üzerindeki ayrışım cismi, yani bütün kökleri tarafından üretilen cisim olsun. *Galois grubu* $\mathrm{Gal}(f) = \mathrm{Gal}(K/F)$, $K$ cisminin $F$ cismini noktasal olarak sabit bırakan otomorfizmalarından oluşur. Bu otomorfizmaların her biri $f$ polinomunun köklerini permüte eder ve bu permütasyonla tamamen belirlenir; bu yüzden $\mathrm{Gal}(f)$, $S_n$ grubunun bir altgrubudur: Kökler arasındaki her cebirsel bağıntıyı koruyan permütasyonlardan oluşur. Katsayıları birbirinden bağımsız değişkenler olan *genel* polinomda özel bir bağıntı yoktur ve Galois grubu $S_n$ grubunun tamamıdır.
+$K$, $f$ polinomunun $F$ üzerindeki ayrışım cismi, yani $F$’ye bu polinomun bütün kökleri eklenince oluşan cisim olsun. *Galois grubu* $\mathrm{Gal}(f) = \mathrm{Gal}(K/F)$, $K$ cisminin, $F$’nin her elemanını yerinde bırakan otomorfizmalarından oluşur. Bu otomorfizmaların her biri $f$ polinomunun köklerinin yerini değiştirir ve bu permütasyon onu tamamen belirler. Bu yüzden $\mathrm{Gal}(f)$, $S_n$ grubunun bir altgrubudur: Kökler arasındaki her cebirsel bağıntıyı koruyan permütasyonlardan oluşur. Katsayıları bağımsız değişkenler olan *genel* polinomda kökler arasında özel bir bağıntı yoktur ve Galois grubu $S_n$ grubunun tamamıdır.
 
-Galois teorisinin temel teoremi, cisimlerle gruplar arasında bir sözlüktür. $F \subseteq E \subseteq K$ ara cisimleri, $G = \mathrm{Gal}(K/F)$ grubunun $H$ altgruplarıyla birebir eşlenir: Bir cisme, onu noktasal olarak sabit bırakan otomorfizmaların altgrubu; bir altgruba da sabit bıraktığı elemanların cismi karşılık gelir. Büyük cisimler küçük gruplarla eşleşir. Ayrıca $E/F$ genişlemesinin kendisi, tam olarak $H$ altgrubu $G$ içinde *normal altgrup* olduğunda bir Galois genişlemesidir ve bu durumda $\mathrm{Gal}(E/F) \cong G/H$ olur.
+Galois teorisinin temel teoremi, cisimlerle gruplar arasında bir sözlük gibidir. $F \subseteq E \subseteq K$ olan her $E$ ara cismi, $G = \mathrm{Gal}(K/F)$ grubunun bir $H$ altgrubuyla birebir eşleşir. Bir cisme, onun her elemanını yerinde bırakan otomorfizmalar karşılık gelir; bir altgruba da yerinde bıraktığı elemanların cismi. Büyük cisimler küçük gruplarla eşleşir. Ayrıca $E/F$ genişlemesi, tam da $H$ altgrubu $G$ içinde *normal* olduğunda bir Galois genişlemesidir ve o zaman bu genişlemenin Galois grubu yapıca $G/H$ bölüm grubunun aynısıdır: $\mathrm{Gal}(E/F) \cong G/H$.
 
-Şimdi bir radikaller kulesini bu sözlükle okuyalım. $F$ cisminden $K$ cismine radikal radikal tırmanmak, $G$ grubundan aşikâr gruba her adımda bir normal altgruba inerek ilerlemek demektir; üstelik her adımın bölüm grubu değişmeli bir gruptur. (Daha kesin söylemek gerekirse, kule $K$ cismini aşabilir; o zaman kulenin, yine radikallerle kurulmuş olan Galois kapanışına geçilir ve $\mathrm{Gal}(f)$ grubunun bu büyük grubun bir bölüm grubu olduğu kullanılır.)
+Şimdi bir radikal kulesini bu sözlükle okuyalım. $F$ cisminden $K$ cismine radikal radikal tırmanmak, $G$ grubundan tek elemanlı $\{e\}$ grubuna her adımda bir normal altgruba inmek demektir; üstelik her adımda bölüm grubu değişmelidir. (İşin aslı, kule $K$ cismini aşabilir. O zaman kulenin, yine radikallerle kurulan Galois kapanışına geçer ve $\mathrm{Gal}(f)$ grubunun bu büyük grubun bir bölüm grubu olduğunu kullanırız.)
 
 ## Çözülebilir gruplar ve teorem
 
-Bu yapı, grup teorisinde çözülebilirlik denen özelliğin ta kendisidir. Sonlu bir $G$ grubunun
+Grup teorisinde bu yapının bir adı var: çözülebilirlik. Sonlu bir $G$ grubunun şöyle bir altnormal serisi varsa, $G$ grubuna *çözülebilir grup* denir:
 
 $$
-G = G_0 \trianglerighteq G_1 \trianglerighteq \dots \trianglerighteq G_k = \{e\}
+G = G_0 \trianglerighteq G_1 \trianglerighteq \dots \trianglerighteq G_k = \{e\}.
 $$
 
-biçiminde, her $G_{i+1}$ grubunun $G_i$ içinde normal olduğu (ama $G$ içinde normal olmak zorunda olmadığı) ve her $G_i/G_{i+1}$ bölüm grubunun değişmeli olduğu bir altnormal serisi varsa, $G$ grubuna *çözülebilir grup* denir. Sözlük radikal kulelerini bu tür serilere çevirir; bir fikir daha eklenince de serileri kulelere.
+Burada her $G_{i+1}$, bir üstündeki $G_i$ içinde normaldir (ama $G$ içinde normal olmak zorunda değildir) ve her $G_i/G_{i+1}$ bölüm grubu değişmelidir. Sözlük, radikal kulelerini bu tür serilere çevirir. Bir fikir daha eklersek serileri de kulelere çevirebiliriz.
 
 <div class="my-8 rounded-xl border border-zinc-200 bg-white px-5 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 
-**Teorem (Galois).** $F$ karakteristiği 0 olan bir cisim (örneğin $\mathbb{Q}$) ve $f \in F[x]$ olsun. $f(x) = 0$ denkleminin $F$ üzerinde radikallerle çözülebilir olması için gerek ve yeter koşul, $\mathrm{Gal}(f)$ grubunun çözülebilir olmasıdır.
+**Teorem (Galois).** $F$ karakteristiği 0 olan bir cisim (örneğin $\mathbb{Q}$) ve $f \in F[x]$ olsun. $f(x) = 0$ denkleminin $F$ üzerinde radikallerle çözülebilmesi için $\mathrm{Gal}(f)$ grubunun çözülebilir olması gerekir ve yeter.
 
 </div>
 
-Eksik fikir yine Lagrange'dan gelir. Ters yönde ilerlemek için seriyi, her bölüm asal $p$ mertebeli devirli bir grup olana kadar inceltir ve birimin gereken köklerini ekleriz. $\sigma$ böyle bir adımın Galois grubunu üretiyorsa, $\theta$ büyük cismin bir elemanıysa ve $\zeta$ birimin ilkel bir $p$'inci köküyse,
+Eksik fikir yine Lagrange’dan geliyor. Ters yönde gitmek için seriyi, her bölüm grubu asal $p$ sayıda elemanı olan devirli bir grup olana kadar inceltir ve birimin gereken köklerini ekleriz. Böyle bir adımın Galois grubu tek bir $\sigma$ elemanının kuvvetlerinden oluşsun. $\theta$ büyük cisimden bir eleman, $\zeta$ da birimin ilkel bir $p$’inci kökü olsun. O zaman
 
 $$
 \ell = \sum_{j=0}^{p-1} \zeta^{-j}\,\sigma^{j}(\theta)
 $$
 
-Lagrange çözücüsü $\sigma(\ell) = \zeta\ell$ eşitliğini sağlar; dolayısıyla $\ell^p$ küçük cisimdedir. $\theta$ uygun seçilirse $\ell \ne 0$ olur; o zaman büyük cisim, küçük cisme $\ell$ eklenerek elde edilir ve bu adım, $\ell^p$ elemanının $p$'inci kökünü almaktan ibarettir. Kübikteki $L$ tam olarak bu yapıdır.
+Lagrange çözücüsü $\sigma(\ell) = \zeta\ell$ eşitliğini sağlar; bu yüzden $\ell^p$ küçük cisimdedir. $\theta$ uygun seçilirse $\ell \ne 0$ olur ve büyük cisim, küçük cisme $\ell$ eklenerek elde edilir; yani bu adım $\ell^p$ sayısının $p$’inci kökünü almaktan ibarettir. Üçüncü derecedeki $L$ tam olarak bu yapıdır.
 
-Genel polinomun Galois grubu $S_n$ olduğundan, $n$'inci dereceden genel denklem ancak ve ancak $S_n$ çözülebilir bir grupsa radikallerle çözülebilir. Formüllerle ilgili bir soru, permütasyonlarla ilgili bir soruya dönüşmüştür.
+Genel polinomun Galois grubu $S_n$ olduğu için $n$’inci dereceden genel denklem ancak ve ancak $S_n$ çözülebilir bir grupsa radikallerle çözülebilir. Böylece formül sorusu bir permütasyon sorusuna dönüştü.
 
-### Merdiven olarak klasik formüller
+### Klasik formüller birer merdiven
 
-$n = 3$ için merdivenin iki basamağı vardır:
+$n = 3$ için merdivenin iki basamağı var:
 
 $$
 \begin{gathered}
@@ -195,21 +195,21 @@ S_3/A_3 \cong C_2, \qquad A_3 \cong C_3 .
 \end{gathered}
 $$
 
-Burada $A_n$ çift permütasyonlardan oluşan alterne grubu, $C_m$ ise $m$ mertebeli devirli grubu gösterir. $C_2$ basamağı, çift permütasyonları tek permütasyonlardan ayıran bir kareköktür. Cardano formülünde bu, $\sqrt{D}$ kareköküdür: Gerçekten de $\Delta = \prod_{i<j}(r_i - r_j)^2 = -4p^3 - 27q^2$ diskriminant olmak üzere $D = -\Delta/108$ olur ve $\sqrt{\Delta} = \prod_{i<j}(r_i - r_j)$ her transpozisyonda işaret değiştirir. $C_3$ basamağı ise küpköktür.
+Burada $A_n$, çift permütasyonlardan (çift sayıda transpozisyonla elde edilenlerden) oluşan alterne grubu; $C_m$ de $m$ elemanlı devirli grubu gösterir. $C_2$ basamağı, çift permütasyonları tek olanlardan ayıran bir karekök. Cardano formülündeki $\sqrt{D}$ bu kareköktür: $\Delta = \prod_{i<j}(r_i - r_j)^2 = -4p^3 - 27q^2$ diskriminant olmak üzere $D = -\Delta/108$ olur. $\sqrt{\Delta} = \prod_{i<j}(r_i - r_j)$ ise köklerin ikili farklarının çarpımıdır ve her transpozisyonda işaret değiştirir. $C_3$ basamağı da küpkök.
 
-$n = 4$ için merdivenin dört basamağı vardır:
+$n = 4$ için merdivenin dört basamağı var:
 
 $$
 S_4 \;\triangleright\; A_4 \;\triangleright\; V_4 \;\triangleright\; C_2 \;\triangleright\; \{e\}.
 $$
 
-Mertebeler sırasıyla $24, 12, 4, 2, 1$, bölüm grupları ise $C_2, C_3, C_2, C_2$ olur; burada $C_2 = \{e, (1\,2)(3\,4)\}$ alınmıştır. Bu $C_2$ altgrubu $V_4$ içinde normaldir ama $S_4$ içinde değildir. Bunda bir sakınca yoktur, çünkü altnormal seri her grubun yalnızca bir üstündeki grup içinde normal olmasını ister. Merdiven, Ferrari yönteminin ta kendisidir. İlk iki basamak, kökleri tam olarak $V_4$ tarafından sabit bırakılan çözücü kübiği bir karekök ve bir küpkökle çözer; son iki basamak da kareköklerdir: $s = \sqrt{2y - p}$ karekökü denklemi iki ikinci derece denkleme ayırır, ikinci derece kök formülü de işi bitirir.
+Grupların eleman sayıları sırasıyla $24, 12, 4, 2, 1$; bölüm grupları ise $C_2, C_3, C_2, C_2$. Burada $C_2 = \{e, (1\,2)(3\,4)\}$ alıyoruz. Bu grup $V_4$ içinde normal ama $S_4$ içinde değil; bunda sakınca yok, çünkü altnormal seri her grubun yalnızca bir üstündeki grup içinde normal olmasını ister. Bu merdiven, Ferrari yönteminin ta kendisi. İlk iki basamak, kökleri tam olarak $V_4$’ün yerinde bıraktığı çözücü kübiği bir karekök ve bir küpkökle çözer. Son iki basamak da karekök: $s = \sqrt{2y - p}$ denklemi iki ikinci dereceden denkleme ayırır, ikinci dereceden denklemin kök formülü de işi bitirir.
 
 ## Beşte kırılan merdiven: 60 elemanlı basit bir grup
 
-$n = 5$ için ilk basamak hâlâ yerindedir. $A_5$ alterne grubunun $S_5$ içindeki indeksi 2'dir; dolayısıyla normaldir ve $S_5/A_5 \cong C_2$ olur: Diskriminantın karekökü yine elimizdedir. Sorun bir sonraki basamaktadır: Merdiveni sürdürmek için $A_5$ grubunun ya değişmeli olması (ki değildir) ya da $\{e\} \ne N \ne A_5$ koşulunu sağlayan bir $N$ normal altgrubu içermesi gerekir.
+$n = 5$ için ilk basamak hâlâ yerinde. $A_5$ alterne grubu, $S_5$’in elemanlarının tam yarısını içerir (indeksi 2’dir); bu yüzden normaldir ve $S_5/A_5 \cong C_2$ olur. Yani diskriminantın karekökü yine elimizde. Sorun bir sonraki basamakta. Merdiveni sürdürmek için $A_5$ ya değişmeli olmalı ya da $\{e\} \ne N \ne A_5$ olan bir $N$ normal altgrubu içermeli. $A_5$ değişmeli değil.
 
-Normal bir altgrup eşlenik sınıflarının birleşimidir; bu yüzden sınıfları bilmek işe yarar. $A_5$ grubunun 60 elemanı beş eşlenik sınıfına ayrılır:
+Normal bir altgrup, eşlenik sınıflarının birleşimidir; bu yüzden bu sınıfları bilmek işimize yarar. $A_5$’in 60 elemanı beş eşlenik sınıfına ayrılır:
 
 | Devir tipi | Örnek | Sınıf büyüklüğü |
 | --- | --- | ---: |
@@ -219,18 +219,18 @@ Normal bir altgrup eşlenik sınıflarının birleşimidir; bu yüzden sınıfla
 | 5-devirler | $(1\,2\,3\,4\,5)$ | 12 |
 | 5-devirler | $(1\,3\,5\,2\,4)$ | 12 |
 
-$S_5$ grubundaki 24 tane 5-devir, $A_5$ içinde on ikişer elemanlı iki sınıfa ayrılır: Bir 5-devir ile karesi (tablodaki iki örnek gibi) birbirine ancak tek permütasyonlarla eşleniktir.
+$S_5$’teki 24 tane 5-devir, $A_5$ içinde on ikişer elemanlı iki sınıfa ayrılır: Bir 5-devir ile karesi (tablodaki iki örnek gibi) birbirine ancak tek permütasyonlarla eşleniktir.
 
-Şimdi $N$, $A_5$ grubunun bir normal altgrubu olsun. $N$ birim elemanı içerir, tam sınıfların birleşimidir ve Lagrange teoremine göre mertebesi 60'ı böler. Dolayısıyla $|N|$ sayısı, 1'in ve 12, 12, 15, 20 sayılarından bazılarının toplamıdır. Olası değerler
+Şimdi $N$, $A_5$’in bir normal altgrubu olsun. $N$ etkisiz eleman $e$’yi içerir, tam sınıfların birleşimidir ve Lagrange teoremine göre eleman sayısı $|N|$, 60’ı böler. Buna göre $|N|$, 1 ile 12, 12, 15 ve 20 sayılarından bazılarının toplamıdır. Olası değerler şunlar:
 
 $$
 \begin{gathered}
 1, 13, 16, 21, 25, 28, \\
-33, 36, 40, 45, 48, 60
+33, 36, 40, 45, 48, 60.
 \end{gathered}
 $$
 
-olup bunlardan 60'ı bölenler yalnızca 1 ve 60'tır. Demek ki $A_5$ grubunun $\{e\}$ ve kendisi dışında normal altgrubu yoktur; yani $A_5$ *basit* bir gruptur. Üstelik kesinlikle değişmeli değildir, çünkü değişmeli bir grupta her eşlenik sınıfı tek elemanlıdır.
+Bunlardan 60’ı bölenler yalnızca 1 ve 60. Demek ki $A_5$’in $\{e\}$ ve kendisinden başka normal altgrubu yok; yani $A_5$ *basit* bir gruptur. Üstelik hiç de değişmeli değildir, çünkü değişmeli bir grupta her eşlenik sınıfı tek elemanlıdır.
 
 Sonuç olarak $S_5$ için merdiven
 
@@ -238,18 +238,18 @@ $$
 S_5 \;\triangleright\; A_5 \;\triangleright\; \{e\}
 $$
 
-serisinin ötesinde inceltilemez. Bu, $S_5$ grubunun tek bileşim serisidir (bölümleri basit gruplar olan altnormal seri) ve Jordan–Hölder teoremine göre bir grubun bütün bileşim serileri aynı bölüm gruplarına sahiptir. Çözülebilir bir grubun bileşim serisindeki bölümler asal mertebeli devirli gruplardır; oysa buradaki bölümlerden biri $A_5$ grubudur. O hâlde $S_5$ çözülebilir değildir. Aynı şekilde, her $n \ge 5$ için $A_n$ basit ve değişmeli olmayan bir grup olduğundan, $n \ge 5$ için hiçbir $S_n$ grubu çözülebilir değildir.
+serisinde kalır; araya yeni bir basamak koyamayız. Bu, $S_5$’in tek bileşim serisidir (bölümleri basit gruplar olan altnormal seri). Jordan–Hölder teoremine göre bir grubun bütün bileşim serilerinde aynı bölüm grupları çıkar. Çözülebilir bir grubun bileşim serisindeki bölümler, asal sayıda elemanı olan devirli gruplardır; burada ise bölümlerden biri $A_5$. O hâlde $S_5$ çözülebilir değildir. Aynı şekilde $A_n$ de her $n \ge 5$ için basit ve değişmeli olmayan bir gruptur; bu yüzden $n \ge 5$ iken hiçbir $S_n$ çözülebilir değildir.
 
 <div class="my-8 rounded-xl border border-zinc-200 bg-white px-5 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 
-**Teorem (Abel–Ruffini).** Her $n \ge 5$ için $n$'inci dereceden genel polinom denklemi radikallerle çözülemez.
+**Teorem (Abel–Ruffini).** Her $n \ge 5$ için $n$’inci dereceden genel polinom denklemi radikallerle çözülemez.
 
 </div>
 
 <figure class="not-prose my-10">
 <div class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-3 py-6 sm:px-6 dark:border-zinc-800 dark:bg-zinc-900">
 <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-graph mask-fade-b"></div>
-<svg class="relative mx-auto block h-auto w-full max-w-xs text-zinc-900 dark:text-zinc-100" viewBox="48 0 288 316" role="img" aria-label="Ortak bir logaritmik ölçekte çizilmiş iki merdiven. 4. derece: S4, A4, V4, C2 ve aşikâr grup; bölüm grupları C2, C3, C2 ve C2, hepsi değişmeli. 5. derece: S5, A5 ve aşikâr grup; bölüm grupları C2 ve A5. Son ve uzun basamak olan A5 değişmeli değildir." xmlns="http://www.w3.org/2000/svg">
+<svg class="relative mx-auto block h-auto w-full max-w-xs text-zinc-900 dark:text-zinc-100" viewBox="48 0 288 316" role="img" aria-label="Aynı logaritmik ölçekte çizilmiş iki merdiven. Dördüncü derece: S4, A4, V4, C2 ve tek elemanlı grup; bölüm grupları C2, C3, C2 ve C2, hepsi değişmeli. Beşinci derece: S5, A5 ve tek elemanlı grup; bölüm grupları C2 ve A5. Sondaki uzun basamak A5 değişmeli değil." xmlns="http://www.w3.org/2000/svg">
 <!-- Math labels use KaTeX's fonts, which the formulas on this page already load: they match the text and cost no extra download. -->
 <g class="text-zinc-600 dark:text-zinc-400" fill="currentColor" style="font-family: KaTeX_Main, var(--font-serif); font-size: 15px">
 <text x="100" y="24" text-anchor="middle"><tspan font-style="italic" style="font-family: KaTeX_Math, var(--font-serif)">n</tspan> = 4</text>
@@ -299,46 +299,46 @@ serisinin ötesinde inceltilemez. Bu, $S_5$ grubunun tek bileşim serisidir (bö
 </g>
 </svg>
 </div>
-<figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">Merdiven olarak çizilmiş bileşim serileri. Her basamağın yanında bölüm grubu yazılıdır; her grup, mertebesinin logaritmasıyla orantılı bir yükseklikte durur, dolayısıyla bir basamağın uzunluğu bölüm grubunun mertebesini ölçer. <i>S</i><sub>4</sub> dört küçük değişmeli basamağa ayrılır; <i>S</i><sub>5</sub> grubunda ise kısa bir basamaktan sonra tek ve uzun bir basamak gelir: bölünemeyen basit grup <i>A</i><sub>5</sub>.</figcaption>
+<figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">Merdiven biçiminde çizilmiş bileşim serileri. Her basamağın yanında bölüm grubu yazıyor. Her grup, eleman sayısının logaritmasıyla orantılı bir yükseklikte duruyor; bu yüzden bir basamağın uzunluğu, bölüm grubunun eleman sayısını gösteriyor. <i>S</i><sub>4</sub> dört küçük değişmeli basamağa ayrılıyor. <i>S</i><sub>5</sub>’te ise kısa bir basamaktan sonra tek ve uzun bir basamak geliyor: bölünemeyen basit grup <i>A</i><sub>5</sub>.</figcaption>
 </figure>
 
-## Radikallerle çözülemeyen bir beşinci derece denklem
+## Radikallerle çözülemeyen bir beşinci dereceden denklem
 
-Genel polinom, değişken katsayılı biçimsel bir nesnedir; ama teorem somut sayılar için de geçerlidir. Şu polinoma bakalım:
+Genel polinom, katsayıları değişken olan soyut bir nesne; ama teoremin somut sayılar için de sonuçları var. Şu polinoma bakalım:
 
 $$
 f(x) = x^5 - 4x + 2 .
 $$
 
-1. **İndirgenemezdir.** $p = 2$ için Eisenstein ölçütü uygulanır: 2 sayısı baş katsayı dışındaki bütün katsayıları böler, $2^2 = 4$ ise sabit terimi bölmez. Dolayısıyla $f$ polinomu $\mathbb{Q}$ üzerinde indirgenemezdir ve beş kökü birbirinden farklıdır.
-2. **Tam olarak üç gerçel kökü vardır.** $f(-2) = -22 < 0 < 2 = f(0)$ ve $f(1) = -1 < 0 < 26 = f(2)$ olduğundan $(-2, 0)$, $(0, 1)$ ve $(1, 2)$ aralıklarının her birinde işaret değişir; demek ki en az üç gerçel kök vardır. $f'(x) = 5x^4 - 4$ türevi yalnızca $x = \pm(4/5)^{1/4}$ noktalarında sıfır olduğundan, Rolle teoremine göre en fazla üç gerçel kök olabilir. Kalan iki kök birbirinin karmaşık eşleniğidir.
-3. **Galois grubu bir transpozisyon içerir.** Karmaşık eşlenik alma işlemi $K \subset \mathbb{C}$ ayrışım cismini kendisine götürür ve $\mathbb{Q}$ cismini sabit bırakır; dolayısıyla $\mathrm{Gal}(f)$ grubunun bir elemanıdır. Bu eleman üç gerçel kökü sabit bırakır, diğer ikisinin yerini değiştirir.
-4. **Bir 5-devir içerir.** İndirgenemezlik her $\alpha$ kökü için $[\mathbb{Q}(\alpha):\mathbb{Q}] = 5$ verir; dolayısıyla 5 sayısı $[K:\mathbb{Q}] = |\mathrm{Gal}(f)|$ mertebesini böler. Cauchy teoremine göre grupta 5 mertebeli bir eleman vardır; $S_5$ içinde 5 mertebeli elemanlar ise tam olarak 5-devirlerdir.
-5. **Demek ki Galois grubu $S_5$'in tamamıdır.** Kökleri, transpozisyon $(1\,2)$ olacak şekilde numaralandıralım. 5-devrin bir kuvveti 1'i 2'ye götürür ve 5 asal olduğundan bu kuvvet yine bir 5-devirdir; diğer üç kökü yeniden numaralandırırsak bu devir $(1\,2\,3\,4\,5)$ olur. $(1\,2)$ transpozisyonunun bu devirle art arda eşleniği alınırsa $(2\,3)$, $(3\,4)$ ve $(4\,5)$ elde edilir; komşu transpozisyonlar da $S_5$ grubunu üretir.
+1. **İndirgenemez.** $p = 2$ için Eisenstein ölçütü işe yarar: 2, baş katsayı dışındaki bütün katsayıları böler; $2^2 = 4$ ise sabit terimi bölmez. Bu yüzden $f$ polinomu $\mathbb{Q}$ üzerinde indirgenemez, yani daha düşük dereceli rasyonel polinomların çarpımına ayrılamaz. Beş kökü de birbirinden farklıdır.
+2. **Tam üç gerçel kökü var.** $f(-2) = -22 < 0 < 2 = f(0)$ ve $f(1) = -1 < 0 < 26 = f(2)$ olduğu için polinom $(-2, 0)$, $(0, 1)$ ve $(1, 2)$ aralıklarının her birinde işaret değiştirir, yani sıfırdan geçer; demek ki en az üç gerçel kök var. Türev $f'(x) = 5x^4 - 4$ yalnızca $x = \pm(4/5)^{1/4}$ noktalarında sıfır olur; bu yüzden Rolle teoremine göre en fazla üç gerçel kök olabilir. Kalan iki kök birbirinin karmaşık eşleniğidir.
+3. **Galois grubunda bir transpozisyon var.** Karmaşık eşlenik alma işlemi $K \subset \mathbb{C}$ ayrışım cismini yine kendisine götürür ve $\mathbb{Q}$ cismini değiştirmez; bu yüzden $\mathrm{Gal}(f)$ grubunun bir elemanıdır. Bu eleman üç gerçel kökü yerinde bırakır, öbür ikisinin yerini değiştirir.
+4. **Bir 5-devir de var.** $f$ indirgenemez olduğundan her $\alpha$ kökü için $[\mathbb{Q}(\alpha):\mathbb{Q}] = 5$ olur. Bu yüzden 5, $[K:\mathbb{Q}] = |\mathrm{Gal}(f)|$ sayısını böler. Cauchy teoremine göre grupta mertebesi 5 olan, yani beş kez uygulanınca başa dönen bir eleman vardır. $S_5$’te mertebesi 5 olan elemanlar da tam olarak 5-devirlerdir.
+5. **Demek ki Galois grubu $S_5$’in tamamı.** Kökleri, transpozisyon $(1\,2)$ olacak şekilde numaralandıralım. 5-devrin bir kuvveti 1’i 2’ye götürür; 5 asal olduğu için bu kuvvet de bir 5-devirdir. Öbür üç kökü yeniden numaralandırırsak bu devir $(1\,2\,3\,4\,5)$ olur. $(1\,2)$ transpozisyonunun bu devirle eşleniğini art arda alırsak $(2\,3)$, $(3\,4)$ ve $(4\,5)$ çıkar. Ardışık iki sayının yerini değiştiren transpozisyonlar da $S_5$’in tamamını üretir.
 
-Bu nedenle $\mathrm{Gal}(x^5 - 4x + 2) = S_5$ olur. Bu grup çözülebilir değildir; dolayısıyla beş kökten hiçbiri tam sayılar, dört işlem ve radikaller kullanılarak yazılamaz. (Tek bir kök yazılabilseydi, onun kulesinin Galois kapanışı beş kökün hepsini içerirdi.)
+Böylece $\mathrm{Gal}(x^5 - 4x + 2) = S_5$ olur. Bu grup çözülebilir değil; bu yüzden beş kökten hiçbiri tam sayılar, dört işlem ve radikallerle yazılamaz. (Tek bir kök bile yazılabilseydi, onun kulesinin Galois kapanışı beş kökün hepsini içerirdi.)
 
 ## Teoremin söylemedikleri
 
-**Beşinci derece denklemlerin çözümü olmadığını söylemez.** Cebirin temel teoremine göre $x^5 - 4x + 2$ polinomunun beş karmaşık kökü vardır ve bunlar kolayca hesaplanır. $x_{k+1} = x_k - f(x_k)/f'(x_k)$ biçimindeki Newton yöntemi burada
+**Beşinci dereceden denklemlerin çözümü olmadığını söylemez.** Cebirin temel teoremine göre $x^5 - 4x + 2$ polinomunun beş karmaşık kökü vardır ve bunları hesaplamak kolaydır. Newton yönteminin $x_{k+1} = x_k - f(x_k)/f'(x_k)$ formülü burada
 
 $$
 x_{k+1} = x_k - \frac{x_k^5 - 4x_k + 2}{5x_k^4 - 4}
 $$
 
-hâlini alır ve $x_0 = 0$ noktasından başlatıldığında sırasıyla $0{,}5$, $0{,}508474\ldots$, $0{,}508499484434\ldots$ ve $0{,}508499484657\ldots$ değerlerini verir: Doğru ondalık basamak sayısı her adımda kabaca ikiye katlanır. Diğer kökler yaklaşık olarak $-1{,}518512$, $1{,}243596$ ve $-0{,}116792 \pm 1{,}438448\,i$ sayılarıdır.
+hâlini alır. $x_0 = 0$’dan başlarsak sırasıyla $0{,}5$, $0{,}508474\ldots$, $0{,}508499484434\ldots$ ve $0{,}508499484657\ldots$ değerlerini buluruz: Doğru basamak sayısı her adımda kabaca ikiye katlanır. Öbür kökler yaklaşık olarak $-1{,}518512$, $1{,}243596$ ve $-0{,}116792 \pm 1{,}438448\,i$.
 
-**Hiçbir beşinci derece denklemin radikallerle çözülemeyeceğini de söylemez.** Bazı özel denklemler çözülebilir. $\zeta = e^{2\pi i/5}$ olmak üzere $x^5 - 2$ polinomunun kökleri $k = 0, 1, \dots, 4$ için $\sqrt[5]{2}\,\zeta^k$ sayılarıdır ve $\zeta$ da radikallerle ifade edilebilir; bunu örneğin $\cos(2\pi/5) = (\sqrt{5} - 1)/4$ eşitliği gösterir. $x^5 - 2$ polinomunun Galois grubu 20 elemanlıdır ve çözülebilirdir: 5 mertebeli devirli bir normal altgrubu vardır ve bölüm grubu 4 mertebeli devirli gruptur. Teorem, *her* beşinci derece denklem için işleyen tek bir formülü dışlar; hangi denklemlerin çözülebilir olduğuna ise Galois ölçütü tek tek karar verir.
+**Hiçbir beşinci dereceden denklemin radikallerle çözülemeyeceğini de söylemez.** Bazı özel denklemler çözülebilir. $\zeta = e^{2\pi i/5}$ olmak üzere $x^5 - 2$ polinomunun kökleri $k = 0, 1, \dots, 4$ için $\sqrt[5]{2}\,\zeta^k$ sayılarıdır. $\zeta$ da radikallerle yazılabilir; bunu örneğin $\cos(2\pi/5) = (\sqrt{5} - 1)/4$ eşitliğinden görebiliriz. $x^5 - 2$ polinomunun Galois grubu 20 elemanlı ve çözülebilir: 5 elemanlı devirli bir normal altgrubu var ve bölüm grubu 4 elemanlı devirli grup. Teoremin dışladığı şey, beşinci dereceden *her* denklemde işe yarayan tek bir formül. Hangi denklemlerin çözülebildiğine ise Galois ölçütü tek tek karar verir.
 
-**Hiçbir kapalı biçim olmadığını da söylemez.** Dışlanan yalnızca radikallerdir. Radikallere tek bir yeni fonksiyon, *Bring radikali* eklenirse (gerçel $a$ için $x^5 + x + a = 0$ denkleminin tek gerçel kökü; $a$'nın fonksiyonu olarak düşünülür ve karmaşık $a$ değerlerine analitik devamla genişletilir) her beşinci derece denklem kapalı biçimde çözülebilir. Charles Hermite 1858'de beşinci derece denklemi, kübiğin trigonometrik fonksiyonlarla çözülebilmesine benzer biçimde, eliptik modüler fonksiyonlarla çözdü. Felix Klein da daha sonra bütün tabloyu, dönme grubu tam olarak $A_5$ olan düzgün yirmi yüzlünün (ikosahedron) simetrileriyle açıkladı.
+**Hiçbir kapalı biçim olmadığını da söylemez.** Dışlanan yalnızca radikaller. Radikallere tek bir yeni fonksiyon, *Bring radikali* eklenirse beşinci dereceden her denklem kapalı biçimde çözülebilir. Bring radikali, gerçel $a$ için $x^5 + x + a = 0$ denkleminin tek gerçel köküdür; $a$’nın fonksiyonu olarak düşünülür ve analitik devamla karmaşık $a$ değerlerine genişletilir. Üçüncü dereceden denklem nasıl trigonometrik fonksiyonlarla çözülebiliyorsa, Charles Hermite de 1858’de beşinci dereceden denklemi eliptik modüler fonksiyonlarla çözdü. Felix Klein da sonradan bütün tabloyu, dönme grubu tam olarak $A_5$ olan düzgün yirmi yüzlünün (ikosahedron) simetrileriyle açıkladı.
 
-## Sonuç: Simetri çözülebilirliği belirler
+## Sonuç: Çözülebilirliğe simetri karar verir
 
-Radikallerle yazılmış bir formül, simetriyi söken bir makinedir. Her radikal, kökler arasındaki simetriyi değişmeli bir adımla biraz daha kırar ve bir formülün var olması, simetri grubunun bu şekilde parçalara ayrılabilmesine denktir. İkinci, üçüncü ve dördüncü derecede simetrik grup değişmeli parçalara ayrılır: $C_2$; sonra $C_2, C_3$; sonra $C_2, C_3, C_2, C_2$. Beşinci dereceden itibaren ise genel denklem, hiçbir radikalin bölemeyeceği basit ve değişmeli olmayan bir çekirdek taşır: $A_n$. Genel beşinci derece denklem, çözülemeyecek kadar karmaşık değildir; simetrisi, radikallerin sökemeyeceği türdendir.
+Radikallerle yazılmış bir formül, simetriyi söken bir makine gibidir. Her radikal, kökler arasındaki simetriyi değişmeli bir adımla biraz daha kırar. Bir formülün var olması da simetri grubunun bu şekilde parçalara ayrılabilmesiyle aynı şeydir. İkinci, üçüncü ve dördüncü derecede simetrik grup değişmeli parçalara ayrılır: $C_2$; sonra $C_2, C_3$; sonra $C_2, C_3, C_2, C_2$. Beşinci dereceden başlayarak ise genel denklemin içinde, hiçbir radikalin bölemeyeceği basit ve değişmeli olmayan bir çekirdek vardır: $A_n$. Yani genel beşinci dereceden denklem çözülemeyecek kadar karmaşık değil; simetrisi, radikallerin sökemeyeceği türden.
 
 ## Okuma önerileri
 
-- David S. Dummit ve Richard M. Foote, <cite lang="en">Abstract Algebra</cite>, 3. baskı (Wiley, 2004), 14. bölüm; 14.7. kısım çözülebilir ve radikal genişlemeleri ele alır ve beşinci derece denklemin çözülemezliğini kanıtlar.
-- Ian Stewart, <cite lang="en">Galois Theory</cite> (CRC Press): Teoriyi tarihiyle birlikte geliştirir.
-- V. B. Alekseev, <cite lang="en">Abel's Theorem in Problems and Solutions</cite> (V. I. Arnold'un derslerine dayanır): teoreme gruplar, karmaşık fonksiyonlar ve Riemann yüzeyleri üzerinden, problemlerle ilerleyen bir yol.
-- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques où on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): özgün kanıt; kısalığıyla ünlü bir risale.
+- David S. Dummit ve Richard M. Foote, <cite lang="en">Abstract Algebra</cite>, 3. baskı (Wiley, 2004), 14. bölüm; 14.7. kısım çözülebilir genişlemeleri, radikal genişlemeleri ve beşinci dereceden denklemin neden çözülemediğini anlatıyor.
+- Ian Stewart, <cite lang="en">Galois Theory</cite> (CRC Press): teoriyi tarihiyle birlikte anlatıyor.
+- V. B. Alekseev, <cite lang="en">Abel's Theorem in Problems and Solutions</cite> (V. I. Arnold’un derslerine dayanıyor): gruplar, karmaşık fonksiyonlar ve Riemann yüzeyleri üzerinden, problem çözerek ilerleyen bir yol.
+- Niels Henrik Abel, <cite lang="fr">Mémoire sur les équations algébriques où on démontre l'impossibilité de la résolution de l'équation générale du cinquième degré</cite> (Christiania, 1824): özgün kanıt; kısalığıyla ünlü bir kitapçık.

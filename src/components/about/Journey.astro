@@ -3,7 +3,10 @@
  * "The journey so far" (section #journey, linked from the home page as /about/#journey): a
  * list of chapters, then the chapters themselves in rough chronological order, most with a
  * small figure of the idea behind them. Chapter text lives in ./prose/* (per locale); names,
- * labels and captions in about.ts, whose JOURNEY_CHAPTERS fixes the order and the numbers.
+ * labels and captions in about.ts. JOURNEY_CHAPTERS gives the chapter numbers and the list at
+ * the top; a chapter has a figure exactly when its catalogue entry has a caption, which numbers
+ * the figures. The chapters below are written out by hand, and tests/about-journey.test.ts
+ * checks that they follow JOURNEY_CHAPTERS and use their own number and figure.
  *
  * Fragment ids are `journey-<key>`. The home page links to #journey and the timeline to
  * #journey-avionics, so keep existing keys when chapters are added or reordered.
@@ -48,8 +51,8 @@ const c = m.chapters;
 
 /** Two-digit chapter number, from the reading order. */
 const number = (key: JourneyChapter) => String(JOURNEY_CHAPTERS.indexOf(key) + 1).padStart(2, '0');
-/** Figures are numbered in reading order among the chapters that have one. */
-const FIGURES: readonly JourneyChapter[] = JOURNEY_CHAPTERS.filter((key) => key !== 'work' && key !== 'community');
+/** Figures are numbered in reading order among the chapters that have one (a caption). */
+const FIGURES: readonly JourneyChapter[] = JOURNEY_CHAPTERS.filter((key) => 'caption' in c[key]);
 const figure = (key: JourneyChapter) => FIGURES.indexOf(key) + 1;
 
 // Fig. 1's numbers come from the same transfer model as its drawing, with real constants:

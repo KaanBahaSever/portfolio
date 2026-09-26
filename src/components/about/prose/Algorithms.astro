@@ -28,11 +28,11 @@ const battleshipSource = 'https://github.com/KaanBahaSever/BattleShips';
         Lise bitirme projelerim XOX ve Amiral Battı oyunlarının masaüstü sürümleriydi; Amiral Battı’nın{' '}
         <a href={battleshipSource} class={ui.inlineLink}>C# kaynak kodu</a> GitHub’da. Bilgisayarın Amiral Battı’daki
         atışlarını bugün yöneten Av ve Hedef (<span lang="en">Hunt &amp; Target</span>) algoritmasını ise sonradan
-        geliştirdim: Önce tahtada gemi arıyor, isabet aldığında da hedefi kıstırıyor.
+        geliştirdim: Önce tahtada gemi arıyor, bir gemiyi vurduğunda da onu batırana kadar çevresine ateş ediyor.
       </p>
       <p>
         İki oyunun tarayıcı sürümleri de artık bu sitede ve rakipleri algoritmik: Amiral Battı’da Av ve Hedef, XOX’ta
-        oyun ağacının tamamını tarayan bir minimax araması. <a href={battleship} class={ui.inlineLink}>Amiral Battı</a>{' '}
+        alfa–beta budamalı bir minimax araması. <a href={battleship} class={ui.inlineLink}>Amiral Battı</a>{' '}
         ya da <a href={ticTacToe} class={ui.inlineLink}>XOX</a> oynayabilirsiniz.
       </p>
     </>
@@ -52,7 +52,7 @@ const battleshipSource = 'https://github.com/KaanBahaSever/BattleShips';
       </p>
       <p>
         Both games now have browser versions on this site, with algorithmic opponents: Hunt &amp; Target for
-        Battleship, and a minimax search of the whole game tree for tic-tac-toe. Play{' '}
+        Battleship, and a minimax search with alpha–beta pruning for tic-tac-toe. Play{' '}
         <a href={battleship} class={ui.inlineLink}>Battleship</a> or{' '}
         <a href={ticTacToe} class={ui.inlineLink}>tic-tac-toe</a>.
       </p>

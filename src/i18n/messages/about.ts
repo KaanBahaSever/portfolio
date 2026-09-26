@@ -39,7 +39,7 @@ const en = {
   meta: {
     title: 'About',
     description:
-      'About Kaan Baha Sever, a software developer and mathematics student in Istanbul: from C# at a vocational high school and rocket avionics to systems software in C++ and Go.',
+      'About Kaan Baha Sever, a software developer and mathematics student in Istanbul: from C# at a vocational high school and rocket avionics to C++ and Go.',
   },
   header: {
     eyebrow: 'About',
@@ -164,7 +164,7 @@ const tr: AboutMessages = {
   meta: {
     title: 'Hakkımda',
     description:
-      'Kaan Baha Sever hakkında: İstanbul’da yazılım geliştirici ve matematik öğrencisi. Meslek lisesinde C# ile başlayıp roket aviyoniğinden C++ ve Go ile sistem yazılımına uzanan bir yol.',
+      'Kaan Baha Sever: İstanbul’da yazılım geliştirici ve matematik öğrencisi. Meslek lisesinde C# ile başlayan, roket aviyoniğinden C++ ve Go’ya uzanan bir yol.',
   },
   header: {
     eyebrow: 'Hakkımda',
@@ -257,7 +257,8 @@ const tr: AboutMessages = {
         title: 'Otomasyon: tek tıkla test, paketleme ve dağıtım',
         caption:
           'Tek bir tetikleme testleri çalıştırır, her platform için ayrı bir derlemeye dallanır; ardından çıktılar paketlenip dağıtılmak üzere yeniden birleşir.',
-        figureLabels: { trigger: 'TETİK', test: 'TEST', build: 'DERLEME', package: 'PAKET', deploy: 'DAĞITIM' },
+        // "Tetikleme", as the caption says; plain "tetik" reads as a gun's trigger.
+        figureLabels: { trigger: 'TETİKLEME', test: 'TEST', build: 'DERLEME', package: 'PAKET', deploy: 'DAĞITIM' },
       },
     },
   },

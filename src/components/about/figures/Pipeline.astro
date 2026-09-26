@@ -15,7 +15,9 @@ interface Props {
 const { labels } = Astro.props;
 
 const MID = 70;
-const col = { trigger: 22, test: 82, build: 160, package: 238, deploy: 294 };
+// The trigger sits a little in from the edge so that a nine-letter label ("TETİKLEME") fits
+// under it at font size 8 (about 48 units wide with the letter spacing).
+const col = { trigger: 26, test: 82, build: 160, package: 238, deploy: 294 };
 const BUILD_W = 58;
 const BUILD_H = 20;
 /** Platform names are proper nouns: the same in every language. */
@@ -84,7 +86,7 @@ const label = 'text-zinc-600 dark:text-zinc-400';
     <circle cx={col.deploy} cy={MID} r="4" fill="currentColor" />
   </g>
 
-  <g class={`${label} font-mono`} fill="currentColor" font-size="7.5" letter-spacing="0.06em" text-anchor="middle">
+  <g class={`${label} font-mono`} fill="currentColor" font-size="8" letter-spacing="0.06em" text-anchor="middle">
     <text x={col.trigger} y="136">{labels.trigger}</text>
     <text x={col.test} y="136">{labels.test}</text>
     <text x={col.build} y="136">{labels.build}</text>

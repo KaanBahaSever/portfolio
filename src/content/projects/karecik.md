@@ -3,6 +3,7 @@ title: Karecik
 shortDescription: A production SaaS that local cafés and restaurants use for QR menus, customer interaction and menu and order management, built for zero downtime and low latency.
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/karecik
+liveUrl: https://karecik.com
 techStack: [Go, PostgreSQL]
 stage: production
 since: 2021

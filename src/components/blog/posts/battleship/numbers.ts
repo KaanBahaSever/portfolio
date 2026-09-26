@@ -8,10 +8,12 @@ import { formatters } from '../../../../i18n/format.ts';
 import { coordinateLabel } from '../../../../lib/games/battleship/rules.ts';
 import { weightDigits } from './format.ts';
 import {
+  BOARD_SIZE,
   FLEET_ARRANGEMENTS,
   FLEET_CELLS,
   GAMES,
   HUNT_EXAMPLE,
+  REPLAY_EXAMPLE,
   STRATEGIES,
   TARGET_EXAMPLE,
   cell,
@@ -21,8 +23,10 @@ import {
   placementCounts,
   randomExpectedShots,
   randomFinishedBy,
+  replayGame,
   replayHunt,
   simulation,
+  tally,
   targetWeight,
   type Strategy,
 } from './model.ts';
@@ -55,6 +59,18 @@ export function postNumbers(lang: Locale) {
   // Two standard errors of the least precise mean: how far the simulated means may be off.
   const margin = Math.max(...STRATEGIES.map((s) => (2 * results[s].sd) / Math.sqrt(results[s].games)));
 
+  // The parity replay: one game, with and without the lattice (ParityReplay.astro).
+  const withParity = replayGame('parity', REPLAY_EXAMPLE.seed);
+  const withoutParity = replayGame('no-parity', REPLAY_EXAMPLE.seed);
+  const counts = (replay: typeof withParity) => {
+    const t = tally(replay);
+    return { shots: int(t.shots), hunt: int(t.hunt), target: int(t.target) };
+  };
+  const destroyerSunk = withParity.shots.findIndex((shot) => shot.sunk?.ship === 'destroyer') + 1;
+  // Every ship's positions multiplied together: the fleets there would be if ships could overlap.
+  const fleetsIfOverlap = placementCounts().reduce((product, row) => product * row.count, 1);
+  const water = BOARD_SIZE * BOARD_SIZE - FLEET_CELLS;
+
   return {
     margin: one(margin),
     oneHit: {
@@ -81,8 +97,22 @@ export function postNumbers(lang: Locale) {
     target: { seed: int(TARGET_EXAMPLE.seed) },
     /** Share of games over within 50 shots. */
     within50: per((s) => (s.finished[50] ?? 0) / s.games, (x) => f.percent(x)),
+    replay: {
+      seed: int(REPLAY_EXAMPLE.seed),
+      /** The shot the figure opens on. */
+      start: int(REPLAY_EXAMPLE.start),
+      /** The shot that sinks the destroyer in the parity game (the lattice goes from m = 2 to 3). */
+      destroyerSunk: int(destroyerSunk),
+      parity: counts(withParity),
+      noParity: counts(withoutParity),
+      /** Shots the lattice saved in this game. */
+      saved: int(withoutParity.shots.length - withParity.shots.length),
+    },
     games: int(GAMES),
     fleets: int(FLEET_ARRANGEMENTS),
+    fleetsIfOverlap: int(fleetsIfOverlap),
+    /** The share of those products that are real fleets (no two ships overlapping). */
+    fleetsShare: f.percent(FLEET_ARRANGEMENTS / fleetsIfOverlap),
     placements: int(placements),
     shipCells: int(FLEET_CELLS),
     weight: int(targetWeight(placementCounts().map((row) => row.ship))),
@@ -93,6 +123,8 @@ export function postNumbers(lang: Locale) {
       expected: one(randomExpectedShots()),
       median: int(randomMedian),
       within85: f.percent(randomFinishedBy(85), { maximumFractionDigits: 1 }),
+      /** The average size of each of the 18 gaps the 17 ship cells cut the 83 water cells into. */
+      gap: one(water / (FLEET_CELLS + 1)),
     },
     mean: per((s) => s.mean, one),
     median: per((s) => s.median),

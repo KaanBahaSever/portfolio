@@ -7,8 +7,13 @@
  *
  * Presentational only: the enclosing figure carries the accessible description, so the SVG is
  * role="img" with a label when `label` is given, and hidden from assistive technology otherwise.
+ *
+ * Two optional slots take SVG drawn by the figure itself, placed with model.ts's DRAWING: "under"
+ * goes above the cell tints and below the grid lines (shading), "over" on top of everything
+ * (marks the figure shows and hides, as ParityReplay.astro does). The theme's variables (--sea,
+ * --miss, --hit, --on-hit, --heat-color) are set on the SVG, so slotted marks can use them.
  */
-import { BOARD_SIZE } from './model.ts';
+import { BOARD_SIZE, DRAWING } from './model.ts';
 
 export interface Marker {
   index: number;
@@ -63,9 +68,9 @@ const {
   class: className,
 } = Astro.props;
 
-const CELL = 28;
+const CELL = DRAWING.cell;
 /** Room for the coordinate labels above and to the left of the board. */
-const GUTTER = 18;
+const GUTTER = DRAWING.gutter;
 const width = GUTTER + view.cols * CELL + 1;
 const height = GUTTER + view.rows * CELL + 1;
 
@@ -149,6 +154,7 @@ const shipBoxes = ships.map((ship) => {
       return <rect class="highlight" x={x + 0.5} y={y + 0.5} width={CELL - 1} height={CELL - 1} />;
     })
   }
+  <slot name="under" />
 
   {/* Cell lines, then the frame. */}
   <g class="grid" stroke="currentColor" stroke-width="0.75">
@@ -246,6 +252,7 @@ const shipBoxes = ships.map((ship) => {
       );
     })
   }
+  <slot name="over" />
 </svg>
 
 <style>

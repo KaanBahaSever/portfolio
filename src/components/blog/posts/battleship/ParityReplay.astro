@@ -1,0 +1,572 @@
+---
+/**
+ * The parity hunt in action: one whole game of the Normal computer, stepped through shot by shot,
+ * with its hunting lattice and (behind a switch) without it, and what the lattice saved.
+ *
+ *   <ParityReplay lang="en">Caption, in the post's language.</ParityReplay>
+ *
+ * Both games are real: replayGame() runs the simulation's own game (game REPLAY_EXAMPLE.seed of
+ * playGame, the same fleet for both), which calls the code the computer plays at /games/battleship/.
+ * The page is rendered after shot REPLAY_EXAMPLE.start of the parity game, the moment before the
+ * destroyer sinks and the lattice changes from m = 2 to m = 3; parity-replay.ts then lets the
+ * reader step, slide and play through both games. Without JavaScript the figure still reads: the
+ * board, the readout and the chart are plain HTML and SVG, and the controls stay hidden.
+ *
+ * The board is Board.astro with this figure's marks in its slots: the lattices, the hidden ships
+ * (dashed until they sink, then filled), a numbered marker per shot of each game and a ring on the
+ * latest shot, all drawn once and shown or hidden per step.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { colOf, rowOf } from '../../../../lib/games/battleship/rules.ts';
+import { gameUi } from '../../../games/styles.ts';
+import Board from './Board.astro';
+import Figure from './Figure.astro';
+import Legend from './Legend.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { DRAWING, REPLAY_EXAMPLE, latticeCells, playGame, replayGame, tally } from './model.ts';
+import { REPLAY_GAMES, frameAt, frameText, type ReplayData } from './parity-replay.ts';
+
+interface Props {
+  lang: Locale;
+  /** Prefix for element ids and names; give each instance on a page its own. */
+  id?: string;
+}
+
+const { lang, id = 'parity-replay' } = Astro.props;
+const m = battleshipPostMessages[lang];
+const r = m.replay;
+const f = formatters(lang);
+const { seed, start } = REPLAY_EXAMPLE;
+
+const replays = { parity: replayGame('parity', seed), 'no-parity': replayGame('no-parity', seed) };
+
+/*
+ * What the prose and the caption say about this game (numbers.ts passes the counts to the MDX as
+ * n.replay). The build fails if the game's code ever plays it differently.
+ */
+const EXPECTED = {
+  parity: { shots: 49, hunt: 36, target: 13 },
+  'no-parity': { shots: 59, hunt: 43, target: 16 },
+  destroyerSunk: 22,
+};
+const fail = (message: string): never => {
+  throw new Error(`ParityReplay: ${message}`);
+};
+for (const game of REPLAY_GAMES) {
+  const counted = tally(replays[game]);
+  const expected = EXPECTED[game];
+  if (counted.shots !== playGame(game, seed)) fail(`the ${game} replay is not game ${seed} of the simulation`);
+  if (counted.shots !== expected.shots || counted.hunt !== expected.hunt || counted.target !== expected.target) {
+    fail(
+      `expected ${game}: ${expected.shots} = ${expected.hunt} hunt + ${expected.target} target shots, ` +
+        `the game played ${counted.shots} = ${counted.hunt} + ${counted.target}`,
+    );
+  }
+}
+if (JSON.stringify(replays.parity.fleet) !== JSON.stringify(replays['no-parity'].fleet)) {
+  fail('both games should fire at the same fleet');
+}
+const parityShots = replays.parity.shots;
+const destroyerSunk = parityShots.findIndex((shot) => shot.sunk?.ship === 'destroyer') + 1;
+if (destroyerSunk !== EXPECTED.destroyerSunk) {
+  fail(`expected the destroyer to sink with shot ${EXPECTED.destroyerSunk}, it sank with shot ${destroyerSunk}`);
+}
+if (start !== destroyerSunk - 1) fail('the figure should open just before the destroyer sinks');
+parityShots.forEach((shot, i) => {
+  // The checkerboard while the destroyer is afloat, every third diagonal after it sinks.
+  const lattice = i < destroyerSunk ? 2 : 3;
+  if (shot.modulus !== lattice) fail(`shot ${i + 1} was fired with m = ${shot.modulus}, expected m = ${lattice}`);
+  if (shot.hunt && (rowOf(shot.index) + colOf(shot.index)) % shot.modulus !== 0) {
+    fail(`hunt shot ${i + 1} is off the lattice of the shortest ship afloat`);
+  }
+});
+
+const data: ReplayData = {
+  seed,
+  fleet: replays.parity.fleet,
+  games: { parity: replays.parity.shots, 'no-parity': replays['no-parity'].shots },
+};
+// Inside a <script> element: no "</script>" may appear, so every "<" is escaped.
+const json = JSON.stringify(data).replace(/</g, '\\u003c');
+const frame = frameAt(data, 'parity', start);
+const text = frameText(data, frame, lang);
+
+// The board's marks, in Board.astro's SVG units.
+const { cell: CELL, gutter: GUTTER } = DRAWING;
+const corner = (index: number) => ({ x: GUTTER + colOf(index) * CELL, y: GUTTER + rowOf(index) * CELL });
+const centre = (index: number) => {
+  const { x, y } = corner(index);
+  return { cx: x + CELL / 2, cy: y + CELL / 2 };
+};
+const lattices = [...new Set(parityShots.map((shot) => shot.modulus))].map((modulus) => ({
+  modulus,
+  cells: latticeCells(modulus),
+}));
+const sunkNow = new Set(frame.sunk);
+const ships = data.fleet.map(({ ship, cells }) => {
+  const points = cells.map(corner);
+  const x = Math.min(...points.map((p) => p.x));
+  const y = Math.min(...points.map((p) => p.y));
+  const w = Math.max(...points.map((p) => p.x)) - x + CELL - 6;
+  const h = Math.max(...points.map((p) => p.y)) - y + CELL - 6;
+  return { ship, x: x + 3, y: y + 3, w, h, sunk: sunkNow.has(ship) };
+});
+const markers = REPLAY_GAMES.flatMap((game) =>
+  data.games[game].map((shot, i) => ({
+    game,
+    n: i + 1,
+    kind: shot.result === 'miss' ? 'miss' : 'hit',
+    visible: game === frame.game && i < frame.shot,
+    ...centre(shot.index),
+  })),
+);
+const ring = frame.last ? centre(frame.last.index) : { cx: 0, cy: 0 };
+
+// The bar chart: hunt and target shots of both games, on one scale.
+const tallies = REPLAY_GAMES.map((game) => ({ game, ...tally(replays[game]) }));
+const longest = Math.max(...tallies.map((row) => row.shots));
+const chartLabel = r.chart.aria(
+  tallies.map((row) => r.chart.row(r.games[row.game], row.shots, row.hunt, row.target)).join(' '),
+);
+
+const stepButton =
+  'inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-800 transition-colors hover:bg-zinc-100 disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800';
+const playButton =
+  'inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-accent-700 text-white shadow-sm transition-colors hover:bg-accent-800 disabled:opacity-50 dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400';
+const icon = {
+  class: 'size-5',
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': '1.75',
+  'stroke-linecap': 'round',
+  'stroke-linejoin': 'round',
+  'aria-hidden': 'true',
+  focusable: 'false',
+} as const;
+const dt = 'text-xs leading-snug text-zinc-600 dark:text-zinc-400';
+const dd = 'mt-0.5 text-sm text-zinc-900 dark:text-zinc-100';
+const num = 'font-mono tabular-nums';
+---
+
+<Figure bleed>
+  <div
+    slot="graphic"
+    class="replay"
+    lang={lang}
+    data-parity-replay
+    data-lang={lang}
+    data-game={frame.game}
+    data-shot={frame.shot}
+  >
+    <script is:inline type="application/json" data-replay-data set:html={json}></script>
+
+    <div class="replay-grid">
+      <fieldset class="area-toggle needs-js w-full max-w-sm min-w-0">
+        <legend class={gameUi.legend}>{r.mode}</legend>
+        <div class:list={[gameUi.segmented, 'grid-cols-2']}>
+          {
+            REPLAY_GAMES.map((game) => (
+              <label class={gameUi.segment}>
+                <input
+                  type="radio"
+                  class="sr-only"
+                  name={`${id}-game`}
+                  value={game}
+                  checked={game === frame.game}
+                  autocomplete="off"
+                  disabled
+                  data-control
+                  data-game
+                />
+                {r.games[game]}
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="area-board min-w-0">
+        <div data-board role="img" aria-label={text.board} class="mx-auto w-full max-w-[26rem]">
+          <Board>
+            <g slot="under">
+              {
+                lattices.map(({ modulus, cells }) => (
+                  <g data-lattice={modulus} display={modulus === frame.modulus ? undefined : 'none'}>
+                    {cells.map((index) => (
+                      <rect class="lattice-cell" x={corner(index).x} y={corner(index).y} width={CELL} height={CELL} />
+                    ))}
+                  </g>
+                ))
+              }
+            </g>
+            <g slot="over">
+              {
+                ships.map((box) => (
+                  <rect
+                    class:list={['ship', box.sunk && 'is-sunk']}
+                    data-ship={box.ship}
+                    x={box.x}
+                    y={box.y}
+                    width={box.w}
+                    height={box.h}
+                    rx={Math.min(box.w, box.h) / 2}
+                  />
+                ))
+              }
+              {
+                markers.map((marker) => (
+                  <g
+                    class:list={['marker', `is-${marker.kind}`]}
+                    data-marker
+                    data-game={marker.game}
+                    data-shot={marker.n}
+                    display={marker.visible ? undefined : 'none'}
+                  >
+                    <circle cx={marker.cx} cy={marker.cy} r="10" />
+                    <text x={marker.cx} y={marker.cy + 3.75} text-anchor="middle">
+                      {marker.n}
+                    </text>
+                  </g>
+                ))
+              }
+              <circle
+                class="latest"
+                data-latest
+                cx={ring.cx}
+                cy={ring.cy}
+                r="12.75"
+                display={frame.last ? undefined : 'none'}
+              />
+            </g>
+          </Board>
+        </div>
+      </div>
+
+      {/* Before the readout, so on phones the buttons sit right under the board. */}
+      <div class="area-controls needs-js flex flex-wrap items-center gap-x-4 gap-y-2" role="group" aria-label={r.controls}>
+        <div class="flex items-center gap-1.5">
+          <button type="button" class={stepButton} aria-label={r.first} title={r.first} disabled data-control data-step="first">
+            <svg {...icon}><path d="M6.5 5.5v13M17.5 6.5 10 12l7.5 5.5z" /></svg>
+          </button>
+          <button
+            type="button"
+            class={stepButton}
+            aria-label={r.previous}
+            title={r.previous}
+            disabled
+            data-control
+            data-step="previous"
+          >
+            <svg {...icon}><path d="m14.5 6-6 6 6 6" /></svg>
+          </button>
+          <button type="button" class={playButton} aria-label={r.play} title={r.play} disabled data-control data-play>
+            <span data-icon="play"><svg {...icon}><path d="M8 5.5v13l10-6.5z" fill="currentColor" /></svg></span>
+            <span data-icon="pause" hidden
+              ><svg {...icon}><path d="M9 6v12M15 6v12" stroke-width="2.5" /></svg></span
+            >
+          </button>
+          <button type="button" class={stepButton} aria-label={r.next} title={r.next} disabled data-control data-step="next">
+            <svg {...icon}><path d="m9.5 6 6 6-6 6" /></svg>
+          </button>
+          <button type="button" class={stepButton} aria-label={r.last} title={r.last} disabled data-control data-step="last">
+            <svg {...icon}><path d="M17.5 5.5v13M6.5 6.5 14 12l-7.5 5.5z" /></svg>
+          </button>
+        </div>
+        <input
+          type="range"
+          class="slider h-11 min-w-0 flex-1 basis-40 cursor-pointer accent-accent-700 disabled:cursor-not-allowed dark:accent-accent-500"
+          min="0"
+          max={frame.total}
+          step="1"
+          value={frame.shot}
+          aria-label={r.slider}
+          aria-valuetext={text.valueText}
+          autocomplete="off"
+          disabled
+          data-control
+          data-slider
+        />
+      </div>
+
+      <dl class="area-readout readout">
+        <div>
+          <dt class={dt}>{r.readout.shot}</dt>
+          <dd class:list={[dd, num]} data-out="shot">{text.shot}</dd>
+        </div>
+        <div>
+          <dt class={dt}>{r.readout.last}</dt>
+          <dd class={dd} data-out="last">{text.last}</dd>
+        </div>
+        <div>
+          <dt class={dt}>{r.readout.kind}</dt>
+          <dd class={dd}>
+            <span class="swatch" data-kind-swatch data-kind={text.kind?.key} hidden={!text.kind} aria-hidden="true"
+            ></span><span data-out="kind">{text.kind?.text ?? '—'}</span>
+          </dd>
+        </div>
+        <div>
+          <dt class={dt}>{r.readout.lattice}</dt>
+          <dd class={dd}>
+            {/* Not label-mono or uppercase anywhere: the variable m must stay lower case. */}
+            <span data-lattice-on hidden={!text.lattice}
+              ><i class="font-serif">m</i> = <span class={num} data-out="modulus">{text.lattice?.modulus}</span>{' · '}<span
+                data-out="cells">{text.lattice?.cells}</span
+              ></span
+            ><span data-lattice-off hidden={Boolean(text.lattice)}>{r.readout.noLattice}</span>
+          </dd>
+        </div>
+        <div>
+          <dt class={dt}><span class="swatch" data-kind="hunt" aria-hidden="true"></span>{r.readout.huntShots}</dt>
+          <dd class:list={[dd, num]} data-out="hunt">{text.hunt}</dd>
+        </div>
+        <div>
+          <dt class={dt}><span class="swatch" data-kind="target" aria-hidden="true"></span>{r.readout.targetShots}</dt>
+          <dd class:list={[dd, num]} data-out="target">{text.target}</dd>
+        </div>
+        <div>
+          <dt class={dt}>{r.readout.sunk}</dt>
+          <dd class:list={[dd, num]} data-out="sunk">{text.sunk}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <p class="sr-only" role="status" aria-live="polite" aria-atomic="true" data-status></p>
+
+    <div class="mt-5">
+      <Legend lang={lang} items={['shotMiss', 'shotHit', 'latest', 'hidden', 'sunk', 'lattice']} />
+    </div>
+
+    <div class="mt-6 border-t border-zinc-200 pt-5 dark:border-zinc-800">
+      <div role="img" aria-label={chartLabel}>
+        <p class={gameUi.legend}>{r.chart.title}</p>
+        {
+          tallies.map((row) => (
+            <div class="mt-3">
+              <p class="text-xs text-zinc-600 dark:text-zinc-400">{r.games[row.game]}</p>
+              <div class="chart-track mt-1">
+                <div class="bar" style={`--share:${(row.shots / longest).toFixed(4)}`}>
+                  <span class="seg is-hunt" style={`flex-grow:${row.hunt}`}>
+                    {f.number(row.hunt)}
+                  </span>
+                  <span class="seg is-target" style={`flex-grow:${row.target}`}>
+                    {f.number(row.target)}
+                  </span>
+                </div>
+                <span class="total font-mono text-sm font-semibold text-zinc-900 tabular-nums dark:text-zinc-100">
+                  {f.number(row.shots)}
+                </span>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <div class="mt-4">
+        <Legend lang={lang} items={['huntShots', 'targetShots']} />
+      </div>
+    </div>
+  </div>
+  <slot />
+</Figure>
+
+<script>
+  import { initParityReplay } from './parity-replay.ts';
+
+  // The site has no client-side router (no ClientRouter or astro:page-load), so every page is a
+  // full load and this runs once per page, like the density lab's script.
+  document.querySelectorAll<HTMLElement>('[data-parity-replay]').forEach(initParityReplay);
+</script>
+
+<style>
+  /*
+   * The two parts of the bar chart (validated as a categorical pair against white and zinc-900,
+   * normal and colour-blind vision; Legend.astro uses the same values), and the text on them:
+   * ink on the accent, white on rose-700 in light mode, ink on both in dark mode (all 4.5:1 or more).
+   */
+  .replay {
+    --hunt-bar: var(--color-accent-600);
+    --on-hunt: var(--color-zinc-950);
+    --target-bar: var(--color-rose-700);
+    --on-target: white;
+    container-type: inline-size;
+  }
+
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :global(:where([data-theme='dark'])) .replay {
+    --target-bar: var(--color-rose-500);
+    --on-target: var(--color-zinc-950);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .replay {
+      --target-bar: var(--color-rose-500);
+      --on-target: var(--color-zinc-950);
+    }
+  }
+
+  /* The controls only work with the script: without it they stay disabled, and hidden where the
+     browser can tell (they are enabled as soon as the script runs, so nothing shifts then). */
+  @media (scripting: none) {
+    .needs-js {
+      display: none;
+    }
+  }
+
+  /* Phones: switch, board, controls, readout in one column. Wider: the readout beside the board. */
+  .replay-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
+  }
+
+  @container (min-width: 36rem) {
+    .replay-grid {
+      grid-template-columns: minmax(0, 1fr) 13rem;
+      grid-template-areas:
+        'toggle toggle'
+        'board readout'
+        'controls controls';
+      column-gap: 1.5rem;
+    }
+
+    .area-toggle {
+      grid-area: toggle;
+    }
+
+    .area-board {
+      grid-area: board;
+    }
+
+    .area-readout {
+      grid-area: readout;
+      grid-template-columns: minmax(0, 1fr);
+      align-content: start;
+      gap: 0.625rem;
+    }
+
+    .area-controls {
+      grid-area: controls;
+    }
+  }
+
+  .swatch {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    margin-right: 0.375rem;
+    border-radius: 2px;
+    vertical-align: -0.0625rem;
+  }
+
+  .swatch[hidden] {
+    display: none;
+  }
+
+  .swatch[data-kind='hunt'] {
+    background-color: var(--hunt-bar);
+  }
+
+  .swatch[data-kind='target'] {
+    background-color: var(--target-bar);
+  }
+
+  /* Marks on the board, as Board.astro draws them (its theme variables are set on the SVG). */
+  .lattice-cell {
+    fill: currentColor;
+    fill-opacity: 0.14;
+  }
+
+  .ship {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-opacity: 0.6;
+    stroke-dasharray: 3 2.5;
+  }
+
+  .ship.is-sunk {
+    fill: currentColor;
+    fill-opacity: 0.08;
+    stroke-opacity: 0.75;
+    stroke-dasharray: none;
+  }
+
+  .marker circle {
+    stroke-width: 1.25;
+  }
+
+  /* A little larger than Board's markers (r 8.5, 9.5px): the whole board fits a phone here. */
+  .marker text {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .marker.is-miss circle {
+    fill: var(--sea);
+    stroke: var(--miss);
+  }
+
+  .marker.is-miss text {
+    fill: currentColor;
+  }
+
+  .marker.is-hit circle {
+    fill: var(--hit);
+    stroke: var(--hit);
+  }
+
+  .marker.is-hit text {
+    fill: var(--on-hit);
+    font-weight: 600;
+  }
+
+  .latest {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+  }
+
+  /* The bar chart: one scale for both bars, the total at the tip, a 2px gap between the parts. */
+  .chart-track {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .bar {
+    display: flex;
+    gap: 2px;
+    width: calc((100% - 2.5rem) * var(--share));
+    height: 1.375rem;
+  }
+
+  .seg {
+    display: flex;
+    flex-basis: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .seg.is-hunt {
+    background-color: var(--hunt-bar);
+    color: var(--on-hunt);
+  }
+
+  .seg.is-target {
+    border-radius: 0 4px 4px 0;
+    background-color: var(--target-bar);
+    color: var(--on-target);
+  }
+</style>

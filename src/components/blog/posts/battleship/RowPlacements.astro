@@ -1,14 +1,18 @@
 ---
 /**
  * One row of the board with every horizontal position of a cruiser (L = 3), as the game's
- * allPlacements() lists them: the n − L + 1 starting columns j = 0 … n − L, one strip each, and
- * under each column c the number f_L(c) of those positions that cover it. The highlighted column
- * shows which positions a single cell collects.
+ * allPlacements() lists them. The cells are numbered 1 … n from left to right, as in the post's
+ * counting section, and a position is named by its starting cell k (its leftmost cell): one strip
+ * for each k = 1 … n − L + 1. Under each cell, the number of those positions that cover it. The
+ * highlighted cell shows which positions a single cell collects: a cell near the edge is covered
+ * by fewer positions than a cell in the middle, which the density section of the post relies on.
  *
- * The counting section of the post derives these numbers in closed form; the build fails if the
- * game's placements ever stop matching them (n − L + 1 positions per row and n(n − L + 1) in all,
- * f_L(c) = min(c, n − L) − max(0, c − L + 1) + 1, Σ_c f_L(c) = L(n − L + 1)), or if the
- * highlighted column stops being covered by the starts the captions name.
+ * The build fails if the game's placements ever stop matching the post's count (n − L + 1
+ * positions per row, starting at k = 1 … n − L + 1, and n(n − L + 1) in all), if the count under a
+ * cell c stops being min(c, n − c + 1, L, n − L + 1) (the room to its left, the room to its right,
+ * the length of the ship or the positions in a row, whichever runs out first), if those counts
+ * stop adding up to L(n − L + 1) (each of the n − L + 1 positions covers L cells), or if the
+ * highlighted cell stops being covered by the starts the captions name.
  *
  * Its few strings live here rather than in messages.ts: they belong to this figure alone.
  */
@@ -23,13 +27,19 @@ interface Props {
 }
 
 const en = {
-  aria: (positions: number, length: number, last: number, counts: string, column: number, starts: string) =>
-    `One row of the board: the ${positions} horizontal positions of a ship ${length} cells long, one for each starting column j = 0, 1, …, ${last}. Under each column c, the number of positions that cover it: ${counts}. Column ${column}, highlighted, is covered by the positions that start at columns ${starts}.`,
+  /** Beside the cell numbers across the top. */
+  cells: 'cell',
+  /** Beside the bottom row: how many positions cover each cell. */
+  counts: 'positions',
+  aria: (positions: number, length: number, n: number, last: number, counts: string, highlighted: number, starts: string) =>
+    `One row of the board, its cells numbered 1 to ${n} from left to right: the ${positions} horizontal positions of a ship ${length} cells long, one for each starting cell k = 1, 2, …, ${last}. Under each cell, the number of positions that cover it: ${counts}. Cell ${highlighted}, highlighted, is covered by the positions that start at k = ${starts}.`,
 };
 type RowPlacementsMessages = typeof en;
 const tr: RowPlacementsMessages = {
-  aria: (positions, length, last, counts, column, starts) =>
-    `Tahtanın tek bir satırı: ${length} hücrelik bir geminin bu satırdaki ${positions} yatay konumu; j = 0, 1, …, ${last} başlangıç sütunlarının her biri için bir tane. Her c sütununun altında o sütunu kaplayan konumların sayısı yazılı: ${counts}. Vurgulanan ${column} numaralı sütunu, ${starts} numaralı sütunlarda başlayan konumlar kaplıyor.`,
+  cells: 'hücre',
+  counts: 'konum',
+  aria: (positions, length, n, last, counts, highlighted, starts) =>
+    `Tahtanın tek bir satırı; hücreleri soldan sağa 1, 2, …, ${n} diye numaralanmış. ${length} hücrelik bir geminin bu satırdaki ${positions} yatay konumu gösteriliyor: başlangıç hücresi k = 1, 2, …, ${last} olan birer konum. Her hücrenin altında, o hücreyi kaplayan konumların sayısı yazılı: ${counts}. Vurgulanan ${highlighted} numaralı hücreyi, başlangıç hücresi k = ${starts} olan konumlar kaplıyor.`,
 };
 const messages = { en, tr } as const satisfies Localized<RowPlacementsMessages>;
 
@@ -41,41 +51,46 @@ const n = BOARD_SIZE;
 const ship = FLEET.find((spec) => spec.id === 'cruiser');
 if (!ship) throw new Error('RowPlacements: the fleet has no cruiser');
 const L = ship.length;
-/** The column the figure and its captions single out ("column 4 … j = 2, 3 and 4"). */
-const COLUMN = 4;
-const EXPECTED_STARTS = [2, 3, 4];
+/** The cell the figure and its captions single out ("cell 5 … k = 3, 4 and 5"), counted from 1. */
+const CELL_NUMBER = 5;
+const EXPECTED_STARTS = [3, 4, 5];
 
+/** Cell numbers and starting cells are counted from 1 here, as in the post; the game counts from 0. */
+const numberOf = (index: number) => colOf(index, n) + 1;
 const horizontal = allPlacements(ship, n).filter((p) => p.orientation === 'horizontal');
 const inRow = horizontal.filter((p) => rowOf(p.start, n) === 0);
-const starts = inRow.map((p) => colOf(p.start, n)).sort((a, b) => a - b);
-const cover = Array.from({ length: n }, (_, c) =>
-  inRow.filter((p) => placementCells(p, n).some((index) => colOf(index, n) === c)).length,
-);
-const closedForm = (c: number) => Math.min(c, n - L) - Math.max(0, c - L + 1) + 1;
-const covering = inRow
-  .filter((p) => placementCells(p, n).some((index) => colOf(index, n) === COLUMN))
-  .map((p) => colOf(p.start, n))
-  .sort((a, b) => a - b);
+const starts = inRow.map((p) => numberOf(p.start)).sort((a, b) => a - b);
+const coveredBy = (c: number) =>
+  inRow.filter((p) => placementCells(p, n).some((index) => numberOf(index) === c)).map((p) => numberOf(p.start));
+/** cover[i] belongs to cell i + 1. */
+const cover = Array.from({ length: n }, (_, i) => coveredBy(i + 1).length);
+const closedForm = (c: number) => Math.min(c, n - c + 1, L, n - L + 1);
+const covering = coveredBy(CELL_NUMBER).sort((a, b) => a - b);
 
-if (starts.length !== n - L + 1 || starts.some((j, i) => j !== i)) {
-  throw new Error('RowPlacements: a row should hold n − L + 1 positions, starting at j = 0 … n − L');
+if (starts.length !== n - L + 1 || starts.some((k, i) => k !== i + 1)) {
+  throw new Error('RowPlacements: a row should hold n − L + 1 positions, starting at k = 1 … n − L + 1');
 }
 if (horizontal.length !== n * (n - L + 1)) throw new Error('RowPlacements: expected n(n − L + 1) horizontal positions');
-if (cover.some((count, c) => count !== closedForm(c))) throw new Error('RowPlacements: f_L(c) differs from its closed form');
-if (cover.reduce((sum, count) => sum + count, 0) !== L * (n - L + 1)) throw new Error('RowPlacements: Σ f_L(c) ≠ L(n − L + 1)');
-if (covering.join() !== EXPECTED_STARTS.join()) throw new Error('RowPlacements: the highlighted column changed');
+if (cover.some((count, i) => count !== closedForm(i + 1))) {
+  throw new Error('RowPlacements: a cell’s count differs from min(c, n − c + 1, L, n − L + 1)');
+}
+if (cover.reduce((sum, count) => sum + count, 0) !== L * (n - L + 1)) {
+  throw new Error('RowPlacements: the counts should add up to L(n − L + 1)');
+}
+if (covering.join() !== EXPECTED_STARTS.join()) throw new Error('RowPlacements: the highlighted cell changed');
 
 const label = m.aria(
   starts.length,
   L,
-  n - L,
+  n,
+  n - L + 1,
   f.list(cover.map((count) => f.number(count))),
-  COLUMN,
-  f.list(covering.map((j) => f.number(j))),
+  CELL_NUMBER,
+  f.list(covering.map((k) => f.number(k))),
 );
 
-/* Geometry, in SVG units: row labels on the left, one strip per position, the counts below. */
-const LABEL = 46;
+/* Geometry, in SVG units: labels on the left, one strip per position, the counts below. */
+const LABEL = 64;
 const CELL = 24;
 const STRIP = 18;
 const PITCH = 24;
@@ -87,7 +102,9 @@ const ruleY = rowsBottom + 7;
 const countY = ruleY + 16;
 const width = right + 2;
 const height = countY + 6;
-const cx = (c: number) => left + c * CELL + CELL / 2;
+/** Left edge and centre of cell number c (1 … n). */
+const x = (c: number) => left + (c - 1) * CELL;
+const cx = (c: number) => x(c) + CELL / 2;
 ---
 
 <Figure class="max-w-sm">
@@ -100,27 +117,25 @@ const cx = (c: number) => left + c * CELL + CELL / 2;
     aria-label={label}
     focusable="false"
   >
-    {/* The highlighted column: a faint accent band behind every strip, down to its count. */}
+    {/* The highlighted cell: a faint accent band behind every strip, down to its count. */}
     <rect
       class="fill-accent-500 dark:fill-accent-400"
       fill-opacity="0.14"
-      x={left + COLUMN * CELL}
+      x={x(CELL_NUMBER)}
       y={TOP - 13}
       width={CELL}
       height={countY + 5 - (TOP - 13)}
       rx="3"
     />
 
-    {/* Column indices c = 0 … n − 1, counted from zero as in the text. */}
+    {/* Cell numbers 1 … n, counted from 1 as in the text. */}
     <g class="font-mono" font-size="9" text-anchor="middle">
-      <text class="fill-zinc-500 dark:fill-zinc-400" x={left - 10} y={TOP - 5} text-anchor="end">
-        <tspan class="font-serif italic" font-size="11">c</tspan>
-      </text>
+      <text class="fill-zinc-500 dark:fill-zinc-400" x={left - 10} y={TOP - 5} text-anchor="end">{m.cells}</text>
       {
-        Array.from({ length: n }, (_, c) => (
+        Array.from({ length: n }, (_, i) => i + 1).map((c) => (
           <text
             class:list={[
-              c === COLUMN ? 'fill-accent-700 font-medium dark:fill-accent-400' : 'fill-zinc-500 dark:fill-zinc-400',
+              c === CELL_NUMBER ? 'fill-accent-700 font-medium dark:fill-accent-400' : 'fill-zinc-500 dark:fill-zinc-400',
             ]}
             x={cx(c)}
             y={TOP - 5}
@@ -132,20 +147,20 @@ const cx = (c: number) => left + c * CELL + CELL / 2;
     </g>
 
     {
-      starts.map((j, i) => {
+      starts.map((k, i) => {
         const y = TOP + i * PITCH;
         return (
           <g>
             <text class="fill-zinc-600 font-mono dark:fill-zinc-400" font-size="9.5" x={left - 10} y={y + STRIP / 2 + 3.5} text-anchor="end">
               {/* One expression, so the HTML compressor cannot drop the space after the variable. */}
-              <tspan class="font-serif italic" font-size="11">j</tspan>{` = ${f.number(j)}`}
+              <tspan class="font-serif italic" font-size="11">k</tspan>{` = ${f.number(k)}`}
             </text>
             <rect x={left} y={y} width={n * CELL} height={STRIP} rx="2" fill="none" stroke="currentColor" stroke-opacity="0.3" stroke-width="0.75" />
-            {Array.from({ length: n - 1 }, (_, k) => (
-              <line x1={left + (k + 1) * CELL} y1={y} x2={left + (k + 1) * CELL} y2={y + STRIP} stroke="currentColor" stroke-opacity="0.12" stroke-width="0.75" />
+            {Array.from({ length: n - 1 }, (_, j) => (
+              <line x1={left + (j + 1) * CELL} y1={y} x2={left + (j + 1) * CELL} y2={y + STRIP} stroke="currentColor" stroke-opacity="0.12" stroke-width="0.75" />
             ))}
             <rect
-              x={left + j * CELL + 2.5}
+              x={x(k) + 2.5}
               y={y + 2.5}
               width={L * CELL - 5}
               height={STRIP - 5}
@@ -156,11 +171,11 @@ const cx = (c: number) => left + c * CELL + CELL / 2;
               stroke-opacity="0.75"
               stroke-width="1.25"
             />
-            {Array.from({ length: L - 1 }, (_, k) => (
+            {Array.from({ length: L - 1 }, (_, j) => (
               <line
-                x1={left + (j + k + 1) * CELL}
+                x1={x(k + j + 1)}
                 y1={y + 5.5}
-                x2={left + (j + k + 1) * CELL}
+                x2={x(k + j + 1)}
                 y2={y + STRIP - 5.5}
                 stroke="currentColor"
                 stroke-opacity="0.35"
@@ -173,16 +188,14 @@ const cx = (c: number) => left + c * CELL + CELL / 2;
 
     <line x1={left} y1={ruleY} x2={right} y2={ruleY} stroke="currentColor" stroke-opacity="0.45" stroke-width="0.75" />
 
-    {/* f_L(c): how many of the positions above cover column c. */}
+    {/* How many of the positions above cover each cell. */}
     <g class="font-mono" font-size="10.5" text-anchor="middle">
-      <text class="fill-zinc-600 dark:fill-zinc-400" x={left - 10} y={countY} text-anchor="end">
-        <tspan class="font-serif italic" font-size="11.5">f</tspan><tspan font-size="7.5" dy="2.5">{f.number(L)}</tspan><tspan dy="-2.5" font-size="10.5">(</tspan><tspan class="font-serif italic" font-size="11.5">c</tspan><tspan font-size="10.5">)</tspan>
-      </text>
+      <text class="fill-zinc-600 dark:fill-zinc-400" font-size="9.5" x={left - 10} y={countY} text-anchor="end">{m.counts}</text>
       {
-        cover.map((count, c) => (
+        cover.map((count, i) => (
           <text
-            class:list={[c === COLUMN ? 'fill-accent-700 font-semibold dark:fill-accent-400' : 'fill-current']}
-            x={cx(c)}
+            class:list={[i + 1 === CELL_NUMBER ? 'fill-accent-700 font-semibold dark:fill-accent-400' : 'fill-current']}
+            x={cx(i + 1)}
             y={countY}
           >
             {f.number(count)}

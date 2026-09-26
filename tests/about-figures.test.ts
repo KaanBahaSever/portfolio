@@ -6,9 +6,8 @@ import {
   EARTH_RADIUS,
   MOON_ORBIT_RADIUS,
   PARKING_ALTITUDE,
-  RBAC_PERMISSIONS,
-  RBAC_ROLES,
-  accessMatrix,
+  GOLDEN_ANGLE,
+  IDEA_NETWORK,
   burnForApogee,
   caesarShift,
   conicArc,
@@ -18,15 +17,17 @@ import {
   flightProfile,
   gnomons,
   hohmannTransfer,
+  ideaNetwork,
+  insideRect,
   integrateTrajectory,
-  leadingRuns,
   linePath,
   minimax,
   placementDensity,
   sCurve,
   steer,
   steeringDirection,
-  type RbacPermission,
+  type IdeaSeed,
+  type Point,
 } from '../src/components/about/geometry.ts';
 import { LOCALES } from '../src/i18n/config.ts';
 import { JOURNEY_CHAPTERS, aboutMessages } from '../src/i18n/messages/about.ts';
@@ -183,69 +184,173 @@ test('integrateTrajectory lands on the ground and drifts with the crosswind', ()
   assert.ok(Math.max(...positions.map((p) => p.z)) > 3);
 });
 
-test('accessMatrix: every role holds the permissions of the roles below it, and more', () => {
-  const grants = accessMatrix<RbacPermission>(
-    RBAC_ROLES.map((r) => r.adds),
-    RBAC_PERMISSIONS,
-  );
-  assert.equal(grants.length, 4);
-  for (const row of grants) assert.equal(row.length, RBAC_PERMISSIONS.length);
-  for (let role = 1; role < grants.length; role++) {
-    const below = grants[role - 1]!;
-    const here = grants[role]!;
-    // Nested: nothing the role below holds is lost…
-    below.forEach((held, p) => assert.ok(!held || here[p], `role ${role} keeps ${RBAC_PERMISSIONS[p]}`));
-    // …and each role adds at least one permission.
-    assert.ok(here.some((held, p) => held && !below[p]), `role ${role} adds a permission`);
+/* The crowd.inc figure: a network of ideas and the people who help with them. */
+
+const network = ideaNetwork(IDEA_NETWORK);
+const { radius, region } = IDEA_NETWORK;
+const ideaAt = (i: number) => network.ideas[i]!.at;
+const userAt = (u: number) => network.users[u]!.at;
+/** Distance from p to the segment from a to b. */
+const segmentDistance = (p: Point, a: Point, b: Point) => {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)));
+  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+};
+
+test('ideaNetwork: every link joins a user to an idea, and every user helps with one or two ideas', () => {
+  assert.ok(network.links.length > 0);
+  for (const { user, idea } of network.links) {
+    assert.ok(Number.isInteger(user) && user >= 0 && user < network.users.length, `user ${user}`);
+    assert.ok(Number.isInteger(idea) && idea >= 0 && idea < network.ideas.length, `idea ${idea}`);
   }
-  // The most privileged role holds everything.
-  assert.ok(grants.at(-1)!.every(Boolean));
+  const keys = network.links.map(({ user, idea }) => `${user}→${idea}`);
+  assert.equal(new Set(keys).size, keys.length, 'no link is drawn twice');
+  const ideasOf = network.users.map((_, u) => network.links.filter((link) => link.user === u).length);
+  ideasOf.forEach((n, u) => assert.ok(n === 1 || n === 2, `user ${u} helps with ${n} ideas`));
+  // Some people help with two ideas: that is what makes it a network rather than separate stars.
+  assert.ok(ideasOf.filter((n) => n === 2).length >= 5);
 });
 
-test('accessMatrix: the lowest role reaches no private data', () => {
-  const grants = accessMatrix<RbacPermission>(
-    RBAC_ROLES.map((r) => r.adds),
-    RBAC_PERMISSIONS,
-  );
-  const lowest = grants[0]!;
-  RBAC_PERMISSIONS.forEach((permission, p) => {
-    if (permission.startsWith('private.')) assert.equal(lowest[p], false, permission);
+test('ideaNetwork: every idea has a helper, and the highlighted idea has the most', () => {
+  network.ideas.forEach((idea, i) => {
+    assert.equal(idea.helpers, network.links.filter((link) => link.idea === i).length, `idea ${i}`);
+    assert.ok(idea.helpers >= 1, `idea ${i} has at least one helper`);
   });
-  // The dashed line splits the columns once: all public ones first, then all private ones.
-  const firstPrivate = RBAC_PERMISSIONS.findIndex((p) => p.startsWith('private.'));
-  assert.ok(firstPrivate > 0);
-  assert.ok(RBAC_PERMISSIONS.slice(0, firstPrivate).every((p) => p.startsWith('public.')));
-  assert.ok(RBAC_PERMISSIONS.slice(firstPrivate).every((p) => p.startsWith('private.')));
+  const busiest = network.ideas[network.busiest]!;
+  assert.equal(busiest.private, false, 'the highlighted idea is a public one');
+  network.ideas.forEach((idea, i) => {
+    if (i !== network.busiest) assert.ok(idea.helpers < busiest.helpers, `idea ${i} has fewer helpers`);
+  });
 });
 
-test('accessMatrix: the granted cells form a staircase', () => {
-  const grants = accessMatrix<RbacPermission>(
-    RBAC_ROLES.map((r) => r.adds),
-    RBAC_PERMISSIONS,
-  );
-  const runs = leadingRuns(grants);
-  // Every row is one unbroken run from the first column…
-  grants.forEach((row, role) => {
-    assert.deepEqual(
-      row,
-      row.map((_, p) => p < runs[role]!),
-      `role ${role} is granted a prefix of the columns`,
+test('ideaNetwork: private ideas keep their links inside the private region, public ones stay outside', () => {
+  assert.ok(network.ideas.some((idea) => idea.private) && network.ideas.some((idea) => !idea.private));
+  network.ideas.forEach((idea, i) => assert.equal(insideRect(idea.at, region), idea.private, `idea ${i}`));
+  network.users.forEach((user, u) => assert.equal(insideRect(user.at, region), user.private, `user ${u}`));
+  for (const { user, idea } of network.links) {
+    const isPrivate = network.ideas[idea]!.private;
+    // Both ends on the same side, so no path of links leads out of the private region…
+    assert.equal(network.users[user]!.private, isPrivate, `link ${user}→${idea} stays on one side`);
+    // …and the whole line too: a public link must not pass over the region between its ends.
+    const [from, to] = [userAt(user), ideaAt(idea)];
+    for (let k = 0; k <= 32; k++) {
+      const p = { x: from.x + (k / 32) * (to.x - from.x), y: from.y + (k / 32) * (to.y - from.y) };
+      assert.equal(insideRect(p, region), isPrivate, `link ${user}→${idea}, point ${k} of 32`);
+    }
+  }
+});
+
+test('ideaNetwork: nodes do not overlap, links pass clear of other nodes and never cross', () => {
+  const nodes = [
+    ...network.ideas.map((idea, i) => ({ at: idea.at, r: radius.idea, name: `idea ${i}` })),
+    ...network.users.map((user, u) => ({ at: user.at, r: radius.user, name: `user ${u}` })),
+  ];
+  for (const [a, n] of nodes.entries()) {
+    // Inside the drawing: the labels sit above the region's top edge, nothing below its bottom.
+    assert.ok(n.at.x - n.r >= 0 && n.at.x + n.r <= 320, `${n.name} is inside the 320-unit width`);
+    assert.ok(n.at.y - n.r >= region.y, `${n.name} is below the labels`);
+    assert.ok(n.at.y + n.r <= region.y + region.height, `${n.name} is above the bottom`);
+    for (const m of nodes.slice(a + 1)) {
+      const gap = Math.hypot(n.at.x - m.at.x, n.at.y - m.at.y) - n.r - m.r;
+      assert.ok(gap >= 4, `${n.name} and ${m.name} are ${gap.toFixed(1)} apart`);
+    }
+  }
+  // Nothing touches the dashed boundary: private nodes keep inside it, public ones outside.
+  for (const n of nodes) {
+    const right = region.x + region.width;
+    const bottom = region.y + region.height;
+    const inside = Math.min(n.at.x - region.x, right - n.at.x, n.at.y - region.y, bottom - n.at.y);
+    const outside = Math.hypot(
+      Math.max(region.x - n.at.x, 0, n.at.x - right),
+      Math.max(region.y - n.at.y, 0, n.at.y - bottom),
     );
+    assert.ok((insideRect(n.at, region) ? inside : outside) >= n.r + 4, `${n.name} is clear of the boundary`);
+  }
+  for (const { user, idea } of network.links) {
+    for (const n of nodes) {
+      if (n.at === userAt(user) || n.at === ideaAt(idea)) continue;
+      const clearance = segmentDistance(n.at, userAt(user), ideaAt(idea)) - n.r;
+      assert.ok(clearance >= 2, `link ${user}→${idea} passes ${n.name} at ${clearance.toFixed(1)}`);
+    }
+  }
+  // Proper crossings only: links that share a user or an idea meet at it, which is fine.
+  const side = (a: Point, b: Point, c: Point) => Math.sign((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
+  network.links.forEach((p, i) => {
+    for (const q of network.links.slice(i + 1)) {
+      if (p.user === q.user || p.idea === q.idea) continue;
+      const [a, b, c, d] = [userAt(p.user), ideaAt(p.idea), userAt(q.user), ideaAt(q.idea)];
+      const crosses = side(a, b, c) * side(a, b, d) < 0 && side(c, d, a) * side(c, d, b) < 0;
+      assert.ok(!crosses, `links ${p.user}→${p.idea} and ${q.user}→${q.idea} cross`);
+    }
   });
-  // …and every step is longer than the one below it.
-  for (let role = 1; role < runs.length; role++) assert.ok(runs[role]! > runs[role - 1]!, `step ${role}`);
-  assert.deepEqual(runs, [1, 2, 4, 6]);
-  assert.deepEqual(leadingRuns([[true, false, true], [false], []]), [1, 0, 0]);
 });
 
-test('accessMatrix rejects unknown permissions and roles that add nothing', () => {
-  assert.deepEqual(accessMatrix([['a'], ['b']], ['a', 'b']), [
-    [true, false],
-    [true, true],
+test('ideaNetwork: helpers fill a ring by the golden angle, with equal areas', () => {
+  close(GOLDEN_ANGLE, 137.50776405003785, 1e-9, 'golden angle');
+  const origin = { x: 0, y: 0 };
+  const three = ideaNetwork({
+    ideas: [{ at: origin, helpers: 3, ring: [10, 20], phase: 0 }],
+    shared: [],
+    region: { x: 100, y: 100, width: 10, height: 10 },
+  });
+  const radii = three.users.map((u) => Math.hypot(u.at.x, u.at.y));
+  // r² steps evenly from 10² to 20²: 100, 250, 400.
+  radii.forEach((r, k) => close(r * r, 100 + 150 * k, 1e-9, `helper ${k}`));
+  close(three.users[0]!.at.x, 10, 1e-9, 'first helper along the phase');
+  const turn = (Math.atan2(three.users[1]!.at.y, three.users[1]!.at.x) * 180) / Math.PI;
+  close(turn, GOLDEN_ANGLE, 1e-9, 'second helper one golden angle further round (clockwise on screen)');
+  assert.equal(three.busiest, 0);
+});
+
+test('ideaNetwork: a shared helper stands between its two ideas, to the right of the line', () => {
+  const pair = ideaNetwork({
+    ideas: [
+      { at: { x: 0, y: 0 }, helpers: 1, ring: [5, 5], phase: 180 },
+      { at: { x: 20, y: 0 }, helpers: 2, ring: [5, 5], phase: 0 },
+    ],
+    shared: [[0, 1, 3]],
+    region: { x: 100, y: 100, width: 10, height: 10 },
+  });
+  // Facing +x on screen (y down), the right-hand side is +y.
+  assert.deepEqual(pair.users.at(-1)!.at, { x: 10, y: 3 });
+  assert.deepEqual(pair.links.slice(-2), [
+    { user: 3, idea: 0 },
+    { user: 3, idea: 1 },
   ]);
-  assert.throws(() => accessMatrix([['a'], ['c']], ['a', 'b']), RangeError);
-  assert.throws(() => accessMatrix([['a'], ['a']], ['a', 'b']), RangeError);
-  assert.throws(() => accessMatrix([[]], ['a']), RangeError);
+  assert.deepEqual(
+    pair.ideas.map((idea) => idea.helpers),
+    [2, 3],
+  );
+  assert.equal(pair.busiest, 1);
+});
+
+test('ideaNetwork refuses to cross the private boundary, and malformed specs', () => {
+  const region = { x: 50, y: 0, width: 50, height: 50 };
+  const idea = (x: number, extra: Partial<IdeaSeed> = {}): IdeaSeed => ({
+    at: { x, y: 25 },
+    helpers: 2,
+    ring: [8, 10],
+    phase: 0,
+    ...extra,
+  });
+  const ok = { ideas: [idea(20), idea(75, { private: true })], shared: [], region };
+  assert.equal(ideaNetwork(ok).users.length, 4);
+  // A helper of a private idea outside the region, and a public idea's helper inside it.
+  assert.throws(
+    () => ideaNetwork({ ...ok, ideas: [idea(20), idea(55, { private: true, phase: 180 })] }),
+    /private but outside/,
+  );
+  assert.throws(() => ideaNetwork({ ...ok, ideas: [idea(44), idea(75, { private: true })] }), /public but inside/);
+  // An idea on the wrong side, and one person helping with a public and a private idea.
+  assert.throws(() => ideaNetwork({ ...ok, ideas: [idea(20), idea(20, { private: true })] }), /wrong side/);
+  assert.throws(() => ideaNetwork({ ...ok, shared: [[0, 1, 0]] }), /public and a private/);
+  // Malformed: no ideas, a shared helper without two ideas, fractional helpers, an inverted ring.
+  assert.throws(() => ideaNetwork({ ideas: [], shared: [], region }), RangeError);
+  assert.throws(() => ideaNetwork({ ...ok, shared: [[0, 0, 0]] }), RangeError);
+  assert.throws(() => ideaNetwork({ ...ok, shared: [[0, 5, 0]] }), RangeError);
+  assert.throws(() => ideaNetwork({ ...ok, ideas: [idea(20, { helpers: 1.5 })] }), RangeError);
+  assert.throws(() => ideaNetwork({ ...ok, ideas: [idea(20, { ring: [10, 8] })] }), RangeError);
 });
 
 test('gnomons: piece k has 2k − 1 cells, and the pieces tile the n × n square without overlap', () => {
@@ -345,16 +450,19 @@ test('figure captions and labels interpolate formatted values without case suffi
   assert.notDeepEqual(tr.journey.chapters.work.figureLabels, en.journey.chapters.work.figureLabels);
 });
 
-test('the access-control figure is presented as an example, and the odd-number square states its sum', () => {
+test('the crowd.inc figure is a schematic picture, and the odd-number square states its sum', () => {
   const { en, tr } = aboutMessages;
-  // The roles and permissions are illustrative, not crowd.inc's: the caption says so first.
-  assert.match(en.journey.chapters.work.caption, /^A schematic example /);
-  assert.match(tr.journey.chapters.work.caption, /^Şematik bir örnek/);
-  // Every role in the model has a label in both languages, and nothing more.
+  // The network is not crowd.inc's data: both captions say so first…
+  assert.match(en.journey.chapters.work.caption, /^A schematic picture of crowd\.inc: /);
+  assert.match(tr.journey.chapters.work.caption, /^Şematik bir resim: crowd\.inc’te /);
   for (const locale of LOCALES) {
-    const labels = aboutMessages[locale].journey.chapters.work.figureLabels;
-    assert.deepEqual(Object.keys(labels.roles).sort(), RBAC_ROLES.map((r) => r.role).sort(), locale);
+    const { caption, figureLabels } = aboutMessages[locale].journey.chapters.work;
+    // …and give no counts that could be read as real figures.
+    assert.doesNotMatch(caption, /\d|hundreds|yüzlerce/i, locale);
+    // The two areas of the drawing are labelled, and nothing more.
+    assert.deepEqual(Object.keys(figureLabels).sort(), ['private', 'public'], locale);
   }
+  assert.deepEqual(tr.journey.chapters.work.figureLabels, { public: 'HERKESE AÇIK', private: 'ÖZEL' });
   // The sum is spelled out in both captions, held together by no-break spaces.
   for (const caption of [en.journey.chapters.community.caption, tr.journey.chapters.community.caption]) {
     assert.ok(caption.includes('1 + 3 + 5 + 7 + 9 = 5²'), caption);

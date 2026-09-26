@@ -13,13 +13,13 @@
  */
 import Chapter from './Chapter.astro';
 import Figure from './Figure.astro';
-import AccessMatrix from './figures/AccessMatrix.astro';
 import AltitudeClasses from './figures/AltitudeClasses.astro';
 import BrokerGraph from './figures/BrokerGraph.astro';
 import CipherFlowchart from './figures/CipherFlowchart.astro';
 import DensityGrid from './figures/DensityGrid.astro';
 import DescentField from './figures/DescentField.astro';
 import HohmannTransfer from './figures/HohmannTransfer.astro';
+import IdeaNetwork from './figures/IdeaNetwork.astro';
 import MinimaxTree from './figures/MinimaxTree.astro';
 import OddSquares from './figures/OddSquares.astro';
 import Pipeline from './figures/Pipeline.astro';
@@ -173,7 +173,7 @@ const item = 'py-10 first:pt-8 last:pb-0 sm:py-14 sm:first:pt-10';
       >
         <Work />
         <Figure slot="figure" number={figure('work')} caption={c.work.caption}>
-          <AccessMatrix labels={c.work.figureLabels} />
+          <IdeaNetwork labels={c.work.figureLabels} />
         </Figure>
       </Chapter>
     </li>

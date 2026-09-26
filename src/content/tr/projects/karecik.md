@@ -1,6 +1,6 @@
 ---
 title: Karecik
-shortDescription: Yerel kafe ve restoranların QR menü, müşteri etkileşimi, menü ve sipariş yönetimi için kullandığı, canlıda çalışan bir SaaS. Kesintisiz ve düşük gecikmeli olacak şekilde tasarlandı.
+shortDescription: Yerel kafe ve restoranların QR menü, müşteri etkileşimi, menü ve sipariş yönetimi için kullandığı, canlıda çalışan bir SaaS. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı.
 ---
 
 ## Nedir?
@@ -18,19 +18,19 @@ aldım.
 ## Özellikler
 
 - **Menü düzenleyici**: Kategoriler ve ürünler sürükle-bırak ile sıralanır, fiyatlar listede
-  doğrudan düzenlenir. Bütün fiyatlar yüzdeyle toplu olarak güncellenebilir; bu sırada
-  yuvarlama kuralları uygulanır.
-- **Şubeler ve menüler**: Bir işletmenin birden çok şubesi olabilir. Menüler bütün şubeler
-  arasında paylaşılabilir ya da tek bir şubeye özel olabilir. Her şube, fiyatları ve ürünlerin
-  satışta olup olmadığını ayrıca belirleyebilir.
+  doğrudan düzenlenir. Fiyatlar yüzdeyle toplu olarak da güncellenebilir; bu sırada yuvarlama
+  kuralları uygulanır.
+- **Şubeler ve menüler**: Bir işletmenin birden çok şubesi olabilir. Bir menü bütün şubelerde
+  ortak kullanılabilir ya da tek bir şubeye özel olabilir. Her şube, fiyatları ve hangi
+  ürünlerin satışta olduğunu kendine göre değiştirebilir.
 - **Altı dilde menü**: Türkçe, İngilizce, Almanca, Rusça, Arapça ve Fransızca.
 - **Ürün ayrıntıları**: fotoğraflar, içindekiler, alerjen uyarıları, kalori bilgisi ve özel
   rozetler.
 - **Marka görünümü**: temalar, yazı tipleri, vurgu renkleri, arka planlar ve ayarlanabilir bir
-  açılış ekranı. Hepsi, panelin içindeki canlı mobil önizlemede kontrol edilebilir.
+  açılış ekranı. Hepsi panelin içindeki canlı mobil önizlemede kontrol edilebilir.
 - **QR kodlar**: PNG olarak indirilebilir ya da yazdırılabilir. Menü adresi de kopyalanabilir.
 - **Müşteri menüsü**: İşletmenin alt alan adında açılır; yedek olarak yol tabanlı bir adres de
-  var. Menüde arama, dil değiştirme ve Wi-Fi bilgileri bulunur.
+  var. Müşteriler menüde arama yapabilir, dili değiştirebilir ve Wi-Fi bilgilerini görebilir.
 
 ## Mimari
 

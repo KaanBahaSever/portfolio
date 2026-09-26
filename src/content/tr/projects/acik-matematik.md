@@ -8,15 +8,15 @@ shortDescription: Lisans düzeyindeki matematik dersleri için Türkçe, açık 
 Açık Matematik, lisans düzeyindeki matematik dersleri için Türkçe, açık kaynak bir dijital
 yayın platformu ve modern bir ders kitabı girişimi. Türkçe ders materyalleri çoğu zaman
 dağınık, el yazısı ya da okunması zor. Proje bu materyalleri herkesin ulaşabileceği tek bir
-kütüphanede topluyor: özenli bir dizgiyle hazırlanmış notlar, titiz belgeler, reklamsız
-sayfalar ve tamamen açık kaynak kod.
+kütüphanede topluyor: özenli bir dizgiyle hazırlanmış notlar, titizlikle yazılmış belgeler,
+reklamsız sayfalar ve tamamen açık kaynak kod.
 
 ## Nasıl başladı?
 
 Açık Matematik kendi yaşadığım bir sorundan doğdu: Akademik ders notlarından çalışmak
 zahmetliydi. Bu sorundan yola çıkıp bir platform kurmak birkaç yıl sürdü:
 
-- **2023**: Proje fikri doğdu.
+- **2023**: Projenin fikri ortaya çıktı.
 - **Mart 2026**: Geliştirme hızlandı.
 - **Haziran 2026**: Platform [acik-matematik.com](https://acik-matematik.com) adresinde yayına
   açıldı.
@@ -37,7 +37,7 @@ zahmetliydi. Bu sorundan yola çıkıp bir platform kurmak birkaç yıl sürdü:
 ## Mimari
 
 - **Çok projeli portal**: En üstte, katalog görevi gören bir Quarto web sitesi var. Her ders
-  ise otomatik numaralandırılan, bağımsız bir Quarto kitabı. Her ders ayrı derlendiği için
+  ise otomatik numaralandırılan, bağımsız bir Quarto kitabı. Dersler ayrı ayrı derlendiği için
   büyük bir müfredat bile içinden çıkılmaz hâle gelmiyor.
 - **Ortak ayarlar**: Tema, tipografi, Türkçe teorem etiketleri ve genel CSS her kitapta
   tekrarlanmıyor; hepsi tek bir ortak meta veri dosyasında duruyor.
@@ -46,5 +46,5 @@ zahmetliydi. Bu sorundan yola çıkıp bir platform kurmak birkaç yıl sürdü:
   ispat ve çözüm bloklarını açılıp kapanan bölümlere çeviriyor, gömülü şekilleri indirilebilir
   sürümlere uygun hâle getiriyor ve LaTeX yapılarını Typst için uyarlıyor.
 - **CI/CD**: `main` dalına yapılan her push’ta GitHub Actions siteyi derleyip kontrol ediyor,
-  ardından Cloudflare Pages üzerinde yayına alıyor. Pull request’ler için de önizleme sürümleri
-  yayına çıkıyor.
+  ardından Cloudflare Pages üzerinde yayına alıyor. Pull request’ler için de birer önizleme
+  sürümü yayımlıyor.

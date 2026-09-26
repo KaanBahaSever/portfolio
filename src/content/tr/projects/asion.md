@@ -1,6 +1,6 @@
 ---
 title: Asion
-shortDescription: macOS, Linux ve Windows için gizliliği ön planda tutan bir üretkenlik ve bilgisayar etkinliği takip aracı. İşletim sistemi olay kancaları ve hafif bir daemon ile çalışır; kendi sunucunuzda barındırmak için tasarlandı.
+shortDescription: macOS, Linux ve Windows için gizliliği ön planda tutan bir üretkenlik ve bilgisayar etkinliği takip aracı. İşletim sisteminin olay kancalarıyla ve hafif bir daemon ile çalışır; kendi sunucunuzda barındırılmaya uygundur.
 ---
 
 ## Nedir?
@@ -9,19 +9,19 @@ Asion bir üretkenlik ve bilgisayar etkinliği takip aracı; macOS, Linux ve Win
 O an hangi uygulamanın ve hangi pencerenin etkin olduğunu kaydediyor, bu ham veriden de zamanın
 gerçekte nereye gittiğini gösteren bir tablo çıkarıyor. Rize.io gibi araçlar böyle bir tablonun
 ne kadar işe yarayabileceğini gösterdi. Asion ise şu düşünceden yola çıkıyor: Bu kadar kişisel
-bir veri, sahibinin elinde kalmalı. Bu yüzden onu, gizliliği ön planda tutan ve kendi
-sunucunuzda barındırılmaya uygun bir yapıda tasarladım.
+bir veri, sahibinin elinde kalmalı. Bu yüzden onu gizliliği ön planda tutarak ve kendi
+sunucunuzda barındırılabilecek şekilde tasarladım.
 
-Asion kimin için? İş gününün dürüst bir kaydını tutmak isteyen herkes ve yazılım ekipleri için.
+Asion kimin için? İş gününün dürüst bir kaydını tutmak isteyenler ve yazılım ekipleri için.
 Akademik zaman takibi de hedeflerden biri: Araştırmacılar ve öğrenciler, bir projeye kaç saat
-harcadıklarını kayıt altına alabilir. 2024’ten beri üzerinde çalışıyorum. Asion hâlâ
+harcadıklarını kaydedebilir. 2024’ten beri üzerinde çalışıyorum. Asion hâlâ
 geliştiriliyor; erken erişim [asion.app](https://asion.app) üzerinden açık. Kaynak kodu kapalı.
 
 ## Bilgisayarı yormadan izlemek
 
 Bir etkinlik takipçisi bütün gün açık kalır. Bu yüzden bilgisayara getirdiği yük neredeyse
 sıfır olmalı. Asion, **işletim sisteminin kendi olay kancalarını** dinler. Böylece etkin pencere
-değiştiği anda bunu her platform kendisi haber verir. Veriyi arka planda **hafif bir daemon**
+değiştiği anda her platform bunu kendisi bildirir. Veriyi arka planda **hafif bir daemon**
 toplar. Platforma özel katmanlarda C/C++ ve Objective-C, bunların yanında da Go kullanıyorum.
 
 ## Mimari
@@ -58,7 +58,7 @@ her birinde yeniden derlenmeli, test edilmeli ve paketlenmeli. Bu yüzden Asion 
   derlemesini üretir.
 - **Özel otomasyon betikleri**: Bash, Batch ve Python ile yazılan bu betikler adımları
   birbirine bağlar.
-- **Tek tıkla test ve paketleme**: Tek bir tıklama testleri çalıştırır, bileşenleri paketler
-  ve her platform için derleme çıktılarını üretir.
-- **Dağıtım pipeline’ları**: Bu çok platformlu derleme çıktılarını sürüm yayımlanana kadar
-  taşır.
+- **Tek tıkla test ve paketleme**: Tek bir tıkla testler çalışır, bileşenler paketlenir ve her
+  platform için derleme çıktıları üretilir.
+- **Dağıtım pipeline’ları**: Çok platformlu derleme çıktılarını alır ve yeni bir sürüm olarak
+  yayımlar.

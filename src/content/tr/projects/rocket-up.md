@@ -14,7 +14,7 @@ yazıyorum. Yeni motor açık kaynak. MIT Lisansı ile yayımlanıyor.
 
 2020’deki prototip dar kapsamlıydı: Genel bir araç olarak değil, tek bir iş için yazılmıştı.
 
-Yeniden yazarken işe tam tersinden başladım. Tek ve sabit bir model yerine simülasyon
+Yeniden yazarken işe tam tersinden başladım. Artık tek ve sabit bir model yok; simülasyon
 parçalardan kuruluyor: Roket bileşenlerden oluşuyor ve bir gezegenin ortamında uçuyor. Uçuşun
 kendisi de koda gömülmüyor, parametrelerle tanımlanıyor. Fizik döngüsünün ihtiyaç duyduğu
 performansı C++ veriyor. Temiz bir mimari de fizik hesaplarının her parçasını kendi yerinde
@@ -29,9 +29,9 @@ Yeni sürüm henüz başlangıç aşamasında. Yine de herkese açık depoda şu
   sınıflar.
 - **Motor modeli**: özgül itki, yakıt kütlesi, ayarlanabilir bir itki eğrisi, itkiyi kısma ve
   atmosfer basıncına göre düzeltilen itki.
-- **Ortamlar ve gezegenler**: Dünya modeli, 1976 ABD Standart Atmosfer modelinin katmanlarını
-  kullanarak irtifaya göre sıcaklığı ve basıncı hesaplıyor. Gezegen sınıfları da
-  genişletilebilecek şekilde yazıldı.
+- **Ortamlar ve gezegenler**: Dünya modeli, sıcaklığı ve basıncı irtifaya göre hesaplıyor.
+  Bunun için 1976 ABD Standart Atmosfer modelinin katmanlarını kullanıyor. Gezegen sınıfları
+  da genişletilebilecek şekilde yazıldı.
 - **Ayarlanabilir uçuş parametreleri**, bir de küçük vektör ve matris hesap yardımcıları.
 
 Proje CMake ile derleniyor.
@@ -48,6 +48,6 @@ Proje CMake ile derleniyor.
 Bu simülasyon, roketçilik çalışmalarımın devamı. 2019–2022 yılları arasında İstanbul
 Üniversitesi Roket Kulübünün başkan yardımcısıydım. Ekibimizle üç roket tasarlayıp ürettik:
 bir alçak irtifa roketi (5.000 ft) ve iki yüksek irtifa roketi (10.000 ft). Bu roketlerin uçuş
-aviyoniği yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma yazdım.
+aviyoniği yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma geliştirdim.
 Aviyonikten bu simülasyona uzanan hikâyeyi [Hakkımda sayfasında](/about/#journey)
 anlatıyorum.

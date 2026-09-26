@@ -79,7 +79,7 @@ const tr: ProjectsMessages = {
       'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik, yüksek güçlü bir roket simülasyonu ve açık kaynak C++ kütüphaneleri. Her birinin nasıl yapıldığını anlatan notlar da var.',
     // Same wording as the home page's "Selected work" link and section that lead here.
     eyebrow: 'Seçili işler',
-    lead: 'Burada geliştirdiğim projeler var: C++ ile yazdığım yerel daemon’lardan Go servislerine, açık kaynak matematik notlarına kadar. Her sayfada bir projenin ne yaptığını ve nasıl kurulduğunu anlatıyorum.',
+    lead: 'Geliştirdiğim projeler burada: C++ ile yazdığım yerel daemon’lardan Go servislerine, açık kaynak matematik notlarına kadar. Her sayfada bir projenin ne yaptığını ve nasıl kurulduğunu anlatıyorum.',
     summary: (total, openSource) => `${total} proje · ${openSource} açık kaynak`,
     featured: 'Öne çıkanlar',
     more: 'Diğer projeler',

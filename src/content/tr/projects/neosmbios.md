@@ -7,7 +7,7 @@ shortDescription: C++23 için tek başlık dosyasından oluşan, veriyi kopyalam
 
 NeoSMBIOS, firmware’in sunduğu SMBIOS/DMI tablolarını okur. Bu tablolarda anakart üreticisi,
 seri numaraları, BIOS sürümü, işlemci ve bellek modülleri gibi bilgiler bulunur. Kütüphane bu
-bilgileri tipli ve sınır kontrolü yapılmış view’lar olarak döndürür. MIT Lisansı ile yayımlanan
+bilgileri tipi belli, sınır kontrolü yapılmış view’lar olarak döndürür. MIT Lisansı ile yayımlanan
 tek bir başlık dosyasıdır.
 
 NeoSMBIOS yalnızca veriyi çözer; firmware’in kendisine hiç dokunmaz. Ona bir
@@ -33,5 +33,4 @@ olmaz, hiçbir yerde de işletim sistemi başlık dosyası gerekmez.
 ## Gereksinimler
 
 C++23 gerekir: GCC 14, Clang 18 ya da MSVC 19.40 (Visual Studio 2022 17.10) ve sonrası. Daha
-eski bir standartla derlemeye çalışırsanız başlık dosyası derlemeyi anlaşılır bir hata
-mesajıyla durdurur.
+eski bir standartla derlerseniz başlık dosyası anlaşılır bir hata verip derlemeyi durdurur.

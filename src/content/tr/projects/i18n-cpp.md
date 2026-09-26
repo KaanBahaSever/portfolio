@@ -10,8 +10,8 @@ metinlerini kullanıcının dilinde göstermesine yarar. Tek bir başlık dosyas
 ayrıca derlemeniz ya da bağlamanız gereken bir şey yok: Dosyayı `#include` ile ekliyor, bir
 dil yüklüyor ve metinleri anahtarlarıyla buluyorsunuz. MIT Lisansı ile yayımlandı.
 
-Kütüphaneyi bilerek küçük tuttum. Hedefim, az yer kaplamanın önemli olduğu küçük ve orta
-ölçekli uygulamalardı. Çok büyük çeviri dosyaları ya da karmaşık yerelleştirme
+Kütüphaneyi bilerek küçük tuttum. Az yer kaplamanın önemli olduğu küçük ve orta ölçekli
+uygulamalar için yazdım. Çok büyük çeviri dosyaları ya da karmaşık yerelleştirme
 ihtiyaçları için ICU veya gettext gibi köklü araçlar daha uygun. README dosyası da bunu açıkça
 söylüyor.
 

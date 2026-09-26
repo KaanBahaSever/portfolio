@@ -152,17 +152,31 @@ There are two more subtle points. First, while chasing one ship, the computer ca
 
 So where should you fire when there’s no hit to chase? Firing right next to a miss is a bit of a waste: the miss has already ruled out every ship position that would cover both cells, so a ship is less likely to turn up next door.
 
-Think of it this way: colour the board black and white like a chequerboard. Two cells side by side always have different colours. Even the shortest ship is two cells long, so every ship covers at least one black cell. Someone who fires only at black cells therefore misses no ship, and has {n.lattice[2]} cells to search instead of 100. We can pick out the black cells as the ones whose row and column numbers add up to an even number; that’s why the idea is called *parity*, which simply means whether a number is even or odd.
+Think of it this way: colour the board black and white like a chequerboard. Two cells side by side always have different colours. Even the shortest ship is two cells long, so every ship covers at least one black cell. Someone who fires only at black cells therefore misses no ship, and has {n.lattice[2]} cells to search instead of 100. We can pick out the black cells as the ones whose row and column numbers add up to an even number; in a moment we’ll write that down the way a mathematician would.
 
 Couldn’t even fewer cells do? No. You can cover the board, with no gaps, with 50 dominoes, each two cells side by side, and the destroyer could be hiding under any one of them. Anyone who wants to catch the destroyer wherever it is has to fire at a cell of every single domino. So at least 50 cells are needed.
 
-Once the destroyer has sunk, the shortest ship is three cells long, and a pattern even sparser than the chequerboard will do. To see the general rule, let’s number the rows and columns from 0 this time (column A is 0, column B is 1, …; row 1 is 0, row 2 is 1, …); that’s how the game’s code counts too. Call the row number $r$ and the column number $c$, and pick a number $m$, such as 2 or 3. Now mark the cells whose two numbers add up to a multiple of $m$:
+Once the destroyer has sunk, the shortest ship is three cells long, and a pattern even sparser than the chequerboard will do. To see the general rule, let’s number the rows and columns from 0 this time (column A is 0, column B is 1, …; row 1 is 0, row 2 is 1, …); that’s how the game’s code counts too. Call the row number $r$ and the column number $c$, and pick a number $m$, such as 2 or 3.
+
+A piece of notation helps a lot here: *mod*. It means looking only at the remainder after dividing by $m$, the way a clock does. A clock starts again after 12, so 15:00 and 3:00 point the same way. Mathematicians write this as $15 \equiv 3 \pmod{12}$ and read it “15 is congruent to 3 mod 12”. So two numbers are congruent mod $m$ when they leave the same remainder when divided by $m$, and the numbers that leave remainder 0 are the multiples of $m$: 0, $m$, $2m$, …
+
+Now the search pattern fits on one line. We pick the cells whose row and column numbers add up to a multiple of $m$:
 
 $$
-r + c = 0,\; m,\; 2m,\; 3m,\; \dots
+\Lambda_m = \lbrace\, (r, c) : r + c \equiv 0 \pmod{m} \,\rbrace .
 $$
 
-Along a horizontal ship, the row number stays the same and the column number goes up by one from cell to cell, so the sum $r + c$ also goes up by one at each cell. The same goes for a vertical ship. So along a ship of length $L$, the sum $r + c$ takes $L$ values in a row, such as 7, 8, 9. And among any $m$ numbers in a row, one is always a multiple of $m$: of two numbers in a row, one is even; of three, one is divisible by 3. So every ship at least $m$ cells long passes over a marked cell. I’ll call the marked cells a *search pattern*; for $m = 2$ the pattern is the chequerboard itself.
+($\Lambda$ is the Greek letter lambda; here it is just the pattern’s name.) For $m = 2$ these are the cells where $r + c$ is even: the chequerboard from before. That’s where the name *parity* comes from: a number’s remainder when divided by 2, whether it is even or odd.
+
+So why does every ship get caught? Along a horizontal ship the row number stays the same and the column number goes up by one from cell to cell; along a vertical ship it is the other way round. So if the sum is $s$ at a ship’s first cell, the sums along a ship of length $L$ go like this:
+
+$$
+s,\; s + 1,\; s + 2,\; \dots,\; s + L - 1 .
+$$
+
+The remainders of consecutive numbers mod $m$ go round in turn, like the hour hand of a clock: …, $m - 2$, $m - 1$, 0, 1, … So any $m$ numbers in a row leave each of the remainders $0, 1, \dots, m - 1$ exactly once, and one of them is always 0. We can even say which one: if $s$ leaves remainder $a$, then $k = (m - a) \bmod m$ cells along, $s + k \equiv 0 \pmod{m}$, and $k$ is at most $m - 1$. So every ship at least $m$ cells long ($L \ge m$) passes over at least one cell of $\Lambda_m$.
+
+For a ship shorter than $m$ that guarantee is gone. With $m = 3$, a destroyer whose first sum is $s \equiv 1 \pmod{3}$ leaves remainders 1 and 2 on its two cells, never 0, so it slips through the pattern. The figure below has exactly such a destroyer: at G2–H2, $s = 1 + 6 = 7 \equiv 1 \pmod{3}$.
 
 The Normal computer takes $m$ to be the length of the shortest ship still afloat. As long as the destroyer is afloat, $m = 2$: the chequerboard. When the destroyer sinks, $m = 3$, and the pattern thins out to the {n.lattice[3]} cells on every third diagonal.
 

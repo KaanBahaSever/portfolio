@@ -152,17 +152,31 @@ Bir isabet, o hücrede bir gemi olduğunu söyler. Gemiler düz durduğu için g
 
 Peki peşine düşecek bir isabet yokken nereye ateş etmeli? Bir ıskanın hemen yanına ateş etmek biraz israftır: Iska, iki hücreyi birlikte kaplayabilecek bütün gemi konumlarını zaten eledi; bu yüzden yandaki hücrede gemi bulma şansı daha düşük.
 
-Şöyle düşünün: Tahtayı dama tahtası gibi siyah ve beyaz boyayalım. Yan yana iki hücre her zaman farklı renktedir. En kısa gemi bile iki hücre uzunluğunda olduğu için her gemi en az bir siyah hücrenin üzerinden geçer. Öyleyse yalnızca siyah hücrelere ateş eden biri hiçbir gemiyi kaçırmaz; üstelik taranacak hücre sayısı 100 yerine {n.lattice[2]} olur. Siyah hücreleri, satır ve sütun numaralarının toplamı çift olanlar diye seçebiliriz; bu yüzden fikrin adı *parite*, yani bir sayının çift mi tek mi olduğu.
+Şöyle düşünün: Tahtayı dama tahtası gibi siyah ve beyaz boyayalım. Yan yana iki hücre her zaman farklı renktedir. En kısa gemi bile iki hücre uzunluğunda olduğu için her gemi en az bir siyah hücrenin üzerinden geçer. Öyleyse yalnızca siyah hücrelere ateş eden biri hiçbir gemiyi kaçırmaz; üstelik taranacak hücre sayısı 100 yerine {n.lattice[2]} olur. Siyah hücreleri, satır ve sütun numaralarının toplamı çift olanlar diye seçebiliriz; birazdan bunu matematikçe de yazacağız.
 
 Daha az hücre yetmez mi? Yetmez. Tahtayı yan yana iki hücrelik 50 domino taşıyla boşluksuz döşeyebilirsiniz ve muhrip bu taşlardan herhangi birinin altında saklanıyor olabilir. Muhribi nerede olursa olsun yakalamak isteyen biri, her taşın en az bir hücresine ateş etmek zorundadır. Yani en az 50 hücre gerekir.
 
-Muhrip battıktan sonra en kısa gemi üç hücrelik olur ve dama tahtasından da seyrek bir desen yeter. Genel kuralı görmek için satırları ve sütunları bu kez 0’dan başlayarak numaralayalım (A sütunu 0, B sütunu 1, …; 1. satır 0, 2. satır 1, …); oyunun kodu da böyle sayıyor. Satır numarasına $r$, sütun numarasına $c$ diyelim, bir de 2 ya da 3 gibi bir $m$ sayısı seçelim. Numaralarının toplamı $m$’ye tam bölünen hücreleri işaretleyelim:
+Muhrip battıktan sonra en kısa gemi üç hücrelik olur ve dama tahtasından da seyrek bir desen yeter. Genel kuralı görmek için satırları ve sütunları bu kez 0’dan başlayarak numaralayalım (A sütunu 0, B sütunu 1, …; 1. satır 0, 2. satır 1, …); oyunun kodu da böyle sayıyor. Satır numarasına $r$, sütun numarasına $c$ diyelim, bir de 2 ya da 3 gibi bir $m$ sayısı seçelim.
+
+Burada çok işimize yarayacak bir gösterim var: *mod*. Bir sayının yalnızca $m$’ye bölümünden kalanına bakmak demek, tıpkı saat gibi. Saat 12’den sonra başa döndüğü için 15.00 ile 3.00 aynı yeri gösterir. Matematikçiler bunu $15 \equiv 3 \pmod{12}$ diye yazar ve “15, mod 12’de 3’e denktir” diye okur. Yani iki sayı $m$’ye bölündüğünde aynı kalanı veriyorsa, bu iki sayı mod $m$’de denktir. Kalanı 0 olan sayılar da $m$’nin katlarıdır: 0, $m$, $2m$, …
+
+Artık tarama desenini tek satırda yazabiliriz. Satır ve sütun numaralarının toplamı $m$’nin katı olan hücreleri seçiyoruz:
 
 $$
-r + c = 0,\; m,\; 2m,\; 3m,\; \dots
+\Lambda_m = \lbrace\, (r, c) : r + c \equiv 0 \pmod{m} \,\rbrace .
 $$
 
-Yatay bir gemide satır numarası sabit kalır, sütun numarası birer birer artar; yani $r + c$ toplamı da her hücrede bir artar. Dikey bir gemide de öyle. Demek ki $L$ boyundaki bir geminin hücrelerinde $r + c$ toplamı, 7, 8, 9 gibi art arda $L$ sayı olur. Art arda gelen $m$ sayıdan biri her zaman $m$’ye bölünür: Art arda iki sayıdan biri çifttir, art arda üç sayıdan biri 3’e bölünür. Öyleyse boyu en az $m$ olan her gemi işaretli bir hücrenin üzerinden geçer. İşaretli hücrelere *tarama deseni* diyeceğim; $m = 2$ için desen, dama tahtasının ta kendisi.
+($\Lambda$, “lambda” diye okunan Yunan harfi; burada yalnızca desenin adı.) $m = 2$ için bunlar $r + c$ toplamının çift olduğu hücreler, yani baştaki dama tahtasının ta kendisi. Fikrin adı da buradan geliyor: *parite*, bir sayının 2’ye bölümünden kalan, yani tek mi çift mi olduğu.
+
+Peki her gemi neden bu desene yakalanıyor? Yatay bir gemide satır numarası sabit kalır, sütun numarası birer birer artar; dikey bir gemide de tam tersi. Yani bir geminin ilk hücresinde toplam $s$ ise, $L$ boyundaki bu geminin hücrelerinde toplam sırayla şöyle gider:
+
+$$
+s,\; s + 1,\; s + 2,\; \dots,\; s + L - 1 .
+$$
+
+Art arda gelen sayıların mod $m$’deki kalanları da saatin akrebi gibi sırayla döner: …, $m - 2$, $m - 1$, 0, 1, … Bu yüzden art arda gelen herhangi $m$ sayının kalanları $0, 1, \dots, m - 1$ değerlerinin her birini tam bir kez alır; aralarından biri mutlaka 0’dır. Hatta hangisi olduğunu da söyleyebiliriz: $s$’nin kalanı $a$ ise, $k = (m - a) \bmod m$ adım sonraki hücrede $s + k \equiv 0 \pmod{m}$ olur ve $k$ en fazla $m - 1$’dir. Demek ki boyu en az $m$ olan ($L \ge m$) her gemi, $\Lambda_m$ deseninin en az bir hücresinin üzerinden geçer.
+
+Gemi $m$’den kısaysa bu garanti ortadan kalkar. $m = 3$ iken ilk toplamı $s \equiv 1 \pmod{3}$ olan bir muhribin iki hücresinin kalanları 1 ve 2 olur; hiçbiri 0 değildir ve muhrip desenin arasından sıyrılır. Aşağıdaki şekilde tam böyle bir muhrip var: G2–H2’de, $s = 1 + 6 = 7 \equiv 1 \pmod{3}$.
 
 Normal seviye $m$ olarak su üstündeki en kısa geminin boyunu alır. Muhrip su üstünde kaldıkça $m = 2$ olur: dama tahtası. Muhrip batınca $m = 3$ olur ve desen, her üç çaprazdan birinin üzerindeki {n.lattice[3]} hücreye seyrelir.
 

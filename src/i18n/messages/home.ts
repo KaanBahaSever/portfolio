@@ -3,16 +3,25 @@
  * summary). Résumé facts themselves live in src/data/resume.ts; shared labels (nav, badges,
  * "Download CV", "Present", "(opens in a new tab)") come from common.ts.
  *
+ * The owner is a software developer, never "an engineer" (nor "mühendis"), and his story is
+ * not an "engineering journey": the copy describes the work instead. tests/resume-copy.test.ts
+ * enforces it.
+ *
  * Pure module: `node --test` imports it (tests/resume-copy.test.ts checks both languages).
  */
 import type { Localized } from '../config.ts';
 
-/** The four chapters of the engineering-journey teaser, in reading order. */
-export const JOURNEY_CHAPTERS = ['avionics', 'guidance', 'simulation', 'foundations'] as const;
+/**
+ * The four chapters of the journey teaser, in reading order: the order of the About page's
+ * journey, so "Ch. 1" here is chapter 01 there.
+ */
+export const JOURNEY_CHAPTERS = ['foundations', 'avionics', 'guidance', 'simulation'] as const;
 export type JourneyChapter = (typeof JOURNEY_CHAPTERS)[number];
 
 interface Chapter {
   title: string;
+  /** Mono line under the title: when and with what ("2019 – 2022 · Rocket Club"). */
+  meta: string;
   text: string;
 }
 
@@ -20,7 +29,7 @@ const en = {
   hero: {
     /** Plain text: the intro has no inline links, so one string per language is enough. */
     intro:
-      "I'm finishing a mathematics degree at Istanbul University, and most of what I build puts that mathematics to work: rocket avionics and trajectory simulation, messaging platforms, game-playing algorithms. Day to day I write modern C++ and Go. Before that I spent nearly three years at crowd.inc owning a production web platform end to end, from the PostgreSQL schema to the Linux servers.",
+      "I'm finishing a mathematics degree at Istanbul University, and most of what I build puts that mathematics to work: rocket avionics and flight simulation, messaging platforms, game-playing algorithms. Day to day I write modern C++ and Go. Before that I spent nearly three years as a software developer at crowd.inc, owning a production web platform end to end, from the PostgreSQL schema to the Linux servers.",
     selectedWork: 'Selected work',
     /** Shown inside the CV button, after "Download CV". */
     cvFormat: 'PDF',
@@ -44,27 +53,33 @@ const en = {
     all: 'All projects',
   },
   journey: {
-    title: 'Engineering journey',
-    lead: 'How the mathematics turned into engineering, in four chapters.',
+    title: 'From mathematics to systems',
+    lead: 'How the mathematics turned into software, in four chapters.',
     all: 'The full story',
     /** Visible chapter index, e.g. "Ch. 1". */
     chapter: (n: number) => `Ch. ${n}`,
     chapters: {
+      foundations: {
+        title: 'Algorithmic foundations',
+        meta: '2016 – 2019 · C# · MS SQL',
+        // The early Battleship was a plain desktop game: its Hunt & Target opponent came later.
+        text: 'It began in 2016 with C# at a vocational high school: data structures and algorithmic problem-solving, then database applications on MS SQL. The graduation projects were desktop Tic-Tac-Toe and Battleship; the Hunt & Target algorithm came later.',
+      },
       avionics: {
         title: 'Rocket avionics',
-        text: 'Three high-power rocket launches with the Istanbul University Rocket Club. I was the sole author of the flight avionics firmware and the parachute deployment control, driven by onboard sensor fusion, and designed the SD-card telemetry logging.',
+        meta: '2019 – 2022 · Rocket Club',
+        text: 'At the Istanbul University Rocket Club, our team designed and built one low-altitude (5,000 ft) and two high-altitude (10,000 ft) rockets. I was the sole author of the flight avionics firmware and the parachute deployment control, and designed the telemetry logging.',
       },
       guidance: {
         title: 'Autonomous parachute guidance',
+        meta: 'Research · Python',
         text: 'A steering algorithm that uses linear algebra and atmospheric descent dynamics to guide a payload to a designated landing coordinate.',
       },
       simulation: {
         title: 'Flight-physics simulation',
-        text: 'A 3D numerical rocket trajectory simulation, first written in Python and now being re-architected in modern C++23 for high-frequency physics modelling.',
-      },
-      foundations: {
-        title: 'Algorithmic foundations',
-        text: 'Where it started: mathematical calculation engines in C# and SQL, a Battleship game with probability-density targeting, and tic-tac-toe driven by recursive minimax.',
+        meta: '2020 prototype · C++ rewrite',
+        // One project that evolved, not two: the prototype is being rewritten as Rocket-Up.
+        text: 'One project that keeps evolving: a narrow Python prototype from 2020, now being rewritten from scratch as Rocket-Up, an open-source aerodynamic simulation engine in modern C++.',
       },
     } satisfies Record<JourneyChapter, Chapter>,
   },
@@ -95,7 +110,7 @@ const en = {
   person: {
     jobTitle: 'Software Developer',
     knowsAbout: [
-      'Software engineering',
+      'Software development',
       'Mathematics',
       'Algorithms',
       'C++',
@@ -104,6 +119,8 @@ const en = {
       'gRPC',
       'MQTT',
       'PostgreSQL',
+      'CI/CD',
+      'GitHub Actions',
       'Flight avionics',
       'Numerical simulation',
     ] as readonly string[],
@@ -115,7 +132,7 @@ export type HomeMessages = typeof en;
 const tr: HomeMessages = {
   hero: {
     intro:
-      'İstanbul Üniversitesinde matematik lisansımı tamamlıyorum ve geliştirdiğim projelerin çoğunda bu matematiği uygulamaya döküyorum: roket aviyoniği ve yörünge simülasyonu, mesajlaşma platformları, oyun algoritmaları. Günlük işimde modern C++ ve Go kullanıyorum. Öncesinde yaklaşık üç yıl boyunca crowd.inc bünyesinde, canlıda çalışan bir web platformunun sorumluluğunu uçtan uca üstlendim: PostgreSQL şemasından Linux sunucularına kadar.',
+      'İstanbul Üniversitesinde matematik lisansımı tamamlıyorum ve geliştirdiğim projelerin çoğunda bu matematiği uygulamaya döküyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun algoritmaları. Günlük işimde modern C++ ve Go kullanıyorum. Öncesinde yaklaşık üç yıl boyunca crowd.inc bünyesinde yazılım geliştirici olarak, canlıdaki bir web platformunun sorumluluğunu uçtan uca üstlendim: PostgreSQL şemasından Linux sunucularına kadar.',
     selectedWork: 'Seçili işler',
     // The CV exists in English only; say so on the button.
     cvFormat: 'PDF · İngilizce',
@@ -137,27 +154,31 @@ const tr: HomeMessages = {
     all: 'Tüm projeler',
   },
   journey: {
-    title: 'Mühendislik yolculuğu',
-    lead: 'Matematiğin mühendisliğe dönüşümü, dört bölümde.',
+    title: 'Matematikten sistemlere',
+    lead: 'Matematiğin yazılıma dönüşümü, dört bölümde.',
     all: 'Hikâyenin tamamı',
     chapter: (n) => `Bölüm ${n}`,
     chapters: {
+      foundations: {
+        title: 'Algoritmik temeller',
+        meta: '2016 – 2019 · C# · MS SQL',
+        text: 'Her şey 2016’da bir meslek lisesinde C# ile başladı: veri yapıları ve algoritmik problem çözme, ardından MS SQL tabanlı veritabanı uygulamaları. Bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; Hunt & Target algoritmasını ise sonradan geliştirdim.',
+      },
       avionics: {
         title: 'Roket aviyoniği',
-        text: 'İstanbul Üniversitesi Roket Kulübü ile üç yüksek güçlü roket fırlatması. Sensör füzyonuna dayanan uçuş aviyoniği yazılımını ve paraşüt açma kontrolünü tek başıma geliştirdim; SD kartlı telemetri kaydını da ben tasarladım.',
+        meta: '2019 – 2022 · Roket Kulübü',
+        text: 'İstanbul Üniversitesi Roket Kulübünde ekibimizle bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik. Uçuş aviyoniği yazılımını ve paraşüt açma kontrolünü tek başıma geliştirdim; telemetri kaydını da ben tasarladım.',
       },
       guidance: {
         title: 'Otonom paraşüt güdümü',
+        meta: 'Araştırma · Python',
         // "Lineer cebir", as on the About page and in the console: one term for one subject.
         text: 'Lineer cebir ve atmosferik iniş dinamiğiyle faydalı yükü belirlenen bir iniş koordinatına yönlendiren bir güdüm algoritması.',
       },
       simulation: {
         title: 'Uçuş fiziği simülasyonu',
-        text: 'Önce Python ile yazdığım, şimdi yüksek frekanslı fizik modellemesi için modern C++23 ile yeniden tasarladığım üç boyutlu sayısal roket yörünge simülasyonu.',
-      },
-      foundations: {
-        title: 'Algoritmik temeller',
-        text: 'Her şeyin başladığı yer: C# ve SQL ile matematiksel hesaplama motorları, olasılık yoğunluğuyla hedef seçen bir Amiral Battı oyunu ve özyinelemeli minimax ile oynayan bir XOX.',
+        meta: '2020 prototipi · şimdi C++',
+        text: 'Gelişmeye devam eden tek bir proje: 2020’de Python ile yazdığım dar kapsamlı bir prototipi, şimdi Rocket-Up adıyla modern C++ ile açık kaynaklı bir aerodinamik simülasyon motoru olarak baştan yazıyorum.',
       },
     },
   },
@@ -186,7 +207,7 @@ const tr: HomeMessages = {
   person: {
     jobTitle: 'Yazılım Geliştirici',
     knowsAbout: [
-      'Yazılım mühendisliği',
+      'Yazılım geliştirme',
       'Matematik',
       'Algoritmalar',
       'C++',
@@ -195,6 +216,8 @@ const tr: HomeMessages = {
       'gRPC',
       'MQTT',
       'PostgreSQL',
+      'CI/CD',
+      'GitHub Actions',
       'Uçuş aviyoniği',
       'Sayısal simülasyon',
     ],

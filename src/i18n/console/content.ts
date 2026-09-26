@@ -7,6 +7,8 @@
  * Lines are rich-text data (src/lib/console/rich.ts), not HTML. Links use locale-free page paths
  * ('/games/'); the builder localizes them. File names and commands stay English in both languages.
  * Every fact here comes from the CV: do not add roles, dates or numbers that are not there.
+ * The owner is a software developer: nothing here calls him an engineer ("mühendis"); other
+ * people keep their own titles (tests/console-data.test.ts enforces it).
  */
 import type { Localized } from '../config.ts';
 import { common } from '../messages/common.ts';
@@ -27,11 +29,11 @@ const en = {
     text(dim('Software Developer | Math-Driven Solutions & Algorithms · Istanbul')),
     blank(),
     text(
-      'I write systems software with a pure-mathematics background. I study mathematics at Istanbul University and work day to day in modern C++ and Go: system tools, telemetry and messaging platforms, algorithm-driven applications.',
+      'I write systems software with a pure-mathematics background. I study mathematics at Istanbul University and work day to day in modern C++ and Go: system tools, telemetry and messaging platforms, algorithm-driven applications. Around the code I build one-click pipelines that test it, package it and deploy multi-platform builds.',
     ),
     blank(),
     text(
-      'Before that: full-stack software engineer at crowd.inc (2021–2024), and Vice President of the Istanbul University Rocket Club, where I wrote the flight avionics firmware (2019–2022).',
+      'Before that: software developer at crowd.inc (2021–2024), and Vice President of the Istanbul University Rocket Club (2019–2022), where our team built three rockets and I wrote the flight avionics firmware.',
     ),
     blank(),
     text(dim('Next: '), run('cat about.txt'), '  ', run('projects'), '  ', run('ls skills')),
@@ -52,16 +54,21 @@ const en = {
     ),
     blank(),
     heading('Work'),
-    indented(2, 'crowd.inc — Full-Stack Software Engineer / Systems Contributor, July 2021 – March 2024.'),
+    indented(2, 'crowd.inc — Software Developer, July 2021 – March 2024.'),
     indented(
       2,
       'Owned the software lifecycle end to end: PostgreSQL schema design, REST APIs in Python/Flask with jQuery on the client, Linux server provisioning and automated testing. Designed granular role-based access control (RBAC) with strict public and private boundaries, built scalable feed pagination and dynamic data loading, and kept it all reliable with unit and integration tests.',
+    ),
+    indented(
+      2,
+      'Today, next to the code: GitHub Actions pipelines with cross-compilation runners that test, package, produce multi-platform artifacts and deploy in one click, notably for the Asion ecosystem. More: ',
+      run('cat ~/skills/devops.txt'),
     ),
     blank(),
     heading('Rockets'),
     indented(
       2,
-      'Istanbul University Rocket Club — Vice President, 2019–2022. Helped design three high-power rockets, all launched successfully.',
+      'Istanbul University Rocket Club — Vice President, 2019–2022. Our team designed and built three rockets: one low-altitude (5,000 ft) and two high-altitude (10,000 ft).',
     ),
     indented(
       2,
@@ -71,23 +78,41 @@ const en = {
     heading('Research'),
     indented(
       2,
-      'An autonomous parachute steering algorithm: linear algebra and atmospheric descent dynamics guide the payload to a chosen landing coordinate.',
+      'An autonomous parachute steering algorithm: linear algebra and atmospheric descent dynamics guide the payload to a chosen landing coordinate. Source: ',
+      link('github.com/KaanBahaSever/AutonomousParachute', 'https://github.com/KaanBahaSever/AutonomousParachute'),
     ),
     indented(
       2,
-      'A 3D numerical rocket trajectory simulation, first written in Python and now being re-architected in modern C++23 for high-frequency physics modelling.',
+      'Rocket flight simulation, one project that keeps evolving: a narrow, purpose-built Python prototype from 2020, now being rewritten from scratch as Rocket-Up, an open-source aerodynamic simulation engine in modern C++ with a cleaner architecture and higher performance: ',
+      link('rocket-up', '/projects/rocket-up/'),
+      '.',
     ),
     blank(),
     heading('Where it started'),
     indented(
       2,
-      'First programs in C# and SQL: mathematical calculation engines, a Battleship game (“Amiral Battı”) that aims with probability densities, and Tic-Tac-Toe (“XOX”) played by recursive minimax. Both games now run in the browser: ',
+      'Space came first: before any code, a long-standing interest in space exploration, spacecraft architectures, lunar mission analysis and theoretical mission planning.',
+    ),
+    indented(
+      2,
+      '2016: programming fundamentals in C# at a vocational high school, then data structures and algorithmic problem-solving. 2019: database applications backed by MS SQL, and a TÜBİTAK high school research project on cryptography and visual programming logic, with an early prototype of a flowchart-based visual coding tool.',
+    ),
+    indented(
+      2,
+      'My high school graduation projects were desktop Tic-Tac-Toe (“XOX”) and Battleship (“Amiral Battı”); the Battleship opponent’s Hunt & Target algorithm came later. Both games now run in the browser: ',
       link('games', '/games/'),
       '.',
     ),
     blank(),
     heading('Also'),
-    indented(2, 'Google Developer Student Clubs core team, 2022–2023: led two YouTube live broadcasts.'),
+    indented(
+      2,
+      'Google Developer Student Clubs core team, 2023: hosted workshops and live streams on Flask, HTML and Git/GitHub, and organised Cyber Security Week, including a live-streamed technical interview with a CCIE-certified network security engineer.',
+    ),
+    indented(
+      2,
+      'Mathematics Club, in my upper years: organised and facilitated academic events, seminars and logic and mathematics competitions.',
+    ),
     indented(2, 'YetGen “21st Century Competencies” certificate, Mehmet Zorlu Foundation, 2020.'),
     indented(2, 'Erasmus+ Youth Exchange in Arrecife, Spain, 2017–2018.'),
     blank(),
@@ -97,14 +122,15 @@ const en = {
     languages: [
       heading('Programming languages'),
       blank(),
-      pair('C++', 'C++23, day to day: system tools, NeoSMBIOS, the trajectory simulation'),
+      pair('C++', 'modern C++, day to day: system tools, NeoSMBIOS (C++23), i18n-cpp, the Rocket-Up simulation engine'),
       pair('Go', 'day to day: Karecik, Novacast and parts of Asion'),
       pair('C', 'the native layer of Asion'),
       pair('Objective-C', 'Asion on macOS'),
-      pair('Python', 'Flask APIs at crowd.inc; the first trajectory simulation'),
-      pair('C#', 'first programs: calculation engines, Battleship, Tic-Tac-Toe'),
+      pair('Python', 'Flask APIs at crowd.inc; the 2020 flight-simulation prototype; parachute guidance research; build scripts'),
+      pair('C#', 'where it started, in 2016: data structures, algorithms, desktop Tic-Tac-Toe and Battleship'),
       pair('TypeScript, JavaScript', 'this site and its in-browser tools'),
-      pair('SQL', 'PostgreSQL schemas; the early C# projects'),
+      pair('SQL', 'PostgreSQL schemas; database applications on MS SQL (2019)'),
+      pair('Bash, Batch', 'build, packaging and release scripts'),
     ],
     systems: [
       heading('Systems and protocols'),
@@ -114,6 +140,14 @@ const en = {
       pair('OS event hooks', 'activity tracking in Asion on macOS, Linux and Windows, behind a lightweight daemon'),
       pair('Linux servers', 'provisioning and automated testing at crowd.inc'),
       pair('Telemetry', 'rocket avionics: RF transmission, SD-card logging, a desktop dashboard for the data'),
+    ],
+    devops: [
+      heading('DevOps and automation'),
+      blank(),
+      pair('GitHub Actions', 'multi-platform CI/CD workflows'),
+      pair('Cross-compilation', 'runners that build for several platforms from one pipeline'),
+      pair('Scripting', 'Bash, Batch and Python for building, packaging and releasing'),
+      pair('One click', 'test, package, produce multi-platform artifacts and deploy, notably for the Asion ecosystem'),
     ],
     data: [
       heading('Databases'),
@@ -136,7 +170,7 @@ const en = {
       pair('Pure', 'real analysis, abstract algebra, topology'),
       pair(
         'Applied',
-        'linear algebra and descent dynamics for parachute steering; numerical simulation of rocket trajectories; probability densities (Battleship); game trees and minimax (Tic-Tac-Toe)',
+        'linear algebra and descent dynamics for parachute steering; aerodynamic simulation of rocket flight; probability densities and Hunt & Target search (Battleship); game trees and minimax (Tic-Tac-Toe)',
       ),
       pair('Writing', 'Açık Matematik: open Turkish textbooks for undergraduate mathematics'),
     ],
@@ -144,6 +178,7 @@ const en = {
       heading('Tools'),
       blank(),
       pair('Git, GitHub', 'version control; public work at ', link('github.com/KaanBahaSever', 'https://github.com/KaanBahaSever')),
+      pair('GitHub Actions', 'CI/CD; see ', run('cat ~/skills/devops.txt')),
       pair('MATLAB, Mathematica, R', 'numerical and symbolic computation'),
       pair('Quarto', 'publishing Açık Matematik'),
     ],
@@ -205,11 +240,11 @@ const tr: ConsoleContent = {
     text(dim('Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar · İstanbul')),
     blank(),
     text(
-      'Sistem yazılımına saf matematik altyapısıyla yaklaşıyorum. İstanbul Üniversitesinde matematik okuyorum; günlük işimde modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları ve algoritma odaklı uygulamalar geliştiriyorum.',
+      'Sistem yazılımına saf matematik altyapısıyla yaklaşıyorum. İstanbul Üniversitesinde matematik okuyorum; günlük işimde modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları ve algoritma odaklı uygulamalar geliştiriyorum. Kodun çevresinde de onu tek tıkla test eden, paketleyen ve çok platformlu derlemeleri dağıtan pipeline’lar kuruyorum.',
     ),
     blank(),
     text(
-      'Daha önce crowd.inc şirketinde full-stack yazılım mühendisi olarak çalıştım (2021–2024). İstanbul Üniversitesi Roket Kulübünde başkan yardımcısıyken uçuş aviyonik yazılımını geliştirdim (2019–2022).',
+      'Daha önce crowd.inc şirketinde yazılım geliştirici olarak çalıştım (2021–2024). İstanbul Üniversitesi Roket Kulübünde başkan yardımcısıyken (2019–2022) ekibimiz üç roket tasarlayıp üretti; uçuş aviyonik yazılımını ben geliştirdim.',
     ),
     blank(),
     text(dim('Sırada: '), run('cat about.txt'), '  ', run('projects'), '  ', run('ls skills')),
@@ -230,16 +265,21 @@ const tr: ConsoleContent = {
     ),
     blank(),
     heading('İş deneyimi'),
-    indented(2, 'crowd.inc — Full-Stack Software Engineer / Systems Contributor, Temmuz 2021 – Mart 2024.'),
+    indented(2, 'crowd.inc — Yazılım Geliştirici, Temmuz 2021 – Mart 2024.'),
     indented(
       2,
       'Yazılım geliştirme yaşam döngüsünün tamamını üstlendim: PostgreSQL şema tasarımı, Python/Flask ile REST API’ler ve istemci tarafında jQuery, Linux sunucu kurulumu ve otomatik testler. Herkese açık ve özel içerik arasında katı sınırlar çizen ayrıntılı bir rol tabanlı erişim denetimi (RBAC) tasarladım, ölçeklenebilir akış sayfalama ve dinamik veri yükleme geliştirdim, sistemin güvenilirliğini birim ve entegrasyon testleriyle sağladım.',
+    ),
+    indented(
+      2,
+      'Bugün kodun yanında: çapraz derleme runner’larıyla çalışan, tek tıkla test eden, paketleyen, çok platformlu artifact’ler üreten ve dağıtım yapan GitHub Actions pipeline’ları; özellikle Asion ekosistemi için. Devamı: ',
+      run('cat ~/skills/devops.txt'),
     ),
     blank(),
     heading('Roketler'),
     indented(
       2,
-      'İstanbul Üniversitesi Roket Kulübü — Başkan Yardımcısı, 2019–2022. Üç yüksek güçlü roketin tasarımına katkıda bulundum; üçü de başarıyla fırlatıldı.',
+      'İstanbul Üniversitesi Roket Kulübü — Başkan Yardımcısı, 2019–2022. Ekibimizle üç roket tasarlayıp ürettik: bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi.',
     ),
     indented(
       2,
@@ -249,23 +289,41 @@ const tr: ConsoleContent = {
     heading('Araştırma'),
     indented(
       2,
-      'Otonom paraşüt yönlendirme algoritması: lineer cebir ve atmosferik iniş dinamiği, faydalı yükü belirlenen bir iniş koordinatına yönlendiriyor.',
+      'Otonom paraşüt yönlendirme algoritması: lineer cebir ve atmosferik iniş dinamiği, faydalı yükü belirlenen bir iniş koordinatına yönlendiriyor. Kaynak kodu: ',
+      link('github.com/KaanBahaSever/AutonomousParachute', 'https://github.com/KaanBahaSever/AutonomousParachute'),
     ),
     indented(
       2,
-      'Üç boyutlu sayısal roket yörüngesi simülasyonu: önce Python ile yazdım, şimdi yüksek frekanslı fizik modellemesi için modern C++23 ile yeniden tasarlıyorum.',
+      'Roket uçuş simülasyonu, gelişmeye devam eden tek bir proje: 2020’de belirli bir amaç için yazdığım dar kapsamlı bir Python prototipi. Şimdi onu Rocket-Up adıyla, daha temiz bir mimariye ve daha yüksek performansa sahip, modern C++ ile açık kaynaklı bir aerodinamik simülasyon motoru olarak baştan yazıyorum: ',
+      link('rocket-up', '/projects/rocket-up/'),
+      '.',
     ),
     blank(),
     heading('Başlangıç'),
     indented(
       2,
-      'İlk programlarımı C# ve SQL ile yazdım: matematiksel hesaplama motorları, hedefini olasılık yoğunluklarıyla seçen bir Amiral Battı oyunu ve özyinelemeli minimax ile oynayan bir XOX. İki oyun da artık tarayıcıda çalışıyor: ',
+      'Önce uzay vardı: daha kod yazmadan önce de uzay keşfine, uzay aracı mimarilerine, Ay görevlerinin analizine ve kuramsal görev planlamasına uzun süredir ilgi duyuyordum.',
+    ),
+    indented(
+      2,
+      '2016: meslek lisesinde C# ile programlamanın temelleri, ardından veri yapıları ve algoritmik problem çözme. 2019: MS SQL tabanlı veritabanı uygulamaları ve kriptografi ile görsel programlama mantığı üzerine bir TÜBİTAK lise araştırma projesi; projede akış şemasıyla kod yazmayı sağlayan görsel bir aracın erken bir prototipi de vardı.',
+    ),
+    indented(
+      2,
+      'Lise bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; Amiral Battı rakibinin Hunt & Target algoritmasını sonradan geliştirdim. İki oyun da artık tarayıcıda çalışıyor: ',
       link('oyunlar', '/games/'),
       '.',
     ),
     blank(),
     heading('Diğer'),
-    indented(2, 'Google Developer Student Clubs çekirdek ekibi, 2022–2023: iki YouTube canlı yayınını yönettim.'),
+    indented(
+      2,
+      'Google Developer Student Clubs çekirdek ekibi, 2023: Flask, HTML ve Git/GitHub üzerine atölyeler ve canlı yayınlar düzenledim; CCIE sertifikalı bir ağ güvenliği mühendisiyle canlı yayında teknik bir söyleşinin de yer aldığı Siber Güvenlik Haftası etkinliğini organize ettim.',
+    ),
+    indented(
+      2,
+      'Matematik Kulübü, son sınıflarımda: akademik etkinlikler, seminerler ve mantık-matematik yarışmaları düzenleyip yürüttüm.',
+    ),
     indented(2, 'YetGen “21. Yüzyıl Yetkinlikleri” sertifikası, Mehmet Zorlu Vakfı, 2020.'),
     indented(2, 'Erasmus+ Gençlik Değişimi, Arrecife, İspanya, 2017–2018.'),
     blank(),
@@ -275,14 +333,15 @@ const tr: ConsoleContent = {
     languages: [
       heading('Programlama dilleri'),
       blank(),
-      pair('C++', 'C++23; günlük işim: sistem araçları, NeoSMBIOS, yörünge simülasyonu'),
+      pair('C++', 'modern C++, günlük işim: sistem araçları, NeoSMBIOS (C++23), i18n-cpp, Rocket-Up simülasyon motoru'),
       pair('Go', 'günlük işim: Karecik, Novacast ve Asion’un bazı bileşenleri'),
       pair('C', 'Asion’un native katmanı'),
       pair('Objective-C', 'Asion’un macOS tarafı'),
-      pair('Python', 'crowd.inc şirketinde Flask API’leri; yörünge simülasyonunun ilk sürümü'),
-      pair('C#', 'ilk programlarım: hesaplama motorları, Amiral Battı, XOX'),
+      pair('Python', 'crowd.inc şirketinde Flask API’leri; 2020’deki uçuş simülasyonu prototipi; paraşüt güdümü araştırması; derleme betikleri'),
+      pair('C#', 'her şeyin başladığı dil, 2016: veri yapıları, algoritmalar, masaüstü XOX ve Amiral Battı'),
       pair('TypeScript, JavaScript', 'bu site ve tarayıcıda çalışan araçları'),
-      pair('SQL', 'PostgreSQL şemaları; ilk C# projelerim'),
+      pair('SQL', 'PostgreSQL şemaları; MS SQL tabanlı veritabanı uygulamaları (2019)'),
+      pair('Bash, Batch', 'derleme, paketleme ve sürüm betikleri'),
     ],
     systems: [
       heading('Sistemler ve protokoller'),
@@ -292,6 +351,14 @@ const tr: ConsoleContent = {
       pair('OS event hooks', 'Asion’da macOS, Linux ve Windows üzerinde etkinlik takibi, hafif bir daemon ile'),
       pair('Linux sunucular', 'crowd.inc şirketinde sunucu kurulumu ve otomatik testler'),
       pair('Telemetri', 'roket aviyoniği: RF iletimi, SD kart kaydı ve veriler için masaüstü arayüz'),
+    ],
+    devops: [
+      heading('DevOps ve otomasyon'),
+      blank(),
+      pair('GitHub Actions', 'çok platformlu CI/CD iş akışları'),
+      pair('Çapraz derleme', 'tek bir pipeline’dan birden çok platform için derleyen runner’lar'),
+      pair('Betikler', 'derleme, paketleme ve sürüm için Bash, Batch ve Python'),
+      pair('Tek tık', 'test, paketleme, çok platformlu artifact üretimi ve dağıtım; özellikle Asion ekosistemi için'),
     ],
     data: [
       heading('Veritabanları'),
@@ -314,7 +381,7 @@ const tr: ConsoleContent = {
       pair('Saf', 'reel analiz, soyut cebir, topoloji'),
       pair(
         'Uygulamalı',
-        'paraşüt yönlendirmede lineer cebir ve iniş dinamiği; roket yörüngelerinin sayısal simülasyonu; olasılık yoğunlukları (Amiral Battı); oyun ağaçları ve minimax (XOX)',
+        'paraşüt yönlendirmede lineer cebir ve iniş dinamiği; roket uçuşunun aerodinamik simülasyonu; olasılık yoğunlukları ve Hunt & Target araması (Amiral Battı); oyun ağaçları ve minimax (XOX)',
       ),
       pair('Yayın', 'Açık Matematik: lisans matematiği için açık kaynaklı Türkçe ders kitapları'),
     ],
@@ -322,6 +389,7 @@ const tr: ConsoleContent = {
       heading('Araçlar'),
       blank(),
       pair('Git, GitHub', 'sürüm kontrolü; herkese açık çalışmalarım: ', link('github.com/KaanBahaSever', 'https://github.com/KaanBahaSever')),
+      pair('GitHub Actions', 'CI/CD; ayrıntılar: ', run('cat ~/skills/devops.txt')),
       pair('MATLAB, Mathematica, R', 'sayısal ve sembolik hesaplama'),
       pair('Quarto', 'Açık Matematik’in yayın altyapısı'),
     ],

@@ -7,12 +7,19 @@
  *
  * Screen readers get full month names instead ('monthYearLong'): Turkish abbreviations are
  * ordinary words ("Kas" is "muscle", "Ara" is "search"), and speech engines read them as such.
+ *
+ * A period may also be known only in words ("Upper years"); it is shown as written.
  */
 
-import type { ResumeDate, ResumePeriod } from '../data/resume.ts';
+import type { DatedPeriod, ResumeDate, ResumePeriod } from '../data/resume.ts';
 import { DEFAULT_LOCALE, type Locale } from '../i18n/config.ts';
 import { formatters } from '../i18n/format.ts';
 import { common } from '../i18n/messages/common.ts';
+
+/** True when the period has real dates, false when it is described in words. */
+export function isDated(period: ResumePeriod): period is DatedPeriod {
+  return period.periodLabel === undefined;
+}
 
 export interface DateLabel {
   /** Human-readable label, e.g. "Jul 2021" / "Tem 2021" or "2024". */
@@ -24,12 +31,13 @@ export interface DateLabel {
 }
 
 export interface PeriodLabels {
-  start: DateLabel;
-  /** null for single dates (e.g. "2024"), 'present' for ongoing periods. */
+  /** null when the period is described in words ("Upper years"): then only `text` applies. */
+  start: DateLabel | null;
+  /** null for single dates (e.g. "2024") and undated periods, 'present' for ongoing periods. */
   end: DateLabel | 'present' | null;
   /** What to show for the end: the formatted date, "Present" / "Günümüz", or null for a single date. */
   endLabel: string | null;
-  /** The visible period, e.g. "Jul 2021 – Mar 2024" or "2020". */
+  /** The visible period, e.g. "Jul 2021 – Mar 2024", "2020" or "Upper years". */
   text: string;
   /** The period as a screen reader should hear it, e.g. "July 2021 to March 2024". */
   spoken: string;
@@ -58,6 +66,10 @@ export function formatResumeDate(value: ResumeDate, locale: Locale = DEFAULT_LOC
 }
 
 export function formatPeriod(period: ResumePeriod, locale: Locale = DEFAULT_LOCALE): PeriodLabels {
+  if (!isDated(period)) {
+    const label = period.periodLabel[locale];
+    return { start: null, end: null, endLabel: null, text: label, spoken: label };
+  }
   const start = formatResumeDate(period.start, locale);
   const end =
     period.end === undefined ? null : period.end === 'present' ? 'present' : formatResumeDate(period.end, locale);
@@ -79,10 +91,17 @@ function comparable(date: ResumeDate | 'present', asEnd: boolean): string {
   return date.length === 4 ? `${date}-${asEnd ? '12' : '01'}` : date;
 }
 
-/** Newest first: by end date (ongoing periods first; a single date is its own end), then by start date. */
+/**
+ * Newest first: by end date (ongoing periods first; a single date is its own end), then by start
+ * date. Undated periods have nothing to compare, so they lead, in their source order: the data
+ * uses them only for the recent past (see UndatedPeriod).
+ */
 export function sortNewestFirst<T extends ResumePeriod>(items: readonly T[]): T[] {
-  return [...items].sort((a, b) => {
+  const undated = items.filter((item) => !isDated(item));
+  const dated = items.filter((item): item is T & DatedPeriod => isDated(item));
+  dated.sort((a, b) => {
     const byEnd = comparable(b.end ?? b.start, true).localeCompare(comparable(a.end ?? a.start, true));
     return byEnd !== 0 ? byEnd : comparable(b.start, false).localeCompare(comparable(a.start, false));
   });
+  return [...undated, ...dated];
 }

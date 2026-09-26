@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import type { ResumeDate } from '../src/data/resume.ts';
-import { formatPeriod, formatResumeDate, parseResumeDate, sortNewestFirst } from '../src/utils/resume-dates.ts';
+import { formatPeriod, formatResumeDate, isDated, parseResumeDate, sortNewestFirst } from '../src/utils/resume-dates.ts';
 
 // The labels the hand-written month table used to produce; switching to Intl must not change them.
 const ENGLISH_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -102,4 +102,30 @@ test('sortNewestFirst puts ongoing periods first, then by end date, then by star
   );
   // The input is not mutated.
   assert.equal(items[0].id, 'erasmus');
+});
+
+test('a period in words is shown as written, in the page language, with nothing to spell out', () => {
+  const upper = { periodLabel: { en: 'Upper years', tr: 'Son sınıflar' } };
+  assert.equal(isDated(upper), false);
+  assert.equal(isDated({ start: '2020' }), true);
+  assert.deepEqual(formatPeriod(upper), { start: null, end: null, endLabel: null, text: 'Upper years', spoken: 'Upper years' });
+  const tr = formatPeriod(upper, 'tr');
+  assert.equal(tr.text, 'Son sınıflar');
+  assert.equal(tr.spoken, 'Son sınıflar');
+  assert.equal(tr.start, null);
+});
+
+test('sortNewestFirst puts undated periods first, in their source order, and never drops one', () => {
+  const items = [
+    { id: 'rocket', start: '2019', end: '2022' },
+    { id: 'club', periodLabel: { en: 'Upper years', tr: 'Son sınıflar' } },
+    { id: 'gdsc', start: '2023' },
+    { id: 'other', periodLabel: { en: 'Later', tr: 'Sonra' } },
+    { id: 'erasmus', start: '2017-06', end: '2018-12' },
+  ] as const;
+  assert.deepEqual(
+    sortNewestFirst(items).map((item) => item.id),
+    ['club', 'other', 'gdsc', 'rocket', 'erasmus'],
+  );
+  assert.deepEqual(sortNewestFirst([]), []);
 });

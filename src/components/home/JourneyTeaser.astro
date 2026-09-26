@@ -1,18 +1,27 @@
 ---
 /**
- * "Engineering journey" teaser: four compact chapter cards, each a stretched link to the full
- * story on the About page (/about/#journey).
+ * The journey teaser ("From mathematics to systems"): four compact chapter cards in the About
+ * page's order, each a stretched link to its own chapter there (/about/#journey-…); the section
+ * link opens the journey from the top (/about/#journey). The About page keeps those anchors.
  */
 import JourneyGlyph from './JourneyGlyph.astro';
 import Section from '../ui/Section.astro';
 import { localizePath } from '../../i18n/config';
-import { JOURNEY_CHAPTERS, homeMessages } from '../../i18n/messages/home';
+import { JOURNEY_CHAPTERS, homeMessages, type JourneyChapter } from '../../i18n/messages/home';
 import { getLocale } from '../../i18n/server';
 
 interface Props {
   /** Two-digit section number, e.g. '03'. */
   index?: string;
 }
+
+/** The About page's chapter anchors (src/components/about/Journey.astro). */
+const CHAPTER_ANCHORS: Record<JourneyChapter, string> = {
+  foundations: 'journey-algorithms',
+  avionics: 'journey-avionics',
+  guidance: 'journey-guidance',
+  simulation: 'journey-simulation',
+};
 
 const { index } = Astro.props;
 const locale = getLocale(Astro);
@@ -35,12 +44,13 @@ const href = localizePath('/about/#journey', locale);
               </div>
               <h3 class="mt-5 font-serif text-xl leading-snug font-medium tracking-tight text-balance">
                 <a
-                  href={href}
+                  href={localizePath(`/about/#${CHAPTER_ANCHORS[key]}`, locale)}
                   class="rounded-sm text-zinc-900 transition-colors group-hover:text-accent-700 after:absolute after:inset-0 after:rounded-xl dark:text-zinc-100 dark:group-hover:text-accent-400"
                 >
                   {chapter.title}
                 </a>
               </h3>
+              <p class="mt-1 font-mono text-xs leading-5 text-zinc-600 tabular-nums dark:text-zinc-400">{chapter.meta}</p>
               <p class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{chapter.text}</p>
             </article>
           </li>

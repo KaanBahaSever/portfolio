@@ -137,8 +137,36 @@ test('Turkish copy names linear algebra "lineer cebir", as the About page and th
 test('Turkish copy uses Turkish letters where Turkish needs them', () => {
   // A cheap guard against ASCII-folded Turkish ("Ozgecmis", "Istanbul Universitesi").
   const turkish = [...strings(homeMessages.tr), ...strings(notFoundMessages.tr)].join(' ');
-  for (const word of ['Özgeçmiş', 'İstanbul Üniversitesinde', 'Mühendislik', 'Şekil']) {
+  for (const word of ['Özgeçmiş', 'İstanbul Üniversitesinde', 'Geliştirici', 'Şekil']) {
     assert.ok(turkish.includes(word), `expected "${word}" in the Turkish copy`);
   }
-  assert.doesNotMatch(turkish, /\b(Ozgecmis|Istanbul Universitesi|Muhendislik|Sekil)\b/);
+  assert.doesNotMatch(turkish, /\b(Ozgecmis|Istanbul Universitesi|Gelistirici|Sekil)\b/);
+});
+
+test('the owner is a developer: no copy calls him an engineer or his story engineering', () => {
+  // Other people keep their titles (the GDSC guest is a network security engineer).
+  const guest = /network security engineer|ağ güvenliği mühendis\p{L}*/giu;
+  const all = [
+    ...Object.values(CATALOGUES).flatMap((catalogue) => [...strings(catalogue.en), ...strings(catalogue.tr)]),
+    ...strings(JSON.parse(JSON.stringify(resume))),
+  ];
+  for (const text of all) assert.doesNotMatch(text.replace(guest, ''), /engineer|mühendis/i, text);
+  assert.equal(homeMessages.en.person.jobTitle, 'Software Developer');
+  assert.equal(homeMessages.tr.person.jobTitle, 'Yazılım Geliştirici');
+});
+
+test('the journey teaser follows the About page and tells the current story', () => {
+  assert.deepEqual([...JOURNEY_CHAPTERS], ['foundations', 'avionics', 'guidance', 'simulation']);
+  const { chapters } = homeMessages.en.journey;
+  // The early Battleship was a plain desktop game; Hunt & Target came later.
+  assert.match(chapters.foundations.text, /2016/);
+  assert.match(chapters.foundations.text, /Hunt & Target algorithm came later/);
+  assert.doesNotMatch(chapters.foundations.text, /probability/i);
+  assert.match(chapters.avionics.text, /one low-altitude \(5,000 ft\) and two high-altitude \(10,000 ft\)/);
+  assert.doesNotMatch(chapters.avionics.text, /launch/i);
+  // One evolving project: the 2020 prototype is being rewritten as Rocket-Up.
+  assert.match(chapters.simulation.text, /2020/);
+  assert.match(chapters.simulation.text, /Rocket-Up/);
+  assert.match(homeMessages.tr.journey.chapters.avionics.text, /5\.000 ft/);
+  assert.match(homeMessages.tr.journey.chapters.simulation.text, /Rocket-Up/);
 });

@@ -202,7 +202,7 @@ const surfaceClass = 'np-surface font-mono';
     <div
       data-notice
       hidden
-      class="flex items-center gap-2 border-b border-zinc-200 bg-zinc-50 py-1 pr-1 pl-3 dark:border-zinc-800 dark:bg-zinc-950/40"
+      class="flex items-center gap-2 border-b border-zinc-200 bg-zinc-50 py-1 ps-(--np-pad-x) pe-1 dark:border-zinc-800 dark:bg-zinc-950/40"
     >
       <p
         data-message
@@ -462,14 +462,15 @@ const surfaceClass = 'np-surface font-mono';
     <!--
       5. Status bar: caret and counters; save state, autosave switch and line endings (or the zen
       exit). Sticky with the card's own background, so it stays in view when the window is taller
-      than the screen; the bottom corners follow the card's (radius minus its 1 px border).
+      than the screen; the bottom corners follow the card's (radius minus its 1 px border). The
+      counters start where the text starts (the editor's inline padding, see the styles).
     -->
     <div
       data-status
-      class="np-status sticky bottom-0 z-10 flex flex-wrap items-center gap-x-3 rounded-b-[calc(var(--radius-xl)-1px)] border-t border-zinc-200 bg-white px-2 font-mono text-xs text-zinc-600 tabular-nums sm:px-3 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+      class="np-status sticky bottom-0 z-10 flex flex-wrap items-center gap-x-3 rounded-b-[calc(var(--radius-xl)-1px)] border-t border-zinc-200 bg-white pe-2 font-mono text-xs text-zinc-600 tabular-nums sm:pe-3 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
     >
       {/* The caret position stays off phones, where the counters and save state need the line. */}
-      <div class="flex min-h-11 min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 px-1 py-1">
+      <div class="flex min-h-11 min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 py-1 ps-(--np-pad-x) pe-1">
         <span data-caret class="np-zen-hide max-sm:hidden">{m.status.caret(f.number(1), f.number(1))}</span>
         <span data-selection-count hidden class="np-zen-hide font-medium text-zinc-900 dark:text-zinc-100"></span>
         <span data-summary="lines" class="font-medium text-zinc-900 dark:text-zinc-100">{m.status.lines(0, zero)}</span>
@@ -590,22 +591,45 @@ const surfaceClass = 'np-surface font-mono';
 
 <style is:global>
   /*
+   * The text column. --np-pad-x is where the text starts, measured from the window's inner
+   * edge: a fixed inset that grows a little with the screen and never centres the column. The
+   * status line and the notice line use it too, so their text starts on the same vertical line.
+   * --np-measure caps the length of a wrapped line on very wide screens (120 columns, a common
+   * editor margin). It only moves the right edge, so the text stays anchored on the left.
+   */
+  .np-card {
+    --np-pad-x: 1rem;
+    --np-measure: 120ch;
+  }
+
+  @media (width >= 40rem) {
+    .np-card {
+      --np-pad-x: 1.5rem;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .np-card {
+      --np-pad-x: 2rem;
+    }
+  }
+
+  /*
    * The textarea and its highlight mirror must break lines at exactly the same places. Every
    * property that affects text layout is set here, once, for both elements.
    *
-   * --np-measure keeps lines readable on wide screens: the side padding grows (percentages of
-   * padding refer to the width of the editor, which both elements share) instead of the line.
-   * The border stays 0 but solid: the highlighter widens the mirror's transparent border to
-   * copy the textarea's scrollbar and iOS's built-in text inset.
+   * The right padding takes whatever the measure leaves over. Percentages of padding refer to
+   * the width of the editor, which both elements share; ch resolves in each element's own font,
+   * which is the same. The border stays 0 but solid: the highlighter widens the mirror's
+   * transparent border to copy the textarea's scrollbar and iOS's built-in text inset.
    */
   .np-surface {
-    --np-pad-x: 0.75rem;
-    --np-measure: 100ch;
     box-sizing: border-box;
     margin: 0;
     border: 0 solid transparent;
-    padding-block: 0.625rem;
-    padding-inline: max(var(--np-pad-x), (100% - var(--np-measure)) / 2);
+    padding-block: 0.75rem;
+    padding-inline-start: var(--np-pad-x);
+    padding-inline-end: max(var(--np-pad-x), 100% - var(--np-pad-x) - var(--np-measure));
     /* 16px on touch screens: iOS Safari zooms into smaller focused fields. */
     font-size: 1rem;
     line-height: 1.5rem;
@@ -629,8 +653,13 @@ const surfaceClass = 'np-surface font-mono';
 
   @media (width >= 40rem) {
     .np-surface {
-      --np-pad-x: 1.25rem;
       padding-block: 1rem;
+    }
+  }
+
+  @media (width >= 64rem) {
+    .np-surface {
+      padding-block: 1.25rem;
     }
   }
 
@@ -641,7 +670,9 @@ const surfaceClass = 'np-surface font-mono';
     }
   }
 
+  /* Unwrapped lines scroll sideways, so a measure would only leave blank space at their end. */
   [data-wrap='off'] .np-surface {
+    padding-inline-end: var(--np-pad-x);
     white-space: pre;
     overflow-wrap: normal;
   }
@@ -710,17 +741,40 @@ const surfaceClass = 'np-surface font-mono';
     display: none;
   }
 
-  /* Wider margins, a shorter line and more leading for writing. */
+  /*
+   * The same left-anchored column as on the page, with wider margins, larger type and more
+   * leading for writing. The measure stays 120 columns, so on a wide screen the text wraps at
+   * about the same words in both views and keeps its shape when zen mode starts or ends.
+   */
+  .np-root[data-zen] > .np-card {
+    --np-pad-x: 1.25rem;
+  }
+
   .np-root[data-zen] .np-surface {
-    --np-measure: 72ch;
     padding-block: 2rem 3rem;
   }
 
   @media (width >= 40rem) {
+    .np-root[data-zen] > .np-card {
+      --np-pad-x: 2.5rem;
+    }
+
     .np-root[data-zen] .np-surface {
       padding-block: 4rem 5rem;
       font-size: 1rem;
       line-height: 1.75rem;
+    }
+  }
+
+  /*
+   * Past the page's widest column (BaseLayout's 'full', max-w-screen-2xl: 96rem) the inset
+   * takes half of the extra width, so the text starts about where it starts on the page instead
+   * of jumping to the screen's edge and leaving an empty half on the right. vw, not %, so the
+   * text and the status line resolve it to the same length.
+   */
+  @media (width >= 64rem) {
+    .np-root[data-zen] > .np-card {
+      --np-pad-x: max(4rem, (100vw - 96rem) / 2 + 4rem);
     }
   }
 

@@ -45,7 +45,8 @@ const data = buildConsoleData({
     email: SITE.email,
     socials: SITE.socials,
     location: pick(SITE.location, locale),
-    cvPath: SITE.cvPath,
+    // The CV in this page's language.
+    cvPath: pick(SITE.cvPath, locale),
   },
 });
 ---

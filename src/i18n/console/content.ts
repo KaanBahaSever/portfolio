@@ -199,6 +199,7 @@ const en = {
     email: 'email',
     location: 'location',
     cv: 'cv',
+    /** After the CV's path in contact.txt: the page's language (the CV linked is in it) and the format. */
     cvNote: '(English, PDF)',
   },
   project: {
@@ -410,7 +411,7 @@ const tr: ConsoleContent = {
     email: 'e-posta',
     location: 'konum',
     cv: 'özgeçmiş',
-    cvNote: '(İngilizce, PDF)',
+    cvNote: '(Türkçe, PDF)',
   },
   project: {
     stack: 'teknolojiler',

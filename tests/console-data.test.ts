@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
+import { SITE } from '../src/config/site.ts';
 import { LOCALES } from '../src/i18n/config.ts';
 import { consoleContent } from '../src/i18n/console/content.ts';
 import { consoleMessages } from '../src/i18n/console/messages.ts';
@@ -59,7 +60,8 @@ const build = (locale: 'en' | 'tr') =>
       email: 'someone@example.com',
       socials: [{ label: 'GitHub', href: 'https://github.com/KaanBahaSever' }],
       location: 'İstanbul, Türkiye',
-      cvPath: '/cv/kaan-cv.pdf',
+      // As the page passes it: the CV in the page's language.
+      cvPath: SITE.cvPath[locale],
     },
   });
 
@@ -121,12 +123,18 @@ test('site links are localized for Turkish; files and external links are not', (
   assert.ok(hrefs(fileLines(tr, ['secret.txt'])).includes('/tr/games/tic-tac-toe/'));
   assert.ok(hrefs(fileLines(tr, ['projects', 'pdf-tool.txt'])).includes('/tr/tools/pdf-split/'));
   const contact = hrefs(fileLines(tr, ['contact.txt']));
-  assert.ok(contact.includes('/cv/kaan-cv.pdf'), 'the CV is one file for every language');
+  // The Turkish CV, at its file path (no /tr/ prefix on a file).
+  assert.ok(contact.includes('/cv/kaan-cv-tr.pdf'), 'the Turkish console links the Turkish CV');
+  assert.ok(!contact.includes('/cv/kaan-cv.pdf'));
   assert.ok(contact.includes('mailto:someone@example.com'));
   assert.ok(contact.includes('https://github.com/KaanBahaSever'));
 
   const en = build('en');
   assert.equal(en.home, '/');
+  assert.ok(hrefs(fileLines(en, ['contact.txt'])).includes('/cv/kaan-cv.pdf'), 'the English console links the English CV');
+  // The note after the path names the language of the CV it follows.
+  assert.match(consoleContent.tr.contact.cvNote, /Türkçe/);
+  assert.match(consoleContent.en.contact.cvNote, /English/);
   assert.ok(hrefs(fileLines(en, ['about.txt'])).includes('/games/'));
   assert.ok(hrefs(en.docs.projects).includes('/projects/asion/'));
 });

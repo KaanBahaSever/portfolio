@@ -1,8 +1,8 @@
 /**
  * Résumé data: the single source of truth for experience, education, volunteering,
  * certifications, activities, skills and languages. Used by the home page (and anything else
- * that summarises the CV) and by `npm run cv`, which builds public/cv/kaan-cv.pdf from it. Keep it
- * factual; re-run `npm run cv` after changing it.
+ * that summarises the CV) and by `npm run cv`, which builds the English and Turkish CVs from it
+ * (public/cv/kaan-cv.pdf, kaan-cv-tr.pdf). Keep it factual; re-run `npm run cv` after changing it.
  *
  * Prose is Localized (read it with pick(value, locale)); dates and technology names are shared
  * by both languages. Fields typed ResumeText (names, titles kept in the original, URLs) may be

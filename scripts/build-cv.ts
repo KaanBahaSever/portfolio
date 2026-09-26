@@ -1,10 +1,16 @@
 /**
- * CV builder: `npm run cv` (node scripts/build-cv.ts) writes public/cv/kaan-cv.pdf.
+ * CV builder: `npm run cv` (node scripts/build-cv.ts) writes the CV in both languages, to the
+ * paths the site links (SITE.cvPath):
  *
- * The CV is generated from the same data as the site — src/data/resume.ts for experience,
- * education, volunteering, activities, skills and languages, src/data/cv.ts for the summary and
- * project lines, src/config/site.ts for contact links — so it cannot drift from the site again.
- * Re-run it after changing any of those files and commit the PDF.
+ *   public/cv/kaan-cv.pdf      English
+ *   public/cv/kaan-cv-tr.pdf   Turkish
+ *
+ * The CVs are generated from the same data as the site — src/data/resume.ts for experience,
+ * education, volunteering, activities, skills and languages, src/data/cv.ts for the headline,
+ * summary and project lines, src/config/site.ts for contact links — so they cannot drift from
+ * the site again. One template serves both languages: every word it adds (section titles, the
+ * footer, the metadata) comes from src/i18n/messages/cv.ts. Re-run it after changing any of those
+ * files and commit the PDFs.
  *
  * How: the data is rendered into a print-styled HTML page (A4, the site's typefaces read straight
  * from node_modules), which a local headless Chrome or Edge prints to PDF with real, clickable
@@ -14,13 +20,16 @@
  * Layout choices that keep the CV readable by applicant-tracking systems: one column, each
  * section heading on its own line before its content, all text as real text (the only graphic is
  * the decorative brand mark), static fonts (Chrome turns variable fonts into Type 3 fonts,
- * which PDF checkers flag), and at most two pages (the build fails otherwise).
+ * which PDF checkers flag), and at most two pages (the build fails otherwise). The Turkish text
+ * runs longer than the English: keep it within the limit by tightening the wording in
+ * src/data/cv.ts, never by shrinking the type.
  *
- *   --keep-html   also write the intermediate HTML to public/cv/kaan-cv.html (gitignored) to
- *                 inspect the layout in a browser.
+ *   --lang en|tr  build only the CV in this language.
+ *   --keep-html   also write the intermediate HTML next to each PDF (public/cv/kaan-cv.html,
+ *                 public/cv/kaan-cv-tr.html; gitignored) to inspect the layout in a browser.
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -38,21 +47,53 @@ import {
   VOLUNTEERING,
   resumeText,
   type ActivityItem,
+  type ResumePeriod,
+  type ResumeText,
 } from '../src/data/resume.ts';
+import { LOCALES, LOCALE_META, isLocale, type Locale } from '../src/i18n/config.ts';
+import { cvMessages } from '../src/i18n/messages/cv.ts';
 import { formatPeriod } from '../src/utils/resume-dates.ts';
 
-const LOCALE = 'en' as const;
 const MAX_PAGES = 2;
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const OUTPUT = join(ROOT, 'public', 'cv', 'kaan-cv.pdf');
-const KEEP_HTML = process.argv.includes('--keep-html');
-const TITLE = `${SITE.name} — CV`;
+
+/** Where the CV in `locale` goes: the public/ file behind the path the site links. */
+const outputPath = (locale: Locale) => join(ROOT, 'public', ...SITE.cvPath[locale].split('/').filter(Boolean));
+
+// ---------------------------------------------------------------------------------------------
+// Options
+
+interface Options {
+  locales: readonly Locale[];
+  keepHtml: boolean;
+}
+
+function parseOptions(args: readonly string[]): Options {
+  const usage = `Options: --lang ${LOCALES.join('|')} (one language; default: all), --keep-html.`;
+  let locales: readonly Locale[] = LOCALES;
+  let keepHtml = false;
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--keep-html') {
+      keepHtml = true;
+    } else if (arg === '--lang' || arg?.startsWith('--lang=')) {
+      const value = arg === '--lang' ? args[++i] : arg.slice('--lang='.length);
+      if (!isLocale(value)) throw new Error(`--lang needs one of ${LOCALES.join(', ')}, not "${value ?? ''}". ${usage}`);
+      locales = [value];
+    } else {
+      throw new Error(`Unknown option "${arg}". ${usage}`);
+    }
+  }
+  return { locales, keepHtml };
+}
 
 // ---------------------------------------------------------------------------------------------
 // HTML
 
 const escapeHtml = (value: string) =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+/** A CSS string literal (for `content:`), escaped for CSS rather than HTML. */
+const cssString = (value: string) => `"${value.replace(/[\\"]/g, '\\$&').replace(/</g, '\\3C ')}"`;
 
 const link = (href: string, label: string) => `<a href="${escapeHtml(href)}">${escapeHtml(label)}</a>`;
 const withoutScheme = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
@@ -60,8 +101,8 @@ const withoutScheme = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').r
 const joinMeta = (parts: readonly string[]) => parts.join('<span class="sep">·</span>');
 
 /**
- * The site's typefaces as static files (latin + latin-ext: Turkish names such as Açık need both),
- * only in the weights the stylesheet below uses.
+ * The site's typefaces as static files (latin + latin-ext: Turkish letters such as ğ, ş and İ
+ * are in latin-ext), only in the weights the stylesheet below uses.
  */
 function fontFaces(): string {
   const file = (pkg: string, name: string) =>
@@ -91,7 +132,6 @@ function fontFaces(): string {
     .join('\n');
 }
 
-const period = (item: Parameters<typeof formatPeriod>[0]) => escapeHtml(formatPeriod(item, LOCALE).text);
 const bullets = (items: readonly string[]) =>
   items.length ? `<ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>` : '';
 
@@ -112,24 +152,27 @@ function section(id: string, title: string, content: string): string {
 </section>`;
 }
 
-function activity(item: ActivityItem): string {
-  const title = item.role
-    ? `${escapeHtml(item.role[LOCALE])}, ${escapeHtml(resumeText(item.title, LOCALE))}`
-    : escapeHtml(resumeText(item.title, LOCALE));
-  const meta = joinMeta(
-    [item.organization && resumeText(item.organization, LOCALE), item.location?.[LOCALE]]
-      .filter((part): part is string => Boolean(part))
-      .map(escapeHtml),
-  );
-  return entry({ title, meta: meta || undefined, period: period(item), body: bullets(item.highlights[LOCALE]) });
-}
+function renderHtml(locale: Locale): string {
+  const cv = CV[locale];
+  const m = cvMessages[locale];
+  const text = (value: ResumeText) => resumeText(value, locale);
+  const period = (item: ResumePeriod) => escapeHtml(formatPeriod(item, locale).text);
 
-function renderHtml(): string {
+  const activity = (item: ActivityItem): string => {
+    const title = escapeHtml(item.role ? m.role(item.role[locale], text(item.title)) : text(item.title));
+    const meta = joinMeta(
+      [item.organization && text(item.organization), item.location?.[locale]]
+        .filter((part): part is string => Boolean(part))
+        .map(escapeHtml),
+    );
+    return entry({ title, meta: meta || undefined, period: period(item), body: bullets(item.highlights[locale]) });
+  };
+
   // Two fixed lines (reach me / find my work), so a wrap never starts a line with a separator.
   const contactLines = [
     [
-      escapeHtml(SITE.location[LOCALE]),
-      link(CV.phone.href, CV.phone.label),
+      escapeHtml(SITE.location[locale]),
+      link(cv.phone.href, cv.phone.label),
       link(`mailto:${SITE.email}`, SITE.email),
       link(SITE.url, withoutScheme(SITE.url)),
     ],
@@ -138,14 +181,14 @@ function renderHtml(): string {
 
   const experience = EXPERIENCE.map((job) =>
     entry({
-      title: escapeHtml(resumeText(job.role, LOCALE)),
-      meta: job.url ? link(job.url, resumeText(job.organization, LOCALE)) : escapeHtml(resumeText(job.organization, LOCALE)),
+      title: escapeHtml(text(job.role)),
+      meta: job.url ? link(job.url, text(job.organization)) : escapeHtml(text(job.organization)),
       period: period(job),
-      body: `<p>${escapeHtml(job.summary[LOCALE])}</p>${bullets(job.highlights[LOCALE])}<p class="stack">${job.stack.map(escapeHtml).join(' · ')}</p>`,
+      body: `<p>${escapeHtml(job.summary[locale])}</p>${bullets(job.highlights[locale])}<p class="stack">${job.stack.map(escapeHtml).join(' · ')}</p>`,
     }),
   ).join('');
 
-  const projects = CV.projects
+  const projects = cv.projects
     .map((project) =>
       entry({
         title: escapeHtml(project.name),
@@ -158,48 +201,47 @@ function renderHtml(): string {
 
   const education = EDUCATION.map((school) =>
     entry({
-      title: `${escapeHtml(school.degree[LOCALE])} in ${escapeHtml(school.field[LOCALE])}`,
+      title: escapeHtml(m.degree(school.degree[locale], school.field[locale])),
       meta: joinMeta(
-        [school.institution[LOCALE], school.department?.[LOCALE]]
+        [school.institution[locale], school.department?.[locale]]
           .filter((part): part is string => Boolean(part))
           .map(escapeHtml),
       ),
       period: period(school),
-      body: bullets(school.highlights[LOCALE]),
+      body: bullets(school.highlights[locale]),
     }),
   ).join('');
 
   const research = [
-    ...CV.research.map((item) =>
+    ...cv.research.map((item) =>
       entry({
         title: escapeHtml(item.title),
         meta: item.url && item.linkLabel ? link(item.url, item.linkLabel) : undefined,
-        period: 'period' in item && item.period ? escapeHtml(String(item.period)) : undefined,
+        period: item.period ? escapeHtml(item.period) : undefined,
         body: `<p>${escapeHtml(item.text)}</p>`,
       }),
     ),
-    ...ACTIVITIES.filter((item) => item.highlights[LOCALE].length > 0).map(activity),
+    ...ACTIVITIES.filter((item) => item.highlights[locale].length > 0).map(activity),
   ].join('');
 
-  const other = [...CERTIFICATIONS, ...ACTIVITIES.filter((item) => item.highlights[LOCALE].length === 0)]
+  const other = [...CERTIFICATIONS, ...ACTIVITIES.filter((item) => item.highlights[locale].length === 0)]
     .map(activity)
     .join('');
 
   const skills = `<dl class="skills">${SKILLS.map(
     (group) =>
-      `<div><dt>${escapeHtml(group.label[LOCALE])}</dt><dd>${group.items.map((item) => escapeHtml(resumeText(item, LOCALE))).join(' · ')}</dd></div>`,
+      `<div><dt>${escapeHtml(group.label[locale])}</dt><dd>${group.items.map((item) => escapeHtml(text(item))).join(' · ')}</dd></div>`,
   ).join('')}</dl>`;
 
-  const languages = `<p>${LANGUAGES.map(
-    (language) =>
-      `${escapeHtml(language.name[LOCALE])}${language.level ? ` (${escapeHtml(language.level[LOCALE].toLowerCase())})` : ''}`,
+  const languages = `<p>${LANGUAGES.map((language) =>
+    escapeHtml(language.level ? m.language(language.name[locale], language.level[locale]) : language.name[locale]),
   ).join(' · ')}</p>`;
 
   return `<!doctype html>
-<html lang="en">
+<html lang="${LOCALE_META[locale].htmlLang}">
 <head>
 <meta charset="utf-8">
-<title>${escapeHtml(TITLE)}</title>
+<title>${escapeHtml(m.documentTitle(SITE.name))}</title>
 <meta name="author" content="${escapeHtml(SITE.name)}">
 <style>
 ${fontFaces()}
@@ -207,7 +249,7 @@ ${fontFaces()}
   size: A4;
   margin: 13mm 14mm 14mm 14mm;
   @bottom-right {
-    content: "${escapeHtml(SITE.name)} · CV · " counter(page) " / " counter(pages);
+    content: ${cssString(`${SITE.name} · ${m.footer} · `)} counter(page) " / " counter(pages);
     font-family: "JetBrains Mono", monospace; font-size: 7pt; color: #71717a; vertical-align: top; padding-top: 3mm;
   }
 }
@@ -227,6 +269,7 @@ header { display: flex; justify-content: space-between; align-items: flex-end; g
   padding-bottom: 3.2mm; border-bottom: 0.8pt solid var(--ink); }
 .mark { width: 11mm; height: 11mm; flex: none; }
 h1 { font-family: "Newsreader", Georgia, serif; font-weight: 500; font-size: 23pt; line-height: 1.05; letter-spacing: -0.01em; }
+/* Capitals come from CSS, which follows html lang: Turkish "geliştirici" becomes "GELİŞTİRİCİ". */
 .headline { margin-top: 1.4mm; font-family: "JetBrains Mono", monospace; font-size: 7.5pt; letter-spacing: 0.05em;
   text-transform: uppercase; color: var(--accent); }
 .contact { display: flex; flex-wrap: wrap; column-gap: 3.2mm; row-gap: 0.6mm; color: var(--muted); font-size: 8pt; }
@@ -267,7 +310,7 @@ dd { margin: 0; color: var(--body); }
 <header>
   <div>
     <h1>${escapeHtml(SITE.name)}</h1>
-    <p class="headline">${escapeHtml(CV.headline)}</p>
+    <p class="headline">${escapeHtml(cv.headline)}</p>
     ${contactLines.map((line) => `<p class="contact">${line.map((item) => `<span>${item}</span>`).join('')}</p>`).join('\n    ')}
   </div>
   <svg class="mark" viewBox="2 2 28 28" aria-hidden="true">
@@ -275,15 +318,15 @@ dd { margin: 0; color: var(--body); }
     <circle cx="16" cy="16" r="3" fill="#009375"></circle>
   </svg>
 </header>
-<p class="summary">${escapeHtml(CV.summary)}</p>
-${section('experience', 'Experience', experience)}
-${section('projects', 'Selected projects', projects)}
-${section('education', 'Education', education)}
-${section('leadership', 'Leadership & volunteering', VOLUNTEERING.map(activity).join(''))}
-${section('research', 'Research', research)}
-${section('skills', 'Skills', skills)}
-${section('other', 'Certificates & activities', other)}
-${section('languages', 'Languages', languages)}
+<p class="summary">${escapeHtml(cv.summary)}</p>
+${section('experience', m.sections.experience, experience)}
+${section('projects', m.sections.projects, projects)}
+${section('education', m.sections.education, education)}
+${section('leadership', m.sections.leadership, VOLUNTEERING.map(activity).join(''))}
+${section('research', m.sections.research, research)}
+${section('skills', m.sections.skills, skills)}
+${section('other', m.sections.other, other)}
+${section('languages', m.sections.languages, languages)}
 </body>
 </html>`;
 }
@@ -310,16 +353,16 @@ function findBrowser(): string {
 }
 
 /** XMP metadata packet: some indexers and PDF/UA checkers read it instead of the Info dictionary. */
-function xmpPacket(): Uint8Array {
+function xmpPacket(meta: { title: string; description: string; language: string }): Uint8Array {
   const esc = (value: string) => escapeHtml(value);
   const xmp = `<?xpacket begin="\uFEFF" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/">
  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
   <rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">
-   <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${esc(TITLE)}</rdf:li></rdf:Alt></dc:title>
+   <dc:title><rdf:Alt><rdf:li xml:lang="x-default">${esc(meta.title)}</rdf:li></rdf:Alt></dc:title>
    <dc:creator><rdf:Seq><rdf:li>${esc(SITE.name)}</rdf:li></rdf:Seq></dc:creator>
-   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">${esc(CV.headline)}</rdf:li></rdf:Alt></dc:description>
-   <dc:language><rdf:Bag><rdf:li>en</rdf:li></rdf:Bag></dc:language>
+   <dc:description><rdf:Alt><rdf:li xml:lang="x-default">${esc(meta.description)}</rdf:li></rdf:Alt></dc:description>
+   <dc:language><rdf:Bag><rdf:li>${esc(meta.language)}</rdf:li></rdf:Bag></dc:language>
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>
@@ -327,12 +370,13 @@ function xmpPacket(): Uint8Array {
   return new TextEncoder().encode(xmp);
 }
 
-const work = mkdtempSync(join(tmpdir(), 'kbs-cv-'));
-try {
-  const htmlPath = join(work, 'cv.html');
-  const pdfPath = join(work, 'cv.pdf');
-  writeFileSync(htmlPath, renderHtml());
-  if (KEEP_HTML) copyFileSync(htmlPath, join(ROOT, 'public', 'cv', 'kaan-cv.html'));
+/** Prints the CV in `locale` to its public/ path and returns the page count. */
+async function buildCv(locale: Locale, work: string, keepHtml: boolean): Promise<number> {
+  const output = outputPath(locale);
+  const htmlPath = join(work, `cv-${locale}.html`);
+  const pdfPath = join(work, `cv-${locale}.pdf`);
+  writeFileSync(htmlPath, renderHtml(locale));
+  if (keepHtml) copyFileSync(htmlPath, output.replace(/\.pdf$/, '.html'));
 
   // A throwaway profile keeps the print away from any running browser session.
   execFileSync(
@@ -342,7 +386,7 @@ try {
       '--disable-gpu',
       '--no-first-run',
       '--no-default-browser-check',
-      `--user-data-dir=${join(work, 'profile')}`,
+      `--user-data-dir=${join(work, `profile-${locale}`)}`,
       '--allow-file-access-from-files',
       '--run-all-compositor-stages-before-draw',
       '--virtual-time-budget=10000',
@@ -353,21 +397,24 @@ try {
     ],
     { stdio: 'ignore', timeout: 120_000 },
   );
-  if (!existsSync(pdfPath)) throw new Error('The browser did not write a PDF.');
+  if (!existsSync(pdfPath)) throw new Error(`The browser did not write the ${locale} PDF.`);
 
   const raw = readFileSync(pdfPath);
-  if (raw.includes('/Subtype /Type3')) throw new Error('Type 3 fonts in the CV: use static font files.');
+  if (raw.includes('/Subtype /Type3')) throw new Error(`Type 3 fonts in the ${locale} CV: use static font files.`);
 
   const pdf = await PDFDocument.load(raw, { updateMetadata: false });
   const pages = pdf.getPageCount();
-  if (pages > MAX_PAGES) throw new Error(`The CV runs to ${pages} pages; trim it to ${MAX_PAGES}.`);
+  if (pages > MAX_PAGES) throw new Error(`The ${locale} CV runs to ${pages} pages; trim it to ${MAX_PAGES}.`);
 
-  pdf.setTitle(TITLE, { showInWindowTitleBar: true });
+  const m = cvMessages[locale];
+  const title = m.documentTitle(SITE.name);
+  const language = LOCALE_META[locale].htmlLang;
+  pdf.setTitle(title, { showInWindowTitleBar: true });
   pdf.setAuthor(SITE.name);
-  pdf.setSubject(CV.headline);
+  pdf.setSubject(CV[locale].headline);
   // One string: pdf-lib joins an array with spaces, which would merge the phrases.
-  pdf.setKeywords(['CV, software developer, C++, Go, mathematics, systems software']);
-  pdf.setLanguage('en');
+  pdf.setKeywords([m.keywords]);
+  pdf.setLanguage(language);
   pdf.setCreator('scripts/build-cv.ts (kaanbahasever.com)');
   pdf.setProducer('Chrome headless + pdf-lib');
   const now = new Date();
@@ -375,11 +422,23 @@ try {
   pdf.setModificationDate(now);
   pdf.catalog.set(
     PDFName.of('Metadata'),
-    pdf.context.register(pdf.context.stream(xmpPacket(), { Type: 'Metadata', Subtype: 'XML' })),
+    pdf.context.register(
+      pdf.context.stream(xmpPacket({ title, description: CV[locale].headline, language }), {
+        Type: 'Metadata',
+        Subtype: 'XML',
+      }),
+    ),
   );
-  writeFileSync(OUTPUT, await pdf.save({ useObjectStreams: false }));
+  mkdirSync(dirname(output), { recursive: true });
+  writeFileSync(output, await pdf.save({ useObjectStreams: false }));
+  console.log(`Wrote ${output.replace(ROOT, '.')} (${pages} page${pages === 1 ? '' : 's'}).`);
+  return pages;
+}
 
-  console.log(`Wrote ${OUTPUT.replace(ROOT, '.')} (${pages} page${pages === 1 ? '' : 's'}).`);
+const options = parseOptions(process.argv.slice(2));
+const work = mkdtempSync(join(tmpdir(), 'kbs-cv-'));
+try {
+  for (const locale of options.locales) await buildCv(locale, work, options.keepHtml);
 } finally {
   rmSync(work, { recursive: true, force: true });
 }

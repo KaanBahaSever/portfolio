@@ -134,8 +134,8 @@ const tr: HomeMessages = {
     intro:
       'İstanbul Üniversitesinde matematik lisansımı tamamlıyorum ve geliştirdiğim projelerin çoğunda bu matematiği uygulamaya döküyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun algoritmaları. Günlük işimde modern C++ ve Go kullanıyorum. Öncesinde yaklaşık üç yıl boyunca crowd.inc bünyesinde yazılım geliştirici olarak, canlıdaki bir web platformunun sorumluluğunu uçtan uca üstlendim: PostgreSQL şemasından Linux sunucularına kadar.',
     selectedWork: 'Seçili işler',
-    // The CV exists in English only; say so on the button.
-    cvFormat: 'PDF · İngilizce',
+    // The button downloads the Turkish CV; the English one is a small link beside it.
+    cvFormat: 'PDF',
     contactLabel: 'İletişim ve profiller',
     locationLabel: 'Konum',
     coordinates: (lat, lon) => `${lat}° K, ${lon}° D`,

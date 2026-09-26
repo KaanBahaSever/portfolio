@@ -58,6 +58,12 @@ const en = {
     techStack: 'Tech stack',
     tags: 'Tags',
     downloadCv: 'Download CV',
+    /**
+     * Label of the small link to the CV in THIS language, shown on pages in the other language
+     * beside their own CV button. Like language.switchTo it is rendered in this language (with
+     * lang="en"), so a Turkish page offers "English version".
+     */
+    cvVersion: 'English version',
     pdf: '(PDF)',
     present: 'Present',
     readMore: 'Read more',
@@ -110,6 +116,7 @@ const tr: CommonMessages = {
     techStack: 'Teknolojiler',
     tags: 'Etiketler',
     downloadCv: 'Özgeçmişi indir',
+    cvVersion: 'Türkçe sürümü',
     pdf: '(PDF)',
     present: 'Günümüz',
     readMore: 'Devamını oku',

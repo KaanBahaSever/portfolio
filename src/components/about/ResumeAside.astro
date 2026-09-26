@@ -1,9 +1,10 @@
 ---
 /**
- * Résumé card: the CV download (the page's one primary action), a link to the experience
- * section on the home page, and the email address. The CV exists in English only, so the link
- * carries hreflang="en" and the Turkish label says so.
+ * Résumé card: the CV download in the page's language (the page's one primary action), a quiet
+ * link to the CV in the other language, a link to the experience section on the home page, and
+ * the email address.
  */
+import CvVersionLink from '../ui/CvVersionLink.astro';
 import Icon from '../ui/Icon.astro';
 import { ui } from '../ui/styles';
 import { SITE } from '../../config/site';
@@ -11,6 +12,7 @@ import { localizePath } from '../../i18n/config';
 import { aboutMessages } from '../../i18n/messages/about';
 import { common } from '../../i18n/messages/common';
 import { getLocale } from '../../i18n/server';
+import { cvLink } from '../../utils/cv';
 
 interface Props {
   class?: string;
@@ -27,18 +29,19 @@ const m = aboutMessages[locale];
   <p class="mt-2 text-sm leading-6 text-zinc-600 dark:text-zinc-400">{m.resume.text}</p>
 
   <a
-    href={SITE.cvPath}
-    download="Kaan-Baha-Sever-CV.pdf"
-    hreflang="en"
-    type="application/pdf"
+    {...cvLink(locale)}
     class:list={[ui.buttonPrimary, 'mt-5 min-h-12 w-full flex-wrap gap-x-2 gap-y-0 py-2 text-center']}
   >
     <Icon name="download" class="size-4 shrink-0" />
     <span>{t.labels.downloadCv}</span>
     <span class="font-normal">{m.resume.cvFormat}</span>
   </a>
+  {/* Centred under the button it belongs to; the experience link below keeps the card's left edge. */}
+  <p class="mt-1 flex justify-center">
+    <CvVersionLink />
+  </p>
 
-  <a href={localizePath('/#experience', locale)} class:list={[ui.accentLink, 'mt-2']}>
+  <a href={localizePath('/#experience', locale)} class:list={[ui.accentLink, 'mt-1']}>
     {m.resume.experienceLink}
     <Icon name="arrow-right" class="size-4 shrink-0" />
   </a>

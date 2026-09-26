@@ -49,7 +49,10 @@ export interface ConsoleContactInput {
   email: string;
   socials: readonly { label: string; href: string }[];
   location: string;
-  /** Site path of the CV file (not localized: there is one PDF). */
+  /**
+   * Site path of the CV in the page's language (SITE.cvPath). A file, so it is shown as given:
+   * no /tr/ prefix is added to it.
+   */
   cvPath: string;
 }
 

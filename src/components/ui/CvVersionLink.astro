@@ -1,0 +1,37 @@
+---
+/**
+ * The small link beside a page's "Download CV" button to the CV in the other language, so a
+ * reader on the Turkish page can still take the English CV (and the reverse). It is labelled in
+ * the language of the CV it opens, like the header's language switch ("English version" on a
+ * Turkish page), and says so with lang/hreflang. Deliberately quieter than the button: the CV in
+ * the page's language stays the primary action.
+ */
+import Icon from './Icon.astro';
+import { LOCALE_META, otherLocale } from '../../i18n/config';
+import { common } from '../../i18n/messages/common';
+import { getLocale } from '../../i18n/server';
+import { cvLink } from '../../utils/cv';
+
+interface Props {
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+const other = otherLocale(getLocale(Astro));
+---
+
+<a
+  {...cvLink(other)}
+  lang={LOCALE_META[other].htmlLang}
+  class:list={[
+    'group -mx-2 inline-flex min-h-11 items-center gap-1.5 rounded-lg px-2 text-sm text-zinc-600 transition-colors hover:text-accent-700 dark:text-zinc-400 dark:hover:text-accent-400',
+    className,
+  ]}
+>
+  <Icon name="download" class="size-3.5 shrink-0 transition-transform duration-200 group-hover:translate-y-0.5" />
+  <span class="underline decoration-zinc-300 underline-offset-4 group-hover:decoration-current dark:decoration-zinc-600"
+    >{common[other].labels.cvVersion}</span
+  >{' '}
+  {/* The space above keeps the accessible name "English version PDF". */}
+  <span class="font-mono text-xs text-zinc-500 dark:text-zinc-400">PDF</span>
+</a>

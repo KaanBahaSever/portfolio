@@ -153,7 +153,7 @@ const en = {
     title: 'Résumé',
     text: 'Experience, education and skills are summarised on the home page.',
     experienceLink: 'Experience on the home page',
-    /** Shown after "Download CV"; the CV is only available in English. */
+    /** Shown after "Download CV" (the CV in the page's language). */
     cvFormat: '(PDF)',
   },
 };
@@ -271,7 +271,7 @@ const tr: AboutMessages = {
     // "beceriler" matches the home page's skills heading ("Beceriler") this sentence points to.
     text: 'Deneyim, eğitim ve beceriler ana sayfada özetleniyor.',
     experienceLink: 'Ana sayfadaki deneyim bölümü',
-    cvFormat: '(İngilizce, PDF)',
+    cvFormat: '(PDF)',
   },
 };
 

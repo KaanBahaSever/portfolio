@@ -3,6 +3,10 @@
  * Journey chapter 7: Software Developer at crowd.inc (July 2021 – March 2024) and what the role
  * owned. The title is "Software Developer"; the home page's experience section has the same
  * facts as a résumé entry.
+ *
+ * The chapter opens with what crowd.inc was, in the owner's words: a website for sharing ideas
+ * and finding help for them, with hundreds of users (no exact number), many projects, ideas and
+ * goals, and a later turn towards private ideas. Add no dates, figures or outcomes to that.
  */
 import { getLocale } from '../../../i18n/server';
 
@@ -13,7 +17,12 @@ const locale = getLocale(Astro);
   locale === 'tr' ? (
     <>
       <p>
-        Temmuz 2021’den Mart 2024’e kadar crowd.inc’te yazılım geliştirici olarak çalıştım. Geliştirme sürecinin her
+        crowd.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi. Yüzlerce
+        kullanıcısı vardı; birçok projeye ev sahipliği yaptı, sitede bir sürü fikir ve hedef paylaşıldı. Sonraları da
+        herkese açık olmayan, özel fikirlere yöneldik.
+      </p>
+      <p>
+        Temmuz 2021’den Mart 2024’e kadar orada yazılım geliştirici olarak çalıştım. Geliştirme sürecinin her
         aşamasını üstlendim: PostgreSQL’de ilişkisel veri tabanı şemalarını tasarladım, Python ve Flask ile REST
         API’ler, jQuery ile de ön yüz geliştirdim, Linux sunucularını kurup yapılandırdım ve otomatik testler yazdım.
       </p>
@@ -26,9 +35,13 @@ const locale = getLocale(Astro);
   ) : (
     <>
       <p>
-        From July 2021 to March 2024 I was a Software Developer at crowd.inc, where I owned the software development
-        lifecycle end to end: relational schema design in PostgreSQL, RESTful APIs with Python/Flask and jQuery, Linux
-        server provisioning and automated testing.
+        crowd.inc was a website where people shared their ideas and found help for them. It had hundreds of users and
+        hosted many projects, and many ideas and goals were shared on it. Later on, we turned towards private ideas.
+      </p>
+      <p>
+        From July 2021 to March 2024 I was a Software Developer there. I owned the software development lifecycle end to
+        end: relational schema design in PostgreSQL, RESTful APIs with Python/Flask and jQuery, Linux server
+        provisioning and automated testing.
       </p>
       <p>
         I designed granular role-based access control (RBAC) with strict boundaries between public and private data,

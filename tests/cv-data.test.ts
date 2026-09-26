@@ -115,6 +115,11 @@ test('the Turkish CV is written with Turkish typography', () => {
   assert.match(CV.tr.summary, /crowd\.inc’te/);
 });
 
+test('both CV summaries say what crowd.inc was: an idea-sharing platform with hundreds of users', () => {
+  assert.match(CV.en.summary, /crowd\.inc, an idea-sharing platform with hundreds of users/);
+  assert.match(CV.tr.summary, /crowd\.inc’te, yüzlerce kullanıcısı olan bir fikir paylaşma platformunun/);
+});
+
 test('the CVs list only the four selected projects, in the owner’s order', () => {
   for (const locale of LOCALES) {
     assert.deepEqual(

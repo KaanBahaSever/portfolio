@@ -167,6 +167,34 @@ test('suffixes in the Turkish About text take the typographic apostrophe', () =>
   assert.match(entry?.text ?? '', /^title: crowd\.inc’te yazılım geliştirici\r?$/m);
 });
 
+test('the crowd.inc chapter and timeline entry open with what the site was, in both languages', () => {
+  // The owner's words: a site for sharing ideas and finding help for them, with hundreds of
+  // users, many projects, ideas and goals, and a later turn towards private ideas.
+  const work = file('src/components/about/prose/Work.astro').text;
+  const split = work.indexOf(') : (');
+  const turkish = [
+    visibleText(work.slice(work.indexOf("locale === 'tr' ? ("), split)),
+    visibleText(file('src/content/tr/timeline/2021-crowd-inc.md').text),
+  ];
+  const english = [visibleText(work.slice(split)), visibleText(file('src/content/timeline/2021-crowd-inc.md').text)];
+  const flat = (text: string) => text.replace(/\s+/g, ' ');
+  for (const text of english.map(flat)) {
+    assert.match(text, /crowd\.inc was a website (for sharing ideas and finding help for them|where people shared their ideas and found help for them)/);
+    for (const fact of [/hundreds of users/, /many projects/, /ideas and goals/, /we turned towards private ideas/]) {
+      assert.match(text, fact);
+    }
+    // The opening comes before what he did there.
+    assert.ok(text.indexOf('private ideas') < text.indexOf('I owned'), 'what crowd.inc was, then the role');
+  }
+  for (const text of turkish.map(flat)) {
+    assert.match(text, /crowd\.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi/);
+    for (const fact of [/Yüzlerce kullanıcısı vardı/, /birçok projeye/, /(fikir|fikre) ve hedef/, /özel fikirlere yöneldik/]) {
+      assert.match(text, fact);
+    }
+    assert.ok(text.indexOf('özel fikirlere') < text.indexOf('Geliştirme sürecinin'), 'what crowd.inc was, then the role');
+  }
+});
+
 test('the résumé card names the home page skills section the way its heading does', () => {
   for (const locale of LOCALES) {
     const intl = LOCALE_META[locale].intl;

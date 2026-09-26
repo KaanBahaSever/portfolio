@@ -6,9 +6,11 @@
  *
  * Lines are rich-text data (src/lib/console/rich.ts), not HTML. Links use locale-free page paths
  * ('/games/'); the builder localizes them. File names and commands stay English in both languages.
- * Every fact here comes from the CV: do not add roles, dates or numbers that are not there. The one
- * exception is the owner's own word on why he made Battleship (he played it with his father as a
- * child): keep it as he told it, without added details.
+ * Every fact here comes from the CV: do not add roles, dates or numbers that are not there. The
+ * exceptions are the owner's own words on why he made Battleship (he played it with his father as
+ * a child) and on what crowd.inc was (a site for sharing ideas and finding help for them, with
+ * hundreds of users, many projects, ideas and goals, and a later turn towards private ideas):
+ * keep them as he told them, without added details.
  * The owner is a software developer: nothing here calls him an engineer ("mühendis"); other
  * people keep their own titles (tests/console-data.test.ts enforces it).
  */
@@ -35,7 +37,7 @@ const en = {
     ),
     blank(),
     text(
-      'Before that: software developer at crowd.inc (2021–2024), and Vice President of the Istanbul University Rocket Club (2019–2022), where our team built three rockets and I wrote the flight avionics firmware.',
+      'Before that: software developer at crowd.inc (2021–2024), an idea-sharing platform with hundreds of users; and Vice President of the Istanbul University Rocket Club (2019–2022), where our team built three rockets and I wrote the flight avionics firmware.',
     ),
     blank(),
     text(dim('Next: '), run('cat about.txt'), '  ', run('projects'), '  ', run('ls skills')),
@@ -59,7 +61,11 @@ const en = {
     indented(2, 'crowd.inc — Software Developer, July 2021 – March 2024.'),
     indented(
       2,
-      'Owned the software lifecycle end to end: PostgreSQL schema design, REST APIs in Python/Flask with jQuery on the client, Linux server provisioning and automated testing. Designed granular role-based access control (RBAC) with strict public and private boundaries, built scalable feed pagination and dynamic data loading, and kept it all reliable with unit and integration tests.',
+      'crowd.inc was a website where people shared their ideas and found help for them. It had hundreds of users and hosted many projects, and many ideas and goals were shared on it. Later on, we turned towards private ideas.',
+    ),
+    indented(
+      2,
+      'I owned the software lifecycle end to end: PostgreSQL schema design, REST APIs in Python/Flask with jQuery on the client, Linux server provisioning and automated testing. I designed granular role-based access control (RBAC) with strict public and private boundaries, built scalable feed pagination and dynamic data loading, and kept it all reliable with unit and integration tests.',
     ),
     indented(
       2,
@@ -247,7 +253,7 @@ const tr: ConsoleContent = {
     ),
     blank(),
     text(
-      'Daha önce 2021–2024 arasında crowd.inc’te yazılım geliştirici olarak çalıştım. 2019–2022 arasında İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım. Ekibimiz üç roket yaptı; uçuş aviyoniğinin gömülü yazılımını ben yazdım.',
+      'Daha önce 2021–2024 arasında, yüzlerce kullanıcısı olan fikir paylaşma platformu crowd.inc’te yazılım geliştirici olarak çalıştım. 2019–2022 arasında İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım. Ekibimiz üç roket yaptı; uçuş aviyoniğinin gömülü yazılımını ben yazdım.',
     ),
     blank(),
     text(dim('Sırada: '), run('cat about.txt'), '  ', run('projects'), '  ', run('ls skills')),
@@ -269,6 +275,10 @@ const tr: ConsoleContent = {
     blank(),
     heading('İş deneyimi'),
     indented(2, 'crowd.inc — Yazılım Geliştirici, Temmuz 2021 – Mart 2024.'),
+    indented(
+      2,
+      'crowd.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi. Yüzlerce kullanıcısı vardı; birçok projeye ev sahipliği yaptı, sitede bir sürü fikir ve hedef paylaşıldı. Sonraları da herkese açık olmayan, özel fikirlere yöneldik.',
+    ),
     indented(
       2,
       'Geliştirmenin her aşamasını ben yürüttüm: PostgreSQL şema tasarımı, Python/Flask ile REST API’ler, istemci tarafında jQuery, Linux sunucu kurulumu ve otomatik testler. Herkese açık ve özel içeriği kesin çizgilerle ayıran, ayrıntılı bir rol tabanlı erişim denetimi (RBAC) tasarladım. Ölçeklenebilir bir akış sayfalaması ve dinamik veri yükleme geliştirdim. Birim ve entegrasyon testleriyle de hepsinin güvenilir çalışmasını sağladım.',

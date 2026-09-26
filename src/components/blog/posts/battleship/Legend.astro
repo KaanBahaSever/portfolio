@@ -1,0 +1,163 @@
+---
+/**
+ * Key to the board figures, drawn with the same marks as Board.astro. Plain text next to small
+ * decorative swatches, so it reads the same with or without the pictures.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { battleshipPostMessages } from './messages.ts';
+
+export type LegendItem =
+  | 'heat'
+  | 'miss'
+  | 'hit'
+  | 'shotMiss'
+  | 'shotHit'
+  | 'peak'
+  | 'sunk'
+  | 'ghost'
+  | 'lattice'
+  | 'highlight';
+
+interface Props {
+  lang: Locale;
+  items: readonly LegendItem[];
+}
+
+const { lang, items } = Astro.props;
+const m = battleshipPostMessages[lang].legend;
+---
+
+<ul class="bs-legend flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-zinc-600 dark:text-zinc-400">
+  {
+    items.map((item) => (
+      <li class="flex items-center gap-2">
+        {item === 'heat' ? (
+          <>
+            <span>{m.low}</span>
+            <svg class="h-3 w-16" viewBox="0 0 64 12" aria-hidden="true" focusable="false">
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
+                <rect class="heat" x={i * 8} y="0" width="8" height="12" style={`--level:${(i / 7).toFixed(3)}`} />
+              ))}
+              <rect x="0.5" y="0.5" width="63" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-opacity="0.35" />
+            </svg>
+            <span>{m.high}</span>
+          </>
+        ) : (
+          <>
+            <svg class="size-4 shrink-0" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              {item === 'miss' && <circle class="miss" cx="8" cy="8" r="2.75" />}
+              {item === 'hit' && (
+                <path class="hit" d="M3.5 3.5l9 9M12.5 3.5l-9 9" stroke-width="1.75" stroke-linecap="round" fill="none" />
+              )}
+              {item === 'peak' && (
+                <rect
+                  x="1.5"
+                  y="1.5"
+                  width="13"
+                  height="13"
+                  rx="2"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-dasharray="3 2"
+                  class="text-zinc-900 dark:text-zinc-100"
+                />
+              )}
+              {item === 'sunk' && (
+                <rect
+                  x="1"
+                  y="4"
+                  width="14"
+                  height="8"
+                  rx="4"
+                  stroke="currentColor"
+                  stroke-width="1.25"
+                  class="sunk text-zinc-900 dark:text-zinc-100"
+                />
+              )}
+              {item === 'shotMiss' && <circle class="shot-miss" cx="8" cy="8" r="6.5" stroke-width="1.25" />}
+              {item === 'shotHit' && <circle class="shot-hit" cx="8" cy="8" r="6.5" stroke-width="1.25" />}
+              {item === 'ghost' && (
+                <rect
+                  x="1"
+                  y="4"
+                  width="14"
+                  height="8"
+                  rx="4"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.25"
+                  stroke-dasharray="2.5 2"
+                  class="text-zinc-900 dark:text-zinc-100"
+                />
+              )}
+              {item === 'lattice' && (
+                <rect x="1" y="1" width="14" height="14" rx="1.5" class="lattice text-zinc-900 dark:text-zinc-100" />
+              )}
+              {item === 'highlight' && <rect x="1" y="1" width="14" height="14" rx="1.5" class="highlight" />}
+            </svg>
+            <span>{m[item]}</span>
+          </>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .bs-legend {
+    --heat-color: var(--color-accent-500);
+    --heat-strength: 0.6;
+    --miss: var(--color-zinc-500);
+    --hit: var(--color-rose-600);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .bs-legend {
+      --heat-color: var(--color-accent-400);
+      --heat-strength: 0.45;
+      --miss: var(--color-zinc-400);
+      --hit: var(--color-rose-400);
+    }
+  }
+
+  .heat {
+    fill: var(--heat-color);
+    fill-opacity: calc(0.05 + var(--level, 0) * (var(--heat-strength) - 0.05));
+  }
+
+  .highlight {
+    fill: var(--heat-color);
+    fill-opacity: var(--heat-strength);
+  }
+
+  .miss {
+    fill: var(--miss);
+  }
+
+  .hit {
+    stroke: var(--hit);
+  }
+
+  .sunk {
+    fill: currentColor;
+    fill-opacity: 0.08;
+  }
+
+  .shot-miss {
+    fill: none;
+    stroke: var(--miss);
+  }
+
+  .shot-hit {
+    fill: var(--hit);
+    stroke: var(--hit);
+  }
+
+  .lattice {
+    fill: currentColor;
+    fill-opacity: 0.14;
+    stroke: currentColor;
+    stroke-opacity: 0.25;
+  }
+</style>

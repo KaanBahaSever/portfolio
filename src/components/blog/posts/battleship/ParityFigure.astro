@@ -1,0 +1,66 @@
+---
+/**
+ * The Normal computer's hunting lattices: cells with (row + column) ≡ 0 (mod m) for m = 2 and 3,
+ * with example ships. The build fails if an example stops showing what the caption says (a ship
+ * touching the lattice in exactly the highlighted cell, a destroyer slipping through m = 3), and
+ * if any placement of a long enough ship could avoid its lattice.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import Board from './Board.astro';
+import Figure from './Figure.astro';
+import Legend from './Legend.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { cell, latticeCells, placementsMissingLattice } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+
+const panels = [
+  { modulus: 2, ship: ['H2', 'H3'], ghost: [] as string[] },
+  { modulus: 3, ship: ['B7', 'C7', 'D7'], ghost: ['G2', 'H2'] },
+].map(({ modulus, ship, ghost }) => {
+  const lattice = latticeCells(modulus);
+  const onLattice = new Set(lattice);
+  const shipCells = ship.map((label) => cell(label));
+  const ghostCells = ghost.map((label) => cell(label));
+  const touched = shipCells.filter((index) => onLattice.has(index));
+  if (touched.length !== 1) throw new Error(`ParityFigure: the m = ${modulus} example should touch one lattice cell`);
+  if (ghostCells.some((index) => onLattice.has(index))) throw new Error('ParityFigure: the destroyer should slip through');
+  for (let length = modulus; length <= 5; length++) {
+    if (placementsMissingLattice(modulus, length) !== 0) throw new Error(`ParityFigure: a ship avoids m = ${modulus}`);
+  }
+  return { modulus, lattice, shipCells, ghostCells, touched };
+});
+
+const [two, three] = panels;
+const label = m.parity.aria(two?.lattice.length ?? 0, three?.lattice.length ?? 0);
+---
+
+<Figure>
+  <div slot="graphic" role="img" aria-label={label} class="grid gap-6 sm:grid-cols-2">
+    {
+      panels.map((panel) => (
+        <div class="mx-auto w-full max-w-xs">
+          {/* Not label-mono: its uppercase would turn the variable m into M. */}
+          <p class="mb-2 text-center font-mono text-xs tracking-wide text-zinc-600 dark:text-zinc-400">
+            <i class="font-serif text-sm">m</i> = {panel.modulus} · {m.parity.cells(panel.lattice.length)}
+          </p>
+          <Board
+            lattice={panel.lattice}
+            highlight={panel.touched}
+            ships={[
+              { cells: panel.shipCells },
+              ...(panel.ghostCells.length > 0 ? [{ cells: panel.ghostCells, ghost: true }] : []),
+            ]}
+          />
+        </div>
+      ))
+    }
+  </div>
+  <Legend slot="legend" lang={lang} items={['lattice', 'highlight', 'ghost']} />
+  <slot />
+</Figure>

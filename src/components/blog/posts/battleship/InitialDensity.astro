@@ -1,0 +1,38 @@
+---
+/**
+ * The density before the first shot, with the value of every cell: how many positions of the five
+ * ships cover it. Computed by the game's probabilityDensity() on an empty board.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { coordinateLabel } from '../../../../lib/games/battleship/rules.ts';
+import Board from './Board.astro';
+import Figure from './Figure.astro';
+import Legend from './Legend.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { densityMap, knowledgeOf } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+const f = formatters(lang);
+
+const map = densityMap(knowledgeOf({}));
+const min = Math.min(...map.density);
+const label = m.initial.aria(f.number(min), f.number(map.max), f.list(map.peaks.map((c) => coordinateLabel(c))));
+---
+
+<Figure class="max-w-sm">
+  <Board
+    slot="graphic"
+    heat={map.density}
+    values={map.density.map((value) => f.number(value))}
+    peaks={map.peaks}
+    label={label}
+  />
+  <Legend slot="legend" lang={lang} items={['heat', 'peak']} />
+  <slot />
+</Figure>

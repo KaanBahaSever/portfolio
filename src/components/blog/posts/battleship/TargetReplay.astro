@@ -1,0 +1,86 @@
+---
+/**
+ * Target mode, replayed: the game's Normal computer has just hit a cruiser and plays on until it
+ * sinks. The shots are real calls to chooseShot() with a fixed seed; the table lists the mode the
+ * computer is in after each one, as the state diagram later in the post names them.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { coordinateLabel, placementCells } from '../../../../lib/games/battleship/rules.ts';
+import Board from './Board.astro';
+import Figure from './Figure.astro';
+import Legend from './Legend.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { EXAMPLE_FLEET, TARGET_EXAMPLE, replayTarget } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+
+/**
+ * The seed was chosen because it shows every move of target mode: two probes, a second hit, the
+ * line, a miss past one end, the other end. The captions narrate this sequence, so the build fails
+ * if the game's code ever plays it differently.
+ */
+const shots = replayTarget(TARGET_EXAMPLE.firstHit, TARGET_EXAMPLE.seed);
+const EXPECTED = 'E5:hit E4:miss E6:miss F5:hit G5:miss D5:sunk';
+const played = shots.map((shot) => `${coordinateLabel(shot.index)}:${shot.result}`).join(' ');
+if (played !== EXPECTED) throw new Error(`TargetReplay: expected ${EXPECTED}, the game played ${played}`);
+const cruiser = EXAMPLE_FLEET.find((placement) => placement.ship === 'cruiser');
+const sunkCells = cruiser ? placementCells(cruiser) : [];
+
+const markers = shots.map((shot, i) => ({
+  index: shot.index,
+  text: String(i + 1),
+  kind: shot.result === 'miss' ? ('miss' as const) : ('hit' as const),
+}));
+const resultText = (result: (typeof shots)[number]['result']) =>
+  result === 'miss' ? m.cellState.miss : result === 'hit' ? m.cellState.hit : m.target.sunk;
+const label = m.target.aria(
+  shots.map((shot, i) => m.target.step(i + 1, coordinateLabel(shot.index), resultText(shot.result))).join('; '),
+);
+const th = 'label-mono py-2 pr-4 text-left font-medium text-zinc-600 dark:text-zinc-400';
+const td = 'py-1.5 pr-4 text-zinc-800 dark:text-zinc-200';
+---
+
+<Figure>
+  <div slot="graphic" class="grid items-center gap-6 sm:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] sm:gap-8">
+    <Board
+      class="mx-auto max-w-[17rem]"
+      view={{ row: 2, col: 1, rows: 5, cols: 7 }}
+      markers={markers}
+      ships={[{ cells: sunkCells, sunk: true }]}
+      label={label}
+    />
+    <table class="w-full max-w-sm justify-self-center text-sm tabular-nums sm:justify-self-start">
+      <thead class="border-b border-zinc-300 dark:border-zinc-700">
+        <tr>
+          <th scope="col" class={th}>{m.target.shot}</th>
+          <th scope="col" class={th}>{m.target.cell}</th>
+          <th scope="col" class={th}>{m.target.result}</th>
+          <th scope="col" class:list={[th, 'pr-0']}>{m.target.next}</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+        {
+          shots.map((shot, i) => (
+            <tr>
+              <td class:list={[td, 'font-mono']}>{i + 1}</td>
+              <td class:list={[td, 'font-mono']}>{coordinateLabel(shot.index)}</td>
+              <td class={td}>{resultText(shot.result)}</td>
+              <td class:list={[td, 'pr-0']}>
+                <span class:list={['font-medium', shot.after === 'hunt' && 'text-accent-700 dark:text-accent-400']}>
+                  {m.machine[shot.after].title}
+                </span>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <Legend slot="legend" lang={lang} items={['shotMiss', 'shotHit', 'sunk']} />
+  <slot />
+</Figure>

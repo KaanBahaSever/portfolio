@@ -1,0 +1,97 @@
+---
+/**
+ * The fleet, and how many positions each ship has on an empty 10×10 board, counted by the game's
+ * allPlacements() and checked against the closed form 2 · n · (n − L + 1). A real table (ships
+ * are data, not a picture); the ship drawings are decorative.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import Figure from './Figure.astro';
+import { battleshipPostMessages } from './messages.ts';
+import { BOARD_SIZE, placementCounts } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = battleshipPostMessages[lang];
+const f = formatters(lang);
+const n = BOARD_SIZE;
+
+const rows = placementCounts().map(({ ship, count }) => {
+  if (count !== 2 * n * (n - ship.length + 1)) throw new Error(`FleetFigure: unexpected count for ${ship.id}`);
+  return { ship, count, formula: `2 · ${n} · ${n - ship.length + 1}` };
+});
+const total = rows.reduce((sum, row) => sum + row.count, 0);
+const CELL = 14;
+const th = 'label-mono py-2 font-medium text-zinc-600 dark:text-zinc-400';
+---
+
+<Figure class="max-w-md">
+  <table slot="graphic" class="w-full text-sm tabular-nums">
+    <thead class="border-b border-zinc-300 dark:border-zinc-700">
+      <tr>
+        <th scope="col" class:list={[th, 'pr-3 text-left']}>{m.fleet.ship}</th>
+        <th scope="col" class:list={[th, 'pr-3 text-right']}>{m.fleet.length}</th>
+        <th scope="col" class:list={[th, 'text-right']}>{m.fleet.positions}</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+      {
+        rows.map(({ ship, count, formula }) => (
+          <tr>
+            <th scope="row" class="py-2.5 pr-3 text-left font-normal">
+              <span class="block text-zinc-900 dark:text-zinc-100">{m.ships[ship.id]}</span>
+              <svg
+                class="mt-1.5 block h-3.5 text-zinc-900 dark:text-zinc-100"
+                style={`width:${(ship.length * CELL) / 16}rem`}
+                viewBox={`0 0 ${ship.length * CELL} ${CELL}`}
+                aria-hidden="true"
+                focusable="false"
+              >
+                <rect
+                  x="0.75"
+                  y="0.75"
+                  width={ship.length * CELL - 1.5}
+                  height={CELL - 1.5}
+                  rx={(CELL - 1.5) / 2}
+                  fill="currentColor"
+                  fill-opacity="0.06"
+                  stroke="currentColor"
+                  stroke-opacity="0.7"
+                  stroke-width="1.25"
+                />
+                {Array.from({ length: ship.length - 1 }, (_, i) => (
+                  <line
+                    x1={(i + 1) * CELL}
+                    y1="3"
+                    x2={(i + 1) * CELL}
+                    y2={CELL - 3}
+                    stroke="currentColor"
+                    stroke-opacity="0.35"
+                  />
+                ))}
+              </svg>
+            </th>
+            <td class="py-2.5 pr-3 text-right font-mono text-zinc-700 dark:text-zinc-300">{ship.length}</td>
+            <td class="py-2.5 text-right font-mono whitespace-nowrap">
+              {/* An explicit space: the HTML compressor drops whitespace between the two spans. */}
+              <span class="text-zinc-500 dark:text-zinc-400">{`${formula} =`}</span>{' '}<span class="text-zinc-900 dark:text-zinc-100">{f.number(count)}</span>
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+    <tfoot class="border-t border-zinc-300 dark:border-zinc-700">
+      <tr>
+        <th scope="row" class="py-2.5 pr-3 text-left font-medium text-zinc-900 dark:text-zinc-100">{m.fleet.total}</th>
+        <td class="py-2.5 pr-3 text-right font-mono text-zinc-700 dark:text-zinc-300">
+          {rows.reduce((sum, row) => sum + row.ship.length, 0)}
+        </td>
+        <td class="py-2.5 text-right font-mono font-medium text-accent-700 dark:text-accent-400">{f.number(total)}</td>
+      </tr>
+    </tfoot>
+  </table>
+  <slot />
+</Figure>

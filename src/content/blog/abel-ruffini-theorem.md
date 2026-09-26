@@ -298,7 +298,7 @@ This is the only composition series of $S_5$ (a subnormal series with simple fac
 </g>
 </svg>
 </div>
-<figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"><span class="label-mono mr-2 text-zinc-500 dark:text-zinc-400">Fig. 1</span>Composition series drawn as ladders. Each rung is labelled with its factor; a group sits at a height proportional to the logarithm of its order, so a rung's length measures the order of its factor. <i>S</i><sub>4</sub> comes apart into four small abelian rungs; <i>S</i><sub>5</sub> has one short rung and then a single long one, the simple group <i>A</i><sub>5</sub>, which cannot be subdivided.</figcaption>
+<figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">Composition series drawn as ladders. Each rung is labelled with its factor; a group sits at a height proportional to the logarithm of its order, so a rung's length measures the order of its factor. <i>S</i><sub>4</sub> comes apart into four small abelian rungs; <i>S</i><sub>5</sub> has one short rung and then a single long one, the simple group <i>A</i><sub>5</sub>, which cannot be subdivided.</figcaption>
 </figure>
 
 ## A quintic with no radical solution

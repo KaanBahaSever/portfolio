@@ -73,4 +73,34 @@ export const TOOLS: readonly ToolInfo[] = [
     status: 'ready',
     href: '/tools/password-generator/',
   },
+  {
+    slug: 'prime-factorizer',
+    title: { en: 'Integer & prime factorizer', tr: 'Asal çarpanlara ayırma' },
+    description: {
+      en: 'Factor whole numbers of up to 40 digits: the canonical prime factorization, every divisor, and τ(n), σ(n) and φ(n), computed in a background thread.',
+      tr: '40 basamağa kadar tam sayıları çarpanlarına ayırın: kanonik asal çarpan gösterimi, tüm bölenler ve τ(n), σ(n), φ(n) değerleri; hesaplama arka planda yapılır.',
+    },
+    status: 'ready',
+    href: '/tools/prime-factorizer/',
+  },
+  {
+    slug: 'binary-text',
+    title: { en: 'Binary ↔ text converter', tr: 'İkili ↔ metin dönüştürücü' },
+    description: {
+      en: 'Turn text into the bits of its UTF-8 bytes and binary back into text, live in both directions. Check for ASCII and see every character byte by byte.',
+      tr: 'Metni UTF-8 baytlarının bitlerine, ikili kodu yeniden metne çevirin; iki yön de anında güncellenir. ASCII denetimi yapın, her karakterin baytlarını tek tek görün.',
+    },
+    status: 'ready',
+    href: '/tools/binary-text/',
+  },
+  {
+    slug: 'geo-distance',
+    title: { en: 'Great-circle distance', tr: 'Büyük daire mesafesi' },
+    description: {
+      en: 'Distance, bearings and midpoint between two latitude/longitude points, in decimal degrees or DMS, with the route drawn on a globe.',
+      tr: 'İki enlem/boylam noktası arasındaki mesafeyi, yönleri ve orta noktayı hesaplayın; ondalık derece ya da DMS girin, rotayı küre üzerinde görün.',
+    },
+    status: 'ready',
+    href: '/tools/geo-distance/',
+  },
 ];

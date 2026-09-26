@@ -2,7 +2,7 @@
 
 Source of the personal site of **Kaan Baha Sever**, a software developer with a mathematics
 background (Istanbul University) who works on systems in C++ and Go. The site has a résumé-style
-home page, an About page telling the engineering story, projects, a blog with KaTeX math, two
+home page, an About page telling the story from mathematics to systems software, projects, a blog with KaTeX math, two
 algorithmic games, an interactive terminal and a set of privacy-friendly browser tools, in
 **English and Turkish**.
 
@@ -23,8 +23,8 @@ Live at [kaanbahasever.com](https://kaanbahasever.com).
 
 | Route (EN / TR)                                  | What it is                                                                 |
 | ------------------------------------------------ | -------------------------------------------------------------------------- |
-| `/` · `/tr/`                                     | Hero, experience, selected work, engineering journey, playground, writing  |
-| `/about/` · `/tr/about/`                         | The engineering journey (`#journey`) and a timeline of milestones          |
+| `/` · `/tr/`                                     | Hero, experience, selected work, journey teaser, playground, writing       |
+| `/about/` · `/tr/about/`                         | The journey so far (`#journey`, chapters `#journey-*`) and a timeline      |
 | `/projects/`, `/projects/<id>/`                  | Curated projects; each has a detail page                                   |
 | `/blog/`, `/blog/<id>/`                          | Posts written here or imported from Medium; KaTeX math, Shiki code blocks  |
 | `/tools/…`                                       | The tools below                                                            |
@@ -41,6 +41,9 @@ Live at [kaanbahasever.com](https://kaanbahasever.com).
 | Image compressor   | `/tools/image-compressor/`   | JPEG/PNG/WebP re-encoding with a quality slider and format choice, before/after comparison and size statistics |
 | Compress PDF       | `/tools/pdf-compress/`       | Re-compresses a PDF's images and cleans out unused objects                                     |
 | Password generator | `/tools/password-generator/` | Cryptographically secure passwords with options and a strength estimate                        |
+| Prime factorizer   | `/tools/prime-factorizer/`   | Integers up to 40 digits: canonical prime factorization (trial division, Pollard–Brent rho, Miller–Rabin / Baillie–PSW) in a Web Worker with a time limit, all divisors, τ, σ, φ and properties |
+| Binary ↔ text      | `/tools/binary-text/`        | Text to 8-bit UTF-8 groups and back, live in both directions; ASCII-only check, errors pointed out by line and column, and a per-character byte breakdown |
+| Great-circle distance | `/tools/geo-distance/`    | Distance, initial and final bearings and midpoint between two latitude/longitude points (decimal degrees or DMS); haversine on the mean-radius sphere with a Vincenty cross-check on WGS-84, and the route on an orthographic globe |
 
 The catalog on `/tools/` is generated from `src/data/tools.ts`; the games index from
 `src/data/games.ts`.
@@ -114,8 +117,8 @@ Run from the project root (Node 22.18+, see `.node-version`; the tests run TypeS
 │   │   └── messages/ tools/ games/ console/   # Typed EN/TR message catalogues
 │   ├── layouts/BaseLayout.astro        # <html lang>, SEO + hreflang, language script, header/footer
 │   ├── lib/                            # Framework-free, unit-tested modules (no DOM):
-│   │                                   # console, games, image, markdown (KaTeX), password, pdf,
-│   │                                   # text, zip, files, storage
+│   │                                   # console, games, geo, geometry, image, markdown (KaTeX),
+│   │                                   # math, password, pdf, text, zip, files, storage
 │   ├── pages/
 │   │   ├── [...lang]/                  # Every route, built once per locale
 │   │   ├── 404.astro                   # English 404
@@ -167,7 +170,10 @@ Run from the project root (Node 22.18+, see `.node-version`; the tests run TypeS
 - **Identity, headline, contact links and navigation**: `src/config/site.ts`.
 - **Résumé** (experience, education, volunteering, certifications, activities, skills,
   languages): `src/data/resume.ts`, with English and Turkish text side by side. Dates are
-  `'YYYY'` or `'YYYY-MM'` strings, or `'present'` as an end date.
+  `'YYYY'` or `'YYYY-MM'` strings, or `'present'` as an end date; an entry without dates on
+  record uses `periodLabel: { en, tr }` (e.g. "Upper years") instead of start/end.
+- **Wording**: the owner is a software developer — no copy calls him an engineer (EN or TR);
+  `tests/resume-copy.test.ts` and `tests/projects-content.test.ts` check it.
 - **CV**: replace `public/cv/kaan-cv.pdf` (or change `cvPath` in `src/config/site.ts`).
 - **Site URL**: `site` in `astro.config.mjs` and `url` in `src/config/site.ts` (used for
   canonical, hreflang and `og:url` tags).
@@ -218,7 +224,8 @@ Türkçe gövde…
 
 Timeline overlays take `title`, an optional `dateLabel` and, if the English entry has photos,
 `photos` with the Turkish `alt` and `caption` in the same order. A missing overlay falls back to
-English (marked `lang="en"`); an overlay without an English entry fails the build.
+English (marked `lang="en"`); an overlay without an English entry fails the build. Timeline files
+are named `YYYY-slug.md`: the year only groups the folder listing, `date` orders the entries.
 
 ### Blog posts: `src/content/blog/*.md` or `*.mdx`
 
@@ -243,6 +250,10 @@ relatedProject: acik-matematik # optional, id of a file in src/content/projects/
 **Math**: write `$…$` inline and `$$…$$` (or a ```` ```math ```` fence) for display math; KaTeX
 renders it at build time. Write a literal dollar sign as `\$`. After changing
 `src/lib/markdown/katex.ts`, run `astro build --force` (Astro caches rendered Markdown).
+
+**Interactive posts** use `.mdx` and import Astro components (see the Battleship and 2D collision
+posts: their diagrams and widgets live in `src/components/blog/posts/<post>/`, and the collision
+geometry in `src/lib/geometry/`). Each widget keeps its own state, so several can share a page.
 
 ### Medium posts
 

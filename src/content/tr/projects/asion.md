@@ -12,7 +12,7 @@ gibi araçlar böyle bir tablonun ne kadar işe yarayabileceğini gösterdi; Asi
 kişisel bir verinin sahibinin denetiminde kalması gerektiği fikriyle yola çıkıyor. Bu yüzden
 gizliliği önceleyen, kendi sunucunuzda barındırılabilecek (self-hosting) bir yapıyla tasarlandı.
 
-İş gününün dürüst bir kaydını tutmak isteyen bireyler, mühendislik ekipleri ve bir projeye
+İş gününün dürüst bir kaydını tutmak isteyen bireyler, yazılım ekipleri ve bir projeye
 harcanan saatleri takip etmesi gereken araştırmacılar ile öğrenciler için düşünüldü; akademik
 zaman takibi de hedeflerinden biri. 2024'ten beri geliştiriyorum. Proje hâlâ geliştirme
 aşamasında; erken erişim [asion.app](https://asion.app) üzerinden yürütülüyor. Kaynak kodu

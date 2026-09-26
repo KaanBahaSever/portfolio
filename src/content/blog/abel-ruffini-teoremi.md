@@ -299,7 +299,7 @@ serisinin ötesinde inceltilemez. Bu, $S_5$ grubunun tek bileşim serisidir (bö
 </g>
 </svg>
 </div>
-<figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"><span class="label-mono mr-2 text-zinc-500 dark:text-zinc-400">Şekil 1</span>Merdiven olarak çizilmiş bileşim serileri. Her basamağın yanında bölüm grubu yazılıdır; her grup, mertebesinin logaritmasıyla orantılı bir yükseklikte durur, dolayısıyla bir basamağın uzunluğu bölüm grubunun mertebesini ölçer. <i>S</i><sub>4</sub> dört küçük değişmeli basamağa ayrılır; <i>S</i><sub>5</sub> grubunda ise kısa bir basamaktan sonra tek ve uzun bir basamak gelir: bölünemeyen basit grup <i>A</i><sub>5</sub>.</figcaption>
+<figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">Merdiven olarak çizilmiş bileşim serileri. Her basamağın yanında bölüm grubu yazılıdır; her grup, mertebesinin logaritmasıyla orantılı bir yükseklikte durur, dolayısıyla bir basamağın uzunluğu bölüm grubunun mertebesini ölçer. <i>S</i><sub>4</sub> dört küçük değişmeli basamağa ayrılır; <i>S</i><sub>5</sub> grubunda ise kısa bir basamaktan sonra tek ve uzun bir basamak gelir: bölünemeyen basit grup <i>A</i><sub>5</sub>.</figcaption>
 </figure>
 
 ## Radikallerle çözülemeyen bir beşinci derece denklem

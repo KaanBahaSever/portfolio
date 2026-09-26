@@ -27,7 +27,12 @@ function render(tex: string, displayMode: boolean): string {
 }
 
 function emit(html: string, sourceFormat: SourceFormat) {
-  return sourceFormat === 'mdx' ? { raw: html, mdxExpressions: false } : { type: 'html' as const, value: html };
+  // MDX re-parses raw HTML as JSX text, which drops the backslash before punctuation: the TeX in
+  // the MathML annotation loses `\,` or `\;`, and `\{ … \}` stops compiling. As a character
+  // reference the backslash survives the re-parse and renders as itself.
+  return sourceFormat === 'mdx'
+    ? { raw: html.replaceAll('\\', '&#92;'), mdxExpressions: false }
+    : { type: 'html' as const, value: html };
 }
 
 export const katexPlugin = defineMdastPlugin({

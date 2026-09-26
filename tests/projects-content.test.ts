@@ -107,9 +107,10 @@ function catalogueText(value: unknown): string {
 }
 
 test('no copy calls the owner an engineer', () => {
-  // Other people keep their titles: Asion is built for "engineering teams", which describes its
-  // users, not the owner. Everything else about his work says developer / built / designed.
-  const allowed = [/engineering\s+teams/g, /mühendislik\s+ekipleri/g];
+  // The word does not appear at all in project copy: his work says developer / built / designed,
+  // and Asion's audience is "software teams". (Other people keep their titles elsewhere, e.g. the
+  // CCIE guest on the About page.)
+  const allowed: RegExp[] = [];
   const scrub = (text: string) => allowed.reduce((rest, pattern) => rest.replace(pattern, ''), text);
   const check = (where: string, text: string, banned: RegExp) => {
     const hit = banned.exec(scrub(text));

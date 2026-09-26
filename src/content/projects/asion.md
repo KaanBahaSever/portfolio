@@ -19,8 +19,7 @@ picture of how time is actually spent. Tools such as Rize.io showed how useful t
 be; Asion is built on the view that data this personal should stay under its owner's control,
 so it is designed privacy-first and with self-hosting in mind.
 
-It is meant for individuals who want an honest record of their working day, for engineering
-teams, and for academic time tracking, where researchers and students account for the hours
+It is meant for individuals who want an honest record of their working day, for software teams, and for academic time tracking, where researchers and students account for the hours
 spent on a project. I have been building it since 2024; it is in development, with early access
 through [asion.app](https://asion.app). The source code is private.
 

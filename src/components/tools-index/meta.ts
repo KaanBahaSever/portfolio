@@ -10,4 +10,7 @@ export const TOOL_FORMATS: Readonly<Record<string, readonly string[]>> = {
   'image-compressor': ['JPEG', 'PNG', 'WebP'],
   'pdf-compress': ['PDF'],
   'password-generator': ['Web Crypto'],
+  'prime-factorizer': ['BigInt', 'Web Worker'],
+  'binary-text': ['UTF-8', 'ASCII'],
+  'geo-distance': ['DMS', 'WGS-84'],
 };

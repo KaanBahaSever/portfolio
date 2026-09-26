@@ -54,11 +54,11 @@ const tr: BlogMessages = {
       'Kaan Baha Sever’in matematik, yazılım ve bilim tarihi üzerine Türkçe ve İngilizce yazıları.',
     eyebrow: 'Blog',
     title: 'Yazılar',
-    empty: 'Burada henüz yayımlanmış bir yazı yok.',
+    empty: 'Henüz yayımlanmış bir yazı yok.',
   },
   list: {
     readingTime: (minutes) => `${minutes} dk okuma`,
-    writtenIn: (language) => `(yazı dili: ${language})`,
+    writtenIn: (language) => `(${language} yazılmış)`,
   },
   post: {
     allPosts: 'Tüm yazılar',

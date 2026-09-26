@@ -196,7 +196,7 @@ Av ve hedef, filo hakkında tek bir bilgi kullanır: en kısa geminin boyu. Zor 
 
 <InitialDensity lang="tr">İlk atıştan önceki yoğunluk. Her hücredeki sayı, beş geminin o hücreden geçen konumlarının sayısı: köşelerde {n.emptyMin}, ortadaki dört hücrede {n.emptyMax}. Zor seviye ilk atışını bu dört hücreden birine yapar.</InitialDensity>
 
-Bu iki sayıyı kendimiz de bulabiliriz. Bir köşe hücresinden her geminin tek bir yatay ve tek bir dikey konumu geçer: bir ucu o köşede duranlar. Beş gemi için $5 \cdot 2 = 10$. Ortadaki dört hücrenin her birinden ise $L$ boyundaki bir gemi $L$ yatay ve $L$ dikey konumla geçebilir, çünkü o hücre geminin birinci, ikinci, … ya da sonuncu hücresi olabilir. Beş gemi için bu $2 \cdot (5 + 4 + 3 + 3 + 2) = 2 \cdot 17 = 34$ eder. Hiçbir hücre bundan fazlasını toplayamaz; kruvazör şeklinde gördüğümüz gibi, kenara yaklaştıkça sayı düşer.
+Bu iki sayıyı kendimiz de bulabiliriz. Bir köşe hücresinden her geminin tek bir yatay ve tek bir dikey konumu geçer: bir ucu o köşede duranlar. Beş gemi için $5 \cdot 2 = 10$. Ortadaki dört hücrenin her birinden ise $L$ boyundaki bir gemi $L$ yatay ve $L$ dikey konumla geçebilir, çünkü o hücre geminin birinci, ikinci, … ya da sonuncu hücresi olabilir. Beş gemi için bu $2 \cdot (5 + 4 + 3 + 3 + 2) = 2 \cdot 17 = 34$ eder. Hiçbir hücre bundan fazlasını toplayamaz; kruvazörde gördüğümüz gibi, kenara yaklaştıkça sayı düşer.
 
 Yöntemin adı da buradan geliyor: Bir hücrenin sayısını toplam konum sayısına ({n.placements}) bölerseniz, bütün konumlar arasından rastgele seçilen birinin o hücreden geçme olasılığını bulursunuz.
 

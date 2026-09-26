@@ -62,7 +62,7 @@ test('status lines read naturally in both languages, with values that need no su
   assert.equal(en.status.overlapping('12'), 'Colliding — depth 12 px');
   assert.equal(tr.status.overlapping('12'), 'Çarpışıyor — derinlik 12 px');
   assert.equal(en.status.separated('18'), 'Separated — gap 18 px');
-  assert.equal(tr.status.separated('18'), 'Çarpışma yok — aralık 18 px');
+  assert.equal(tr.status.separated('18'), 'Çarpışma yok — boşluk 18 px');
   assert.equal(tr.axes.parallel('A1'), 'A1 eksenine paralel');
   // Every figure has its own names for the two shapes.
   for (const locale of LOCALES) {
@@ -208,7 +208,7 @@ test('readouts keep the same four keys whatever the state, and statuses match th
   };
   assert.equal(statusText(analyse(touching), m, format), 'Touching — depth 0 px');
   const concave = analyse(initialScene('concave'));
-  assert.equal(statusText(concave, collisionMessages.tr, formatters('tr')), 'SAT: çarpışıyor — yanlış, şekiller arasında 25 px var');
+  assert.equal(statusText(concave, collisionMessages.tr, formatters('tr')), 'SAT: çarpışıyor — yanlış, şekiller arasında 25 px boşluk var');
 });
 
 test('concave figure: the status says SAT agrees only when its relation matches the pieces', () => {

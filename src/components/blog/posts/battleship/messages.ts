@@ -231,13 +231,13 @@ const tr: BattleshipPostMessages = {
     high: 'Yüksek',
     miss: 'Iska',
     hit: 'İsabet',
-    shotMiss: 'Iska, atış sırasıyla',
-    shotHit: 'İsabet, atış sırasıyla',
+    shotMiss: 'Iska, sıra numarasıyla',
+    shotHit: 'İsabet, sıra numarasıyla',
     peak: 'En yüksek yoğunluk',
     sunk: 'Batmış gemi',
     ghost: 'Aradan sıyrılan muhrip',
     lattice: 'Desen hücresi',
-    highlight: 'Geminin kapsadığı desen hücresi',
+    highlight: 'Geminin kapladığı desen hücresi',
     latest: 'Son atış',
     hidden: 'Batmamış gemi',
     huntShots: 'Av atışları',
@@ -266,20 +266,20 @@ const tr: BattleshipPostMessages = {
   parity: {
     cells: (n) => `${n} hücre`,
     aria: (m2, m3) =>
-      `İki tahta. Solda satır ve sütun numaralarının toplamı çift olan ${m2} hücre, yani bir dama tahtası; H2–H3 arasındaki muhrip bunlardan birini, H2 hücresini kapsıyor. Sağda toplamı 3’ün katı olan ${m3} hücre, çapraz çizgiler üzerinde; B7–D7 arasındaki kruvazör bunlardan birini, D7 hücresini kapsıyor, G2–H2 arasındaki muhrip ise hiçbirini kapsamıyor.`,
+      `İki tahta. Solda satır ve sütun numaralarının toplamı çift olan ${m2} hücre, yani bir dama tahtası; H2–H3 arasındaki muhrip bunlardan birini, H2 hücresini kaplıyor. Sağda toplamı 3’ün katı olan ${m3} hücre, çapraz çizgiler üzerinde; B7–D7 arasındaki kruvazör bunlardan birini, D7 hücresini kaplıyor, G2–H2 arasındaki muhrip ise hiçbirini kaplamıyor.`,
   },
   hunt: {
     aria: (shots, cells, peaks) =>
-      `Zor seviye ${shots} atıştan sonra; atışların hepsi ıska: ${cells}. Bir sonraki atış için yoğunluk da gösteriliyor. Hiçbir ıska bir başkasının yanında değil; yoğunluk en yüksek değerine ıskaların henüz ulaşmadığı köşede, ${peaks} hücrelerinde ulaşıyor.`,
+      `Zor seviye ${shots} atış yaptı ve hepsi ıska: ${cells}. Tahtada bir sonraki atış için hesaplanan yoğunluk da görülüyor. Iskaların hiçbiri bir diğerinin yanında değil. Yoğunluğun en yüksek olduğu yer, ıskaların henüz ulaşmadığı köşedeki ${peaks} hücreleri.`,
   },
   hits: {
     one: 'Tek isabet',
     two: 'Aynı hizada iki isabet',
     aria: (one, oneValue, two, twoValue) =>
-      `İki tahta. E5’teki tek isabetten sonra yoğunluk en çok komşu hücrelerde yükseliyor: ${one}, değer ${oneValue}. F5’teki ikinci isabetten sonra en yüksek değer çizginin iki ucunda: ${two}, değer ${twoValue}.`,
+      `İki tahta. E5’teki tek isabetten sonra en yüksek yoğunluk komşu hücrelerde: ${one} (değer ${oneValue}). F5’teki ikinci isabetten sonra en yüksek değer çizginin iki ucunda: ${two} (değer ${twoValue}).`,
   },
   machine: {
-    aria: 'Bir durum diyagramı. Bilgisayar Av durumunda başlar; ıskada bu durumda kalır, isabette Hedef durumuna geçer. Hedef ve Çizgi birlikte Hedefleme durumunu oluşturur. Hedef, ıskada aynı durumda kalır, ikinci isabet aynı hizaya gelince Çizgi durumuna geçer; Çizgi, isabet dizisini uzattıkça aynı durumda kalır, iki ucu da kapanınca Hedef durumuna döner. Bir gemi batınca Battı adımı geminin hücrelerini işaretler ve gemiyi filodan çıkarır; açıkta isabet kaldıysa Hedefleme durumuna, kalmadıysa Av durumuna döner.',
+    aria: 'Bir durum diyagramı. Bilgisayar Av durumunda başlar. Iskadan sonra bu durumda kalır, isabetten sonra Hedef durumuna geçer. Hedef ve Çizgi birlikte Hedefleme durumunu oluşturur. Hedef durumunda ıskadan sonra orada kalır; ikinci isabet ilkiyle aynı hizaya gelince Çizgi durumuna geçer. Çizgi durumunda isabet dizisini uzattıkça orada kalır; iki uç da kapanınca Hedef durumuna döner. Bir gemi batınca Battı adımı geminin hücrelerini işaretler ve gemiyi filodan çıkarır. Sonra geride isabet kaldıysa Hedefleme durumuna, kalmadıysa Av durumuna döner.',
     targeting: 'Hedefleme',
     hunt: { title: 'Av', lines: ['tarama deseni', 'üzerine ateş et'] },
     target: { title: 'Hedef', lines: ['açık isabetlerin', 'komşularını dene'] },
@@ -299,7 +299,7 @@ const tr: BattleshipPostMessages = {
   chart: {
     xAxis: 'Atış sayısı',
     yAxis: 'Biten oyunlar',
-    theory: 'Rastgele atış, kesin',
+    theory: 'Rastgele atış, kesin hesap',
     aria: (lines) =>
       `Belirli bir atış sayısına kadar biten oyunların oranını gösteren grafik; her strateji için bir eğri. ${lines}`,
     line: (name, median, p90) => `${name}: oyunların yarısı ${median}. atışa, onda dokuzu ${p90}. atışa kadar bitiyor.`,
@@ -327,7 +327,7 @@ const tr: BattleshipPostMessages = {
     fleet: 'Su üstündeki gemiler',
     reset: 'Tahtayı sıfırla',
     grid: 'Yoğunluk laboratuvarı tahtası',
-    help: 'İşaretlemek için bir hücreye tıklayın ya da dokunun; klavyede ok tuşlarıyla gezinip Enter ya da Boşluk tuşuna basın. Aynı araçla yeniden işaretlemek hücreyi temizler. Bir gemi batınca hücrelerini “Battı” olarak işaretleyin ve gemiyi listeden kaldırın.',
+    help: 'İşaretlemek için bir hücreye tıklayın ya da dokunun; klavyede ok tuşlarıyla gezinip Enter ya da Boşluk tuşuna basın. Bir hücreyi aynı araçla yeniden işaretlerseniz işaret kalkar. Bir gemi batınca hücrelerini “Battı” olarak işaretleyin ve gemiyi listeden kaldırın.',
     cell: (coordinate, state, value, peak) =>
       `${coordinate}, ${state}${value ? `, yoğunluk ${value}` : ''}${peak ? ', en yüksek' : ''}`,
     best: 'Zor seviyenin hedefi',
@@ -383,7 +383,7 @@ const tr: BattleshipPostMessages = {
       lattice: (m, cells) => `Gölgeli hücreler, m = ${m} için tarama deseni: ${cells} hücre. `,
       noLattice: 'Desen yok: bilgisayar av atışlarını rastgele yapıyor. ',
       last: (shot, cell, result, kind) => `${shot}. atış, ${cell}: ${result} (${kind}). `,
-      counts: (hunt, target, sunk) => `Şimdiye kadar ${hunt} av atışı ve ${target} hedef atışı; batan gemiler: ${sunk}. `,
+      counts: (hunt, target, sunk) => `Şimdiye kadar ${hunt} av atışı ve ${target} hedef atışı yapıldı; batan gemiler: ${sunk}. `,
       noneSunk: 'yok',
       fleet: (ships) => `Gemilerin yerleri: ${ships}.`,
       ship: (name, from, to) => `${name} ${from}–${to}`,

@@ -40,6 +40,12 @@ import { mulberry32 } from '../../../../lib/games/random.ts';
 
 export { BOARD_SIZE, FLEET, HIT, MISS, SUNK, UNKNOWN, targetWeight, type CellKnowledge, type ShipId, type ShipSpec };
 
+/**
+ * How Board.astro draws a board, in SVG units: the side of a cell, and the room left of and above
+ * the cells for the coordinates. Figures that draw into a Board's slots place their marks with it.
+ */
+export const DRAWING = { cell: 28, gutter: 18 } as const;
+
 /** 'E5' → the cell index (column letter, then the row counted from 1), as the game labels cells. */
 export function cell(label: string, size = BOARD_SIZE): number {
   const match = /^([A-Z])(\d{1,2})$/.exec(label);
@@ -271,23 +277,99 @@ function nextShot(strategy: Strategy, knowledge: Knowledge, rng: () => number): 
 }
 
 /**
- * Shots needed to sink a whole fleet. Game `seed` places the fleet with mulberry32(seed) and gives
- * the computer mulberry32(seed · 7919 + 17), as the game's tests do, so every strategy faces the
- * same fleets and each game can be replayed exactly.
+ * One whole game: game `seed` places the fleet with mulberry32(seed) and gives the computer
+ * mulberry32(seed · 7919 + 17), as the game's tests do, so every strategy faces the same fleets and
+ * each game can be replayed exactly. `observe` sees every shot with what the shooter knew before
+ * it. playGame and replayGame both run through here, so a replay is always the simulated game.
  */
-export function playGame(strategy: Strategy, seed: number): number {
-  const ocean = createOcean(randomFleet(mulberry32(seed)));
+function runGame(
+  strategy: Strategy,
+  seed: number,
+  observe?: (before: Knowledge, outcome: Exclude<ShotOutcome, { result: 'repeat' }>) => void,
+): { fleet: Placement[]; shots: number } {
+  const fleet = randomFleet(mulberry32(seed));
+  const ocean = createOcean(fleet);
   const knowledge = createKnowledge();
   const rng = mulberry32(seed * 7919 + 17);
   let shots = 0;
   while (!allSunk(ocean)) {
     const outcome = fire(ocean, nextShot(strategy, knowledge, rng));
     if (outcome.result === 'repeat') throw new Error(`playGame: ${strategy} repeated a shot`);
+    observe?.(knowledge, outcome);
     recordShot(knowledge, outcome);
     shots++;
   }
-  return shots;
+  return { fleet, shots };
 }
+
+/** Shots needed to sink a whole fleet, in game `seed` (see runGame). */
+export function playGame(strategy: Strategy, seed: number): number {
+  return runGame(strategy, seed).shots;
+}
+
+/**
+ * The modulus of the Normal computer's hunting lattice: the length of the shortest ship afloat
+ * (as huntAndTarget in ai.ts; with no ship left, which a real game never asks, 1).
+ */
+export function latticeModulus(remaining: readonly ShipSpec[]): number {
+  return remaining.length > 0 ? Math.min(...remaining.map((spec) => spec.length)) : 1;
+}
+
+export interface ReplayShot {
+  /** The cell fired at. */
+  index: number;
+  result: 'miss' | 'hit' | 'sunk';
+  /** The ship this shot sank, and its cells. */
+  sunk?: { ship: ShipId; cells: number[] };
+  /**
+   * Fired with no open hit on the board (a hit on a ship still afloat): the computer was hunting.
+   * Every other shot is a target shot.
+   */
+  hunt: boolean;
+  /** The lattice modulus before the shot: the length of the shortest ship afloat. */
+  modulus: number;
+}
+
+export interface GameReplay {
+  strategy: Strategy;
+  seed: number;
+  /** The fleet the computer is firing at. */
+  fleet: { ship: ShipId; cells: number[] }[];
+  shots: ReplayShot[];
+}
+
+/** Game `seed` of the simulation, shot by shot: the same game playGame counts. */
+export function replayGame(strategy: Strategy, seed: number): GameReplay {
+  const shots: ReplayShot[] = [];
+  const { fleet } = runGame(strategy, seed, (before, outcome) => {
+    shots.push({
+      index: outcome.index,
+      result: outcome.result,
+      ...(outcome.result === 'sunk' ? { sunk: { ship: outcome.ship, cells: [...outcome.cells] } } : {}),
+      hunt: unresolvedHits(before).length === 0,
+      modulus: latticeModulus(before.remaining),
+    });
+  });
+  return {
+    strategy,
+    seed,
+    fleet: fleet.map((placement) => ({ ship: placement.ship, cells: placementCells(placement) })),
+    shots,
+  };
+}
+
+/** Hunt and target shots of a replayed game. */
+export function tally(replay: GameReplay): { shots: number; hunt: number; target: number } {
+  const hunt = replay.shots.filter((shot) => shot.hunt).length;
+  return { shots: replay.shots.length, hunt, target: replay.shots.length - hunt };
+}
+
+/**
+ * The parity replay of the post (ParityReplay.astro): game 743 of the simulation, played by the
+ * Normal computer with and without its lattice. The figure opens after shot 21, just before the
+ * destroyer sinks and the lattice changes from m = 2 to m = 3.
+ */
+export const REPLAY_EXAMPLE = { seed: 743, start: 21 } as const;
 
 export interface Summary {
   games: number;

@@ -34,6 +34,10 @@ const en = {
     ghost: 'A destroyer that slips through',
     lattice: 'Lattice cell',
     highlight: 'Lattice cell the ship covers',
+    latest: 'Latest shot',
+    hidden: 'Hidden ship',
+    huntShots: 'Hunt shots',
+    targetShots: 'Target shots',
   },
   fleet: {
     ship: 'Ship',
@@ -143,6 +147,73 @@ const en = {
     announceReset: 'Board reset.',
     more: (n: number) => `${n} more`,
   },
+  /** The parity replay (ParityReplay.astro, parity-replay.ts). */
+  replay: {
+    /** Legend of the switch between the two games. */
+    mode: 'Hunting',
+    games: { parity: 'With parity', 'no-parity': 'Without parity' },
+    /** The same, inside a sentence. */
+    gamesInline: { parity: 'with parity', 'no-parity': 'without parity' },
+    controls: 'Replay controls',
+    first: 'Back to the start',
+    previous: 'Previous shot',
+    play: 'Play',
+    pause: 'Pause',
+    next: 'Next shot',
+    last: 'Go to the end',
+    slider: 'Shot',
+    valueText: (shot: number, total: number) =>
+      shot === 0 ? `Before the first shot, ${total} in all` : `Shot ${shot} of ${total}`,
+    readout: {
+      shot: 'Shot',
+      shotValue: (shot: number, total: number) => `${shot} of ${total}`,
+      last: 'Last shot',
+      none: 'None yet',
+      kind: 'Shot type',
+      lattice: 'Lattice',
+      /** Without parity: the computer hunts on every cell. */
+      noLattice: 'None (any cell)',
+      huntShots: 'Hunt shots',
+      targetShots: 'Target shots',
+      sunk: 'Ships sunk',
+      sunkValue: (sunk: number, total: number) => `${sunk} of ${total}`,
+    },
+    kind: { hunt: 'Hunt shot', target: 'Target shot' },
+    /** The same, inside a sentence. */
+    kindInline: { hunt: 'hunt shot', target: 'target shot' },
+    result: { miss: 'miss', hit: 'hit', sunk: (ship: string) => `${ship} sunk` },
+    lastValue: (cell: string, result: string) => `${cell} · ${result}`,
+    /** The board's accessible description, sentence by sentence; `aria` puts them together. */
+    board: {
+      state: (seed: number, game: string, shot: number, total: number) =>
+        shot === 0
+          ? `Game ${seed}, ${game}: the board before the first shot (${total} in all). `
+          : `Game ${seed}, ${game}: the board after shot ${shot} of ${total}. `,
+      lattice: (m: number, cells: number) => `The shaded cells are the lattice for m = ${m}: ${cells} cells. `,
+      noLattice: 'There is no lattice: the computer hunts at random. ',
+      last: (shot: number, cell: string, result: string, kind: string) => `Shot ${shot}, ${cell}: ${result} (${kind}). `,
+      counts: (hunt: number, target: number, sunk: string) =>
+        `So far ${hunt} ${hunt === 1 ? 'hunt shot' : 'hunt shots'} and ${target} ${target === 1 ? 'target shot' : 'target shots'}; ships sunk: ${sunk}. `,
+      noneSunk: 'none',
+      fleet: (ships: string) => `Dashed outlines show the hidden ships: ${ships}.`,
+      ship: (name: string, from: string, to: string) => `${name} ${from} to ${to}`,
+    },
+    announce: {
+      step: (shot: number, total: number, cell: string, result: string, kind: string) =>
+        `Shot ${shot} of ${total}: ${cell}, ${result}, ${kind}.`,
+      start: 'Before the first shot.',
+      latticeNow: (m: number) => ` The lattice is now m = ${m}.`,
+      paused: (step: string) => `Paused. ${step}`,
+      ended: (total: number, hunt: number, target: number) =>
+        `Game over after ${total} shots: ${hunt} hunt shots and ${target} target shots.`,
+    },
+    chart: {
+      title: 'Shots in this game',
+      aria: (rows: string) => `A bar chart of the shots this game took to sink the fleet. ${rows}`,
+      row: (game: string, total: number, hunt: number, target: number) =>
+        `${game}: ${total} shots, ${hunt} hunt shots and ${target} target shots.`,
+    },
+  },
 };
 
 export type BattleshipPostMessages = typeof en;
@@ -169,6 +240,10 @@ const tr: BattleshipPostMessages = {
     ghost: 'Aradan sıyrılan muhrip',
     lattice: 'Desen hücresi',
     highlight: 'Geminin kapsadığı desen hücresi',
+    latest: 'Son atış',
+    hidden: 'Gizli gemi',
+    huntShots: 'Av atışları',
+    targetShots: 'Hedef atışları',
   },
   fleet: {
     ship: 'Gemi',
@@ -272,6 +347,62 @@ const tr: BattleshipPostMessages = {
     announceFleetNone: (reason) => `Filo değişti. ${reason}`,
     announceReset: 'Tahta sıfırlandı.',
     more: (n) => `${n} hücre daha`,
+  },
+  replay: {
+    mode: 'Av biçimi',
+    games: { parity: 'Parite ile', 'no-parity': 'Paritesiz' },
+    gamesInline: { parity: 'parite ile', 'no-parity': 'paritesiz' },
+    controls: 'Oynatma düğmeleri',
+    first: 'Başa dön',
+    previous: 'Geri',
+    play: 'Oynat',
+    pause: 'Duraklat',
+    next: 'İleri',
+    last: 'Sona git',
+    slider: 'Atış',
+    valueText: (shot, total) => (shot === 0 ? `İlk atıştan önce, toplam ${total}` : `${shot}. atış, toplam ${total}`),
+    readout: {
+      shot: 'Atış',
+      shotValue: (shot, total) => `${shot} / ${total}`,
+      last: 'Son atış',
+      none: 'Henüz yok',
+      kind: 'Atış türü',
+      lattice: 'Parite deseni',
+      noLattice: 'Yok (her hücre)',
+      huntShots: 'Av atışları',
+      targetShots: 'Hedef atışları',
+      sunk: 'Batan gemiler',
+      sunkValue: (sunk, total) => `${sunk} / ${total}`,
+    },
+    kind: { hunt: 'Av atışı', target: 'Hedef atışı' },
+    kindInline: { hunt: 'av atışı', target: 'hedef atışı' },
+    result: { miss: 'ıska', hit: 'isabet', sunk: (ship) => `${ship} battı` },
+    lastValue: (cell, result) => `${cell} · ${result}`,
+    board: {
+      state: (seed, game, shot, total) =>
+        shot === 0
+          ? `${seed} numaralı oyun, ${game}: tahtanın ilk atıştan önceki hâli (toplam ${total} atış). `
+          : `${seed} numaralı oyun, ${game}: tahtanın ${shot}. atıştan sonraki hâli (toplam ${total} atış). `,
+      lattice: (m, cells) => `Gölgeli hücreler, m = ${m} için parite deseni: ${cells} hücre. `,
+      noLattice: 'Desen yok: bilgisayar av atışlarını rastgele yapıyor. ',
+      last: (shot, cell, result, kind) => `${shot}. atış, ${cell}: ${result} (${kind}). `,
+      counts: (hunt, target, sunk) => `Şimdiye kadar ${hunt} av atışı ve ${target} hedef atışı; batan gemiler: ${sunk}. `,
+      noneSunk: 'yok',
+      fleet: (ships) => `Kesik çizgiler gizli gemileri gösteriyor: ${ships}.`,
+      ship: (name, from, to) => `${name} ${from}–${to}`,
+    },
+    announce: {
+      step: (shot, total, cell, result, kind) => `${shot}. atış (toplam ${total}): ${cell}, ${result}; ${kind}.`,
+      start: 'İlk atıştan önce.',
+      latticeNow: (m) => ` Desen artık m = ${m}.`,
+      paused: (step) => `Duraklatıldı. ${step}`,
+      ended: (total, hunt, target) => `Oyun ${total} atışta bitti: ${hunt} av atışı ve ${target} hedef atışı.`,
+    },
+    chart: {
+      title: 'Bu oyundaki atışlar',
+      aria: (rows) => `Bu oyunda filoyu batırmak için gereken atışları gösteren çubuk grafik. ${rows}`,
+      row: (game, total, hunt, target) => `${game}: ${total} atış; ${hunt} av atışı, ${target} hedef atışı.`,
+    },
   },
 };
 

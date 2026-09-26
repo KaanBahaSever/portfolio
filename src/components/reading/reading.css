@@ -1,0 +1,56 @@
+/*
+ * The reading layout of long-form pages: blog posts and project pages
+ * (src/pages/[...lang]/blog/[id].astro, src/pages/[...lang]/projects/[id].astro).
+ *
+ * Everything that is read (breadcrumb, header, notes, the body, navigation) sits in ONE column,
+ * centred on the page at a comfortable measure; nothing sits beside it. Figures may reach past
+ * the measure by up to --reading-bleed-max on each side, symmetrically, so they share the
+ * column's axis; their captions stay at the measure, aligned with the text.
+ *
+ *   .reading          The wrapper, as wide as the page's 'wide' <main> content box. A size
+ *                     container, so a figure inside the column can tell how much room the page
+ *                     leaves beside it (100cqw) and never reach past the wrapper, whatever the
+ *                     viewport: no horizontal page scroll.
+ *   .reading-column   A block of the wrapper's flow, centred at the measure.
+ *   .reading-wide     A block of the wrapper's flow, centred at the measure plus both bleeds.
+ *   .reading-bleed    A block INSIDE the column that widens to the same wide edges with
+ *                     negative margins (post-prose.css does the same for figures and display
+ *                     maths in rendered Markdown).
+ *
+ * Both wide forms give the same box: min(wrapper, measure + 2 × bleed), centred. Plain CSS with
+ * no colours, so it needs neither Tailwind nor dark-theme rules. Unlayered, so it wins over
+ * Tailwind's layered utilities, e.g. the Typography plugin's 65ch max-width on .prose; do not
+ * put an mx-* or max-w-* utility on the same element. The two numbers are mirrored in layout.ts
+ * (image `sizes`); tests/reading-layout.test.ts keeps them in step.
+ */
+.reading {
+  --reading-measure: 46rem;
+  --reading-bleed-max: 6rem;
+  /*
+   * Room beside the column, per side, capped at the bleed. Resolved where it is used, so 100cqw
+   * is this wrapper's width (the nearest size container of the element using it).
+   */
+  --reading-bleed: clamp(0px, (100cqw - var(--reading-measure)) / 2, var(--reading-bleed-max));
+
+  container-type: inline-size;
+}
+
+.reading-column {
+  max-width: var(--reading-measure);
+  margin-inline: auto;
+}
+
+.reading-wide {
+  max-width: calc(var(--reading-measure) + 2 * var(--reading-bleed-max));
+  margin-inline: auto;
+}
+
+.reading-bleed {
+  margin-inline: calc(-1 * var(--reading-bleed));
+}
+
+/* A wide figure's caption keeps the measure and lines up with the text column. */
+:is(.reading-wide, .reading-bleed) > figcaption {
+  max-width: var(--reading-measure);
+  margin-inline: auto;
+}

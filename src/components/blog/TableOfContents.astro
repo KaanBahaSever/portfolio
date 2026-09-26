@@ -1,18 +1,27 @@
 ---
 /**
- * A post's table of contents, in two forms:
- * - 'sidebar': a list for the sticky column beside the article (large screens);
- * - 'collapsible': a <details> disclosure above the article body (phones and tablets).
- * The page renders both and hides one per breakpoint (display: none also hides it from
- * assistive technology). A small script marks the section being read with aria-current.
+ * A post's table of contents: one collapsible "Contents" block between the post's header and its
+ * body, at every width (the reading column has nothing beside it).
+ *
+ * - Native <details>/<summary>: Enter or Space opens it, assistive technology announces it as
+ *   expanded or collapsed, and it works without JavaScript. The <nav> goes around the
+ *   disclosure, so the landmark stays in the page's landmark list while the list is closed.
+ * - Closed by default. The article is what the reader came for: the long posts list 15 to 17
+ *   headings, which open would fill more than a phone screen before the first paragraph. The
+ *   summary says how many entries there are, so the outline's size is clear before opening it.
+ * - Entries are numbered like the post's structure: sections 1, 2, 3 and their subsections 1.1,
+ *   1.2. The numbers are visual only (aria-hidden); the nested ordered lists give screen readers
+ *   the same structure.
+ * - It stays open after a link is followed, so going back (or scrolling up) returns to the list.
+ *   There is no marker for the section being read: the list sits above the article, out of view
+ *   while reading, so a scroll listener would update a highlight nobody sees.
  */
-import type { TocEntry } from './toc';
+import { countEntries, type TocEntry } from './toc';
+import { blogMessages } from '../../i18n/messages/blog';
+import { getLocale } from '../../i18n/server';
 
 interface Props {
   entries: TocEntry[];
-  /** "Contents" in the interface language. */
-  label: string;
-  variant: 'sidebar' | 'collapsible';
   /** lang of the heading texts, when it differs from the element around the list. */
   contentLang?: string;
   /** lang of the label, when the component sits inside an article in another language. */
@@ -20,141 +29,69 @@ interface Props {
   class?: string;
 }
 
-const { entries, label, variant, contentLang, lang, class: className } = Astro.props;
-const labelId = `toc-label-${variant}`;
+const { entries, contentLang, lang, class: className } = Astro.props;
+const m = blogMessages[getLocale(Astro)].post;
+const labelId = 'toc-label';
 
-// Shared link styles. Start padding and font size are set per variant and level: two utilities
-// for the same property on one element do not override each other by their order in the class
-// list, only by their order in the generated CSS.
-const link =
-  'block border-s border-transparent py-1.5 pointer-coarse:py-3 leading-snug text-zinc-600 transition-colors hover:text-zinc-900 aria-[current=true]:border-accent-600 aria-[current=true]:text-accent-800 dark:text-zinc-400 dark:hover:text-zinc-100 dark:aria-[current=true]:border-accent-400 dark:aria-[current=true]:text-accent-300';
-const number = (index: number) => String(index + 1).padStart(2, '0');
+// Rows are compact for a mouse and 44 px tall for touch. The number column (w-10) is wide enough
+// for "10.10"; subsection lists are indented by that column plus the gap (ps-12), so their
+// numbers line up under their section's title.
+const row =
+  'flex gap-2 rounded-lg px-2 py-2 text-sm leading-snug text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 pointer-coarse:min-h-11 pointer-coarse:items-center dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-50';
+const number = 'w-10 shrink-0 font-mono text-xs leading-5 text-zinc-500 tabular-nums dark:text-zinc-400';
 ---
 
-{
-  variant === 'sidebar' ? (
-    <nav aria-labelledby={labelId} lang={lang} class={className} data-toc>
-      <p id={labelId} class="label-mono text-zinc-600 dark:text-zinc-400">
-        {label}
-      </p>
-      <ol lang={contentLang} class="mt-3 border-s border-zinc-200 dark:border-zinc-800">
-        {entries.map((entry, index) => (
+<nav aria-labelledby={labelId} lang={lang} class={className}>
+  <details class="group rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <summary
+      class="flex min-h-12 list-none items-center gap-3 rounded-xl px-4 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800/60 [&::-webkit-details-marker]:hidden"
+    >
+      {/* The spaces keep "Contents" and the count apart in the summary's accessible name. */}
+      <span id={labelId} class="label-mono text-zinc-700 dark:text-zinc-300">{m.contents}</span>{' '}
+      <span class="text-sm text-zinc-600 tabular-nums dark:text-zinc-400">
+        <span aria-hidden="true" class="me-1 text-zinc-400 dark:text-zinc-600">·</span>{' '}
+        {m.contentsCount(countEntries(entries))}
+      </span>
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.75"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="ms-auto size-4 shrink-0 text-zinc-500 transition-transform duration-200 group-open:rotate-180 dark:text-zinc-400"
+      >
+        <path d="m6 9 6 6 6-6" />
+      </svg>
+    </summary>
+    <ol lang={contentLang} class="border-t border-zinc-200 px-2 py-2 dark:border-zinc-800">
+      {
+        entries.map((entry, index) => (
           <li>
-            <a href={`#${entry.slug}`} data-toc-link={entry.slug} class:list={[link, '-ms-px ps-4 text-sm']}>
-              <span aria-hidden="true" class="me-2 font-mono text-[0.6875rem] text-zinc-500 tabular-nums dark:text-zinc-400">
-                {number(index)}
+            <a href={`#${entry.slug}`} class={row}>
+              <span aria-hidden="true" class={number}>
+                {index + 1}
               </span>
-              {entry.text}
+              <span class="min-w-0">{entry.text}</span>
             </a>
             {entry.children.length > 0 && (
-              <ol>
-                {entry.children.map((child) => (
+              <ol class="ps-12">
+                {entry.children.map((child, childIndex) => (
                   <li>
-                    <a href={`#${child.slug}`} data-toc-link={child.slug} class:list={[link, '-ms-px ps-9 text-[0.8125rem]']}>
-                      {child.text}
+                    <a href={`#${child.slug}`} class={row}>
+                      <span aria-hidden="true" class={number}>
+                        {`${index + 1}.${childIndex + 1}`}
+                      </span>
+                      <span class="min-w-0">{child.text}</span>
                     </a>
                   </li>
                 ))}
               </ol>
             )}
           </li>
-        ))}
-      </ol>
-    </nav>
-  ) : (
-    <details
-      lang={lang}
-      class:list={['group rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900', className]}
-      data-toc
-    >
-      <summary class="flex min-h-12 list-none items-center justify-between gap-3 rounded-xl px-4 [&::-webkit-details-marker]:hidden">
-        <span class="label-mono text-zinc-700 dark:text-zinc-300">{label}</span>
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.75"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          class="size-4 text-zinc-500 transition-transform duration-200 group-open:rotate-180"
-        >
-          <path d="m6 9 6 6 6-6" />
-        </svg>
-      </summary>
-      <nav aria-label={label} class="border-t border-zinc-200 px-4 pt-2 pb-3 dark:border-zinc-800">
-        <ol lang={contentLang}>
-          {entries.map((entry, index) => (
-            <li>
-              <a href={`#${entry.slug}`} data-toc-link={entry.slug} class:list={[link, 'flex min-h-11 items-center text-sm']}>
-                <span aria-hidden="true" class="me-3 font-mono text-[0.6875rem] text-zinc-500 tabular-nums dark:text-zinc-400">
-                  {number(index)}
-                </span>
-                {entry.text}
-              </a>
-              {entry.children.length > 0 && (
-                <ol>
-                  {entry.children.map((child) => (
-                    <li>
-                      <a href={`#${child.slug}`} data-toc-link={child.slug} class:list={[link, 'flex min-h-11 items-center ps-7 text-sm']}>
-                        {child.text}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
-    </details>
-  )
-}
-
-<script>
-  // Marks the section being read in every contents list, and folds the disclosure on phones
-  // once a section is picked. rAF-throttled scroll handling; no motion, so nothing to reduce.
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
-  const ids = [...new Set(links.map((link) => link.dataset.tocLink ?? ''))];
-  const headings = ids.map((id) => document.getElementById(id)).filter((el): el is HTMLElement => el !== null);
-
-  let current: string | undefined;
-  let queued = false;
-
-  function update(): void {
-    queued = false;
-    // The heading that last crossed a line a quarter of the way down the viewport.
-    const line = window.innerHeight * 0.25;
-    let next: string | undefined;
-    for (const heading of headings) {
-      if (heading.getBoundingClientRect().top <= line) next = heading.id;
-      else break;
-    }
-    // At the very bottom, the last section is the one being read even if it is short.
-    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) next = headings.at(-1)?.id;
-    if (next === current) return;
-    current = next;
-    for (const link of links) {
-      if (link.dataset.tocLink === current) link.setAttribute('aria-current', 'true');
-      else link.removeAttribute('aria-current');
-    }
-  }
-
-  if (headings.length > 0) {
-    const schedule = () => {
-      if (!queued) {
-        queued = true;
-        requestAnimationFrame(update);
+        ))
       }
-    };
-    window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', schedule, { passive: true });
-    update();
-  }
-
-  for (const details of document.querySelectorAll<HTMLDetailsElement>('details[data-toc]')) {
-    details.addEventListener('click', (event) => {
-      if (event.target instanceof Element && event.target.closest('a')) details.open = false;
-    });
-  }
-</script>
+    </ol>
+  </details>
+</nav>

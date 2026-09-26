@@ -15,7 +15,7 @@ export interface TocEntry {
   children: TocEntry[];
 }
 
-/** Section (h2) and subsection (h3) headings; deeper levels would crowd a sidebar. */
+/** Section (h2) and subsection (h3) headings; deeper levels would crowd the list. */
 const MIN_DEPTH = 2;
 const MAX_DEPTH = 3;
 

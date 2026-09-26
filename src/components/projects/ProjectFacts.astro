@@ -1,7 +1,14 @@
 ---
 /**
- * Side panel of a project page: a short fact sheet (year started, tech stack). The project's
- * figure is no longer part of it: it opens the page at full width (ProjectPlate).
+ * A project's fact sheet (year started, tech stack) as a horizontal band in the page's header,
+ * between the lead and the links: hairline rules above and below, mono labels, in the same
+ * style as a blog post's date and reading-time row. It used to be a sticky column beside the
+ * write-up, which narrowed the text; the reading column now has nothing beside it.
+ *
+ * The facts wrap as a row of label/value pairs: side by side while they fit, the tech stack on a
+ * line of its own when it is too long to share one. The stage and whether the code is open are
+ * the badges above the title, and the site and repository are the buttons below, so the band
+ * does not repeat them.
  */
 import TagList from '../ui/TagList.astro';
 import { common } from '../../i18n/messages/common';
@@ -22,18 +29,18 @@ const { since, techStack } = project.data;
 ---
 
 <aside aria-label={m.detail.facts} class={className}>
-  <dl class="divide-y divide-zinc-200 border-y border-zinc-200 text-sm dark:divide-zinc-800 dark:border-zinc-800">
+  <dl class="flex flex-wrap gap-x-10 gap-y-3 border-y border-zinc-200 py-3.5 dark:border-zinc-800">
     {
       since && (
-        <div class="flex items-baseline justify-between gap-4 py-3">
-          <dt class="label-mono text-zinc-500 dark:text-zinc-400">{m.detail.started}</dt>
-          <dd class="font-mono text-zinc-900 tabular-nums dark:text-zinc-100">{since}</dd>
+        <div>
+          <dt class="label-mono text-zinc-600 dark:text-zinc-400">{m.detail.started}</dt>
+          <dd class="mt-1 font-mono text-sm text-zinc-900 tabular-nums dark:text-zinc-100">{since}</dd>
         </div>
       )
     }
-    <div class="space-y-3 py-3">
-      <dt class="label-mono text-zinc-500 dark:text-zinc-400">{t.labels.techStack}</dt>
-      <dd>
+    <div class="min-w-0">
+      <dt class="label-mono text-zinc-600 dark:text-zinc-400">{t.labels.techStack}</dt>
+      <dd class="mt-1.5">
         <TagList items={techStack} label={t.labels.techStack} />
       </dd>
     </div>

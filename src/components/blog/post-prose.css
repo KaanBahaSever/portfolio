@@ -80,6 +80,25 @@
 }
 
 /*
+ * Figures and display equations may reach past the text measure (the page's reading layout,
+ * src/components/reading/reading.css): symmetrically, by at most the bleed, never past the page.
+ * Only direct children of the body do; a formula inside a list item stays with its item. An
+ * equation stays centred on the same axis and gets more room before it has to scroll; a figure's
+ * frame widens while its caption keeps the measure, in line with the text.
+ *
+ * The interactive collision figures keep the measure: their stage grows in height with its width
+ * and, any wider, would no longer fit a laptop screen together with its readout.
+ */
+.post-body > :is(figure:not(.collision-demo), .math-display) {
+  margin-inline: calc(-1 * var(--reading-bleed, 0px));
+}
+
+.post-body > figure:not(.collision-demo) > figcaption {
+  max-width: var(--reading-measure, none);
+  margin-inline: auto;
+}
+
+/*
  * The width and height attributes Astro writes reserve the box before a lazy image loads, so
  * nothing here may override the width (width: auto, or a max-height that forces it, would
  * collapse unloaded images and make the page jump).

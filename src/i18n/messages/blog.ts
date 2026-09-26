@@ -27,6 +27,8 @@ const en = {
     readingTimeLabel: 'Reading time',
     readingTime: (minutes: number) => `${minutes} min`,
     contents: 'Contents',
+    /** Next to "Contents": how many headings the list holds (sections and subsections). */
+    contentsCount: (entries: number) => `${entries} ${entries === 1 ? 'section' : 'sections'}`,
     /** Shown when the article is in the other language and has no translation. */
     onlyIn: (language: string) => `This article is only available in ${language}.`,
     relatedProject: 'Related project',
@@ -61,6 +63,7 @@ const tr: BlogMessages = {
     readingTimeLabel: 'Okuma süresi',
     readingTime: (minutes) => `${minutes} dk`,
     contents: 'İçindekiler',
+    contentsCount: (entries) => `${entries} başlık`,
     onlyIn: (language) => `Bu yazının yalnızca ${language} sürümü var.`,
     relatedProject: 'İlgili proje',
     morePosts: 'Diğer yazılar',

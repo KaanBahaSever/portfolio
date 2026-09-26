@@ -167,7 +167,7 @@ test('suffixes in the Turkish About text take the typographic apostrophe', () =>
   assert.match(entry?.text ?? '', /^title: crowd\.inc’te yazılım geliştirici\r?$/m);
 });
 
-test('the crowd.inc chapter, timeline entry and about.txt open with what the site was, in the same words', () => {
+test('the crowd.inc chapter and about.txt open with what the site was, in the same words', () => {
   // The owner's words: a site for sharing ideas and finding help for them, with hundreds of
   // users (no exact number), many projects, ideas and goals, and a later turn towards private
   // ideas. The same thing is said the same way wherever the job is told in full.
@@ -179,12 +179,17 @@ test('the crowd.inc chapter, timeline entry and about.txt open with what the sit
   const split = work.indexOf(') : (');
   const flat = (text: string) => visibleText(text).replace(/\s+/g, ' ');
   const places = {
-    en: [flat(work.slice(split)), flat(file('src/content/timeline/2021-crowd-inc.md').text)],
-    tr: [
-      flat(work.slice(work.indexOf("locale === 'tr' ? ("), split)),
-      flat(file('src/content/tr/timeline/2021-crowd-inc.md').text),
-    ],
+    en: [flat(work.slice(split))],
+    tr: [flat(work.slice(work.indexOf("locale === 'tr' ? ("), split))],
   };
+  // The timeline entry sits on the same page, right under the chapters: like the Rocket Club
+  // entry, it stays short and points to the chapter instead of repeating it.
+  for (const path of ['src/content/timeline/2021-crowd-inc.md', 'src/content/tr/timeline/2021-crowd-inc.md']) {
+    const entry = flat(file(path).text);
+    assert.match(entry, /hundreds of users|yüzlerce kullanıcısı/, path);
+    assert.match(entry, /\(\/about\/#journey-work\)/, `${path}: links the crowd.inc chapter`);
+    assert.doesNotMatch(entry, /private ideas|özel fikirlere/, `${path}: the full story stays in the chapter`);
+  }
   // What he did there follows the opening.
   const role = { en: 'I owned', tr: 'Geliştirme sürecinin' };
   for (const locale of ['en', 'tr'] as const) {

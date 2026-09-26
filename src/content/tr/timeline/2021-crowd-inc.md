@@ -5,15 +5,6 @@ title: crowd.inc’te yazılım geliştirici
 dateLabel: Temmuz 2021 – Mart 2024
 ---
 
-crowd.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi.
-Yüzlerce kullanıcısı vardı; birçok projeye ev sahipliği yaptı, sitede bir sürü fikir ve hedef
-paylaşıldı. Sonraları da herkese açık olmayan, özel fikirlere yöneldik.
-
-Geliştirme sürecinin her aşamasını üstlendim: PostgreSQL’de ilişkisel veri tabanı şemalarını
-tasarladım, Python ve Flask ile REST API’ler, jQuery ile de ön yüz geliştirdim, Linux
-sunucularını kurup yapılandırdım ve otomatik testler yazdım.
-
-Ayrıntılı yetkilere dayanan bir rol tabanlı erişim kontrolü (RBAC) tasarladım ve herkese açık
-verilerle özel veriler arasında net bir sınır çizdim. İçerik akışı için ölçeklenebilir sayfalama
-ve dinamik veri yükleme geliştirdim. Platformun güvenilir çalışması için de kapsamlı birim ve
-entegrasyon testleri yazdım.
+crowd.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu, yüzlerce kullanıcısı olan
+bir web sitesiydi. Orada geliştirme sürecinin her aşamasını üstlendim. Sitenin hikâyesini ve
+orada neler yaptığımı yukarıdaki [crowd.inc bölümünde](/about/#journey-work) anlatıyorum.

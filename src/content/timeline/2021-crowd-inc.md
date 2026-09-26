@@ -6,13 +6,6 @@ dateLabel: July 2021 – March 2024
 # ideas and goals, and a later turn towards private ideas. Add no dates, figures or outcomes.
 ---
 
-crowd.inc was a website where people shared their ideas and found help for them. It had
-hundreds of users and was home to many projects, ideas and goals. Later we turned towards
-private ideas.
-
-I owned the end-to-end software development lifecycle: relational schema design in PostgreSQL,
-RESTful APIs with Python/Flask and jQuery, Linux server provisioning and automated testing.
-
-I designed granular role-based access control (RBAC) with strict boundaries between public and
-private data, built scalable feed pagination and dynamic data loading, and kept the platform
-reliable with rigorous unit and integration testing.
+crowd.inc was a website where people shared their ideas and found help for them, with hundreds
+of users. I owned its development lifecycle end to end. The [crowd.inc chapter](/about/#journey-work)
+above tells the story and what I built there.

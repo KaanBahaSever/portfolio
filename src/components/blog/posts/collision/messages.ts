@@ -99,7 +99,7 @@ const tr: CollisionMessages = {
     sat: 'Döndürülmüş A dikdörtgeni ve dışbükey B çokgeni',
     concave: 'U biçimli A çokgeni ve küçük B karesi',
   },
-  shapeRole: 'sürüklenebilir şekil',
+  shapeRole: 'taşınabilir şekil',
   shapes: {
     aabb: { a: 'A kutusu', b: 'B kutusu' },
     circles: { a: 'A dairesi', b: 'B dairesi' },
@@ -149,7 +149,7 @@ const tr: CollisionMessages = {
   },
   axes: {
     heading: 'Her eksendeki izdüşümler',
-    hint: 'Bir ekseni çizimde görmek için seçin; otomatik seçime dönmek için aynı ekseni yeniden seçin.',
+    hint: 'Çizimde görmek istediğiniz ekseni seçin; otomatik seçime dönmek için aynı ekseni yeniden seçin.',
     shownAuto: (axis) => `Çizimde: ${axis} (otomatik)`,
     shownPinned: (axis) => `Çizimde: ${axis}`,
     name: (source, index) => `${source}${index}`,
@@ -161,7 +161,7 @@ const tr: CollisionMessages = {
     legendA: 'A şeklinin gölgesi',
     legendB: 'B şeklinin gölgesi',
   },
-  noscript: 'Bu çizim etkileşimli ve JavaScript ister. JavaScript kapalıyken yalnızca başlangıç konumunu görürsünüz.',
+  noscript: 'Bu etkileşimli çizim JavaScript ile çalışır. JavaScript kapalıysa yalnızca başlangıç konumunu görürsünüz.',
 };
 
 export const collisionMessages = { en, tr } as const satisfies Localized<CollisionMessages>;

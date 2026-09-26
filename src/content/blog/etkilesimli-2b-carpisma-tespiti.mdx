@@ -1,6 +1,6 @@
 ---
 title: Etkileşimli 2B Çarpışma Tespiti
-description: 'Şekilleri sürükleyin, testlerin nasıl karar verdiğini izleyin: iki kutu, iki daire, bir daireyle bir kutu ve döndürülmüş çokgenler için ayırıcı eksen teoremi. Her testin nereden geldiğini adım adım gösteriyorum.'
+description: 'Şekilleri sürükleyin, testlerin nasıl karar verdiğini izleyin. İki kutu, iki daire ve bir daireyle bir kutu için kullanılan testlerin, döndürülmüş çokgenler için de ayırıcı eksen teoreminin nereden geldiğini adım adım gösteriyorum.'
 pubDate: 2026-09-26
 lang: tr
 translationKey: collision-2d
@@ -13,11 +13,11 @@ Ekrandaki iki şeklin ya ortak bir noktası vardır ya da yoktur. Oyunlar, fizik
 
 Bu yazıda dört şekil çiftini ele alıyorum: kenarları eksenlere paralel iki kutu, iki daire, bir daireyle bir kutu ve ayırıcı eksen teoremiyle iki dışbükey çokgen, yani hiçbir yerinde içe doğru girinti olmayan iki çokgen. Bunlar için kullanılan klasik testlerin nereden geldiğini adım adım gösteriyorum. Her bölümde kurcalayabileceğiniz bir çizim var. Şekilleri sürükleyin ya da Tab tuşuyla birini seçip ok tuşlarıyla taşıyın. Çizimlerin altındaki sayıları, metinde anlatılan kodun kendisi hesaplıyor.
 
-Ekran koordinatlarını kullanıyorum: $x$ sağa doğru, $y$ ise SVG’de ve HTML canvas’ta olduğu gibi *aşağıya* doğru büyür. Uzunluklar çizimin kendi biriminde; bu birimi px diye yazıyorum.
+Ekran koordinatlarını kullanıyorum: $x$ sağa doğru, $y$ ise SVG’de ve HTML canvas’ta olduğu gibi *aşağıya* doğru artar. Uzunlukları çizimin kendi birimiyle ölçüyorum ve bu birimi px diye yazıyorum.
 
 ## Bir çarpışma testi ne söyler?
 
-Her şekli kenarıyla birlikte düşüneceğiz; matematikte buna *kapalı* küme denir. Böylece yalnızca kenarları buluşan iki şekil de kesişmiş sayılır; bu duruma **temas** diyeceğiz. Temas da bir çarpışmadır. Yerde duran bir nesne için fizik motorunun istediği de tam budur. Aşağıdaki her testin yanıtı üç durumdan biridir: Şekiller ya ayrıdır ya temas eder ya da örtüşür. Test bunun yanında şunları da bildirir:
+Her şekli sınırıyla, yani dış çizgisiyle birlikte düşüneceğiz; matematikte buna *kapalı* küme denir. Böylece yalnızca sınırları buluşan iki şekil de kesişmiş sayılır; bu duruma **temas** diyeceğiz. Temas da bir çarpışmadır. Yerde duran bir nesne için fizik motorunun istediği de tam budur. Aşağıdaki her testin yanıtı üç durumdan biridir: Şekiller ya ayrıdır ya temas eder ya da örtüşür. Test bunun yanında şunları da bildirir:
 
 - **derinlik** $d$: şekillerin birbirinin içine ne kadar girdiği;
 - **normal** $\mathbf{n}$: $A$ şeklinden $B$ şekline doğru bakan birim vektör, yani uzunluğu 1 olan bir yön;
@@ -32,7 +32,7 @@ Eksenlere hizalı sınırlayıcı kutu, kenarları eksenlere paralel olan bir di
 
 ### Önce aralıklar
 
-Bir doğru üzerinde iki kapalı aralık alalım: $[a_0, a_1]$ ve $[b_0, b_1]$. Bu iki aralığın ortak noktası yoksa biri tamamen ötekinin solunda kalır, yani $a_1 < b_0$ ya da $b_1 < a_0$ olur. Tersi de doğru. Demek ki iki aralık tam olarak şu koşulda kesişir:
+Bir doğru üzerinde iki kapalı aralık alalım: $[a_0, a_1]$ ve $[b_0, b_1]$. Bu iki aralığın ortak noktası yoksa biri tamamen ötekinin solunda kalır, yani $a_1 < b_0$ ya da $b_1 < a_0$ olur. Tersi de doğru. Demek ki iki aralık şu koşul sağlanıyorsa kesişir, sağlanmıyorsa kesişmez:
 
 $$
 a_0 \le b_1 \quad\text{ve}\quad b_0 \le a_1 .
@@ -48,13 +48,13 @@ $$
 
 ### Ne kadar derin, çıkış hangi yönde?
 
-Kutuları $x$ yönünde ayırmanın iki yolu var. $B$ sağa kayabilir; sol kenarı $A$’nın sağ kenarına gelince durur ve bu $a_{x1} - b_{x0}$ kadar yol eder. Ya da sola kayabilir; sağ kenarı $A$’nın sol kenarına gelince durur ve bu da $b_{x1} - a_{x0}$ kadar yol eder. Bu iki yoldan kısa olanı, o eksendeki örtüşmedir:
+Kutuları $x$ yönünde ayırmanın iki yolu var. $B$ sağa kayabilir: Sol kenarı $A$’nın sağ kenarına gelince durur, yani $a_{x1} - b_{x0}$ kadar yol alır. Ya da sola kayabilir: Sağ kenarı $A$’nın sol kenarına gelince durur, yani $b_{x1} - a_{x0}$ kadar yol alır. Bu iki yoldan kısa olanı, o eksendeki örtüşmedir:
 
 $$
 o_x = \min\bigl(a_{x1} - b_{x0},\; b_{x1} - a_{x0}\bigr), \qquad o_y = \min\bigl(a_{y1} - b_{y0},\; b_{y1} - a_{y0}\bigr).
 $$
 
-$o_x$ pozitifse gölgeler örtüşüyordur, sıfırsa birbirine değiyordur. Negatifse aralarında $-o_x$ genişliğinde bir boşluk vardır. Kutular $\min(o_x, o_y) \ge 0$ olduğunda, yani iki örtüşmenin küçüğü bile negatif değilse çarpışır. Derinlik $d = \min(o_x, o_y)$ olur ve MTV, bu en küçük değeri veren eksen boyunca uzanır. Kutular ayrıysa aralarındaki uzaklık iki boşluktan şöyle hesaplanır:
+$o_x$ pozitifse gölgeler örtüşüyordur, sıfırsa birbirine değiyordur. Negatifse aralarında $-o_x$ genişliğinde bir boşluk vardır. Kutular $\min(o_x, o_y) \ge 0$ ise, yani iki değerin küçüğü bile negatif değilse çarpışır. Derinlik $d = \min(o_x, o_y)$ olur ve MTV, bu en küçük değeri veren eksen boyunca uzanır. Kutular ayrıysa aralarındaki uzaklık iki boşluktan şöyle hesaplanır:
 
 $$
 \operatorname{dist}(A, B) = \sqrt{\max(0, -o_x)^2 + \max(0, -o_y)^2}.
@@ -67,15 +67,15 @@ const hit = overlapX >= 0 && overlapY >= 0;
 const depth = hit ? Math.min(overlapX, overlapY) : 0;
 ```
 
-Bir noktaya dikkat: $o_x$, gölgelerin ortak kısmının uzunluğu değil, gereken itmenin uzunluğudur. Kutulardan biri ötekinin içindeyse bu iki sayı farklı çıkar. $[0, 10]$ aralığının içindeki $[3, 5]$ gölgesinin onunla ortak kısmı yalnızca 2 birimdir. Ama dışarı çıkmak için 7 birim sağa ya da 5 birim sola gitmesi gerekir. Aşağıda küçük kutuyu büyüğün içine sürükleyin ve derinliğin, taralı örtüşme bölgesinin yüksekliğini nasıl geçtiğini izleyin.
+Bir noktaya dikkat: $o_x$, gölgelerin ortak kısmının uzunluğu değil, gereken itmenin uzunluğudur. Kutulardan biri ötekinin içindeyse bu iki sayı farklı çıkar. Örneğin $[3, 5]$ gölgesi $[0, 10]$ aralığının içindeyse ikisinin ortak kısmı yalnızca 2 birimdir. Ama küçük gölgenin dışarı çıkması için 7 birim sağa ya da 5 birim sola gitmesi gerekir. Aşağıda küçük kutuyu büyüğün içine sürükleyin ve derinliğin, taralı örtüşme bölgesinin yüksekliğini nasıl geçtiğini izleyin.
 
 <CollisionDemo kind="aabb" lang="tr">
-  Eksenlere hizalı iki kutu. Kutuların $x$ eksenine (altta) ve $y$ eksenine (solda) düşen gölgeleri kenarlarda çizili; A’nınki düz çizgiyle, B’ninki kesik çizgiyle. İki gölge çifti de örtüşüyorsa kutular çarpışır; biri bile ayrıysa çarpışmaz. Taralı dikdörtgen örtüşen bölge, ok ise MTV. Kesik çizgili çerçeve, B’nin bu ok kadar kaydırılınca duracağı yeri gösteriyor.
+  Eksenlere hizalı iki kutu. Kutuların $x$ eksenine (altta) ve $y$ eksenine (solda) düşen gölgeleri çizimin kenarlarında görünüyor; A’nınki düz, B’ninki kesik çizgiyle. İki gölge çifti de örtüşüyorsa kutular çarpışır; biri bile ayrıysa çarpışmaz. Taralı dikdörtgen örtüşen bölge, ok ise MTV. Kesik çizgili çerçeve, B’nin bu ok kadar kaydırılınca duracağı yeri gösteriyor.
 </CollisionDemo>
 
 ## İki daire
 
-Burada “daire” derken yalnızca çevre çizgisini değil, içiyle birlikte bütün diski kastediyorum: Merkezi $\mathbf{c}$, yarıçapı $r$ olan bir daire, $\mathbf{c}$ noktasına uzaklığı en fazla $r$ olan bütün noktalardan oluşur. İki disk tam olarak şu koşulda kesişir:
+Burada “daire” derken yalnızca çevre çizgisini değil, içiyle birlikte bütün diski kastediyorum: Merkezi $\mathbf{c}$, yarıçapı $r$ olan bir daire, $\mathbf{c}$ noktasına uzaklığı en fazla $r$ olan bütün noktalardan oluşur. İki disk şu koşul sağlanıyorsa kesişir, sağlanmıyorsa kesişmez:
 
 $$
 \lVert \mathbf{c}_B - \mathbf{c}_A \rVert \le r_A + r_B .
@@ -83,7 +83,7 @@ $$
 
 Yani merkezler arasındaki uzaklık, yarıçapların toplamını geçmemeli. ($\lVert \cdot \rVert$ işareti bir vektörün uzunluğunu gösterir.)
 
-Bu koşulun bir yönü üçgen eşitsizliğinden gelir: Bir üçgende bir kenar, öbür iki kenarın toplamından uzun olamaz. İki diskte birden bulunan bir $\mathbf{p}$ noktası varsa $\lVert \mathbf{c}_B - \mathbf{c}_A \rVert \le \lVert \mathbf{c}_B - \mathbf{p} \rVert + \lVert \mathbf{p} - \mathbf{c}_A \rVert \le r_B + r_A$ olur. Öbür yönü görmek için $\mathbf{c}_A$ noktasından $\mathbf{c}_B$ noktasına doğru yürüyün: $\mathbf{c}_A$ noktasına uzaklığı $\min(r_A, \lVert \mathbf{c}_B - \mathbf{c}_A \rVert)$ olan nokta iki diskin de içindedir. Kodda karekök almaya gerek yok, kareleri karşılaştırmak yeter: $\delta = \mathbf{c}_B - \mathbf{c}_A$ olmak üzere test $\delta \cdot \delta \le (r_A + r_B)^2$ olur. ($\delta \cdot \delta$, $\delta$ vektörünün uzunluğunun karesidir.)
+Diskler kesişiyorsa bu koşul sağlanır. Bu, üçgen eşitsizliğinden gelir: Bir üçgende bir kenar, öbür iki kenarın toplamından uzun olamaz. İki diskte birden bulunan bir $\mathbf{p}$ noktası alırsak $\lVert \mathbf{c}_B - \mathbf{c}_A \rVert \le \lVert \mathbf{c}_B - \mathbf{p} \rVert + \lVert \mathbf{p} - \mathbf{c}_A \rVert \le r_B + r_A$ olur. Tersine, koşul sağlanıyorsa diskler kesişir. Bunu görmek için $\mathbf{c}_A$ noktasından $\mathbf{c}_B$ noktasına doğru yürüyün: $\mathbf{c}_A$ noktasına uzaklığı $\min(r_A, \lVert \mathbf{c}_B - \mathbf{c}_A \rVert)$ olan nokta iki diskin de içindedir. Kodda karekök almaya gerek yok, kareleri karşılaştırmak yeter: $\delta = \mathbf{c}_B - \mathbf{c}_A$ dersek test $\delta \cdot \delta \le (r_A + r_B)^2$ olur. ($\delta \cdot \delta$, $\delta$ vektörünün uzunluğunun karesidir.)
 
 Normal, iki merkezi birleştiren doğrunun yönüdür: $\mathbf{n} = \delta / \lVert \delta \rVert$. Yani $\delta$ vektörünü kendi uzunluğuna bölüp uzunluğu 1 olan bir vektör elde ediyoruz. Derinlik ise yarıçapların toplamının merkezler arasındaki uzaklığı ne kadar aştığıdır:
 
@@ -93,10 +93,10 @@ $$
 
 Bu, işe yarayan ötelemelerden herhangi biri değil, *en kısası*. Neden? $B$ bir $\mathbf{v}$ vektörü kadar kaydırılırsa merkezler arasında en az $r_A + r_B$ kalmalıdır. $\lVert \delta + \mathbf{v} \rVert \le \lVert \delta \rVert + \lVert \mathbf{v} \rVert$ olduğundan buradan $\lVert \mathbf{v} \rVert \ge d$ çıkar. $\mathbf{n}$ yönünde kaydırmak ise tam $d$ kadar yol ister. En derindeki iki nokta, $A$ üzerinde $\mathbf{c}_A + r_A \mathbf{n}$ ve $B$ üzerinde $\mathbf{c}_B - r_B \mathbf{n}$ noktalarıdır. Bu ikisinin tam ortası, temas noktası için doğal bir seçimdir.
 
-Merkezleri birleştiren doğrunun hiç olmadığı bir durum var: eş merkezli daireler. O zaman bütün yönler aynı derecede iyidir. Kod da sıfıra bölmek yerine birini seçer; burada bu yön $\mathbf{n} = (1, 0)$.
+Merkezleri birleştiren doğrunun hiç olmadığı bir durum var: eş merkezli daireler. O zaman hangi yönü seçsek aynıdır. Kod da sıfıra bölmek yerine birini seçer; burada bu yön $\mathbf{n} = (1, 0)$.
 
 <CollisionDemo kind="circles" lang="tr">
-  İki daire. Kesik çizgi merkezleri birleştiriyor; taralı, mercek biçimli bölge örtüşmeyi gösteriyor. Çizimin altındaki değerler, merkezler arasındaki uzaklığı yarıçapların toplamıyla karşılaştırıyor. Ok, yani MTV, merkezleri birleştiren doğru boyunca B’nin en derin noktasından A’nınkine uzanıyor.
+  İki daire. Kesik çizgi merkezleri birleştiriyor; taralı, mercek biçimli bölge örtüşmeyi gösteriyor. Çizimin altında, karşılaştırabilmeniz için merkezler arasındaki uzaklık ve yarıçapların toplamı yan yana yazılı. Ok, yani MTV, merkezleri birleştiren doğru boyunca B’nin en derin noktasından A’nınkine uzanıyor.
 </CollisionDemo>
 
 ## Bir daireyle bir kutu
@@ -107,13 +107,13 @@ $$
 \lVert \mathbf{c} - \mathbf{p} \rVert^2 = (c_x - p_x)^2 + (c_y - p_y)^2 ,
 $$
 
-kutu da $p_x$ ve $p_y$ koordinatlarını ayrı ayrı sınırlar: $p_x$ değeri $[x_0, x_1]$ aralığında, $p_y$ değeri de $[y_0, y_1]$ aralığında kalmalıdır. Bu yüzden iki parçayı ayrı ayrı en küçük yapabiliriz. Bunun için $\mathbf{c}$ merkezinin her koordinatını kendi aralığının içine çekmek yeter; koddaki adıyla *clamp*:
+kutunun koyduğu şartlar da iki koordinat için ayrıdır: $p_x$ değeri $[x_0, x_1]$ aralığında, $p_y$ değeri de $[y_0, y_1]$ aralığında kalmalıdır. Bu yüzden iki parçayı ayrı ayrı en küçük yapabiliriz. Bunun için $\mathbf{c}$ merkezinin her koordinatını kendi aralığının içine çekmek, yani *sınırlamak* yeter. Koddaki adı *clamp*:
 
 $$
 \mathbf{p} = \bigl(\operatorname{clamp}(c_x, x_0, x_1),\ \operatorname{clamp}(c_y, y_0, y_1)\bigr), \qquad \operatorname{clamp}(v, lo, hi) = \min\bigl(\max(v, lo), hi\bigr).
 $$
 
-Sayı aralığın içindeyse olduğu gibi kalır, dışındaysa aralığın en yakın ucuna çekilir. Daire ile kutu, $\lVert \mathbf{c} - \mathbf{p} \rVert \le r$ ise çarpışır, değilse çarpışmaz. Derinlik $r - \lVert \mathbf{c} - \mathbf{p} \rVert$ olur; normal de $\mathbf{p}$ noktasından $\mathbf{c}$ noktasına doğru bakar.
+Yani bir sayı aralığın içindeyse olduğu gibi kalır, dışındaysa aralığın en yakın ucuna çekilir. Daire ile kutu, $\lVert \mathbf{c} - \mathbf{p} \rVert \le r$ ise çarpışır, değilse çarpışmaz. Derinlik $r - \lVert \mathbf{c} - \mathbf{p} \rVert$ olur; normal de $\mathbf{p}$ noktasından $\mathbf{c}$ noktasına doğru bakar.
 
 ```ts
 const p = { x: clamp(c.x, box.min.x, box.max.x), y: clamp(c.y, box.min.y, box.max.y) };
@@ -122,9 +122,9 @@ const dy = c.y - p.y;
 const hit = dx * dx + dy * dy <= r * r;
 ```
 
-Kutunun kenarlarını uzatınca düzlem dokuz bölgeye ayrılır; çizimde bu çizgiler de var. Dairenin merkezi bir kenarın karşısındaysa koordinatlardan biri sınırlanır ve $\mathbf{p}$ o kenar boyunca kayar. Bir köşenin ötesindeyse iki koordinat da sınırlanır ve $\mathbf{p}$ köşenin kendisi olur. Kutunun içindeyse hiçbir şey sınırlanmaz ve $\mathbf{p} = \mathbf{c}$ olur.
+Kutunun kenarlarını uzatınca düzlem dokuz bölgeye ayrılır; çizimde bu çizgiler de var. Dairenin merkezi bir kenarın dışında ama o kenarın hizasındaysa koordinatlardan yalnızca biri sınırlanır ve $\mathbf{p}$ o kenar boyunca kayar. Bir köşenin ötesindeyse iki koordinat da sınırlanır ve $\mathbf{p}$ köşenin kendisi olur. Kutunun içindeyse hiçbir koordinat sınırlanmaz ve $\mathbf{p} = \mathbf{c}$ olur.
 
-Aceleyle yazılmış kodun yanıldığı yer tam da bu son durumdur. $\mathbf{p} = \mathbf{c}$ olunca $\mathbf{c} - \mathbf{p}$ vektörü sıfır olur; onu birim vektöre çevirmeye kalkınca sonuç NaN, yani geçersiz bir sayı çıkar. Geometriye bakarsak daire bir kenardan çıkmak zorundadır ve en kısa yol en yakın kenardan geçer. $c_x - x_0$, $x_1 - c_x$, $c_y - y_0$ ve $y_1 - c_y$ uzaklıklarının en küçüğüne $m$ dersek derinlik şudur:
+Aceleyle yazılmış kodun yanıldığı yer tam da bu son durumdur. $\mathbf{p} = \mathbf{c}$ olunca $\mathbf{c} - \mathbf{p}$ vektörü sıfır olur. Onu birim vektöre çevirmeye kalkarsanız sonuç NaN, yani geçersiz bir sayı olur. Geometriye bakarsak daire bir kenardan çıkmak zorundadır ve en kısa yol en yakın kenardan geçer. $c_x - x_0$, $x_1 - c_x$, $c_y - y_0$ ve $y_1 - c_y$ uzaklıklarının en küçüğüne $m$ dersek derinlik şudur:
 
 $$
 d = r + m .
@@ -133,14 +133,14 @@ $$
 Normal de o kenarın dışa bakan normalidir. Daha kısa bir itme işe yaramaz: Merkezin kutudan çıkması için en az $m$ yol alması, diskin tamamını dışarı taşımak için de ardından $r$ kadar daha gitmesi gerekir.
 
 <CollisionDemo kind="circle-box" lang="tr">
-  Bir kutu ve bir daire. Noktalı çizgiler kutunun kenarlarını uzatıyor. $p$, kutunun $c$ merkezine en yakın noktası; koordinatları sınırlayarak bulunuyor. Öbür durumu görmek için dairenin merkezini kutunun içine sürükleyin: En yakın kenar vurgulanır ve MTV daireyi o kenardan dışarı iter.
+  Bir kutu ve bir daire. Noktalı çizgiler kutunun kenarlarını uzatıyor. $p$, kutuda dairenin $c$ merkezine en yakın nokta; koordinatlar sınırlanarak bulunuyor. Öbür durumu görmek için dairenin merkezini kutunun içine sürükleyin: En yakın kenar vurgulanır ve MTV daireyi o kenardan dışarı iter.
 </CollisionDemo>
 
 ## Ayırıcı eksen teoremi
 
-Dönen kutular ve genel olarak çokgenler için daha genel bir fikir gerekir. Kutu testine bir daha bakın: İki kutu, $x$ ya da $y$ ekseninde gölgeleri arasında boşluk kalıyorsa ayrıdır; kalmıyorsa çarpışır. Ayırıcı eksen teoremi (İngilizce adının kısaltmasıyla SAT), doğru eksenler denendiği sürece aynı fikrin herhangi iki dışbükey şekil için de işlediğini söyler.
+Dönen kutular ve başka çokgenler için daha genel bir fikir gerekir. Kutu testine bir daha bakın: İki kutu, $x$ ya da $y$ ekseninde gölgeleri arasında boşluk kalıyorsa ayrıdır; kalmıyorsa çarpışır. Ayırıcı eksen teoremi (İngilizce adının kısaltmasıyla SAT), doğru eksenler denendiği sürece aynı fikrin herhangi iki dışbükey şekil için de işlediğini söyler.
 
-**Teorem.** İki dışbükey çokgen $A$ ve $B$, ancak ve ancak izdüşümleri ayrık iki aralık olan bir $\mathbf{n}$ yönü varsa ayrıktır, yani hiç ortak noktaları yoktur. Böyle bir yöne *ayırıcı eksen* denir. Bir $S$ şeklinin $\mathbf{n}$ yönündeki izdüşümü, yani o yöne düşen gölgesi şu kümedir:
+**Teorem.** İki dışbükey çokgen $A$ ile $B$ ayrıksa, yani hiç ortak noktaları yoksa, öyle bir $\mathbf{n}$ yönü vardır ki iki çokgenin bu yöndeki izdüşümleri de ayrık iki aralıktır. Tersi de doğrudur: Böyle bir yön varsa çokgenler ayrıktır. Bu yöne *ayırıcı eksen* denir. Bir $S$ şeklinin $\mathbf{n}$ yönündeki izdüşümü, yani o yöne düşen gölgesi şu kümedir:
 
 $$
 \operatorname{proj}_{\mathbf{n}}(S) = \lbrace\, \mathbf{n} \cdot \mathbf{s} : \mathbf{s} \in S \,\rbrace.
@@ -148,7 +148,7 @@ $$
 
 Üstelik $\mathbf{n}$ her zaman $A$’nın ve $B$’nin kenar normalleri arasından seçilebilir.
 
-Algoritma doğrudan buradan çıkar: İki çokgenin her kenar normali için iki çokgenin de o eksendeki izdüşümünü alın ve çıkan iki aralığı karşılaştırın. Tek bir boşluk, şekillerin ayrı olduğunu kanıtlar. Hiçbir eksende boşluk yoksa şekiller kesişir.
+Algoritma doğrudan buradan çıkar: İki çokgenin bütün kenar normallerini tek tek deneyin. Her normal için iki çokgenin de o eksendeki izdüşümünü alın ve çıkan iki aralığı karşılaştırın. Tek bir boşluk, şekillerin ayrı olduğunu kanıtlar. Hiçbir eksende boşluk yoksa şekiller kesişir.
 
 ### İzdüşümler ve aday eksenler
 
@@ -171,7 +171,7 @@ $$
 Bu küme, $A$’dan bir nokta, $B$’den bir nokta alıp birinciden ikinciyi çıkarınca elde edilebilecek bütün vektörlerden oluşur.
 
 1. $A$ ile $B$’nin ortak bir noktası olması, $\mathbf{0} \in A \ominus B$ olmasıyla, yani sıfır vektörünün bu farkın içinde olmasıyla aynı şeydir. Çünkü ortak bir $\mathbf{a} = \mathbf{b}$ noktası $\mathbf{a} - \mathbf{b} = \mathbf{0}$ verir.
-2. $A \ominus B$, $A$ ile $-B$ kümelerinin Minkowski toplamıdır. İki dışbükey çokgenin Minkowski toplamı yine dışbükey bir çokgendir. Bu çokgenin kenarları da $A$’nın ve $-B$’nin kenarlarının yönlerine göre sıralanmasıyla elde edilir. Bu yüzden kenar normalleri, belki ters yönde, $A$’nın ya da $B$’nin kenar normalleridir.
+2. $A \ominus B$, $A$ ile $-B$ kümelerinin Minkowski toplamıdır. İki dışbükey çokgenin Minkowski toplamı yine dışbükey bir çokgendir. $A$’nın ve $-B$’nin kenarlarını yönlerine göre sıraya dizince bu çokgenin kenarları çıkar. Bu yüzden onun her kenar normali, $A$’nın ya da $B$’nin bir kenar normaliyle ya aynı yöndedir ya da tam ters yönde.
 3. Dışbükey bir çokgen, kenarlarının belirlediği $\lbrace \mathbf{x} : \mathbf{n}_j \cdot \mathbf{x} \le h_j \rbrace$ yarı düzlemlerinin kesişimidir. (Yarı düzlem, bir doğrunun bir yanında kalan bütün noktalardır.) Burada $\mathbf{n}_j$ kenarın dışa bakan normali, $h_j$ de $\mathbf{n}_j \cdot \mathbf{x}$ ifadesinin çokgen üzerindeki en büyük değeridir. Bu yüzden $\mathbf{0}$ noktasının çokgenin dışında kalması, $h_j < 0$ olan bir kenar bulunmasıyla aynı şeydir.
 4. $A \ominus B$ için bu en büyük değer şudur:
 
@@ -181,9 +181,9 @@ $$
 
 $h_j < 0$ ise $A$’nın $\mathbf{n}_j$ üzerindeki gölgesinin her noktası, $B$’nin gölgesinin her noktasından küçüktür; yani izdüşümler ayrıktır.
 
-Hepsini birleştirelim: Çokgenler ayrıksa $A$’nın ya da $B$’nin kenar normallerinden biri onları ayırır. Öte yandan, hangi türden olursa olsun bir ayırıcı eksen bulmak, ayrık olduklarını kanıtlamaya yeter. $h_j = 0$ durumu temas durumudur: $\mathbf{0}$ noktası $A \ominus B$ kümesinin tam sınırındadır.
+Hepsini birleştirelim: Çokgenler ayrıksa $A$’nın ya da $B$’nin kenar normallerinden biri onları ayırır. Öte yandan, hangi yönde olursa olsun tek bir ayırıcı eksen bulmak bile ayrık olduklarını kanıtlamaya yeter. $h_j = 0$ ise şekiller birbirine değer: $\mathbf{0}$ noktası $A \ominus B$ kümesinin tam sınırındadır.
 
-Aynı resim MTV’yi de bedavaya verir. $B$’yi $\mathbf{t}$ kadar kaydırmak, $A \ominus B$ kümesini $-\mathbf{t}$ kadar kaydırır. Bu yüzden $\mathbf{0}$ noktasını farkın dışına çıkaran en kısa ötelemenin boyu, $\mathbf{0}$ noktasının farkın sınırına olan uzaklığı kadardır. $\mathbf{0}$ noktasını içeren dışbükey bir çokgende bu uzaklık, en küçük $h_j$ değeridir. Her aday eksende bu, kutulardaki “iki itmeden kısa olanı” hesabının aynısı; yalnız eksenin iki yönüne de bakılıyor:
+Minkowski farkı MTV’yi de hiç ek iş gerektirmeden verir. $B$’yi $\mathbf{t}$ kadar kaydırmak, $A \ominus B$ kümesini $-\mathbf{t}$ kadar kaydırır. Bu yüzden $\mathbf{0}$ noktasını farkın dışına çıkaran en kısa ötelemenin boyu, $\mathbf{0}$ noktasının farkın sınırına olan uzaklığı kadardır. $\mathbf{0}$ noktasını içeren dışbükey bir çokgende bu uzaklık, en küçük $h_j$ değeridir. Her aday eksende yapılan hesap, kutulardaki “iki itmeden kısa olanı” hesabının aynısıdır; eksenin iki yönüne de bakılır:
 
 $$
 d = \min_{\mathbf{n}} \min\Bigl(\max_A \mathbf{n} \cdot \mathbf{a} - \min_B \mathbf{n} \cdot \mathbf{b},\ \ \max_B \mathbf{n} \cdot \mathbf{b} - \min_A \mathbf{n} \cdot \mathbf{a}\Bigr).
@@ -210,13 +210,13 @@ function sat(a: Vec[], b: Vec[]): number | null {
 }
 ```
 
-Aşağıdaki çizim bu döngünün daha ayrıntılı bir sürümünü çalıştırıyor. İlk boşlukta durmak yerine bütün eksenleri saklıyor; böylece çizimin altındaki liste hepsini gösterebiliyor. Ayrıca yönü, temas noktasını ve örtüşme bölgesini de veriyor.
+Aşağıdaki çizim bu döngünün daha kapsamlı bir sürümünü çalıştırıyor. İlk boşlukta durmak yerine bütün eksenleri saklıyor; böylece çizimin altındaki liste hepsini gösterebiliyor. Yönü, temas noktasını ve örtüşme bölgesini de hesaplıyor.
 
 <CollisionDemo kind="sat" lang="tr">
-  Döndürülmüş bir A dikdörtgeni ve dışbükey bir B çokgeni. Liste her aday ekseni, A’nın (dolu) ve B’nin (içi boş) gölgeleriyle birlikte gösteriyor. Çizimde tek bir eksen, gölgeleri düşüren çizgilerle birlikte görünüyor: ayırıcı eksen varsa o, yoksa MTV’nin ekseni. Başka bir ekseni çizdirmek için listeden seçin. Şekilleri Q ve E tuşlarıyla ya da düğmelerle döndürebilirsiniz.
+  Döndürülmüş bir A dikdörtgeni ve dışbükey bir B çokgeni. Liste her aday ekseni iki gölgeyle gösteriyor: A’nınki dolu, B’ninki içi boş. Çizimde tek bir eksen, gölgeleri düşüren çizgilerle birlikte görünüyor: ayırıcı eksen varsa o, yoksa MTV’nin ekseni. Başka bir ekseni çizdirmek için listeden seçin. Şekilleri Q ve E tuşlarıyla ya da düğmelerle döndürebilirsiniz.
 </CollisionDemo>
 
-Denemeye değer birkaç şey var. B’yi, A’nın bir köşesine değmeden kıl payı yanından geçecek kadar yaklaştırın: Çoğu zaman boşluğu yalnızca B’nin eksenlerinden biri bulur, A’nın kendi eksenlerinde gölgeler hâlâ örtüşür. B için dikdörtgeni seçin ve kenarları A’nınkilerle aynı hizaya gelene kadar döndürün: Eksenleri A’nınkilere paralel olur ve liste bunların yeni bir şey katmadığını gösterir. Beşgenle yedi aday eksen olur ve derinlik her zaman bunlar arasındaki en küçük örtüşmedir.
+Denemeye değer birkaç şey var. B’yi, A’nın bir köşesine neredeyse değecek kadar yaklaştırın ama değdirmeyin: Çoğu zaman boşluğu yalnızca B’nin eksenlerinden biri bulur; A’nın kendi eksenlerinde gölgeler hâlâ örtüşür. B için dikdörtgeni seçin ve kenarları A’nınkilerle aynı hizaya gelene kadar döndürün: Eksenleri A’nınkilere paralel olur ve liste bunların yeni bir şey katmadığını gösterir. Beşgeni seçince yedi aday eksen olur ve derinlik her zaman bunlar arasındaki en küçük örtüşmedir.
 
 ### Döndürülmüş dikdörtgenler ve üçgenler
 
@@ -228,37 +228,37 @@ $$
 
 Dikdörtgenin iki ekseni $R(\theta)$ matrisinin sütunlarıdır: $\mathbf{u} = (\cos\theta, \sin\theta)$ ve $\mathbf{v} = (-\sin\theta, \cos\theta)$. Yani bu eksenleri kenarlardan hesaplamaya hiç gerek yok. Dikdörtgenin birim uzunluktaki bir $\mathbf{n}$ eksenine izdüşümü, merkezi $\mathbf{n} \cdot \mathbf{c}$, yarı uzunluğu $w \lvert \mathbf{n} \cdot \mathbf{u} \rvert + h \lvert \mathbf{n} \cdot \mathbf{v} \rvert$ olan bir aralıktır. Böylece dört köşenin izdüşümünü tek tek almaya gerek kalmaz. İki döndürülmüş dikdörtgen için dört eksen gerekir. Eksenlere hizalı kutu, $\theta = 0$ olan özel durumdur; o zaman dört eksen, bildiğimiz iki eksene iner.
 
-Bir $\mathbf{a}\mathbf{b}\mathbf{c}$ üçgeni üç eksen getirir. $(\mathbf{b} - \mathbf{a}) \times (\mathbf{c} - \mathbf{a})$ vektörel çarpımının işareti, üçgenin köşelerinin saat yönünde mi tersine mi sıralandığını söyler. $(e_y, -e_x)$ normalinin üçgenin dışına mı içine mi baktığını da bu sıra belirler. SAT testinin kendisi için bunun önemi yok, çünkü aralıkları aynadaki gibi ters çevirmek örtüşüp örtüşmediklerini değiştirmez. Ama dışa bakan normallerle MTV’nin yönünü düşünmek daha kolaydır. Aynı vektörel çarpım, bir $\mathbf{p}$ noktasının üçgenin içinde olup olmadığını da söyler. Bunun için çarpımı $\mathbf{p}\mathbf{b}\mathbf{c}$, $\mathbf{a}\mathbf{p}\mathbf{c}$ ve $\mathbf{a}\mathbf{b}\mathbf{p}$ alt üçgenlerine uygularız: Üç işaretten hiçbiri bütün üçgeninkinin tersi değilse nokta içeridedir.
+Bir $\mathbf{a}\mathbf{b}\mathbf{c}$ üçgeni üç eksen getirir. $(\mathbf{b} - \mathbf{a}) \times (\mathbf{c} - \mathbf{a})$ vektörel çarpımının işareti, üçgenin köşelerinin saat yönünde mi tersine mi sıralandığını söyler. $(e_y, -e_x)$ normalinin üçgenin dışına mı içine mi baktığını da bu sıra belirler. SAT testinin kendisi için bunun önemi yok, çünkü ekseni ters çevirince iki aralık da aynadaki gibi ters döner ve örtüşüp örtüşmedikleri değişmez. Ama dışa bakan normallerle MTV’nin yönünü düşünmek daha kolaydır. Aynı vektörel çarpım, bir $\mathbf{p}$ noktasının üçgenin içinde olup olmadığını da söyler. Bunun için çarpımı $\mathbf{p}\mathbf{b}\mathbf{c}$, $\mathbf{a}\mathbf{p}\mathbf{c}$ ve $\mathbf{a}\mathbf{b}\mathbf{p}$ alt üçgenlerine uygularız: Üç işaretten hiçbiri bütün üçgeninkinin tersi değilse nokta içeridedir.
 
 ### Dışbükeylik neden önemli?
 
-Kanıt dışbükeyliği iki yerde kullandı. 2. adımda $A \ominus B$ kümesinin dışbükey bir çokgen çıkmasına, 3. adımda da dışbükey bir çokgenin dışındaki her noktanın kenar yarı düzlemlerinden birinin dışında kalmasına dayandık. İçbükey, yani bir yerinde içe doğru girinti olan bir şekilde bu sonuç tutmaz. Aşağıdaki çizimde küçük bir kare, U biçimli bir şeklin oyuğunda, ona değmeden duruyor. Her aday eksende gölgeler örtüşüyor, bu yüzden SAT çarpışma bildiriyor. Oysa iki şeklin arasından hiçbir düz çizgi geçemez, çünkü aradaki boşluk oyuğun içinde.
+Kanıtta dışbükeyliği iki yerde kullandık. 2. adımda $A \ominus B$ kümesinin dışbükey bir çokgen çıkmasına, 3. adımda da dışbükey bir çokgenin dışındaki her noktanın kenar yarı düzlemlerinden birinin dışında kalmasına dayandık. İçbükey, yani bir yerinde içe doğru girinti olan şekillerde bu sonuç geçerli değildir. Aşağıdaki çizimde küçük bir kare, U biçimli bir şeklin oyuğunda, ona değmeden duruyor. Her aday eksende gölgeler örtüşüyor, bu yüzden SAT çarpışma bildiriyor. Sorun şu: Şekiller birbirine değmese de aralarından düz bir çizgi geçirilemez, çünkü aradaki boşluk oyuğun içinde kalıyor.
 
 <CollisionDemo kind="concave" lang="tr">
-  İçbükey bir şekilde SAT. U’nun kenarları yalnızca yatay ve dikey yönde; iki eksende de U’nun ve karenin gölgeleri örtüştüğü için SAT çarpışma bildiriyor. Kesik çizgiler U’yu üç dışbükey parçaya bölüyor. Kareyi her parçayla ayrı ayrı test edince doğru yanıt çıkıyor.
+  İçbükey bir şekle uygulanan SAT. U’nun kenarları yalnızca iki yönde uzanıyor: yatay ve dikey. İki eksende de U’nun ve karenin gölgeleri örtüştüğü için SAT çarpışma bildiriyor. Kesik çizgiler U’yu üç dışbükey parçaya bölüyor. Kareyi her parçayla ayrı ayrı test edince doğru yanıt çıkıyor.
 </CollisionDemo>
 
-Genellikle yapılan şey, içbükey çokgeni $P_1, \dots, P_k$ gibi dışbükey parçalara bölüp her parçayı ayrı ayrı test etmektir. Örneğin çokgeni kulak kesme (*ear clipping*) yöntemiyle üçgenlere ya da bir dışbükey ayrıştırmayla daha az sayıda parçaya bölebilirsiniz. Parçalardan biri çarpışıyorsa şekiller çarpışır; hiçbiri çarpışmıyorsa çarpışmaz. Derinlik ise daha fazla dikkat ister. Parçaların derinliklerinin en büyüğü, bütün şeklin derinliği için yalnızca bir alt sınırdır; yani gerçek derinlik bundan az olamaz ama daha fazla olabilir. Çünkü şekli bir parçadan dışarı iten hareket, onu doğrudan başka bir parçanın içine sokabilir. Kesin MTV için parçaları birlikte düşünmek gerekir: MTV yine $\mathbf{0}$ noktasından sınıra giden en kısa yoldur, ama bu kez sınır, $P_i \ominus B$ Minkowski farklarının birleşiminin sınırıdır.
+Bu sorunun olağan çözümü, içbükey çokgeni $P_1, \dots, P_k$ gibi dışbükey parçalara bölmek ve her parçayı ayrı ayrı test etmektir. Örneğin çokgeni kulak kesme (*ear clipping*) yöntemiyle üçgenlere ya da bir dışbükey ayrıştırmayla daha az sayıda parçaya bölebilirsiniz. Parçalardan biri çarpışıyorsa şekiller çarpışır; hiçbiri çarpışmıyorsa çarpışmaz. Derinlik ise daha fazla dikkat ister. Parçaların derinliklerinin en büyüğü, bütün şeklin derinliği için yalnızca bir alt sınırdır; yani gerçek derinlik bundan az olamaz ama daha fazla olabilir. Çünkü $B$’yi bir parçanın dışına iten hareket, onu doğrudan başka bir parçanın içine sokabilir. Kesin MTV için parçaları birlikte düşünmek gerekir: MTV yine $\mathbf{0}$ noktasından sınıra giden en kısa yoldur, ama bu kez sınır, $P_i \ominus B$ Minkowski farklarının birleşiminin sınırıdır.
 
 ## Hesap ne kadar sürer?
 
-İlk üç test sabit zamanda çalışır, yani her seferinde aynı, az sayıda işlem yapar: iki kutu için dört karşılaştırma; iki daire için bir uzaklık karesini bir toplamın karesiyle karşılaştırmak; bir daireyle bir kutu için iki sınırlama ve bir uzaklık karesi.
+İlk üç test sabit zamanda çalışır, yani her seferinde aynı, az sayıda işlem yapar: iki kutu için dört karşılaştırma; iki daire için uzaklığın karesiyle yarıçaplar toplamının karesi arasında tek bir karşılaştırma; bir daireyle bir kutu için iki sınırlama ve bir uzaklık karesi.
 
 Köşe sayıları $n$ ve $m$ olan iki çokgende SAT, en fazla $n + m$ eksenin her biri için $n + m$ köşenin izdüşümünü alır. Bu, $O\bigl((n + m)^2\bigr)$ iş demektir, yani iş köşe sayısının karesiyle büyür. İlk boşluk bulununca da döngüden hemen çıkılır. Sıradan bir oyundaki küçük çokgenler için bu hızlıdır. Çok köşeli şekillerde ya da 3B’de ise GJK (Gilbert–Johnson–Keerthi) gibi yinelemeli algoritmalar daha iyi ölçeklenir. GJK, Minkowski farkıyla destek noktaları üzerinden çalışır; derinliği bulmak için yanına EPA (*expanding polytope algorithm*) eklenir.
 
-Asıl yük, çiftlerin sayısıdır. $N$ şekilli bir sahnede $N(N - 1)/2$ çift vardır: bin şekil için her karede 499.500 çift.
+Asıl maliyet ise çiftlerin sayısından gelir. $N$ şekilli bir sahnede $N(N - 1)/2$ çift vardır: bin şekil için her karede 499.500 çift.
 
 ## Uygulamada
 
 ### Önce kaba eleme, sonra kesin test
 
-Gerçek sistemler işi ikiye böler. Önce **kaba eleme** aşaması (İngilizce kaynaklarda *broad phase*) çiftlerin çoğunu ucuza ve temkinli biçimde eler; temkinli, çünkü çarpışabilecek hiçbir çifti atmaz. Bunun için her şekli eksenlere hizalı bir kutuya sarar: döndürülmüş bir dikdörtgeni dört köşesini içine alan kutuya, bir daireyi kenarı $2r$ olan kareye. Sonra örtüşen kutuları bir uzamsal veri yapısıyla bulur; eşit hücreli bir ızgara, tek eksen boyunca sırala ve tara yöntemi ya da bir sınırlayıcı hacim hiyerarşisi (BVH) gibi. Yalnızca bu elemeyi geçen adaylar yukarıdaki kesin testlere ulaşır; bu ikinci aşamaya **kesin test** aşaması (*narrow phase*) denir. Böylece en basit test olan kutu testi iki ayrı yerde iş görür.
+Gerçek sistemler işi ikiye böler. Önce **kaba eleme** aşaması (İngilizce kaynaklarda *broad phase*) çiftlerin çoğunu ucuz bir yoldan ayıklar. Bunu temkinli yapar, yani çarpışabilecek hiçbir çifti atmaz. Bunun için her şekli eksenlere hizalı bir kutuya sarar: döndürülmüş bir dikdörtgeni dört köşesini içine alan kutuya, bir daireyi kenarı $2r$ olan kareye. Sonra örtüşen kutuları uzamsal bir veri yapısıyla bulur. Bu iş için eşit hücreli bir ızgara, kutuları tek eksen boyunca sıralayıp tarayan bir yöntem (*sort and sweep*) ya da bir sınırlayıcı hacim hiyerarşisi (BVH) kullanılabilir. Yalnızca bu elemeyi geçen adaylar yukarıdaki kesin testlere ulaşır; bu ikinci aşamaya **kesin test** aşaması (*narrow phase*) denir. Böylece en basit test olan kutu testi iki ayrı yerde iş görür.
 
 ### Kayan nokta hatalarına pay bırakmak
 
-Kâğıt üzerinde tam olarak birbirine değen şekiller, kayan noktalı sayılarla hesaplanınca nadiren tam olarak değer. IEEE çift duyarlıklı sayılarda (double) `0.1 + 0.2` işlemi `0.30000000000000004` verir; `0.1` sayısını on kez toplamak da `0.9999999999999999` eder. Bir dikdörtgeni $\pi/2$ kadar, yani 90 derece döndürürken $0$ yerine $\cos(\pi/2) \approx 6{,}1 \times 10^{-17}$ değeri kullanılır. Bu yüzden $x = 2$ doğrusuna oturması gereken bir köşe `1.9999999999999998` konumuna düşer ve birbirine değmesi gereken iki dikdörtgen yaklaşık $2 \times 10^{-16}$ kadar örtüşür. Buradan birkaç pratik kural çıkıyor:
+Kâğıt üzerinde tam olarak birbirine değen şekiller, hesap kayan noktalı sayılarla yapılınca nadiren tam olarak değer. IEEE çift duyarlıklı sayılarda (double) `0.1 + 0.2` işlemi `0.30000000000000004` verir; `0.1` sayısını on kez toplamak da `0.9999999999999999` eder. Bir dikdörtgeni $\pi/2$ kadar, yani 90 derece döndürürken $0$ yerine $\cos(\pi/2) \approx 6{,}1 \times 10^{-17}$ değeri kullanılır. Bu yüzden $x = 2$ doğrusuna oturması gereken bir köşe `1.9999999999999998` konumuna düşer ve birbirine değmesi gereken iki dikdörtgen yaklaşık $2 \times 10^{-16}$ kadar örtüşür. Buradan birkaç pratik kural çıkıyor:
 
-- Temas durumunu bir toleransla tanımlayın: $\pm\varepsilon$ içinde kalan, yani sıfıra çok yakın bir örtüşme temas sayılsın. Bu yazıdaki çizimler $\varepsilon = 0{,}5$ px kullanıyor; bu, gözün ancak ayırt edebildiği kadar bir fark. Çizimlerin arkasındaki kod ise genel kullanım için $10^{-9}$ varsayılan değerini koordinatların büyüklüğüyle ölçekliyor, çünkü yuvarlama hataları sayılar büyüdükçe büyür.
+- Temas durumunu bir toleransla tanımlayın: $\pm\varepsilon$ içinde kalan, yani sıfıra çok yakın bir örtüşme temas sayılsın. Bu yazıdaki çizimler $\varepsilon = 0{,}5$ px kullanıyor; bu, gözün ancak ayırt edebildiği kadar bir fark. Genel kullanım içinse çizimlerin arkasındaki kod, varsayılan $10^{-9}$ değerini koordinatların büyüklüğüne göre ölçekliyor, çünkü yuvarlama hataları sayılar büyüdükçe artar.
 - Yalnızca evet ya da hayır yanıtı gerekiyorsa uzunlukların karelerini karşılaştırın. Vektörleri ancak bir derinlik ya da yön gerektiğinde birim vektöre çevirin.
 - Sıfır olabilecek bir uzunluğa yapılan her bölmeyi önceden kontrol edin: eş merkezli daireler, kutunun içine düşen bir merkez, uzunluğu sıfır olan kenarlar, bir doğru parçasına ya da tek bir noktaya dönüşen çokgenler.
 

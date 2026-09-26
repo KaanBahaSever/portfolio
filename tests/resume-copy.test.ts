@@ -157,9 +157,10 @@ test('Turkish copy names linear algebra "lineer cebir", as the About page and th
 });
 
 test('Turkish copy reads as Turkish, not as a translation of the English', () => {
-  // The calques the owner flagged ("crowd.inc bünyesinde", "yaşam döngüsünü uçtan uca üstlendim").
+  // The calques the owner flagged ("crowd.inc bünyesinde", "yaşam döngüsünü uçtan uca üstlendim"),
+  // and "Kodun yanında" for "Around the code", which the console already rules out.
   const turkish = [...turkishStrings(), SITE.description.tr].join(' ');
-  for (const calque of [/bünyesinde/i, /uçtan uca/i, /yaşam döngüsü/i, /ortaya koy/i, /gizliliğe saygılı/i]) {
+  for (const calque of [/bünyesinde/i, /uçtan uca/i, /yaşam döngüsü/i, /ortaya koy/i, /gizliliğe saygılı/i, /kodun yanında/i]) {
     assert.doesNotMatch(turkish, calque);
   }
   // crowd.inc takes its suffix like any other name (read "kraud ink": -te).

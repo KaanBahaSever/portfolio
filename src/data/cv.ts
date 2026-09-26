@@ -12,7 +12,7 @@
  * (tests/cv-data.test.ts checks it). English uses British spelling, like the site. Turkish is
  * written natively and plainly, in short first-person sentences like the Turkish résumé
  * bullets, with ’ before suffixes on names and numbers ("2024’ten", "crowd.inc’te") and the
- * site's Turkish terms (CI/CD süreçleri, canlıda, lineer cebir, Amiral Battı, XOX).
+ * site's Turkish terms (CI/CD süreçleri, boru hattı, canlıda, lineer cebir, Amiral Battı, XOX).
  *
  * Pure module (types only from config.ts), so the build script and tests import it with plain Node.
  */
@@ -118,8 +118,9 @@ const tr: CvContent = {
       period: '2024’ten beri · geliştiriliyor, erken erişimde',
       stack: ['C/C++', 'Objective-C', 'Go', 'gRPC'],
       // "Barındırılabilecek" (future), as on the Asion page: "built with self-hosting in mind"
-      // is a design goal of a product in early access, not a finished feature.
-      text: 'Bireyler, ekipler ve akademik zaman takibi için bir üretkenlik aracı: iş istasyonundaki etkinliği takip ediyor. Gizliliği ön planda tutuyor, farklı platformlarda çalışıyor ve kendi sunucunuzda barındırılabilecek şekilde tasarlanıyor. macOS, Linux ve Windows’ta işletim sisteminin yerel olay kancalarını (OS event hooks) kullanıyor; hafif bir daemon mimarisi, gRPC/Protobuf ile süreçler arası iletişim ve şifreli bir SQLCipher veritabanı üzerine kurulu. Çok platformlu GitHub Actions süreçlerini çapraz derleme runner’larıyla ben kurdum: tek tıkla test, paketleme, derleme çıktısı üretme ve dağıtım.',
+      // is a design goal of a product in early access, not a finished feature. "Boru hatları" for
+      // the pipelines, as on the Asion page: "süreçler" here are the processes that talk over gRPC.
+      text: 'Bireyler ve ekipler için, akademik zaman takibine de uygun bir üretkenlik aracı. İş istasyonundaki etkinliği takip ediyor; gizliliği ön planda tutuyor, farklı platformlarda çalışıyor ve kendi sunucunuzda barındırılabilecek şekilde tasarlanıyor. macOS, Linux ve Windows’ta işletim sisteminin yerel olay kancalarını (OS event hooks) kullanıyor. Mimarisi hafif bir daemon’a dayanıyor; süreçler gRPC/Protobuf ile haberleşiyor, veriler şifreli bir SQLCipher veritabanında tutuluyor. Çok platformlu GitHub Actions boru hatlarını çapraz derleme runner’larıyla ben kurdum: test, paketleme, derleme çıktısı üretme ve dağıtım tek tıkla yapılıyor.',
     },
     {
       name: 'Novacast',
@@ -127,7 +128,8 @@ const tr: CvContent = {
       url: 'https://novacast.app',
       period: '2025’ten beri · canlıda',
       stack: ['Go', 'MQTT'],
-      text: 'Gerçek zamanlı mesaj yayını ve cihaz orkestrasyonu için bir platform; düşük gecikmeli pub/sub hatları üzerine kurulu. Çalıştığım bir bilgisayar firmasında, yetersiz kalan eski bir yazılımın yerine geçmesi için geliştirdim. Önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT ile bir mikroservis olarak baştan tasarladım.',
+      // "Boru hatları", the Turkish term for pipelines, as on the Novacast page.
+      text: 'Gerçek zamanlı mesaj yayını ve cihaz orkestrasyonu için bir platform; düşük gecikmeli pub/sub boru hatları üzerine kurulu. Çalıştığım bir bilgisayar firmasında, yetersiz kalan eski bir yazılımın yerine geçmesi için geliştirdim. Önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT ile bir mikroservis olarak baştan tasarladım.',
     },
     {
       name: 'Karecik',

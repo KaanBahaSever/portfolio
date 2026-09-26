@@ -133,7 +133,7 @@ const tr: HomeMessages = {
   hero: {
     // Short sentences, one idea each. "crowd.inc’te": the name is read "kraud ink", so -te.
     intro:
-      'İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Geliştirdiğim şeylerin çoğunda da bu matematiği kullanıyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun oynayan algoritmalar. Her gün modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te yaklaşık üç yıl yazılım geliştirici olarak çalıştım. Orada canlıdaki bir web platformunun her şeyinden ben sorumluydum: PostgreSQL şemasından Linux sunucularına kadar.',
+      'İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Geliştirdiğim şeylerin çoğunda da bu matematiği kullanıyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun oynayan algoritmalar. Her gün modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te üç yıla yakın yazılım geliştirici olarak çalıştım. Canlıda çalışan bir web platformunun her şeyinden ben sorumluydum: PostgreSQL şemasından Linux sunucularına kadar.',
     selectedWork: 'Seçili işler',
     // The button downloads the Turkish CV; the English one is a small link beside it.
     cvFormat: 'PDF',
@@ -188,7 +188,7 @@ const tr: HomeMessages = {
     title: 'Oyun alanı',
     lead: 'Burada hemen kullanabileceğiniz küçük şeyler var: algoritmik rakiplere karşı oyunlar, bir terminal ve dosyalarınızı cihazınızdan çıkarmayan tarayıcı araçları.',
     kinds: { game: 'Oyun', tool: 'Araç', terminal: 'Terminal' },
-    consoleText: 'Siteyi bir terminalden, komut yazarak gezin.',
+    consoleText: 'Siteyi terminalde, komut yazarak gezin.',
     allGames: 'Tüm oyunlar',
     allTools: 'Tüm araçlar',
     moreLabel: 'Oyun alanında daha fazlası',

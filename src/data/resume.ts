@@ -125,7 +125,7 @@ export const EXPERIENCE: readonly ExperienceItem[] = [
       ],
       tr: [
         'Ayrıntılı bir rol tabanlı erişim kontrolü (RBAC) tasarladım; herkese açık verilerle özel veriler arasına kesin yetki sınırları koydum.',
-        'Akış için ölçeklenebilir sayfalamayı ve dinamik veri yüklemeyi hem API’de hem ön yüzde geliştirdim.',
+        'İçerik akışı için hem API’de hem ön yüzde ölçeklenebilir sayfalama ve dinamik veri yükleme geliştirdim.',
         'Platformun çalıştığı Linux sunucularını kurup yapılandırdım.',
         'Sistemin güvenilir çalışması için kapsamlı birim ve entegrasyon testleri yazdım.',
       ],
@@ -149,8 +149,8 @@ export const EDUCATION: readonly EducationItem[] = [
         'Planning a Master’s degree in Computer Science next.',
       ],
       tr: [
-        'Mezun olmak üzereyim. Saf matematikteki temelimi reel analiz, soyut cebir ve topoloji oluşturuyor.',
-        'Ardından bilgisayar bilimleri alanında yüksek lisans yapmayı planlıyorum.',
+        'Mezun olmak üzereyim. Saf matematik altyapım reel analiz, soyut cebir ve topolojiye dayanıyor.',
+        'Ardından bilgisayar bilimlerinde yüksek lisans yapmayı planlıyorum.',
       ],
     },
   },
@@ -171,9 +171,9 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
       ],
       tr: [
         // Turkish groups thousands with a dot: 5.000 ft.
-        'Kulüp ekibiyle birlikte bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik.',
+        'Kulüpteki ekibimizle bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik.',
         'Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrol sistemini tek başıma geliştirdim. İkisi de roketteki yönelim, jiroskop ve altimetre verilerini birleştiren sensör füzyonuyla çalışıyordu.',
-        'Telemetri verisini SD karta kaydeden protokolü tasarladım; bu protokol RF telemetri modülleriyle birlikte çalışıyordu. Uçuştan sonra verileri ayrıştırıp yörüngeyi çizen bir masaüstü paneli de geliştirdim.',
+        'Telemetri verisini SD karta kaydetmek için bir protokol tasarladım; bu protokol RF telemetri modülleriyle birlikte çalışıyordu. Uçuş verisini ayrıştırıp uçuştan sonra yörüngeyi grafiğe döken bir masaüstü paneli de geliştirdim.',
       ],
     },
   },
@@ -246,7 +246,7 @@ export const ACTIVITIES: readonly ActivityItem[] = [
 export const FOCUS: Localized<string> = {
   en: 'Modern C++ and Go day to day, for system tools, telemetry and messaging platforms and algorithm-driven applications, on a foundation of pure mathematics. Around the code: GitHub Actions pipelines that test, package, produce multi-platform builds and deploy in one click, notably for the Asion ecosystem.',
   // "CI/CD süreçleri" for the pipelines, the owner's own term in the skills below.
-  tr: 'Her gün modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar geliştiriyorum. Hepsinin temelinde saf matematik var. Kodun yanında, özellikle Asion ekosistemi için, GitHub Actions ile CI/CD süreçleri kuruyorum. Bu süreçler tek tıkla test ediyor, paketliyor, birden çok platform için derliyor ve dağıtıyor.',
+  tr: 'Her gün modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar geliştiriyorum. Hepsinin temelinde saf matematik var. Bunun yanında özellikle Asion ekosistemi için GitHub Actions ile CI/CD süreçleri kuruyorum. Bu süreçlerle kod tek tıkla test ediliyor, paketleniyor, birden çok platform için derleniyor ve dağıtılıyor.',
 };
 
 /**

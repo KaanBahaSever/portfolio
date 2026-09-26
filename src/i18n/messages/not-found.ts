@@ -53,7 +53,7 @@ const tr: NotFoundMessages = {
     // "Private": what the tools do with your data, not "gizliliğe saygılı" (a calque).
     tools: 'Tarayıcınızda çalışan, verilerinizi dışarı göndermeyen araçlar',
     games: 'Algoritmik rakiplere karşı Amiral Battı ve XOX',
-    about: 'Özgeçmişim ve matematikten sistem yazılımına geçişim',
+    about: 'Özgeçmişim ve matematikten sistem yazılımına nasıl geldiğim',
   },
 };
 

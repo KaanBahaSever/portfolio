@@ -164,7 +164,21 @@ test('Turkish copy reads as Turkish, not as a translation of the English', () =>
     assert.doesNotMatch(turkish, calque);
   }
   // crowd.inc takes its suffix like any other name (read "kraud ink": -te).
-  assert.match(homeMessages.tr.hero.intro, /crowd\.inc’te/);
+  assert.match(aboutMessages.tr.journey.chapters.work.title, /crowd\.inc’te/);
+});
+
+test('the home introduction is a general welcome: no job details, and it ends by inviting the visitor in', () => {
+  // The owner: details such as crowd.inc do not belong in the first introduction (the Experience
+  // section right below has them), and the text should lead somewhere rather than trail off.
+  for (const locale of ['en', 'tr'] as const) {
+    const intro = homeMessages[locale].hero.intro;
+    assert.doesNotMatch(intro, /crowd\.inc|PostgreSQL|Linux/, locale);
+    assert.match(intro, /C\+\+ (and|ve) Go/, locale);
+  }
+  assert.match(homeMessages.tr.hero.intro, /^Merhaba, hoş geldiniz!/);
+  assert.match(homeMessages.tr.hero.intro, /iyi gezinmeler!$/);
+  // English keeps the house voice (no exclamation marks); the Turkish greeting may use them.
+  assert.match(homeMessages.en.hero.intro, /enjoy your visit\.$/);
 });
 
 test('Turkish copy uses Turkish letters where Turkish needs them', () => {

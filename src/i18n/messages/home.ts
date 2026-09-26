@@ -29,7 +29,7 @@ const en = {
   hero: {
     /** Plain text: the intro has no inline links, so one string per language is enough. */
     intro:
-      "I'm finishing a mathematics degree at Istanbul University, and most of what I build puts that mathematics to work: rocket avionics and flight simulation, messaging platforms, game-playing algorithms. Day to day I write modern C++ and Go. Before that I spent nearly three years as a software developer at crowd.inc, owning a production web platform end to end, from the PostgreSQL schema to the Linux servers.",
+      "Hi, and welcome. I'm Kaan. I build software, mostly in modern C++ and Go, and I'm about to finish my mathematics degree at Istanbul University. I love mathematics so much that I can't help bringing it into my work, from rocket software to real-time messaging systems. Here you'll find my projects, posts on mathematics and algorithms, small tools that run in your browser, and games you can play against the computer. Start wherever you like, and enjoy your visit.",
     selectedWork: 'Selected work',
     /** Shown inside the CV button, after "Download CV". */
     cvFormat: 'PDF',
@@ -132,10 +132,10 @@ export type HomeMessages = typeof en;
 
 const tr: HomeMessages = {
   hero: {
-    // Warm and everyday, as the owner asked: a greeting, then short sentences. "crowd.inc’te": the
-    // name is read "kraud ink", so -te.
+    // A general, warm introduction that ends by inviting the visitor in; the job details are in the
+    // Experience section right below, so the intro leaves them out (the owner asked for this).
     intro:
-      'Merhaba, ben Kaan. İstanbul Üniversitesinde matematik okuyorum, mezun olmama az kaldı. Yaptığım projelerin çoğunda matematiği kullanıyorum: roket yazılımlarında, uçuş simülasyonlarında, mesajlaşma sistemlerinde ve bilgisayara karşı oynanan oyunlarda. En çok modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te üç yıla yakın bir süre yazılım geliştirici olarak çalıştım; oradaki web platformunun PostgreSQL veritabanından Linux sunucularına kadar her şeyiyle ben ilgileniyordum.',
+      'Merhaba, hoş geldiniz! Ben Kaan. Çoğunlukla modern C++ ve Go ile yazılım geliştiriyorum; bir yandan da İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Matematiği o kadar seviyorum ki onu roket yazılımlarına da gerçek zamanlı mesaj sistemlerine de katmadan duramıyorum. Burada projelerimi, matematik ve algoritmalar üzerine yazılarımı, tarayıcıda çalışan küçük araçları ve bilgisayara karşı oynayabileceğiniz oyunları bulacaksınız; dilediğiniz yerden başlayın, iyi gezinmeler!',
     selectedWork: 'Seçili işler',
     // The button downloads the Turkish CV; the English one is a small link beside it.
     cvFormat: 'PDF',

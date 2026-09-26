@@ -1,6 +1,6 @@
 ---
-title: The Battleship Hunt & Target Algorithm
-description: How a Battleship computer hunts on a parity lattice, closes in on every hit and weighs each possible ship position, with figures computed from the game’s code.
+title: 'Battleship: How the Computer Finds Your Ships'
+description: How does the computer find your ships in Battleship? I explain the hunt & target algorithm and the simple maths behind it step by step, with figures drawn by the game’s own code.
 pubDate: 2026-09-26
 lang: en
 translationKey: battleship-hunt-target
@@ -14,6 +14,7 @@ import HitDensity from '../../components/blog/posts/battleship/HitDensity.astro'
 import HuntSnapshot from '../../components/blog/posts/battleship/HuntSnapshot.astro';
 import InitialDensity from '../../components/blog/posts/battleship/InitialDensity.astro';
 import ParityFigure from '../../components/blog/posts/battleship/ParityFigure.astro';
+import ParityReplay from '../../components/blog/posts/battleship/ParityReplay.astro';
 import RowPlacements from '../../components/blog/posts/battleship/RowPlacements.astro';
 import ShotsChart from '../../components/blog/posts/battleship/ShotsChart.astro';
 import SimulationTable from '../../components/blog/posts/battleship/SimulationTable.astro';
@@ -25,194 +26,234 @@ export const n = postNumbers('en');
 export const gameHref = localizePath('/games/battleship/', 'en');
 
 {/*
-  The figures and the interpolated numbers are computed during the build by the game's own code
-  (src/lib/games/battleship/), through src/components/blog/posts/battleship/. The Turkish
-  translation is amiral-batti-av-ve-hedef.mdx; keep the two in step.
+  The figures and the numbers in the text are computed during the build by the game's own code
+  (src/lib/games/battleship/), through src/components/blog/posts/battleship/. The text does not
+  hard-code results; it takes them from postNumbers. The Turkish version is
+  amiral-batti-av-ve-hedef.mdx; the two posts carry the same facts, so keep them in step.
 */}
 
-Battleship looks like a game of luck. Two players hide five ships on a 10 × 10 grid and take turns calling out cells, and nobody sees anything but splashes and hits. Yet a computer that knows nothing about its opponent can sink a whole fleet in less than half the shots that blind luck needs, and the reasons are a pleasant mix of combinatorics, probability and a small state machine.
+Battleship is the game I played with my father as a child, and that is why I wanted to design a Battleship of my own. For my high-school graduation project I wrote a desktop Battleship in C#; the [original code is on GitHub](https://github.com/KaanBahaSever/BattleShips). That version was a plain game. The hunt & target algorithm in this post came later, and it is what <a href={gameHref}>the Battleship game on this site</a> plays.
 
-This post takes apart the computer opponent of the <a href={gameHref}>Battleship game on this site</a>, one difficulty level at a time: firing at random, *hunting and targeting* on a parity lattice, and aiming by *probability density*, a count of every position the remaining ships could still take. Every board, chart and simulated statistic below is computed while the site is built, by the same TypeScript that runs the game: when a figure says the computer fires at E5, that is what the game's code returned.
+At first glance Battleship looks like a game of luck. Two players hide their ships from each other and take turns calling out cells, and all anyone gets to see is splashes and hits. Yet a computer that knows nothing about its opponent can sink the whole fleet in fewer than half the shots that firing blind would take. The secret is a little counting, a little probability and a small state machine.
 
-The game has a longer history than this site. For my high-school graduation project I wrote a desktop Battleship in C#; the [original code is on GitHub](https://github.com/KaanBahaSever/BattleShips). It was a plain desktop game. The hunt & target algorithm described here came later, and it is what the version in your browser plays.
+In this post we’ll get to know the computer opponent of the game on this site by opening up its three difficulty levels one at a time: Easy fires at random, Normal plays *hunt & target*, and Hard counts every place the ships could still be hiding. You don’t need to know any maths: I’ll explain every formula and every symbol in plain words the first time it shows up. Every board, chart and result in the post is also computed by the game’s own code while the site is built: when a figure says the computer fires at E5, the game really did pick E5.
 
-## The problem
+## The rules of the game
 
-The board has 100 cells, labelled A to J across and 1 to 10 down. The fleet is the classic one: a carrier of five cells, a battleship of four, a cruiser and a submarine of three each, and a destroyer of two, {n.shipCells} cells in all. Ships lie horizontally or vertically inside the board; on this site they may touch but never overlap. After every shot the shooter learns *miss* or *hit*, and when the last cell of a ship is hit, which ship has sunk. The game then reveals the sunk ship's outline, so the shooter also knows exactly which cells it occupied.
+The board is a 10 × 10 grid, so 100 cells. The columns are lettered A to J from left to right and the rows are numbered 1 to 10 from top to bottom; E5 is the cell where column E meets row 5. Each player has five ships: a carrier of five cells, a battleship of four, a cruiser and a submarine of three each, and a destroyer of two. Together they cover {n.shipCells} cells.
 
-### How many ways can a single ship be hidden?
+Ships lie inside the board, either horizontally or vertically. On this site they may touch each other but never overlap. The player whose turn it is calls out a cell, and the other side answers “miss” or “hit”. When the last cell of a ship is hit, that ship sinks, and the game shows where the sunk ship was, so from then on you know exactly which cells it covered.
 
-Number the rows and columns from zero, as the lattices below will: on a board of side $n$, a cell is a pair $(r, c)$, with row $r$ and column $c$ in $\lbrace 0, 1, \dots, n - 1 \rbrace$ (column A is $c = 0$, row 1 is $r = 0$). A placement of a ship of length $L$, the set of cells it covers, is fixed by two choices: its orientation, and its first cell, the leftmost cell of a horizontal ship or the topmost of a vertical one.
+Before we look at how the computer plays, let’s do a little counting exercise. The numbers will come in handy later.
 
-A horizontal ship whose first cell is $(r, j)$ covers $(r, j), (r, j + 1), \dots, (r, j + L - 1)$. It stays on the board exactly when its last cell does, when $j + L - 1 \le n - 1$, that is, when $0 \le j \le n - L$. So, as long as the ship is no longer than the board ($L \le n$), each of the $n$ rows offers $n - L + 1$ starting columns, and the set $H_L$ of horizontal placements has $|H_L| = n\,(n - L + 1)$ elements. Reflecting the board in its diagonal, $(r, c) \mapsto (c, r)$, turns rows into columns and horizontal placements into vertical ones, one for one, so the set $V_L$ of vertical placements is just as large. Adding the two gives
+### How many places can a single ship hide?
 
-$$
-|H_L| + |V_L| = 2n\,(n - L + 1).
-$$
+Let’s call each place where a ship could sit on the board a *position*. How many positions does one ship have? Let’s count them together. We’ll do the sum for every board and every ship at once, and for that two short names are enough: call the number of cells along one side of the board $n$, and the length of the ship $L$. On our board $n = 10$, and for the cruiser $L = 3$. Wherever you see the letters, you can think of those numbers.
 
-<RowPlacements lang="en">Every horizontal position of a cruiser ($L = 3$) in one row, as the game's code lists them: $n - L + 1 = 8$, one for each starting column $j$. The bottom row gives $f_3(c)$, the number of positions that cover column $c$; the highlighted column 4 is covered by the positions that start at $j = 2$, 3 and 4.</RowPlacements>
-
-Is that the number of placements? Only if no placement is counted twice. In general, by inclusion–exclusion,
+**Step one: a single row.** Number the cells of a row from left to right: 1, 2, …, $n$. A ship of length $L$ covers $L$ cells side by side in the row. Its place is fixed by the cell it starts in, that is, its leftmost cell; call that cell’s number $k$. The ship starts in cell $k$ and runs on for $L$ cells:
 
 $$
-|H_L \cup V_L| = |H_L| + |V_L| - |H_L \cap V_L|,
+k,\; k + 1,\; \dots,\; k + L - 1.
 $$
 
-and the formula needs the last term to vanish. For $L \ge 2$, that is $L > 1$, it does. Two different cells cannot share both a row and a column, so a ship of two or more cells has a well-defined direction and no placement is both horizontal and vertical: $H_L \cap V_L = \varnothing$. For $L = 1$ the direction means nothing. A "horizontal" and a "vertical" one-cell ship on the same cell are the same placement, so $H_1 = V_1$, $|H_1 \cap V_1| = n^2$, and the right count is $n^2$, not $2n^2$: the formula would count every cell twice. (This is also why the game's code, when it lists the positions of a ship, gives a one-cell ship a single orientation.) At the other end, a ship longer than the board fits nowhere. For $L > n$ the factor $n - L + 1$ is zero or negative: at $L = n + 1$ the formula still gives 0, by luck, and beyond that it goes negative. The honest count per line is $\max(0,\, n - L + 1)$. Altogether,
+For example, a cruiser that starts in cell 4 covers cells 4, 5 and 6; its last cell is $4 + 3 - 1 = 6$. For the ship not to hang off the board, the number of its last cell can be at most $n$ (the sign $\le$ means “less than or equal to”):
 
 $$
-|H_L \cup V_L| =
-\begin{cases}
-n^2, & L = 1,\\
-2n\,(n - L + 1), & 2 \le L \le n,\\
-0, & L > n.
-\end{cases}
+k + L - 1 \le n, \quad \text{that is,} \quad k \le n - L + 1.
 $$
 
-Every ship of the classic fleet has $2 \le L \le 5 \le n = 10$, so the middle case covers all of them.
+(We got the version on the right by taking $L - 1$ away from both sides of the one on the left.) Since $k$ is at least 1, the ship can start in cells 1, 2, …, $n - L + 1$. So a row holds exactly $n - L + 1$ positions. For the cruiser that’s $10 - 3 + 1 = 8$.
 
-The same argument counts the placements through a single cell, which the Hard computer will need later. A horizontal placement with first column $j$ covers column $c$ exactly when $j \le c \le j + L - 1$. Together with $0 \le j \le n - L$, that leaves the starting columns $\max(0,\, c - L + 1) \le j \le \min(c,\, n - L)$, so a cell in column $c$ lies on
+<RowPlacements lang="en">Every position of the cruiser ($L = 3$) in one row, as the game’s code lists them. There is one position for each starting cell $k$, and $k$ runs from 1 to 8. The numbers in the bottom row show how many of these positions pass over each cell. The highlighted cell 5 is covered by three positions: the ones that start at $k = 3$, 4 and 5.</RowPlacements>
 
-$$
-f_L(c) = \min(c,\, n - L) - \max(0,\, c - L + 1) + 1
-$$
-
-horizontal placements of the ship. The same number can be written as $\min(c + 1,\, n - c,\, L,\, n - L + 1)$: the room to the left, the room to the right, the length of the ship or the number of positions in a line, whichever runs out first. Vertical placements count the same way down the column, so for $2 \le L \le n$ the cell $(r, c)$ is covered by $f_L(c) + f_L(r)$ placements of the ship. In a corner, where $r$ and $c$ are each $0$ or $n - 1$, $f_L(0) = f_L(n - 1) = 1$ for every ship, so the five ships cover it $2 \cdot 5 = 10$ times. The four central cells of the 10 × 10 board, where $r, c \in \lbrace 4, 5 \rbrace$, have $f_L(r) = f_L(c) = L$ for every ship with $L \le 5$, that is, for the whole fleet, which makes $2\,(5 + 4 + 3 + 3 + 2) = 34$. These are the values the game's code finds for the corners and the centre of the first density map below, {n.emptyMin} and {n.emptyMax}. A double count checks the formula: each of the $n - L + 1$ placements in a row covers $L$ cells, so $\sum_c f_L(c) = L\,(n - L + 1)$, and for the cruiser above, $1 + 2 + 3 + 3 + 3 + 3 + 3 + 3 + 2 + 1 = 24 = 3 \cdot 8$.
-
-On the 10 × 10 board the lengths of the fleet, $L = 5, 4, 3, 3, 2$, give 120, 140, 160, 160 and 180 positions, {n.placements} in all.
-
-<FleetFigure lang="en">The five ships and the number of positions each one has on an empty board, counted by the game's code and matching the formula above.</FleetFigure>
-
-A ship on its own has at most 180 positions, but the whole fleet, placed without overlaps, can be arranged in {n.fleets} ways. (I counted them by brute force: every position of the three largest ships and, for each, the pairs of positions of the two smallest ships that avoid them, minus the pairs that overlap.) No practical player, human or program, reasons about whole fleets: before the first shot there are about $3 \times 10^{10}$ of them, and each shot cuts that set down in a way that is hard to describe. Every strategy below works with single ships instead.
-
-## A baseline: firing at random
-
-The Easy computer fires at a random cell it has not tried yet. Its game ends with the shot that hits the last of the {n.shipCells} ship cells, so the length $T$ of a game is the position of the last ship cell in a random ordering of the 100 cells, a classical order statistic.
-
-The 17 ship cells split the other 83 cells into 18 gaps: before the first ship cell, between consecutive ones, and after the last. By symmetry every gap has the same expected size, $83/18$, and the game ends just before the last gap, so
+**Step two: every row.** The board has $n$ rows, each with $n - L + 1$ positions. Adding the same number up $n$ times is the same as multiplying it by $n$; that’s the *multiplication rule* of counting. So the number of horizontal positions is
 
 $$
-\mathbb{E}[T] = 100 - \frac{83}{18} = \frac{17 \cdot 101}{18} \approx 95.4 .
+n\,(n - L + 1).
 $$
 
-The whole distribution is just as explicit. The game is over by shot $t$ exactly when all 17 ship cells are among the first $t$ cells fired at, so
+(In maths, writing two things side by side with no sign between them means multiplying them. The dot $\cdot$ between two numbers is a multiplication sign too.) For the cruiser, $10 \cdot 8 = 80$.
+
+**Step three: the columns.** The board is square, so the same sum works for the columns. Imagine turning the board through 90 degrees: the rows become columns, and horizontal ships become vertical ones. So there are also $n\,(n - L + 1)$ vertical positions; 80 again for the cruiser.
+
+**Step four: all of them together.** A ship lies either horizontally or vertically, never both at once. To count two groups that don’t mix, we simply add their sizes (that’s the *addition rule*):
+
+$$
+n\,(n - L + 1) + n\,(n - L + 1) = 2n\,(n - L + 1).
+$$
+
+For the cruiser, $2 \cdot 10 \cdot (10 - 3 + 1) = 2 \cdot 10 \cdot 8 = 160$.
+
+For “either horizontal or vertical” to make sense, the ship has to be at least two cells long, that is, $L > 1$ (the sign $>$ means “greater than”). If there were a ship of a single cell, its “horizontal” and “vertical” versions would be the same ship on the same cell. Such a ship would have as many positions as the board has cells, $n \cdot n = n^2$, but the formula would count every position twice and give double that, $2n^2$. Luckily, the fleet has no one-cell ship. A ship longer than the board, on the other hand, fits nowhere at all; we only use the formula for ships that fit on the board.
+
+The ships of the fleet are 5, 4, 3, 3 and 2 cells long. For them the formula gives 120, 140, 160, 160 and 180 positions, {n.placements} in all.
+
+<FleetFigure lang="en">The five ships and how many positions each one has on an empty board. The game’s code counts them one by one, and every count matches the formula $2n\,(n - L + 1)$.</FleetFigure>
+
+Take one more look at the bottom row of the cruiser figure: the cell at the edge is covered by a single position, the cells in the middle by three each. A ship at the edge can only stretch inwards, so edge cells collect fewer positions. A cell can be covered by at most $L$ horizontal positions of a ship, because it can be the ship’s first cell, its second, … or its last. This small observation will later explain where the Hard computer fires its first shot.
+
+### How many ways can the whole fleet be arranged?
+
+A single ship has at most 180 positions. So in how many different ways can all five ships be arranged together?
+
+If ships could overlap, the answer would be easy. Each ship would choose its place without caring about the others, and the multiplication rule would do the job again: for each of the carrier’s 120 positions, the battleship’s 140 positions; for each of those, the cruiser’s 160 positions; and so on. The result would be 120 · 140 · 160 · 160 · 180 = {n.fleetsIfOverlap}.
+
+But ships can’t overlap, and that changes everything. Where one ship fits depends on where the others are: if the carrier sits in the middle of the board, there’s less room left for the battleship. That’s why no simple formula gives the answer in one line. So I had the computer count them. I placed the three biggest ships, the carrier, the battleship and the cruiser, in every way they fit without running into each other, one arrangement at a time. Each time, the submarine and the destroyer are left. I counted the positions of those two that stay clear of the three ships and multiplied the counts (the multiplication rule once more); then I took away the pairs in which the submarine and the destroyer land on top of each other. The result: {n.fleets} different fleets. In other words, once overlaps are forbidden, only about {n.fleetsShare} of the combinations we counted when overlaps were allowed survive.
+
+One detail: the cruiser and the submarine are both three cells long, but they are different ships. Swapping the two counts as a new arrangement.
+
+No player, human or program, thinks through that many fleets one by one. On top of that, every shot trims the list in a way that is hard to describe. That’s why all the strategies below think about the ships one at a time.
+
+## A yardstick: firing at random
+
+Let’s start with the simplest opponent. The Easy computer picks, at random, a cell it hasn’t fired at yet; it’s like aiming with your eyes shut. We’ll use this level as a yardstick for how clever the other levels are. The question is: on average, how many shots does someone firing at random need to sink the whole fleet?
+
+Let’s call the number of shots a game lasts $T$. $T$ comes out different in every game: sometimes luck is on your side, sometimes the last ship cell is the very last cell left. So instead of one game, we ask about the average of many games. If we played countless games and averaged their $T$ values, that average would settle on a particular number. That number is called the *expected value* of $T$ and is written $\mathbb{E}[T]$ (the E stands for “expected”).
+
+Why work this number out? For two reasons. First, it’s the bar we’ll hold the cleverer levels up against. Second, it lets us check the simulation at the end of the post: the average of the Easy games the computer played there should come out very close to the number the formula gives. And it does: {n.mean.random} in the simulation, {n.random.expected} from the formula.
+
+Now let’s work it out. Picture a deck of 100 cards: {n.shipCells} of them are red (the ship cells), and the other 83 are black (empty water). Firing at random is like shuffling the deck well and turning the cards over one by one. The game ends the moment the last red card turns up.
+
+The red cards split the black ones into heaps: the heap before the first red card, the heaps between each two red cards that follow each other, and the heap after the last red card. With {n.shipCells} red cards, that makes 18 heaps; some of them may be empty. A well-shuffled deck favours no heap, so on average every heap holds the same number of cards: the 83 black cards are shared among 18 heaps, $83/18$ (83 divided by 18) per heap on average, or about {n.random.gap} cards.
+
+Since the game ends with the last red card, the only heap never turned over is the very last one. So in an average game, only the last heap’s worth of the 100 cards stays face down:
+
+$$
+\mathbb{E}[T] = 100 - \frac{83}{18} \approx 95.4 .
+$$
+
+(The sign $\approx$ means “roughly equal to”.) Careful: {n.random.expected} is not a percentage, it’s a number of shots. It only looks like a percentage because the board happens to have exactly 100 cells. What it says is this: someone firing at random combs through almost the whole board before the fleet goes down; on average only {n.random.gap} cells are never touched.
+
+We can go beyond the average, too. What is the chance that the game is over by shot $t$ at the latest? (Capital $T$ is the length of the game; small $t$ is any number of shots we care to pick.) The game being over within $t$ shots means that every red card is among the first $t$ cards. In a shuffled deck, the places where the red cards land are {n.shipCells} places chosen at random out of 100. The symbol $\binom{100}{17}$ stands for the number of different ways to choose 17 things out of 100 (the order they’re chosen in doesn’t matter). All of these choices are equally likely, and in $\binom{t}{17}$ of them every red card lands in the first $t$ places. The probability is the ratio of the two:
 
 $$
 P(T \le t) = \binom{t}{17} \bigg/ \binom{100}{17} .
 $$
 
-The median game lasts {n.random.median} shots, and only {n.random.within85} of games are over within 85. Random fire sinks the fleet eventually, but usually just before it runs out of water.
+Here $P$ stands for probability, and $T \le t$ for “the game was over by shot $t$”. This formula tells us two more things. If you lined the games up from shortest to longest, the one right in the middle would last {n.random.median} shots (that’s called the *median*). And only {n.random.within85} of games are over within 85 shots. Random fire does sink the fleet in the end, but usually only after combing through almost all the water.
 
 ## Hunt and target
 
-A human player does much better than chance without any theory. After a hit they fire around it until the ship sinks, and while they have nothing to follow up, they spread their shots out. The Normal computer does both, and each half is worth looking at on its own.
+Even someone who knows no theory at all plays far better than chance. What do you do after a hit? You fire around it until the ship sinks. And while you have no hit to follow up, you spread your shots over the board. That’s exactly what the Normal computer does. We call the first part *target* and the second *hunt*; let’s look at each on its own.
 
 ### Target mode: finishing a ship
 
-A hit says that a ship covers that cell, and because ships are straight, the rest of it lies in the same row or column. So the computer tries the four neighbours of the hit. Once a second hit lines up with the first, the ship's direction is known and the computer extends the run of hits at either end; when one end meets a miss or the edge of the board, it carries on from the other end.
+A hit tells you there is a ship on that cell. Ships are straight, so the rest of it has to be in the same row or the same column. That’s why the computer tries the hit’s four neighbours: above, below, left and right. Once a second hit lands next to the first, the ship’s direction is known. The computer now extends the run of hits at both ends; when one end runs into a miss or the edge of the board, it carries on from the other end.
 
-<TargetReplay lang="en">The Normal computer finishing off a cruiser, replayed with seed {n.target.seed}. After the hit at E5 it probes E4 and E6 and misses both; F5 hits, which fixes the direction; G5 extends the line and misses; D5, at the other end, sinks the ship. With no hits left open, the computer goes back to hunting.</TargetReplay>
+<TargetReplay lang="en">The Normal computer finishing off a cruiser. After the hit at E5 it tries E4 and E6, and both miss. F5 hits and reveals that the ship lies horizontally. G5 tries to extend the line but misses; D5, at the other end, sinks the ship. With no hits left to chase, the computer goes back to hunting. (The computer’s random choices start from *seed* number {n.target.seed}. The same seed gives the same choices every time, so this game always plays out the same way.)</TargetReplay>
 
-Two details make this robust. First, the computer can hit a second ship while it is chasing the first, for example when two ships lie side by side and the line runs across both. That is why it never keeps "the ship I am chasing" in a variable: it looks at all *open* hits, the hits on ships that have not sunk yet. Second, when a ship sinks, the game reveals which cells it occupied. Those hits are closed, any hits left over belong to another ship, and the computer goes on to target that one. Only when no open hit remains does it return to hunting.
+There are two more subtle points. First, while chasing one ship, the computer can hit another one, for example when two ships lie side by side. So it never keeps “the ship I’m chasing” in mind. It looks at every hit on a ship that hasn’t sunk yet; let’s call these *open hits*. Second, when a ship sinks, the game shows which cells it was on, and the hits on those cells are closed. Any open hits left over belong to another ship, and the computer goes after that one next. It only goes back to hunting when no open hit is left.
 
 ### Hunt mode: parity
 
-While hunting, a shot right next to an earlier miss is partly wasted: the two cells could belong to the same ship, so they answer overlapping questions. Colour the board like a checkerboard. Adjacent cells have different colours and every ship covers at least two adjacent cells, so every ship covers at least one black cell. Firing only at black cells, those whose row and column numbers add up to an even number, still finds every ship, with {n.lattice[2]} cells to search instead of 100.
+So where should you fire when there’s no hit to chase? Firing right next to a miss is a bit of a waste: the two cells could belong to the same ship, so the two shots partly ask the same question.
 
-No smaller set would do. The board can be tiled by 50 dominoes, disjoint pairs of adjacent cells, and the destroyer could be hiding under any one of them. A set of cells that catches the destroyer wherever it is must contain a cell of every domino, so it has at least 50 cells.
+Think of it this way: colour the board black and white like a checkerboard. Two cells side by side always have different colours. Even the shortest ship is two cells long, so every ship covers at least one black cell. Someone who fires only at black cells therefore misses no ship, and has {n.lattice[2]} cells to search instead of 100. We can pick out the black cells as the ones whose row and column numbers add up to an even number; that’s why the idea is called *parity*, which simply means whether a number is even or odd.
 
-The idea generalises. Write $r$ and $c$ for the row and column of a cell, counting from zero. A horizontal ship of length $L$ covers $L$ consecutive values of $r + c$, and so does a vertical one. If $L \ge m$, one of those values is a multiple of $m$, so every ship of length at least $m$ covers a cell of the lattice
+Couldn’t even fewer cells do? No. You can cover the board, with no gaps, with 50 dominoes, each two cells side by side, and the destroyer could be hiding under any one of them. Anyone who wants to catch the destroyer wherever it is has to fire at a cell of every single domino. So at least 50 cells are needed.
+
+Once the destroyer has sunk, the shortest ship is three cells long, and a pattern even sparser than the checkerboard will do. To see the general rule, let’s number the rows and columns from 0 this time (column A is 0, column B is 1, …; row 1 is 0, row 2 is 1, …); that’s how the game’s code counts too. Call the row number $r$ and the column number $c$, and pick a number $m$, such as 2 or 3. Now mark the cells whose two numbers add up to a multiple of $m$:
 
 $$
-\Lambda_m = \lbrace\, (r, c) : r + c \equiv 0 \pmod{m} \,\rbrace.
+r + c = 0,\; m,\; 2m,\; 3m,\; \dots
 $$
 
-The Normal computer hunts on $\Lambda_m$, with $m$ the length of the shortest ship still afloat. While the destroyer is afloat that is the checkerboard, $m = 2$; once it has sunk, the lattice thins out to {n.lattice[3]} cells on every third diagonal.
+Along a horizontal ship, the row number stays the same and the column number goes up by one from cell to cell, so the sum $r + c$ also goes up by one at each cell. The same goes for a vertical ship. So a ship of length $L$ passes over $L$ consecutive sums, sums that follow on from each other like 7, 8, 9. And among any $m$ consecutive numbers, one is always a multiple of $m$: of two consecutive numbers, one is even; of three, one is divisible by 3. So every ship at least $m$ cells long passes over a marked cell. I’ll call the marked cells a *lattice*; for $m = 2$ the lattice is the checkerboard itself.
 
-<ParityFigure lang="en">The hunting lattices for $m = 2$ and $m = 3$. Every ship at least $m$ cells long covers a lattice cell (the build checks this for every position of every such ship), like the destroyer and the cruiser here. A destroyer is shorter than 3 and can slip between the diagonals of $\Lambda_3$, which is why the lattice follows the shortest ship afloat.</ParityFigure>
+The Normal computer takes $m$ to be the length of the shortest ship still afloat. As long as the destroyer is afloat, $m = 2$: the checkerboard. When the destroyer sinks, $m = 3$, and the lattice thins out to the {n.lattice[3]} cells on every third diagonal.
 
-In the simulation at the end of this post, parity is worth about {n.saved.parity} shots a game: hunt & target needs {n.mean['no-parity']} shots on average without the lattice and {n.mean.parity} with it. The saving is far from half a game because only the hunting shots benefit; the shots that finish off ships are much the same either way. The lattice also caps the worst case: the longest of the {n.games} games took {n.worst.parity} shots with it and {n.worst['no-parity']} without.
+<ParityFigure lang="en">The lattices for $m = 2$ and $m = 3$, with the lattice cells shaded. On the left, the destroyer at H2–H3 covers one lattice cell, H2; on the right, the cruiser at B7–D7 covers D7. Every ship at least $m$ cells long covers a lattice cell; while the site is built, this is checked one by one for every position of every such ship. A destroyer, being shorter than three cells, can slip between the diagonals of the $m = 3$ lattice (the dashed destroyer at G2–H2). That’s why the lattice follows the shortest ship afloat.</ParityFigure>
+
+This is easier to watch in a real game than to explain. Below, the Normal computer sinks, from start to finish, the fleet of game number {n.replay.seed} from the simulation at the end of the post. It isn’t a specially picked lucky game: its totals are very close to the averages we’re about to see. We’ll sort the shots into two kinds: a shot fired while there is no open hit is a *hunt shot*, and every other shot is a *target shot*.
+
+<ParityReplay lang="en">The Normal computer sinking the fleet of game number {n.replay.seed} from the simulation. The shaded cells are the lattice the computer is hunting on at that moment, and the numbers give the order of the shots; dashed outlines show ships not found yet, and filled shapes show sunk ships. The figure opens just after shot {n.replay.start}: the destroyer is about to sink, and the lattice is still the checkerboard. With shot {n.replay.destroyerSunk} the destroyer sinks, and the lattice thins out to every third diagonal. Step through the game shot by shot with the buttons or the slider, or press play and watch: whenever the computer is hunting, it fires on the lattice of the shortest ship afloat at that moment. With the toggle, you can also have the same fleet sunk by hunt & target without the lattice. The bars underneath compare the two games: {n.replay.parity.shots} shots with the lattice ({n.replay.parity.hunt} hunt shots and {n.replay.parity.target} target shots), {n.replay.noParity.shots} without it ({n.replay.noParity.hunt} hunt shots and {n.replay.noParity.target} target shots).</ParityReplay>
+
+In this game the lattice saved {n.replay.saved} shots, and most of the difference comes from the hunt shots: {n.replay.parity.hunt} hunt shots instead of {n.replay.noParity.hunt}, and {n.replay.parity.target} target shots instead of {n.replay.noParity.target}.
+
+One game could be down to luck, but the average of {n.games} games says the same thing. In the simulation at the end of the post, the lattice saves {n.saved.parity} shots a game on average: hunt & target lasts {n.mean['no-parity']} shots on average without the lattice and {n.mean.parity} with it. The lattice halves the cells to search, yet the game is nowhere near halved, because only the hunt shots benefit from the lattice; the shots that finish off ships are much the same either way. The lattice also improves the worst case: the longest of the {n.games} games took {n.worst.parity} shots with it and {n.worst['no-parity']} without.
 
 ### The state machine
 
-Put together, the Normal computer is a small state machine.
+Put the pieces together and the Normal computer becomes a small *state machine*. The name sounds complicated, but the idea is simple: at any moment the computer is in one of a few states, just as a traffic light shows green, amber or red, and the result of each shot moves it on to the next state.
 
-<StateMachine lang="en">Hunt & target as a statechart. Target and Line together form the Targeting state; every sinking passes through the bookkeeping step, which updates the fleet (and with it the lattice) and decides where to go next.</StateMachine>
+<StateMachine lang="en">Hunt & target as a state diagram. Target and Line together make up the Targeting state. Every sinking passes through the Sunk step: it removes the sunk ship from the fleet (and changes the lattice if the shortest ship has changed) and picks the next state.</StateMachine>
 
-The code has no variable that holds the state: the state is a function of what the computer knows. It is *hunting* when there is no open hit, *following a line* when two open hits are adjacent and an unknown cell continues their run, and *targeting* otherwise. Deriving the state instead of storing it means that it can never fall out of step with the board, which is the classic bug of hand-written versions: a destroyer found while chasing a cruiser, a sinking that leaves a stray hit behind, a stored direction that no longer means anything.
+The code keeps no note of “which state am I in right now”. Before every shot, the computer works out its state afresh by looking at the board: if there is no open hit, it is *hunting*. If two open hits lie side by side and a cell not yet fired at sits at one end of their run, it is *following a line*. In every other case it is *targeting*. Because the state is read off the board every time, it can never disagree with the board. Programs that store the state somewhere else fall into well-known traps: a destroyer found while a cruiser is being chased, a stray hit left behind after a sinking, a stored direction that no longer means anything.
 
-The Sunk step is the only moment the computer learns more than hit or miss. Marking the ship's cells as sunk closes its hits. Removing it from the fleet can change $m$, and with it the lattice, and it changes the weight $w$ of the next section.
+The Sunk step is the only moment the computer learns more than miss or hit. The sunk ship’s cells are marked, and that ship’s hits are closed. Once the ship leaves the fleet, the shortest ship can change, and with it the lattice. The weight $w$, which we’ll meet shortly, changes with every sinking.
 
 ## Probability density
 
-Hunt & target uses the fleet only through the length of its shortest ship. The Hard computer uses all of it. Before every shot it asks, for every cell, in how many ways the remaining ships could cover that cell, given everything seen so far.
+Hunt & target uses just one fact about the fleet: the length of its shortest ship. The Hard computer uses the whole fleet. Before every shot it asks, for every cell: without contradicting anything I’ve seen so far, in how many different ways could the remaining ships cover this cell? Then it fires at the cell with the biggest count; if several cells tie, it picks one of them at random.
 
-### Counting placements
+### Counting positions
 
-For each ship $s$ still afloat, let $P_s$ be its *consistent* placements: straight, inside the board, and touching no miss and no cell of a sunk ship. A placement made only of hits is left out too, since a ship with every cell hit would already have sunk. The density of a cell $c$ that has not been fired at is
+Let’s call a position *consistent* if it doesn’t contradict anything seen so far: it lies inside the board and passes over no miss and no cell of a sunk ship. (A position made up only of hits doesn’t count either, because a ship with every cell hit would already have sunk.) We’ll write the *density* of a cell $x$ that hasn’t been fired at yet as $d(x)$. While there are no hits, the definition is very simple: $d(x)$ is the number of consistent positions of all the ships afloat that pass over $x$. Once hits come into play, we’ll give the positions points; we’ll get to that shortly.
 
-$$
-d(c) = \sum_{s} \; \sum_{p \in P_s,\; c \in p} w^{h(p)},
-$$
+<InitialDensity lang="en">The density before the first shot. The number in each cell is how many positions of the five ships pass over it: {n.emptyMin} in the corners, {n.emptyMax} in the four central cells. The Hard computer fires its first shot at one of these four cells.</InitialDensity>
 
-where $h(p)$ is the number of open hits that placement $p$ covers and $w$ is a weight we will come to shortly. Without hits every term is $w^0 = 1$ and $d(c)$ simply counts placements. The computer fires at a cell where $d$ is largest and breaks ties at random.
+We can find these two numbers ourselves. A corner cell is covered by a single horizontal and a single vertical position of each ship: the ones with an end in that corner. For five ships that’s $5 \cdot 2 = 10$. Each of the four central cells, on the other hand, is covered by $L$ horizontal and $L$ vertical positions of a ship of length $L$, because the cell can be the ship’s first, second, … or last cell. For the five ships that makes $2 \cdot (5 + 4 + 3 + 3 + 2) = 2 \cdot 17 = 34$. No cell can collect more than that; as we saw with the cruiser, the count drops towards the edges.
 
-<InitialDensity lang="en">The density before the first shot: the number of positions of the five ships that cover each cell, from {n.emptyMin} in the corners to {n.emptyMax} in the four central cells, where the Hard computer fires first.</InitialDensity>
+That’s also where the method gets its name: divide a cell’s count by the total number of positions ({n.placements}), and you get the probability that a position picked at random from all of them passes over that cell.
 
-Edges and corners are covered by fewer placements, since a ship there can only extend inwards. A cell lies on at most $L$ horizontal and $L$ vertical placements of a ship of length $L$, so its count is at most $2 \cdot 17 = 34$ for the full fleet, and the four central cells reach that bound. The number on the cell in row $r$ and column $c$ is the sum, over the five ships, of the counts $f_L(c) + f_L(r)$ from the start of the post. Divided by the total number of placements, {n.placements}, $d(c)$ is the probability that a placement drawn at random from all of them covers $c$, which is where the name comes from.
+Misses rule positions out, and the density drops around them:
 
-Misses remove placements, and the density drops around them:
+<HuntSnapshot lang="en">The first {n.hunt.shots} shots of a game on Hard (seed {n.hunt.seed}), all of them misses, and the density worked out for shot {n.hunt.next}. The code doesn’t even mention a checkerboard, yet none of these shots is next to another. The highest density is now at {n.hunt.peaks}, in the corner the misses haven’t reached yet.</HuntSnapshot>
 
-<HuntSnapshot lang="en">The first {n.hunt.shots} shots of a Hard game (seed {n.hunt.seed}), all misses, and the density for shot {n.hunt.next}. Nothing in the code mentions parity, yet no two of these shots are side by side. The highest density is now at {n.hunt.peaks}, in the corner the misses have not reached.</HuntSnapshot>
-
-A miss removes every placement through it, which lowers the count of its neighbours most, so the next peak tends to lie some distance away. That is parity rediscovered from first principles, and a little more: the density also knows that the edges are poor hunting ground, and that a gap too short for the remaining ships in one direction can only hold them in the other.
+A miss wipes out every position that passes over it, and it lowers its neighbours’ counts the most. That’s why the next peak usually turns up a little further away. The density finds the checkerboard idea all by itself, without anyone telling it. It even knows more: that the edges are poor hunting ground, and that a gap too narrow for the remaining ships in one direction can only hold them in the other.
 
 ### Weighting the hits
 
-Now suppose the computer hits E5. If every placement counted 1, nothing would change: placements through a hit are still allowed, exactly as before, so every other cell keeps the count it had before the hit. A hit is the most valuable thing the computer knows, and the count cannot see it. That is what the weight is for.
+Now suppose the computer hits E5. If every position counted as 1, nothing would change: the positions through E5 are still possible, just as they were before, so every cell would keep its old count. Yet a hit is the most valuable thing the computer knows, and a plain count can’t see it. That’s what the weight is for.
 
-The game uses $w = 1 + 2\sum_s L_s$, summed over the ships afloat: {n.weight} for the full fleet. The choice is not arbitrary. Group the placements through $c$ by the number $k$ of open hits they cover, and let $N_k(c)$ be the size of group $k$. Then
+The rule is this: a position that touches no open hit scores 1 point, and a position that passes over one open hit scores {n.weight} points. A position that passes over two open hits at once scores {n.weight} · {n.weight} points, and so on. A cell’s density is the total score of the consistent positions that pass over it. Let’s give this number, {n.weight}, a name: $w$. It’s worked out from the lengths of the ships afloat: twice their total length, plus one. For the full fleet, 1 + 2 · {n.shipCells} = {n.weight}.
+
+Why this number? As we just counted, with the full fleet no cell is covered by more than {n.emptyMax} positions, and $w$ is exactly one more than that. So however many ordinary 1-point positions pile up on a cell, they can never catch up with the score of a single position through a hit. As ships sink, both this ceiling and $w$ get smaller, but $w$ always stays one above the ceiling.
+
+This works a lot like the digits we learned about at school. In our base-ten system a digit is at most 9, so the ones digit can never catch up with even a single ten. When we compare 472 with 469, we look at the hundreds first, then the tens; the ones only get a say if the tens are equal too. The density works the same way, except that the base isn’t 10 but $w$:
 
 $$
-d(c) = N_0(c) + N_1(c)\,w + N_2(c)\,w^2 + \cdots,
+d(x) = N_0(x) + N_1(x) \cdot w + N_2(x) \cdot w^2 + \cdots
 $$
 
-and since no cell lies on more than $2\sum_s L_s = w - 1$ placements, every $N_k(c)$ is between $0$ and $w - 1$. In other words, the $N_k(c)$ are the *digits of $d(c)$ in base $w$*. Comparing two densities means comparing their digits from the top: the computer first maximises the number of open hits a placement through the cell can cover, and only among the cells that tie on that does it count placements.
+Here $w^2$ means $w \cdot w$. $N_0(x)$ is the number of positions through $x$ that touch no open hit; $N_1(x)$ is the number that pass over exactly one open hit, $N_2(x)$ the number that pass over two open hits at once, and so on. Since at most $w - 1$ positions pass over a cell in all, each of these numbers stays between 0 and $w - 1$: they are the digits of the number $d(x)$ in base $w$, just as $472 = 2 + 7 \cdot 10 + 4 \cdot 10^2$. Comparing two cells starts from the top digit, just like comparing two numbers. The computer first asks: at most how many open hits can a position through this cell touch? Only among the cells that tie on that question does the number of positions decide.
 
-<HitDensity lang="en">The density after one hit at E5, and after a second hit at F5. Under each board, the peak written in base $w$ (here {n.weight}): its leading digit counts the placements through the peak that cover the most hits.</HitDensity>
+<HitDensity lang="en">The density after a single hit at E5, and after a second hit at F5. Under each board, the peak value is written in base $w$ (here {n.weight}); its top digit counts the positions through the peak that touch the most hits.</HitDensity>
 
-With one hit at E5, the peak is at {n.oneHit.peaks}, with {n.oneHit.through} · {n.weight} + {n.oneHit.none} = {n.oneHit.value}: {n.oneHit.through} placements through each of them also cover E5, and {n.oneHit.none} do not. The other neighbours, {n.oneHit.others}, score {n.oneHit.othersValue}: E5 is not quite in the centre, and there is a little less room above it and to its left. After the second hit, only the cells that continue the line lie on placements through *both* hits, so their leading digit moves to the $w^2$ place, and the peak is at the two ends, {n.twoHits.peaks}: {n.twoHits.both} · {n.weight}² + {n.twoHits.one} · {n.weight} + {n.twoHits.none} = {n.twoHits.value}.
+After the single hit at E5, the peak is at {n.oneHit.peaks}: {n.oneHit.through} · {n.weight} + {n.oneHit.none} = {n.oneHit.value}. Read it like this: of the positions through each of these cells, {n.oneHit.through} also pass over E5 and bring in {n.weight} points each; {n.oneHit.none} don’t, and bring in 1 point each. E5’s other neighbours, {n.oneHit.others}, are just behind, on {n.oneHit.othersValue} points: E5 isn’t quite in the middle of the board, and there’s a little less room above it and to its left. After the second hit, positions that pass over both hits can only go through the cells that continue the line, so the top digit of those cells moves up to the $w^2$ place. The peak is now at the two ends of the line, {n.twoHits.peaks}: {n.twoHits.both} · {n.weight}² + {n.twoHits.one} · {n.weight} + {n.twoHits.none} = {n.twoHits.value}.
 
-Nobody wrote the line-extension rule into the Hard computer; it falls out of the arithmetic. Much of the state machine above does too: the position $k$ of the leading digit of the largest density plays the role of the state. With $k = 0$ the computer is hunting, with $k = 1$ it is targeting, and with $k \ge 2$ it is working along a line of hits. It even goes straight for a single unknown cell between two hits, such as F5 between E5 and G5, which the Normal computer treats as just one more neighbour. A sinking removes a ship, lowers $w$ and closes its hits, and the digits rearrange themselves.
+Nobody wrote the rule “extend the line” into the Hard computer; it comes out of the arithmetic on its own. So does most of the state machine above: the top digit of the largest density does the job of the state. If that digit is in the ones place, the computer is hunting; in the $w$ place, it is targeting; in the $w^2$ place or higher, it is working its way along a line of hits. It even goes straight for a single cell not yet fired at between two hits, such as F5 between E5 and G5; for the Normal computer, that cell is just one of the neighbours. When a ship sinks, its hits are closed, $w$ gets smaller and the digits rearrange themselves.
 
-### Try it
+### Try it yourself
 
-The lab below runs the game's density function in your browser. Mark misses and hits and watch the peak move. When a ship sinks in your imagined game, mark its cells as sunk and untick it: the weight $w$ drops and the density redistributes over the ships that are left.
+The lab below runs the game’s density calculation in your browser. Mark misses and hits, and watch the peak move. When a ship sinks in the game you’re imagining, mark its cells as “Sunk” and untick the ship in the list: $w$ gets smaller, and the density spreads itself over the ships that are left.
 
-<DensityLab lang="en">The density lab. The tint is $d$, relative to its largest value; the dashed squares are where the Hard computer would fire. The panel shows the density of the cell under the pointer or the keyboard focus, written in base $w$ once a hit is involved.</DensityLab>
+<DensityLab lang="en">The density lab. The darker a cell’s tint, the closer its $d$ is to the largest value; the dashed squares are the cells the Hard computer would fire at. The panel shows the density of the cell under the pointer or the keyboard focus; once a hit is involved, the value is written in base $w$.</DensityLab>
 
-Two experiments worth trying: place two hits side by side and see the peaks jump to the ends of the line, then put a miss at one end; or leave the board empty and untick every ship except the carrier, and see how strongly the density avoids the edges when only long ships remain.
+Two things are worth trying. Put two hits side by side and watch the peak jump to both ends of the line; then add a miss at one end. Or leave the board empty and untick every ship except the carrier: with only one long ship left, see how strongly the density keeps away from the edges.
 
 ### What the count leaves out
 
-The density treats every ship on its own, so it also counts combinations that cannot happen, such as a carrier and a battleship on the same cells. The exact answer would weigh each whole fleet that is consistent with the shots so far, some $3 \times 10^{10}$ of them before the first shot, and even that would only be right if the opponent placed ships uniformly at random. Sampling consistent fleets at random, a Monte Carlo estimate of the same density, is the natural next step. The per-ship count is cheap, easy to reason about and, as the next section shows, already good. (A person who knows how it thinks might hide ships along the edges, which the density searches last.)
+The density thinks about each ship on its own, so it also counts positions that could never appear together in a single fleet, such as a carrier and a battleship on the same cells. For the exact answer you would have to weigh, one by one, every fleet that agrees with the shots so far; before the first shot there are {n.fleets} of them. And even that would only be right if the opponent placed the ships completely at random. Drawing random samples from the consistent fleets (the Monte Carlo method) would be the natural next step. Counting ship by ship, though, is cheap, easy to follow and, as the next section shows, already works well. (Someone who knows how the computer thinks could hide their ships along the edges, which the density searches last.)
 
 ## How many shots?
 
-To compare the strategies I let each of them sink the same {n.games} fleets. Game $i$ places the fleet with the game's own random placement, seeded with $i$, and gives the computer a generator seeded with $7919\,i + 17$ (mulberry32, as in the game's tests), so every game can be replayed exactly. The fourth strategy, hunt & target without parity, is the Normal computer with its lattice switched off: it hunts at random and targets like Normal.
+To compare the strategies, I had each of them sink the same {n.games} fleets. The games are numbered: in game number $i$, the fleet is set up by the game’s own random placement with seed $i$, and the computer’s random choices start from seed $7919\,i + 17$ (the random number generator is mulberry32, as in the game’s tests). So every game can be replayed exactly; game {n.replay.seed}, which you stepped through above, is one of them. Besides the three levels, the table below has a fourth strategy: hunt & target without parity. That’s the Normal computer with its lattice switched off: it hunts at random and targets like Normal.
 
 <SimulationTable lang="en" />
 
-<ShotsChart lang="en">The share of the {n.games} games that were over within a given number of shots. The dotted curve is the exact distribution of random fire derived above; the simulated Easy games follow it closely.</ShotsChart>
+The “Middle 80%” column of the table shows the range that is left once the fastest 10% and the slowest 10% of the games are set aside.
 
-Random fire matches the formula: {n.mean.random} shots on average in the simulation, against {n.random.expected} predicted. Targeting is the big step, from {n.mean.random} shots on average to {n.mean['no-parity']}. Parity saves {n.saved.parity} more, and the density another {n.saved.density}: the Hard computer finishes {n.within50.density} of its games within 50 shots, against {n.within50.parity} for Normal, and none of its games took more than {n.worst.density} shots. With {n.games} games per strategy, each mean is accurate to within about {n.margin} shots (two standard errors), far less than the gaps between them.
+<ShotsChart lang="en">The share of the {n.games} games that were over within a given number of shots; the further left a curve is, the faster the strategy. The dotted curve is the exact distribution of random fire, whose formula we found above; the simulated Easy games follow it closely.</ShotsChart>
+
+The biggest leap comes from targeting: from the Easy computer’s {n.mean.random} shots on average (just as the formula says) to {n.mean['no-parity']} for hunt & target without parity. The lattice saves {n.saved.parity} more shots, and the density another {n.saved.density}. The Hard computer finishes {n.within50.density} of its games within 50 shots, the Normal computer {n.within50.parity}; none of the Hard computer’s games lasted longer than {n.worst.density} shots. These averages depend a little on luck too: each of them could be off by about {n.margin} shots either way (two standard errors). The gaps between the strategies are much bigger than that, so the ranking isn’t down to chance.
 
 ## Three ideas
 
-Stripped of the details, the hunt & target algorithm is three ideas, each more general than the last. A hit is information about its neighbours, so follow it up: that is target mode. Shots that can be explained by the same ship are wasteful, so spread them on a lattice that no ship can avoid: that is parity. And instead of either rule, count everything that is still possible and let the weights decide: that is the probability density, and the rules come back out of it as digits.
+Leave the details aside and three ideas remain, each more general than the one before. A hit carries information about its neighbours, so follow it up: that’s target mode. Two shots that the same ship could explain are a waste, so spread your shots on a lattice that no ship can escape: that’s parity. And instead of writing these rules one by one, count everything that is still possible and let the weights decide: that’s the probability density, and the rules come back out of it as digits.
 
-You can play all three levels in the <a href={gameHref}>Battleship game</a>. On Hard, turn on the heat map during a battle to watch $d$ spread over your own fleet as the computer closes in.
+You can try all three levels in the <a href={gameHref}>Battleship game</a>. On Hard, turn on the heat map during a battle and watch $d$ spread over your own fleet as the computer closes in. And maybe next time you play Battleship, you’ll remember the checkerboard too.
 
 ## Further reading
 
-- DataGenetics, [“Battleship”](http://www.datagenetics.com/blog/december32011/index.html) (2011): a classic comparison of random fire, hunt & target, parity and probability density, with many more charts.
+- DataGenetics, [“Battleship”](http://www.datagenetics.com/blog/december32011/index.html) (2011): a classic post comparing random fire, hunt & target, parity and probability density, with many more charts.

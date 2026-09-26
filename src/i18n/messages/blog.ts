@@ -27,8 +27,12 @@ const en = {
     readingTimeLabel: 'Reading time',
     readingTime: (minutes: number) => `${minutes} min`,
     contents: 'Contents',
-    /** Next to "Contents": how many headings the list holds (sections and subsections). */
-    contentsCount: (entries: number) => `${entries} ${entries === 1 ? 'section' : 'sections'}`,
+    /**
+     * Next to "Contents": how many headings the list holds, sections and subsections together.
+     * "Headings", not "sections": the list numbers only its sections (1, 2, 3; subsections are
+     * 1.1, 1.2), so "17 sections" over a list whose last number is 9 would not add up.
+     */
+    contentsCount: (entries: number) => `${entries} ${entries === 1 ? 'heading' : 'headings'}`,
     /** Shown when the article is in the other language and has no translation. */
     onlyIn: (language: string) => `This article is only available in ${language}.`,
     relatedProject: 'Related project',

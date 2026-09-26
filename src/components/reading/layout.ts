@@ -8,11 +8,14 @@
  */
 
 /**
- * Text measure in rem: 736 px, a little wider than the 45rem column posts had without contents.
+ * Text measure in rem: 736 px. The old layout set a post's text at 45rem without contents; with
+ * contents, beside the sidebar, at 45rem at 1024 px, up to about 53rem just below 1280 px and at
+ * 48rem from there. 46rem is a compromise between that width and the length of a line.
  * The body text is 18 px from Tailwind's sm (sm:prose-lg) with a 1.78 line height; IBM Plex Sans
- * sets about 0.44em per character, so a full line holds about 90 characters of English or
+ * sets about 0.44em per character, so a full line holds about 85 to 95 characters of English or
  * Turkish. The tall line spacing keeps lines of that length easy to follow; a measure of 70 to 80
- * characters would need a column (about 40rem) narrower than the old one.
+ * characters would need a column of about 40rem. Change --reading-measure in reading.css
+ * together with this number (tests/reading-layout.test.ts keeps the two in step).
  */
 export const READING_MEASURE_REM = 46;
 

@@ -33,11 +33,12 @@ const { entries, contentLang, lang, class: className } = Astro.props;
 const m = blogMessages[getLocale(Astro)].post;
 const labelId = 'toc-label';
 
-// Rows are compact for a mouse and 44 px tall for touch. The number column (w-10) is wide enough
-// for "10.10"; subsection lists are indented by that column plus the gap (ps-12), so their
-// numbers line up under their section's title.
+// Rows are compact for a mouse and at least 44 px tall for touch: taller padding (12 + 20 + 12),
+// not centring, so a title that wraps keeps its number on its first line. The number column
+// (w-10) is wide enough for "10.10"; subsection lists are indented by that column plus the gap
+// (ps-12), so their numbers line up under their section's title.
 const row =
-  'flex gap-2 rounded-lg px-2 py-2 text-sm leading-snug text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 pointer-coarse:min-h-11 pointer-coarse:items-center dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-50';
+  'flex gap-2 rounded-lg px-2 py-2 text-sm leading-snug text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-950 pointer-coarse:min-h-11 pointer-coarse:py-3 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-50';
 const number = 'w-10 shrink-0 font-mono text-xs leading-5 text-zinc-500 tabular-nums dark:text-zinc-400';
 ---
 

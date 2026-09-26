@@ -22,7 +22,7 @@ const projects: ConsoleProjectInput[] = [
     title: 'Karecik',
     summary: 'Kafe ve restoranlar için QR menü platformu.',
     lang: 'tr',
-    stack: ['Go', 'PostgreSQL', 'Cloudflare'],
+    stack: ['Go', 'PostgreSQL'],
     isOpenSource: true,
     stage: 'production',
     repositoryUrl: 'https://github.com/KaanBahaSever/karecik',
@@ -144,7 +144,7 @@ test('every link in the data is one the renderer will create', () => {
 test('project files show the stack, status, page and links in the page language', () => {
   const tr = build('tr');
   const karecik = fileLines(tr, ['projects', 'karecik.txt']).map(plainText).join('\n');
-  assert.match(karecik, /teknolojiler Go · PostgreSQL · Cloudflare/);
+  assert.match(karecik, /teknolojiler Go · PostgreSQL/);
   assert.match(karecik, /durum Açık kaynak · Canlıda/);
   assert.match(karecik, /sayfa \/tr\/projects\/karecik\//);
   assert.match(karecik, /kaynak kodu github\.com\/KaanBahaSever\/karecik/);
@@ -215,6 +215,69 @@ test('isSafeHref and displayUrl', () => {
   assert.equal(displayUrl('https://www.asion.app/'), 'asion.app');
   assert.equal(displayUrl('https://github.com/KaanBahaSever/karecik'), 'github.com/KaanBahaSever/karecik');
   assert.equal(displayUrl('mailto:a@b.c'), 'a@b.c');
+});
+
+/** Every line the console can show for a locale: files, whoami, projects and the banner. */
+function everyText(locale: 'en' | 'tr'): string {
+  const data = build(locale);
+  return [...allLines(data.root), ...data.docs.banner, ...data.docs.whoami, ...data.docs.projects]
+    .map(plainText)
+    .join('\n');
+}
+
+test('the console never calls the owner an engineer, in either language', () => {
+  // Other people keep their titles: the GDSC guest is a network security engineer.
+  const guest = /network security engineer|ağ güvenliği mühendis\p{L}*/giu;
+  for (const locale of LOCALES) {
+    const all = everyText(locale);
+    assert.doesNotMatch(all.replace(guest, ''), /engineer|mühendis/i, locale);
+  }
+  assert.match(everyText('en'), /crowd\.inc — Software Developer, July 2021 – March 2024/);
+  assert.match(everyText('tr'), /crowd\.inc — Yazılım Geliştirici, Temmuz 2021 – Mart 2024/);
+});
+
+test('skills/devops.txt covers the CI/CD work, and every run link finds its file from anywhere', () => {
+  for (const locale of LOCALES) {
+    const data = build(locale);
+    const devops = fileLines(data, ['skills', 'devops.txt']).map(plainText).join('\n');
+    for (const fact of [/GitHub Actions/, /Bash, Batch/, /Asion/]) assert.match(devops, fact, locale);
+
+    // `run` spans are commands; the ones that cat a file must resolve from any directory.
+    const lines = [...allLines(data.root), ...data.docs.whoami, ...data.docs.banner];
+    const commands = lines.flatMap(spansOf).flatMap((span) => (typeof span !== 'string' && span.run ? [span.run] : []));
+    const cats = commands.filter((command) => command.startsWith('cat ~/'));
+    assert.ok(cats.length >= 2, locale);
+    for (const command of cats) {
+      for (const cwd of [[], ['projects'], ['skills']]) {
+        const result = execute(command, { cwd, root: data.root, projects: data.projects, history: [], home: data.home });
+        assert.equal(result.output[0]?.kind, 'file', `${locale}: ${command} from /${cwd.join('/')}`);
+      }
+    }
+  }
+});
+
+test('about.txt tells the current story in both languages', () => {
+  const en = fileLines(build('en'), ['about.txt']).map(plainText).join('\n');
+  assert.match(en, /one low-altitude \(5,000 ft\) and two high-altitude \(10,000 ft\)/);
+  assert.doesNotMatch(en, /launched successfully|high-power/);
+  assert.match(en, /2016: programming fundamentals in C# at a vocational high school/);
+  assert.match(en, /Hunt & Target algorithm came later/);
+  assert.doesNotMatch(en, /aims with probability densities/);
+  assert.match(en, /rewritten from scratch as Rocket-Up/);
+  assert.match(en, /Google Developer Student Clubs core team, 2023/);
+  assert.match(en, /Mathematics Club/);
+
+  const trData = build('tr');
+  const tr = fileLines(trData, ['about.txt']).map(plainText).join('\n');
+  assert.match(tr, /bir alçak irtifa \(5\.000 ft\) ve iki yüksek irtifa \(10\.000 ft\)/);
+  assert.match(tr, /Rocket-Up/);
+  assert.match(tr, /Matematik Kulübü/);
+  assert.match(tr, /av ve hedef \(hunt & target\) algoritmasını sonradan geliştirdim/);
+  assert.doesNotMatch(tr, /Hunt & Target|Kodun çevresinde|kodun yanında/);
+  // The Rocket-Up page and the research repository are linked, localized where they are site pages.
+  const links = hrefs(fileLines(trData, ['about.txt']));
+  assert.ok(links.includes('/tr/projects/rocket-up/'));
+  assert.ok(links.includes('https://github.com/KaanBahaSever/AutonomousParachute'));
 });
 
 test('both catalogues describe every command, and Turkish is not left in English', () => {

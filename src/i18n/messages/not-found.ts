@@ -29,7 +29,7 @@ const en = {
     blog: 'Notes on mathematics and the things I build',
     tools: 'Private utilities that run in your browser',
     games: 'Battleship and tic-tac-toe against algorithmic opponents',
-    about: 'Background and the engineering journey so far',
+    about: 'Background and the road from mathematics to systems software',
   } satisfies Record<NotFoundLink, string>,
 };
 
@@ -51,7 +51,7 @@ const tr: NotFoundMessages = {
     blog: 'Matematik ve geliştirdiğim şeyler üzerine notlar',
     tools: 'Tarayıcınızda çalışan, gizliliğe saygılı araçlar',
     games: 'Algoritmik rakiplere karşı Amiral Battı ve XOX',
-    about: 'Geçmişim ve bugüne kadarki mühendislik yolculuğum',
+    about: 'Geçmişim ve matematikten sistem yazılımına uzanan yolum',
   },
 };
 

@@ -57,7 +57,7 @@ const {
 
 const locale = getLocale(Astro);
 const t = common[locale];
-const { start, end, endLabel, spoken } = formatPeriod(period, locale);
+const { start, end, endLabel, spoken, text: periodText } = formatPeriod(period, locale);
 const hasMeta = Boolean(organization) || details.length > 0;
 const columns = layout === 'columns';
 
@@ -111,10 +111,12 @@ const body = columns ? 'sm:col-start-2' : '';
 
   {/*
     The period: <time> elements for machines, one spoken phrase with full month names for screen
-    readers ("July 2021 to March 2024"), and the abbreviated en-dash version hidden from them. Each date stays in one piece; a
-    narrow column may break only at the dash; in the columns layout the period spans the title
-    and organisation rows, so a two-line period never pushes the organisation away from the
-    title. Kept on one line: whitespace around the separator would render as extra spaces.
+    readers ("July 2021 to March 2024"), and the abbreviated en-dash version hidden from them.
+    Each date stays in one piece; a narrow column may break only at the dash; in the columns
+    layout the period spans the title and organisation rows, so a two-line period never pushes
+    the organisation away from the title. Kept on one line: whitespace around the separator
+    would render as extra spaces. A period known only in words ("Upper years") is plain text:
+    there is no date to mark up and nothing to spell out.
   */}
   <p
     class:list={[
@@ -122,7 +124,13 @@ const body = columns ? 'sm:col-start-2' : '';
       columns ? 'sm:col-start-1 sm:row-span-2 sm:row-start-1 sm:pt-px' : 'row-start-1 mb-0.5',
     ]}
   >
-    <span class="sr-only">{spoken}</span><span aria-hidden="true"><time datetime={start.datetime} class="whitespace-nowrap">{start.label}</time>{endLabel !== null && <> – {end !== null && end !== 'present' ? <time datetime={end.datetime} class="whitespace-nowrap">{endLabel}</time> : <span class="whitespace-nowrap">{endLabel}</span>}</>}</span>
+    {
+      start === null ? (
+        <span>{periodText}</span>
+      ) : (
+        <><span class="sr-only">{spoken}</span><span aria-hidden="true"><time datetime={start.datetime} class="whitespace-nowrap">{start.label}</time>{endLabel !== null && <> – {end !== null && end !== 'present' ? <time datetime={end.datetime} class="whitespace-nowrap">{endLabel}</time> : <span class="whitespace-nowrap">{endLabel}</span>}</>}</span></>
+      )
+    }
   </p>
 
   {summary && <p class:list={['mt-2 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300', body]}>{summary}</p>}

@@ -14,7 +14,7 @@ import {
   type ResumePeriod,
 } from '../src/data/resume.ts';
 import { LOCALES } from '../src/i18n/config.ts';
-import { parseResumeDate } from '../src/utils/resume-dates.ts';
+import { isDated, parseResumeDate } from '../src/utils/resume-dates.ts';
 
 const ALL = { EXPERIENCE, EDUCATION, VOLUNTEERING, CERTIFICATIONS, ACTIVITIES, SKILLS, LANGUAGES, FOCUS };
 
@@ -44,16 +44,63 @@ test('every translated field has non-empty text in both languages', () => {
   }
 });
 
-test('experience lists only the crowd.inc role', () => {
+test('experience lists only the crowd.inc role, as Software Developer', () => {
   assert.equal(EXPERIENCE.length, 1);
   const [job] = EXPERIENCE;
   assert.equal(resumeText(job!.organization, 'en'), 'crowd.inc');
-  // The English title is kept on the Turkish page too, and marked as English there.
-  for (const locale of LOCALES) {
-    assert.equal(resumeText(job!.role, locale), 'Full-Stack Software Engineer / Systems Contributor');
-  }
-  assert.equal(job!.roleLang, 'en');
+  assert.equal(resumeText(job!.role, 'en'), 'Software Developer');
+  assert.equal(resumeText(job!.role, 'tr'), 'Yazılım Geliştirici');
+  // Translated, so neither page needs to mark the title as another language.
+  assert.equal(job!.roleLang, undefined);
   assert.deepEqual([job!.start, job!.end], ['2021-07', '2024-03']);
+  // The ownership highlights stay.
+  const highlights = job!.highlights.en.join(' ');
+  for (const topic of [/RBAC/, /public and private/, /pagination/, /Linux servers/, /unit and integration test/]) {
+    assert.match(highlights, topic);
+  }
+});
+
+test('the résumé never calls the owner an engineer, in either language', () => {
+  // Other people keep their titles: the GDSC guest is a network security engineer.
+  const guest = /network security engineer|ağ güvenliği mühendis/gi;
+  const text = JSON.stringify(ALL).replace(guest, '');
+  assert.doesNotMatch(text, /engineer|mühendis/i);
+});
+
+test('volunteering carries the current facts', () => {
+  const byTitle = (title: string) => VOLUNTEERING.find((item) => resumeText(item.title, 'en') === title);
+
+  const rockets = byTitle('Istanbul University Rocket Club');
+  assert.ok(rockets && isDated(rockets));
+  assert.deepEqual([rockets.start, rockets.end], ['2019', '2022']);
+  assert.match(rockets.highlights.en.join(' '), /one low-altitude rocket \(5,000 ft\) and two high-altitude rockets \(10,000 ft\)/);
+  // Turkish groups thousands with a dot.
+  assert.match(rockets.highlights.tr.join(' '), /bir alçak irtifa \(5\.000 ft\) ve iki yüksek irtifa \(10\.000 ft\)/);
+  assert.doesNotMatch(JSON.stringify(rockets), /three high-power|launches/i);
+
+  const gdsc = byTitle('Google Developer Student Clubs');
+  assert.ok(gdsc && isDated(gdsc));
+  assert.deepEqual([gdsc.start, gdsc.end], ['2023', undefined]);
+  const gdscText = gdsc.highlights.en.join(' ');
+  for (const fact of [/Flask, HTML and Git\/GitHub/, /Cyber Security Week/, /CCIE-certified/]) assert.match(gdscText, fact);
+
+  const maths = byTitle('Mathematics Club');
+  assert.ok(maths);
+  // No dates on record: a period in words, never a made-up year.
+  assert.ok(!isDated(maths));
+  assert.equal(maths.start, undefined);
+  assert.deepEqual(maths.periodLabel, { en: 'Upper years', tr: 'Son sınıflar' });
+  assert.match(maths.highlights.en.join(' '), /seminars and logic and mathematics competitions/);
+});
+
+test('skills feature DevOps and automation, and the focus mentions the Asion pipelines', () => {
+  const devops = SKILLS.find((group) => group.label.en === 'DevOps & automation');
+  assert.ok(devops, 'a DevOps & automation group');
+  const items = devops.items.map((item) => resumeText(item, 'en'));
+  for (const skill of ['GitHub Actions', 'Bash', 'Batch', 'Python scripting', 'Cross-compilation runners']) {
+    assert.ok(items.includes(skill), skill);
+  }
+  for (const locale of LOCALES) assert.match(FOCUS[locale], /Asion/);
 });
 
 test('links point at the page in the reader’s language where one exists', () => {
@@ -85,6 +132,11 @@ test('skills lead with C++ and Go', () => {
 test('every period is well formed and never ends before it starts', () => {
   const periods: ResumePeriod[] = [...EXPERIENCE, ...EDUCATION, ...VOLUNTEERING, ...CERTIFICATIONS, ...ACTIVITIES];
   for (const period of periods) {
+    if (!isDated(period)) {
+      // A period in words has text in both languages and no stray dates.
+      for (const locale of LOCALES) assert.ok(period.periodLabel[locale].trim(), `empty period label (${locale})`);
+      continue;
+    }
     const start = parseResumeDate(period.start);
     if (period.end === undefined || period.end === 'present') continue;
     const end = parseResumeDate(period.end);

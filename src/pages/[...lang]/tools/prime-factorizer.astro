@@ -51,28 +51,28 @@ const tips: Localized<ToolTip[]> = {
   ],
   tr: [
     {
-      lead: 'Neler yazılabilir?',
-      body: `En fazla ${MAX_DIGITS} basamaklı tam sayılar; ayırıcıyla ya da ayırıcısız: 1 000 000, 1_000_000 ve 1.000.000 yazımlarının hepsi geçerlidir. Negatif bir −n sayısı −1 × n olarak çarpanlarına ayrılır; 0 ve 1 ise çarpanlara ayrılmak yerine açıklanır.`,
+      lead: 'Neler yazabilirsiniz?',
+      body: `En fazla ${MAX_DIGITS} basamaklı tam sayılar yazabilirsiniz. Ayırıcı kullanmak size kalmış: 1 000 000, 1_000_000 ve 1.000.000 yazımlarının hepsi olur. Negatif bir −n sayısı −1 × n olarak çarpanlarına ayrılır. 0 ve 1 ise çarpanlarına ayrılmaz; bunun yerine bir açıklama gösterilir.`,
     },
     {
       lead: 'Nasıl çalışır?',
-      body: `Önce ${tr.number(SMALL_PRIME_LIMIT)} değerinin altındaki her asal sayıyla deneme bölmesi yapılır. Kalan kısım, sayının tam kuvvet olup olmadığına ve √n’ye yakın iki çarpanı olup olmadığına hızlıca bakıldıktan sonra Pollard’ın rho yöntemine (Brent’in iyileştirmesiyle) verilir. Tüm hesaplar BigInt ile tam olarak yapılır.`,
+      body: `Araç önce sayıyı ${tr.number(SMALL_PRIME_LIMIT)} değerinin altındaki bütün asal sayılara bölmeyi dener. Sonra kalan kısım bir tam kuvvet mi, √n’ye yakın iki çarpanı var mı diye hızlıca bakar. En son bu kısmı, Pollard’ın rho yönteminin Brent sürümüyle ayrıştırır. Bütün hesaplarda BigInt kullanılır, yani hiçbir sonuç yuvarlanmaz.`,
     },
     {
       lead: 'Asal mı, olası asal mı?',
-      body: '3,3 × 10²⁴ değerinin altında, ilk 13 asal sayıyı taban alan Miller–Rabin testi bir ispattır; sonuç kesindir. Daha büyük çarpanlar Baillie–PSW testiyle denetlenir: bu testi geçen hiçbir bileşik sayı bilinmiyor, ancak test bir ispat olmadığı için bu çarpanlar † ile işaretlenir.',
+      body: '3,3 × 10²⁴ değerinin altında, ilk 13 asal sayıyı taban olarak kullanan Miller–Rabin testi bir ispattır, yani sonuç kesindir. Daha büyük çarpanlar Baillie–PSW testiyle denetlenir. Bu testi geçen hiçbir bileşik sayı bilinmiyor, ama test bir ispat değil. Bu yüzden bu çarpanlar † ile işaretlenir.',
     },
     {
-      lead: 'Çok uzun sürerse.',
-      body: `Rho yöntemi bir p asal çarpanını bulmak için yaklaşık √p adım atar; bu yüzden iki 20 basamaklı asalın çarpımı olan 40 basamaklı bir sayı saatler sürebilir. Arama ${tr.number(seconds)} saniye sonra durur ve hangi çarpanın kaldığını gösterir; dilerseniz aramayı uzatabilirsiniz.`,
+      lead: 'Çok uzun sürerse ne olur?',
+      body: `Rho yöntemi bir p asal çarpanını yaklaşık √p adımda bulur. Bu yüzden 20 basamaklı iki asalın çarpımı olan 40 basamaklı bir sayıyı çarpanlarına ayırmak saatler sürebilir. Arama ${tr.number(seconds)} saniye sonra durur ve araç geriye hangi çarpanın kaldığını gösterir. İsterseniz aramayı uzatabilirsiniz.`,
     },
     {
       lead: 'Carmichael sayıları.',
-      body: '561 = 3 × 11 × 17, kendisiyle aralarında asal olan her a tabanı için Fermat testini (aⁿ⁻¹ ≡ 1 mod n) tıpkı bir asal sayı gibi geçer. Miller–Rabin testi ara adımlarda 1’in kareköklerini de denetlediği için bu sayıyı yakalar.',
+      body: '561 = 3 × 11 × 17 sayısı, kendisiyle aralarında asal olan her a tabanı için Fermat testini (aⁿ⁻¹ ≡ 1 mod n) tıpkı bir asal sayı gibi geçer. Miller–Rabin testi ise ara adımlarda 1’in kareköklerine de baktığı için bu sayıyı yakalar.',
     },
     {
-      lead: 'Klavye.',
-      body: 'Enter tuşu sayıyı çarpanlarına ayırır, Esc tuşu uzun bir aramayı iptal eder. Bir örneği seçtiğinizde sayı alana yazılır ve hemen çarpanlarına ayrılır.',
+      lead: 'Klavye kısayolları.',
+      body: 'Enter tuşuna basınca sayı çarpanlarına ayrılır, Esc tuşuna basınca da uzun süren arama iptal edilir. Bir örneğe tıkladığınızda sayı alana yazılır ve hemen çarpanlarına ayrılır.',
     },
   ],
 };

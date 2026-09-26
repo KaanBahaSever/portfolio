@@ -202,14 +202,14 @@ const tr: BinaryTextMessages = {
   meta: {
     title: 'İkili ↔ metin dönüştürücü',
     description:
-      'Metni ikili koda, ikili kodu metne tarayıcınızda dönüştürün: 8 bitlik gruplar hâlinde UTF-8 baytları, ASCII denetimi, hataların tam konumu ve karakter bazında döküm.',
+      'Metni ikili koda, ikili kodu metne tarayıcınızda çevirin. UTF-8 baytlarını 8 bitlik gruplar hâlinde görün, ASCII denetimi yapın, hataların tam yerini bulun ve her karakteri tek tek inceleyin.',
   },
   header: {
     eyebrow: 'UTF-8 · tarayıcınızda çalışır',
-    lead: 'İki alandan birine yazın, diğeri anında güncellenir: metin, UTF-8 baytlarının bitlerine; bitler de yeniden metne dönüşür. Aşağıda her karakter, kod noktasına ve baytlarına ayrılır.',
+    lead: 'İki alandan birine yazın, diğeri anında güncellenir. Metin yazarsanız metnin UTF-8 baytlarını bit olarak, bit yazarsanız metni görürsünüz. Aşağıda da her karakter kod noktasına ve baytlarına ayrılır.',
   },
   toolLabel: 'İkili kod ve metin dönüştürücü',
-  noscript: 'Bu araç JavaScript gerektirir. Tamamen tarayıcınızda çalışır; hiçbir şey yüklenmez.',
+  noscript: 'Bu araç JavaScript olmadan çalışmaz. Dönüştürme tamamen tarayıcınızda yapılır, hiçbir şey bir sunucuya yüklenmez.',
   examples: {
     label: 'Örnekler',
     emoji: 'Emoji',
@@ -262,12 +262,12 @@ const tr: BinaryTextMessages = {
       none: 'Yok',
       newline: 'Yeni satır',
     },
-    grouping: 'Gruplar',
+    grouping: 'Gruplama',
     groupings: {
-      byte: 'Bayt başına',
-      character: 'Karakter başına',
+      byte: 'Bayta göre',
+      character: 'Karaktere göre',
     },
-    groupingHint: 'Karakter başına gruplama, ASCII dışındaki bir karakterin iki ila dört baytını bir arada tutar.',
+    groupingHint: 'Karaktere göre gruplarsanız ASCII dışındaki bir karakterin iki, üç ya da dört baytı bir arada kalır.',
     groupingDisabled: 'Bitleri gruplamak için bir ayraç seçin.',
     ascii: {
       label: 'Yalnızca ASCII',
@@ -277,7 +277,7 @@ const tr: BinaryTextMessages = {
   problems: {
     where: (line, column) => `Satır ${trNumber(line)}, sütun ${trNumber(column)}`,
     show: 'Alanda göster',
-    invalidCharacter: (where, char, codePoint) => `${where}: “${char}” (${codePoint}) ikili bir rakam değil.`,
+    invalidCharacter: (where, char, codePoint) => `${where}: “${char}” (${codePoint}) 0 ya da 1 değil.`,
     invalidCharacterHint:
       'Yalnızca 0 ve 1 kullanın; baytları boşluk, satır sonu ya da virgülle ayırın. Grupların başında 0b olabilir.',
     // "3. grupta", "1.501. baytta": ordinals keep Turkish number formatting, and the suffix sits
@@ -285,9 +285,9 @@ const tr: BinaryTextMessages = {
     groupLength: (where, group, bits) =>
       `${where}: ${trNumber(group)}. grupta ${trNumber(bits)} bit var; bu sayı 8’in katı değil.`,
     groupLengthHint:
-      'Bir bayt tam 8 bitten oluşur. Eksik ya da fazla bir rakam veya bir baytın ortasına düşmüş bir boşluk olup olmadığına bakın.',
+      'Bir bayt tam 8 bittir. Eksik ya da fazla bir rakam var mı, bir baytın ortasına boşluk girmiş mi, kontrol edin.',
     emptyPrefix: (where, group) =>
-      `${where}: ${trNumber(group)}. grup yalnızca 0b ön ekinden oluşuyor; ardından hiç bit gelmiyor.`,
+      `${where}: ${trNumber(group)}. grup yalnızca 0b ön ekinden oluşuyor, arkasında hiç bit yok.`,
     emptyPrefixHint: 'Baytın 8 bitini 0b ön ekinin hemen ardından yazın ya da ön eki silin.',
     nonAsciiText: (where, char, codePoint, count) =>
       `${where}: “${char}” (${codePoint}) ASCII’nin dışında; ASCII 127’de biter.` +
@@ -305,14 +305,14 @@ const tr: BinaryTextMessages = {
       overlong: () =>
         'Bu dizi gereğinden uzun bir kodlama: karakterin daha kısa bir kodlaması var ve UTF-8 yalnızca en kısasına izin verir.',
       surrogate: () => 'Bu dizi, bir UTF-16 vekil kod noktasını (U+D800–U+DFFF) kodluyor; UTF-8 buna izin vermez.',
-      'too-large': () => 'Bu dizi, Unicode’un üst sınırı olan U+10FFFF değerini aşan bir değer kodluyor.',
+      'too-large': () => 'Bu dizi, Unicode’un son kod noktası olan U+10FFFF’ten büyük bir değer kodluyor.',
       'missing-continuation': (detail) =>
         `Bu bayt ${trNumber(detail.expected)} baytlık bir karakter başlatıyor, ancak ${trNumber(detail.at)}. bayt 10 ile başlamıyor.`,
       truncated: (detail) =>
         `Bu bayt ${trNumber(detail.expected)} baytlık bir karakter başlatıyor, ancak bu karakterin yalnızca ${trNumber(detail.present)} baytı var.`,
     },
     loneSurrogate: (where, codePoint) =>
-      `${where}: metinde kodlanamayan bozuk bir karakter var (eşi olmayan bir UTF-16 vekili: ${codePoint}).`,
+      `${where}: metinde kodlanamayan bozuk bir karakter var (eşi olmayan bir UTF-16 vekili, ${codePoint}).`,
     loneSurrogateHint: 'Karakteri silip yeniden yazın.',
     tooLong: (limit) => `Çok uzun: bu araç tek seferde en fazla ${trNumber(limit)} bayt dönüştürür.`,
     tooLongHint: 'Metni daha küçük parçalar hâlinde dönüştürün.',
@@ -330,9 +330,9 @@ const tr: BinaryTextMessages = {
     fixedWithLayout: 'Düzeltildi: iki alan yeniden eşleşiyor ve yeni düzen uygulandı.',
   },
   breakdown: {
-    heading: 'Karakter dökümü',
+    heading: 'Karakter karakter',
     caption: 'Metnin kod noktaları ve UTF-8 baytları',
-    regionLabel: 'Karakter dökümü tablosu',
+    regionLabel: 'Karakter tablosu',
     columns: {
       index: '#',
       character: 'Karakter',
@@ -346,7 +346,7 @@ const tr: BinaryTextMessages = {
     // "… kod noktasından": the suffix sits on the noun, never on the number.
     capped: (shown, total) => `${trNumber(total)} kod noktasından ilk ${trNumber(shown)} tanesi gösteriliyor.`,
     legend:
-      'Kalın bitler kod noktasını taşır. Önlerindeki soluk bitler UTF-8 işaretleridir: 0 tek baytlık bir karakteri; 110, 1110 ve 11110 iki, üç ve dört baytlık karakterleri başlatır; 10 ise bir karakteri sürdüren her baytı işaretler.',
+      'Kalın bitler kod noktasını taşır. Önlerindeki soluk bitler UTF-8’in işaretleridir: 0 ile başlayan bayt tek başına bir karakterdir; 110, 1110 ve 11110 sırasıyla iki, üç ve dört baytlık bir karakteri başlatır; 10 ile başlayan her bayt ise bir karakterin devamıdır.',
     notAscii: 'ASCII değil',
     noBytes: 'yok',
     kinds: {
@@ -360,7 +360,7 @@ const tr: BinaryTextMessages = {
   privacy: {
     label: 'Gizlilik',
     title: 'Hiçbir şey cihazınızdan çıkmaz.',
-    body: 'Dönüştürme tarayıcınızda yapılır. Yazdıklarınız hiçbir yere yüklenmez ve bu sayfa hiçbirini saklamaz.',
+    body: 'Dönüştürme tarayıcınızda yapılır. Yazdıklarınız hiçbir yere yüklenmez, bu sayfa da hiçbirini saklamaz.',
   },
   tipsTitle: 'İpuçları',
 };

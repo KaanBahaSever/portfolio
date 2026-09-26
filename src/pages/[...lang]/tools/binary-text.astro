@@ -42,20 +42,22 @@ const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
             <li class={item}>
               <span aria-hidden="true" class={number}>01</span>
               <p class={body}>
-                <strong class={strong}>UTF-8 nasıl çalışır?</strong> ASCII karakterleri (0–127 arasındaki kod noktaları){' '}
-                <code class={ui.code}>0</code> ile başlayan tek bir bayt kaplar. Diğer karakterler iki ila dört bayt
-                kaplar: ilk bayt, toplam bayt sayısı kadar 1 içeren <code class={ui.code}>110</code>,{' '}
-                <code class={ui.code}>1110</code> ya da <code class={ui.code}>11110</code> ile, sonraki her bayt da{' '}
-                <code class={ui.code}>10</code> ile başlar. Türkçedeki ğ, ş ve ı gibi harfler iki bayt, çoğu emoji ise dört bayt kaplar.
+                <strong class={strong}>UTF-8 nasıl çalışır?</strong> ASCII karakterleri (0–127 arasındaki kod noktaları)
+                tek bayt yer kaplar ve bu bayt <code class={ui.code}>0</code> ile başlar. Diğer karakterler iki, üç ya da
+                dört bayt kaplar. Bunların ilk baytı <code class={ui.code}>110</code>, <code class={ui.code}>1110</code> ya
+                da <code class={ui.code}>11110</code> ile başlar; baştaki 1’lerin sayısı, karakterin kaç bayt olduğunu
+                söyler. Sonraki her bayt <code class={ui.code}>10</code> ile başlar. Türkçedeki ğ, ş ve ı gibi harfler iki
+                bayt, çoğu emoji ise dört bayt kaplar.
               </p>
             </li>
             <li class={item}>
               <span aria-hidden="true" class={number}>02</span>
               <p class={body}>
-                <strong class={strong}>İkili kodu yapıştırırken.</strong> Baytları boşluk, satır sonu ya da virgülle
+                <strong class={strong}>İkili kod yapıştırırken.</strong> Baytları boşluk, satır sonu ya da virgülle
                 ayırın veya uzunluğu 8’in katı olan kesintisiz bir bit dizisi yapıştırın. Grupların başında{' '}
                 <code class={ui.code}>0b</code> ön eki de olabilir (ör. <code class={ui.code}>0b01001000</code>).
-                Bir hata olduğunda araç yerini satır ve sütunla bildirir; “{m.problems.show}” düğmesi o kısmı seçer.
+                Bir hata olursa araç, hatanın yerini satır ve sütun numarasıyla bildirir; “{m.problems.show}” düğmesi o
+                kısmı seçer.
               </p>
             </li>
             <li class={item}>
@@ -72,8 +74,9 @@ const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
                 <strong class={strong}>Tek emoji, birden fazla kod noktası.</strong> Ten rengi seçilmiş emojiler,
                 bayraklar ve aile emojileri birden fazla kod noktasından oluşur; parçalar çoğu zaman ZWJ
                 (<code class={ui.code}>U+200D</code>) ile birleştirilir. Bu yüzden tablo her parçayı ayrı bir satırda
-                gösterir; bayt sırası işareti (<code class={ui.code}>U+FEFF</code>) gibi görünmez karakterler de orada
-                adlarıyla görünür.
+                gösterir.
+                Bayt sırası işareti (<code class={ui.code}>U+FEFF</code>) gibi ekranda görünmeyen karakterler
+                de tabloda adlarıyla yer alır.
               </p>
             </li>
           </ol>

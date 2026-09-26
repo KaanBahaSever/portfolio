@@ -21,7 +21,7 @@ export type ToolsIndexMessages = typeof en;
 
 const tr: ToolsIndexMessages = {
   title: 'Araçlar',
-  description: 'Tamamen tarayıcınızda çalışan, gizliliğinize saygılı küçük araçlar. Bu araçlarda açtığınız hiçbir şey yüklenmez.',
+  description: 'Tamamen tarayıcınızda çalışan, gizliliğinize saygılı küçük araçlar. Bu araçlarda açtığınız hiçbir şey bir sunucuya yüklenmez.',
   eyebrow: (count) => `${formatters('tr').number(count)} araç · tarayıcınızda`,
   lead: 'Günlük işler için küçük araçlar. Üyelik yok, reklam yok, takip yok.',
   privacyTitle: 'Gizlilik',

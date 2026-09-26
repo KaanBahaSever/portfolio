@@ -96,12 +96,12 @@ const trStrength = {
 const tr: PasswordMessages = {
   title: 'Parola üretici',
   description:
-    'Web Crypto API ile doğrudan tarayıcınızda güçlü, rastgele parolalar üretin. Uzunluğu ve karakter türlerini seçin; hiçbir şey gönderilmez ya da saklanmaz.',
-  lead: 'Web Crypto API ile cihazınızda üretilen güçlü, rastgele parolalar. Hiçbir yere gönderilmez ve hiçbir yerde saklanmaz.',
+    'Web Crypto API ile doğrudan tarayıcınızda güçlü, rastgele parolalar üretin. Uzunluğu ve karakter türlerini seçin. Parolalar hiçbir yere gönderilmez, hiçbir yerde saklanmaz.',
+  lead: 'Güçlü, rastgele parolalar Web Crypto API ile doğrudan cihazınızda üretilir. Hiçbir yere gönderilmez, hiçbir yerde saklanmaz.',
   tipsTitle: 'İpuçları',
 
   regionLabel: 'Parola üretici',
-  noscript: 'Bu araç JavaScript gerektirir. Parolalar tarayıcınızda üretilir; hiçbir yere gönderilmez.',
+  noscript: 'Bu araç JavaScript olmadan çalışmaz. Parolalar tarayıcınızda üretilir, hiçbir yere gönderilmez.',
   outputHeading: 'Üretilen parola',
   optionsHeading: 'Seçenekler',
   strengthLabel: 'Güç:',
@@ -111,13 +111,13 @@ const tr: PasswordMessages = {
   generate: 'Yenisini üret',
   length: 'Uzunluk',
   typesLegend: 'Karakter türleri',
-  typesHint: 'En az bir tür seçili kalmalıdır.',
+  typesHint: 'En az bir tür seçili kalmalı.',
   advancedLegend: 'Gelişmiş',
   lookAlikes: {
     // Describes the setting, like "Seçilen her türü dahil et" below; "…kaçın" read as advice
     // and could also be taken as "run away".
     label: 'Birbirine benzeyen karakterleri hariç tut',
-    detail: 'Kolayca karıştırılan I, l, 1, |, O, o ve 0 karakterlerini dışarıda bırakır.',
+    detail: 'Kolayca karıştırılan I, l, 1, |, O, o ve 0 parolada kullanılmaz.',
   },
   eachType: {
     label: 'Seçilen her türü dahil et',
@@ -134,7 +134,7 @@ const tr: PasswordMessages = {
   lockNotice: (name) => `“${trTypes[name]}” seçili kalıyor: en az bir tür seçili olmalı.`,
   generated: 'Yeni parola üretildi',
   copiedAnnouncement: 'Panoya kopyalandı',
-  copyFailed: 'Otomatik olarak kopyalanamadı. Parola seçili durumda; cihazınızın Kopyala komutuyla kopyalayın.',
+  copyFailed: 'Otomatik olarak kopyalanamadı. Parola seçili; cihazınızın Kopyala komutuyla kopyalayın.',
 };
 
 export const passwordMessages = { en, tr } as const satisfies Localized<PasswordMessages>;

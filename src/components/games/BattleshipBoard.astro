@@ -91,6 +91,10 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
     /* Cell boundaries a touch stronger than the page's graph paper, so the cells read as a grid. */
     --graph-line-strong: color-mix(in oklab, var(--color-zinc-900) 17%, transparent);
     --graph-line: color-mix(in oklab, var(--color-zinc-900) 5%, transparent);
+    /* Coordinates, the sea's frame and its paper. */
+    --label: var(--color-zinc-600);
+    --frame: var(--color-zinc-300);
+    --paper: white;
 
     display: grid;
     grid-template-columns: 1.25rem minmax(0, 1fr);
@@ -100,8 +104,29 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
     max-width: 30rem;
   }
 
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :global(:where([data-theme='dark'])) .board {
+    --ink: var(--color-zinc-300);
+    --ink-soft: color-mix(in oklab, white 8%, transparent);
+    --hatch: color-mix(in oklab, var(--color-zinc-300) 45%, transparent);
+    --miss: var(--color-zinc-400);
+    --hit: var(--color-rose-400);
+    --mark: var(--color-accent-400);
+    --mark-fill: color-mix(in oklab, var(--color-accent-400) 22%, transparent);
+    --bad: var(--color-rose-400);
+    --bad-fill: color-mix(in oklab, var(--color-rose-400) 18%, transparent);
+    --heat-color: var(--color-accent-400);
+    --tick: var(--color-zinc-100);
+    --peak: white;
+    --graph-line-strong: color-mix(in oklab, white 15%, transparent);
+    --graph-line: color-mix(in oklab, white 4%, transparent);
+    --label: var(--color-zinc-400);
+    --frame: var(--color-zinc-700);
+    --paper: var(--color-zinc-900);
+  }
+
   @media (prefers-color-scheme: dark) {
-    .board {
+    :global(:where(:root:not([data-theme]))) .board {
       --ink: var(--color-zinc-300);
       --ink-soft: color-mix(in oklab, white 8%, transparent);
       --hatch: color-mix(in oklab, var(--color-zinc-300) 45%, transparent);
@@ -116,6 +141,9 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
       --peak: white;
       --graph-line-strong: color-mix(in oklab, white 15%, transparent);
       --graph-line: color-mix(in oklab, white 4%, transparent);
+      --label: var(--color-zinc-400);
+      --frame: var(--color-zinc-700);
+      --paper: var(--color-zinc-900);
     }
   }
 
@@ -133,15 +161,8 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
     font-size: 0.6875rem;
     line-height: 1;
     font-variant-numeric: tabular-nums;
-    color: var(--color-zinc-600);
+    color: var(--label);
     user-select: none;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .columns,
-    .rows {
-      color: var(--color-zinc-400);
-    }
   }
 
   .columns {
@@ -162,22 +183,15 @@ const lines = Array.from({ length: BOARD_SIZE }, (_, i) => i);
   .sea {
     position: relative;
     aspect-ratio: 1;
-    border: 1px solid var(--color-zinc-300);
+    border: 1px solid var(--frame);
     border-radius: 0.375rem;
-    background-color: white;
+    background-color: var(--paper);
     background-size:
       10% 10%,
       10% 10%,
       2% 2%,
       2% 2%;
     overflow: hidden;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .sea {
-      border-color: var(--color-zinc-700);
-      background-color: var(--color-zinc-900);
-    }
   }
 
   .ships,

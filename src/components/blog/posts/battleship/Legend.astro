@@ -112,8 +112,16 @@ const m = battleshipPostMessages[lang].legend;
     --hit: var(--color-rose-600);
   }
 
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :global(:where([data-theme='dark'])) .bs-legend {
+    --heat-color: var(--color-accent-400);
+    --heat-strength: 0.45;
+    --miss: var(--color-zinc-400);
+    --hit: var(--color-rose-400);
+  }
+
   @media (prefers-color-scheme: dark) {
-    .bs-legend {
+    :global(:where(:root:not([data-theme]))) .bs-legend {
       --heat-color: var(--color-accent-400);
       --heat-strength: 0.45;
       --miss: var(--color-zinc-400);

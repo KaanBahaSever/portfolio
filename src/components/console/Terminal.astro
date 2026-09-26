@@ -157,11 +157,13 @@ const switchLanguage = {
   /*
    * The console is always a black screen, whatever the site theme: the page behind it (overscroll,
    * safe areas) is black too. Everything is scoped under .console, which only this page renders.
+   * !important because the theme script sets the root's color-scheme inline (BaseLayout), which
+   * would otherwise give a light theme's scrollbars to this black page.
    */
   html:has(.console),
   html:has(.console) body {
     background-color: #000;
-    color-scheme: dark;
+    color-scheme: dark !important;
   }
 
   .console {

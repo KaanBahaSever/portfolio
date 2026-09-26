@@ -210,8 +210,13 @@ const labels: [number, number, 'start' | 'end', readonly string[]][] = [
     fill: white;
   }
 
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :global(:where([data-theme='dark'])) .node {
+    fill: var(--color-zinc-900);
+  }
+
   @media (prefers-color-scheme: dark) {
-    .node {
+    :global(:where(:root:not([data-theme]))) .node {
       fill: var(--color-zinc-900);
     }
   }

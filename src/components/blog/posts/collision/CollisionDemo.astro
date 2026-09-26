@@ -360,10 +360,33 @@ const rotateLabel = format.number(ROTATE_STEP);
     --cd-grid-major: color-mix(in oklab, var(--color-zinc-900) 10%, transparent);
     --cd-fill-a: color-mix(in oklab, var(--color-zinc-900) 6%, transparent);
     --cd-region: color-mix(in oklab, var(--color-accent-500) 26%, transparent);
+    /* The projection list beside the drawing. */
+    --cd-row-text: var(--color-zinc-700);
+    --cd-row-name: var(--color-zinc-900);
+    --cd-row-hover: var(--color-zinc-100);
+    --cd-row-frame: var(--color-zinc-300);
+  }
+
+  /* Dark theme: the visitor's choice, or the OS preference when JavaScript is off (global.css). */
+  :global(:where([data-theme='dark'])) .collision-demo {
+    --cd-ink: var(--color-zinc-200);
+    --cd-muted: var(--color-zinc-400);
+    --cd-muted-text: var(--color-zinc-400);
+    --cd-accent: var(--color-accent-400);
+    --cd-accent-strong: var(--color-accent-300);
+    --cd-paper: var(--color-zinc-900);
+    --cd-grid: color-mix(in oklab, white 5%, transparent);
+    --cd-grid-major: color-mix(in oklab, white 9%, transparent);
+    --cd-fill-a: color-mix(in oklab, white 7%, transparent);
+    --cd-region: color-mix(in oklab, var(--color-accent-400) 26%, transparent);
+    --cd-row-text: var(--color-zinc-300);
+    --cd-row-name: var(--color-zinc-100);
+    --cd-row-hover: var(--color-zinc-800);
+    --cd-row-frame: var(--color-zinc-600);
   }
 
   @media (prefers-color-scheme: dark) {
-    .collision-demo {
+    :global(:where(:root:not([data-theme]))) .collision-demo {
       --cd-ink: var(--color-zinc-200);
       --cd-muted: var(--color-zinc-400);
       --cd-muted-text: var(--color-zinc-400);
@@ -374,6 +397,10 @@ const rotateLabel = format.number(ROTATE_STEP);
       --cd-grid-major: color-mix(in oklab, white 9%, transparent);
       --cd-fill-a: color-mix(in oklab, white 7%, transparent);
       --cd-region: color-mix(in oklab, var(--color-accent-400) 26%, transparent);
+      --cd-row-text: var(--color-zinc-300);
+      --cd-row-name: var(--color-zinc-100);
+      --cd-row-hover: var(--color-zinc-800);
+      --cd-row-frame: var(--color-zinc-600);
     }
   }
 
@@ -633,12 +660,12 @@ const rotateLabel = format.number(ROTATE_STEP);
     border-radius: 0.5rem;
     padding: 0.25rem 0.5rem;
     text-align: start;
-    color: var(--color-zinc-700);
+    color: var(--cd-row-text);
     transition: background-color 150ms ease-out;
   }
 
   .cd-row:hover {
-    background-color: var(--color-zinc-100);
+    background-color: var(--cd-row-hover);
   }
 
   /* The axis drawn on the figure gets an accent rule; a pinned one also a frame. */
@@ -647,17 +674,17 @@ const rotateLabel = format.number(ROTATE_STEP);
   }
 
   .cd-row[aria-pressed='true'] {
-    background-color: var(--color-zinc-100);
+    background-color: var(--cd-row-hover);
     box-shadow:
       inset 3px 0 0 var(--cd-accent-strong),
-      inset 0 0 0 1px var(--color-zinc-300);
+      inset 0 0 0 1px var(--cd-row-frame);
   }
 
   .cd-row-name {
     font-family: var(--font-mono);
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--color-zinc-900);
+    color: var(--cd-row-name);
   }
 
   .cd-row-bars {
@@ -729,27 +756,6 @@ const rotateLabel = format.number(ROTATE_STEP);
 
   .cd-key-b {
     background-color: var(--cd-paper);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .cd-row {
-      color: var(--color-zinc-300);
-    }
-
-    .cd-row:hover,
-    .cd-row[aria-pressed='true'] {
-      background-color: var(--color-zinc-800);
-    }
-
-    .cd-row[aria-pressed='true'] {
-      box-shadow:
-        inset 3px 0 0 var(--cd-accent-strong),
-        inset 0 0 0 1px var(--color-zinc-600);
-    }
-
-    .cd-row-name {
-      color: var(--color-zinc-100);
-    }
   }
 </style>
 

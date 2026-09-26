@@ -167,6 +167,9 @@ test('the journey teaser follows the About page and tells the current story', ()
   // One evolving project: the 2020 prototype is being rewritten as Rocket-Up.
   assert.match(chapters.simulation.text, /2020/);
   assert.match(chapters.simulation.text, /Rocket-Up/);
+  // Turkish uses the site's name for the algorithm (as on the Playground card), English in parentheses.
+  assert.match(homeMessages.tr.journey.chapters.foundations.text, /av ve hedef \(hunt & target\) algoritmasını/);
+  assert.doesNotMatch(homeMessages.tr.journey.chapters.foundations.text, /Hunt & Target/);
   assert.match(homeMessages.tr.journey.chapters.avionics.text, /5\.000 ft/);
   assert.match(homeMessages.tr.journey.chapters.simulation.text, /Rocket-Up/);
 });

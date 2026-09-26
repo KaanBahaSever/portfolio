@@ -243,7 +243,7 @@ export const ACTIVITIES: readonly ActivityItem[] = [
 /** One-line summary of what the skills below are pointed at. */
 export const FOCUS: Localized<string> = {
   en: 'Modern C++ and Go day to day, for system tools, telemetry and messaging platforms and algorithm-driven applications, on a foundation of pure mathematics. Around the code: GitHub Actions pipelines that test, package, produce multi-platform builds and deploy in one click, notably for the Asion ecosystem.',
-  tr: 'Günlük işimde modern C++ ve Go kullanıyorum: sistem araçları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Hepsinin temelinde saf matematik var. Kodun çevresinde de, özellikle Asion ekosistemi için, GitHub Actions ile tek tıkla test eden, paketleyen, çok platformlu derleme çıktıları üreten ve dağıtım yapan pipeline’lar kuruyorum.',
+  tr: 'Günlük işimde modern C++ ve Go kullanıyorum: sistem araçları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Hepsinin temelinde saf matematik var. Bunun yanında, özellikle Asion ekosistemi için, GitHub Actions ile tek tıkla test eden, paketleyen, çok platformlu derleme çıktıları üreten ve dağıtım yapan pipeline’lar kuruyorum.',
 };
 
 /** Curated for the current focus: systems languages first. */

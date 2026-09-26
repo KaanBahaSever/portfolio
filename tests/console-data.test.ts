@@ -272,6 +272,8 @@ test('about.txt tells the current story in both languages', () => {
   assert.match(tr, /bir alçak irtifa \(5\.000 ft\) ve iki yüksek irtifa \(10\.000 ft\)/);
   assert.match(tr, /Rocket-Up/);
   assert.match(tr, /Matematik Kulübü/);
+  assert.match(tr, /av ve hedef \(hunt & target\) algoritmasını sonradan geliştirdim/);
+  assert.doesNotMatch(tr, /Hunt & Target|Kodun çevresinde|kodun yanında/);
   // The Rocket-Up page and the research repository are linked, localized where they are site pages.
   const links = hrefs(fileLines(trData, ['about.txt']));
   assert.ok(links.includes('/tr/projects/rocket-up/'));

@@ -240,7 +240,7 @@ const tr: ConsoleContent = {
     text(dim('Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar · İstanbul')),
     blank(),
     text(
-      'Sistem yazılımına saf matematik altyapısıyla yaklaşıyorum. İstanbul Üniversitesinde matematik okuyorum; günlük işimde modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları ve algoritma odaklı uygulamalar geliştiriyorum. Kodun çevresinde de onu tek tıkla test eden, paketleyen ve çok platformlu derlemeleri dağıtan pipeline’lar kuruyorum.',
+      'Sistem yazılımına saf matematik altyapısıyla yaklaşıyorum. İstanbul Üniversitesinde matematik okuyorum; günlük işimde modern C++ ve Go ile sistem araçları, telemetri ve mesajlaşma platformları ve algoritma odaklı uygulamalar geliştiriyorum. Bunun yanında kodu tek tıkla test eden, paketleyen ve çok platformlu derlemeleri dağıtan pipeline’lar kuruyorum.',
     ),
     blank(),
     text(
@@ -272,7 +272,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Bugün kodun yanında: çapraz derleme runner’larıyla çalışan, tek tıkla test eden, paketleyen, çok platformlu artifact’ler üreten ve dağıtım yapan GitHub Actions pipeline’ları; özellikle Asion ekosistemi için. Devamı: ',
+      'Bugün ayrıca, özellikle Asion ekosistemi için, GitHub Actions ile çapraz derleme runner’larıyla çalışan; tek tıkla test eden, paketleyen, çok platformlu artifact’ler üreten ve dağıtım yapan pipeline’lar kuruyorum. Devamı: ',
       run('cat ~/skills/devops.txt'),
     ),
     blank(),
@@ -310,7 +310,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Lise bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; Amiral Battı rakibinin Hunt & Target algoritmasını sonradan geliştirdim. İki oyun da artık tarayıcıda çalışıyor: ',
+      'Lise bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; Amiral Battı rakibinin av ve hedef (hunt & target) algoritmasını sonradan geliştirdim. İki oyun da artık tarayıcıda çalışıyor: ',
       link('oyunlar', '/games/'),
       '.',
     ),
@@ -381,7 +381,7 @@ const tr: ConsoleContent = {
       pair('Saf', 'reel analiz, soyut cebir, topoloji'),
       pair(
         'Uygulamalı',
-        'paraşüt yönlendirmede lineer cebir ve iniş dinamiği; roket uçuşunun aerodinamik simülasyonu; olasılık yoğunlukları ve Hunt & Target araması (Amiral Battı); oyun ağaçları ve minimax (XOX)',
+        'paraşüt yönlendirmede lineer cebir ve iniş dinamiği; roket uçuşunun aerodinamik simülasyonu; olasılık yoğunlukları ile av ve hedef araması (Amiral Battı); oyun ağaçları ve minimax (XOX)',
       ),
       pair('Yayın', 'Açık Matematik: lisans matematiği için açık kaynaklı Türkçe ders kitapları'),
     ],

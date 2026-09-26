@@ -66,7 +66,7 @@ test('the crowd.inc entry says what the platform was, in both languages', () => 
   const [job] = EXPERIENCE;
   const { en, tr } = job!.summary;
   for (const fact of [
-    /platform for sharing ideas and finding help for them/,
+    /platform where people shared their ideas and found help for them/,
     /hundreds of users/,
     /many projects, ideas and goals/,
     /later we turned towards private ideas/,

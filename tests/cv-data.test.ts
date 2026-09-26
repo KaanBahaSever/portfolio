@@ -115,9 +115,14 @@ test('the Turkish CV is written with Turkish typography', () => {
   assert.match(CV.tr.summary, /crowd\.inc’te/);
 });
 
-test('both CV summaries say what crowd.inc was: an idea-sharing platform with hundreds of users', () => {
-  assert.match(CV.en.summary, /crowd\.inc, an idea-sharing platform with hundreds of users/);
-  assert.match(CV.tr.summary, /crowd\.inc’te, yüzlerce kullanıcısı olan bir fikir paylaşma platformunun/);
+test('the CV summaries name crowd.inc and leave what it was to the experience entry below them', () => {
+  // The experience entry (src/data/resume.ts, pinned in resume-data.test.ts) opens with what
+  // crowd.inc was, a few lines below the summary on page 1, so the summary does not say it twice.
+  assert.match(CV.en.summary, /I owned the development lifecycle at crowd\.inc, from database schema to Linux servers/);
+  assert.match(CV.tr.summary, /crowd\.inc’te geliştirme sürecini baştan sona yürüttüm/);
+  for (const locale of LOCALES) {
+    assert.doesNotMatch(CV[locale].summary, /hundreds|yüzlerce|sharing ideas|idea-sharing|fikir/i, locale);
+  }
 });
 
 test('the CVs list only the four selected projects, in the owner’s order', () => {

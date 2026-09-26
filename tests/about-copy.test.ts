@@ -167,31 +167,34 @@ test('suffixes in the Turkish About text take the typographic apostrophe', () =>
   assert.match(entry?.text ?? '', /^title: crowd\.inc’te yazılım geliştirici\r?$/m);
 });
 
-test('the crowd.inc chapter and timeline entry open with what the site was, in both languages', () => {
+test('the crowd.inc chapter, timeline entry and about.txt open with what the site was, in the same words', () => {
   // The owner's words: a site for sharing ideas and finding help for them, with hundreds of
-  // users, many projects, ideas and goals, and a later turn towards private ideas.
+  // users (no exact number), many projects, ideas and goals, and a later turn towards private
+  // ideas. The same thing is said the same way wherever the job is told in full.
+  const opening = {
+    en: 'crowd.inc was a website where people shared their ideas and found help for them. It had hundreds of users and was home to many projects, ideas and goals. Later we turned towards private ideas.',
+    tr: 'crowd.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi. Yüzlerce kullanıcısı vardı; birçok projeye ev sahipliği yaptı, sitede bir sürü fikir ve hedef paylaşıldı. Sonraları da herkese açık olmayan, özel fikirlere yöneldik.',
+  };
   const work = file('src/components/about/prose/Work.astro').text;
   const split = work.indexOf(') : (');
-  const turkish = [
-    visibleText(work.slice(work.indexOf("locale === 'tr' ? ("), split)),
-    visibleText(file('src/content/tr/timeline/2021-crowd-inc.md').text),
-  ];
-  const english = [visibleText(work.slice(split)), visibleText(file('src/content/timeline/2021-crowd-inc.md').text)];
-  const flat = (text: string) => text.replace(/\s+/g, ' ');
-  for (const text of english.map(flat)) {
-    assert.match(text, /crowd\.inc was a website (for sharing ideas and finding help for them|where people shared their ideas and found help for them)/);
-    for (const fact of [/hundreds of users/, /many projects/, /ideas and goals/, /we turned towards private ideas/]) {
-      assert.match(text, fact);
+  const flat = (text: string) => visibleText(text).replace(/\s+/g, ' ');
+  const places = {
+    en: [flat(work.slice(split)), flat(file('src/content/timeline/2021-crowd-inc.md').text)],
+    tr: [
+      flat(work.slice(work.indexOf("locale === 'tr' ? ("), split)),
+      flat(file('src/content/tr/timeline/2021-crowd-inc.md').text),
+    ],
+  };
+  // What he did there follows the opening.
+  const role = { en: 'I owned', tr: 'Geliştirme sürecinin' };
+  for (const locale of ['en', 'tr'] as const) {
+    for (const text of places[locale]) {
+      const at = text.indexOf(opening[locale]);
+      assert.ok(at >= 0, `${locale}: the opening, word for word, in ${text.slice(0, 80)}…`);
+      assert.ok(at < text.indexOf(role[locale]), `${locale}: what crowd.inc was, then the role`);
     }
-    // The opening comes before what he did there.
-    assert.ok(text.indexOf('private ideas') < text.indexOf('I owned'), 'what crowd.inc was, then the role');
-  }
-  for (const text of turkish.map(flat)) {
-    assert.match(text, /crowd\.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi/);
-    for (const fact of [/Yüzlerce kullanıcısı vardı/, /birçok projeye/, /(fikir|fikre) ve hedef/, /özel fikirlere yöneldik/]) {
-      assert.match(text, fact);
-    }
-    assert.ok(text.indexOf('özel fikirlere') < text.indexOf('Geliştirme sürecinin'), 'what crowd.inc was, then the role');
+    // about.txt in the console says it in the same words.
+    assert.ok(file('src/i18n/console/content.ts').text.includes(`'${opening[locale]}'`), `${locale}: about.txt`);
   }
 });
 

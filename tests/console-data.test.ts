@@ -281,7 +281,7 @@ test('about.txt tells the current story in both languages', () => {
   assert.match(en, /Mathematics Club/);
   // What crowd.inc was, in the owner's words, before what he did there.
   assert.match(en, /crowd\.inc was a website where people shared their ideas and found help for them/);
-  assert.match(en, /hundreds of users and hosted many projects, and many ideas and goals were shared on it/);
+  assert.match(en, /It had hundreds of users and was home to many projects, ideas and goals\. Later we turned towards private ideas\./);
   assert.match(en, /we turned towards private ideas\.\n.*I owned the software lifecycle/);
 
   const trData = build('tr');
@@ -291,7 +291,7 @@ test('about.txt tells the current story in both languages', () => {
   assert.match(tr, /Matematik Kulübü/);
   assert.match(tr, /crowd\.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi/);
   assert.match(tr, /Yüzlerce kullanıcısı vardı; birçok projeye ev sahipliği yaptı, sitede bir sürü fikir ve hedef paylaşıldı/);
-  assert.match(tr, /özel fikirlere yöneldik/);
+  assert.match(tr, /Sonraları da herkese açık olmayan, özel fikirlere yöneldik\.\n.*Geliştirmenin her aşamasını ben yürüttüm/);
   assert.match(tr, /av ve hedef algoritmasını sonradan geliştirdim/);
   assert.match(tr, /Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu/);
   // Plain Turkish: no English gloss for the algorithm, no calques of "around/next to the code".

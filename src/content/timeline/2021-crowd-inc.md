@@ -6,8 +6,9 @@ dateLabel: July 2021 – March 2024
 # ideas and goals, and a later turn towards private ideas. Add no dates, figures or outcomes.
 ---
 
-crowd.inc was a website for sharing ideas and finding help for them. It had hundreds of users
-and hosted many projects, ideas and goals; later we turned towards private ideas.
+crowd.inc was a website where people shared their ideas and found help for them. It had
+hundreds of users and was home to many projects, ideas and goals. Later we turned towards
+private ideas.
 
 I owned the end-to-end software development lifecycle: relational schema design in PostgreSQL,
 RESTful APIs with Python/Flask and jQuery, Linux server provisioning and automated testing.

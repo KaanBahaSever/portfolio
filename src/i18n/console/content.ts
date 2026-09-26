@@ -61,7 +61,7 @@ const en = {
     indented(2, 'crowd.inc — Software Developer, July 2021 – March 2024.'),
     indented(
       2,
-      'crowd.inc was a website where people shared their ideas and found help for them. It had hundreds of users and hosted many projects, and many ideas and goals were shared on it. Later on, we turned towards private ideas.',
+      'crowd.inc was a website where people shared their ideas and found help for them. It had hundreds of users and was home to many projects, ideas and goals. Later we turned towards private ideas.',
     ),
     indented(
       2,

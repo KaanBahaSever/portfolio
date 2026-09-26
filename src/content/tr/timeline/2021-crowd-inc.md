@@ -6,8 +6,8 @@ dateLabel: Temmuz 2021 – Mart 2024
 ---
 
 crowd.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi.
-Yüzlerce kullanıcısı vardı; birçok projeye, bir sürü fikre ve hedefe ev sahipliği yaptı.
-Sonraları da herkese açık olmayan, özel fikirlere yöneldik.
+Yüzlerce kullanıcısı vardı; birçok projeye ev sahipliği yaptı, sitede bir sürü fikir ve hedef
+paylaşıldı. Sonraları da herkese açık olmayan, özel fikirlere yöneldik.
 
 Geliştirme sürecinin her aşamasını üstlendim: PostgreSQL’de ilişkisel veri tabanı şemalarını
 tasarladım, Python ve Flask ile REST API’ler, jQuery ile de ön yüz geliştirdim, Linux

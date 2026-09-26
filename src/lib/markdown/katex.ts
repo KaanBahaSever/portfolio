@@ -26,12 +26,30 @@ function render(tex: string, displayMode: boolean): string {
   return displayMode ? `<div class="math-display">${html}</div>` : html;
 }
 
+/**
+ * Characters that the Markdown re-parse of MDX raw content would read as syntax: backslash
+ * escapes, emphasis (`_`, `*`), code spans, GFM strikethrough (`~`), links and footnotes (`[ ]`),
+ * math (`$`), and the dashes and ellipses of smart punctuation (`-`, `.`). KaTeX already writes
+ * `& < > " '` as entities, and entities never contain any of these.
+ */
+const MARKDOWN_SYNTAX = /[\\_*`~[\]$.-]/g;
+
+/**
+ * MDX re-parses a raw string as Markdown, text inside the HTML included. So the TeX in the MathML
+ * annotation would lose the backslash before punctuation (`\,`, `\;`, and `\{ … \}` would stop
+ * compiling) and pick up Markdown: `\mathbf{n}_j … \min_{…}` became `<em>`. In the text between
+ * tags, each such character becomes a character reference, which the re-parse turns back into
+ * that character and nothing else. Tags and attributes are left alone.
+ */
+export function escapeForMdx(html: string): string {
+  return html.replace(/(^|>)([^<]+)/g, (_match, open: string, text: string) =>
+    open + text.replace(MARKDOWN_SYNTAX, (char) => `&#${char.charCodeAt(0)};`),
+  );
+}
+
 function emit(html: string, sourceFormat: SourceFormat) {
-  // MDX re-parses raw HTML as JSX text, which drops the backslash before punctuation: the TeX in
-  // the MathML annotation loses `\,` or `\;`, and `\{ … \}` stops compiling. As a character
-  // reference the backslash survives the re-parse and renders as itself.
   return sourceFormat === 'mdx'
-    ? { raw: html.replaceAll('\\', '&#92;'), mdxExpressions: false }
+    ? { raw: escapeForMdx(html), mdxExpressions: false }
     : { type: 'html' as const, value: html };
 }
 

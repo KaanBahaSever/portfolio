@@ -47,3 +47,16 @@ Tarayıcılar, bir eklentinin yerel bir programa yalnızca native messaging üze
 izin verir. Bu yöntemde her mesaj, JSON yükünün önüne eklenen 4 baytlık, little-endian bir
 uzunluk önekiyle çerçevelenir. Asion bu çerçevelemeyi `asion-native-host` içinde **C++** ile
 uygular; böylece eklenti ile arka plandaki ajan, arada bir ağ servisi olmadan mesajlaşır.
+
+## Derleme, test ve sürüm otomasyonu
+
+Üç işletim sisteminde yerel bileşenleri olan bir yazılımın, her değişiklikte bu sistemlerin her
+birinde derlenmesi, test edilmesi ve paketlenmesi gerekir. Asion ekosistemi için **GitHub
+Actions** üzerinde çok platformlu CI/CD boru hatları kurdum:
+
+- **Çok platformlu iş akışları** (workflow) ve yerel derlemeleri üreten çapraz derleme
+  (cross-compilation) runner'ları.
+- Adımları birbirine bağlayan, Bash, Batch ve Python ile yazılmış **özel otomasyon betikleri**.
+- **Tek tıkla test ve paketleme**: tek bir tıklama testleri çalıştırır, bileşenleri paketler ve
+  her platform için derleme çıktılarını (artifact) üretir.
+- Bu çok platformlu derleme çıktılarını sürüme kadar taşıyan **dağıtım boru hatları**.

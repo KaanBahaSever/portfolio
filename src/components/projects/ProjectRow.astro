@@ -8,6 +8,7 @@ import Icon from '../ui/Icon.astro';
 import TagList from '../ui/TagList.astro';
 import ProjectBadges from './ProjectBadges.astro';
 import ProjectLinks from './ProjectLinks.astro';
+import ProjectTitle from './ProjectTitle.astro';
 import { localizePath } from '../../i18n/config';
 import { common } from '../../i18n/messages/common';
 import { projectsMessages } from '../../i18n/messages/projects';
@@ -37,7 +38,7 @@ const textLang = project.lang === locale ? undefined : project.lang;
           href={href}
           class="rounded-sm transition-colors group-hover:text-accent-700 after:absolute after:-inset-x-3 after:inset-y-1 after:rounded-lg focus-visible:outline-hidden focus-visible:after:outline-2 focus-visible:after:outline-solid focus-visible:after:outline-accent-700 dark:group-hover:text-accent-400 dark:focus-visible:after:outline-accent-400"
         >
-          {title}
+          <ProjectTitle text={title} />
           <Icon
             name="arrow-right"
             class="ml-0.5 inline-block size-5 -translate-y-px align-middle text-zinc-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-accent-700 dark:text-zinc-500 dark:group-hover:text-accent-400"

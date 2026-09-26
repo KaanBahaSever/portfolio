@@ -11,6 +11,17 @@ da okunması zor; proje bu materyalleri erişilebilir tek bir kütüphanede topl
 dizgiyle hazırlanmış notlar, titiz bir belgeleme, reklamsız bir deneyim ve tamamen açık kaynak
 kod.
 
+## Nasıl başladı?
+
+Açık Matematik'in çıkış noktası kendi yaşadığım bir sorundu: akademik ders notlarıyla
+çalışırken karşılaştığım zorluklar. Bunu bir platforma dönüştürmek birkaç yıl sürdü:
+
+- **2023**: projenin fikri ortaya çıkıyor.
+- **Mart 2026**: geliştirme hız kazanıyor.
+- **Haziran 2026**: canlı platform [acik-matematik.com](https://acik-matematik.com) adresinde
+  yayına giriyor.
+- **Eylül 2026**: açık kaynak sürüm resmî olarak duyuruluyor.
+
 ## Özellikler
 
 - **Okunaklı, etkileşimli notlar**: teorem ve tanım kutuları, istendiğinde açılan ispatlar ve

@@ -1,0 +1,15 @@
+---
+/**
+ * A project title as inline text, with compound words ("High-Power", "Rocket-Up") kept whole
+ * and a dash kept with the word before it (see title.ts). Use it inside the heading or link.
+ */
+import { titleRuns } from './title';
+
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+---
+
+{titleRuns(text).map((run) => (run.keep ? <span class="whitespace-nowrap">{run.text}</span> : run.text))}

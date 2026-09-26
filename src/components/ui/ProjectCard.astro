@@ -13,6 +13,7 @@ import TagList from './TagList.astro';
 import ProjectBadges from '../projects/ProjectBadges.astro';
 import ProjectFigure from '../projects/ProjectFigure.astro';
 import ProjectLinks from '../projects/ProjectLinks.astro';
+import ProjectTitle from '../projects/ProjectTitle.astro';
 import { hasFigure } from '../projects/figures';
 import { localizePath } from '../../i18n/config';
 import { common } from '../../i18n/messages/common';
@@ -65,7 +66,7 @@ const hasLinks = Boolean(project.data.liveUrl || project.data.repositoryUrl);
           href={href}
           class="rounded-sm transition-colors group-hover:text-accent-700 after:absolute after:inset-0 after:rounded-xl focus-visible:outline-hidden focus-visible:after:outline-2 focus-visible:after:outline-solid focus-visible:after:outline-offset-2 focus-visible:after:outline-accent-700 dark:group-hover:text-accent-400 dark:focus-visible:after:outline-accent-400"
         >
-          {title}
+          <ProjectTitle text={title} />
           <Icon
             name="arrow-right"
             class="ml-0.5 inline-block size-5 -translate-y-px align-middle text-zinc-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-accent-700 dark:text-zinc-500 dark:group-hover:text-accent-400"

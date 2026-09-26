@@ -1,33 +1,50 @@
 ---
-title: Rocket-Up
-shortDescription: An early-stage, modular C++ library for simulating rocket flight, from engine thrust to the atmosphere the rocket flies through.
+title: Rocket-Up — High-Power Rocket Simulation
+shortDescription: A high-power rocket flight simulation that began in 2020 as a narrow Python prototype and is now being rewritten from scratch as an open-source aerodynamic simulation engine in modern C++.
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/Rocket-Up
 techStack: ['C++']
+stage: in-development
+since: 2020
 featured: false
-order: 6
+order: 5
 date: 2024-12-14
 ---
 
 ## What it is
 
-Rocket-Up is a C++ library for modelling the different parts of a rocket flight, from engine
-thrust to the atmosphere the rocket flies through. It is built with CMake (C++17) and released
-under the MIT License.
+Rocket-Up is my high-power rocket flight simulation. It is one project that has changed shape
+over time, not two separate ones: it began in 2020 as a Python prototype, and I am now
+rewriting it completely as a dynamic, modern C++ aerodynamic simulation engine. The new engine
+is open source under the MIT License.
 
-## Features
+## From prototype to engine
+
+The 2020 prototype was narrow and purpose-built: it was written for one job, not as a general
+tool.
+
+The rewrite starts from the other end. Instead of one fixed model, a simulation is put together
+from parts: a rocket is assembled from components, it flies through the environment of a
+planet, and the flight is described by parameters rather than written into the code. C++ gives
+the physics loop the performance it needs, and a clean architecture keeps each part of the
+physics in its own place, so it can be tested, improved or replaced without touching the rest.
+
+## What is in the repository
+
+The rewrite is at an early stage. The public repository already has:
 
 - **Modular rocket components**: separate classes for the rocket, its engine and recovery
   hardware such as a parachute.
 - **Engine model**: specific impulse, propellant mass, a configurable thrust curve, throttling
   and thrust corrected for atmospheric pressure.
-- **Expandable environments and planets**: an Earth model computes temperature and pressure by
-  altitude using the layers of the 1976 US Standard Atmosphere.
+- **Environments and planets**: an Earth model computes temperature and pressure by altitude
+  from the layers of the 1976 US Standard Atmosphere, and the planet classes are built to be
+  extended.
 - **Configurable flight parameters**, plus small vector and matrix math helpers.
 
-## Roadmap
+It builds with CMake.
 
-The project is at an early stage. Planned next steps:
+## Roadmap
 
 - More rocket components: fins, body tubes and nose cones.
 - Integration with physics libraries for more accurate simulations.
@@ -36,11 +53,9 @@ The project is at an early stage. Planned next steps:
 
 ## Background
 
-Rocket-Up belongs to a longer thread of flight work. From 2019 to 2022 I was Vice President of
-the Istanbul University Rocket Club, where I contributed to the design of three rockets and
-their successful high-power launches, and solely engineered the flight avionics firmware and
-the parachute deployment control system.
-
-Rocket-Up is its own codebase, separate from my current simulation work: a 3D numerical
-trajectory simulation, first written in Python and now being re-architected in modern C++23.
-The [About page](/about/#journey) tells that story.
+The simulation belongs to the same thread as my rocketry work. From 2019 to 2022 I was Vice
+President of the Istanbul University Rocket Club, where our team designed and built three
+rockets: one low-altitude rocket (5,000 ft) and two high-altitude rockets (10,000 ft). I was
+the sole author of their flight avionics firmware and of the parachute deployment control
+system. The [About page](/about/#journey) tells that story, from the avionics to this
+simulation.

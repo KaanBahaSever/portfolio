@@ -199,6 +199,7 @@ const en = {
     email: 'email',
     location: 'location',
     cv: 'cv',
+    /** After the CV's path in contact.txt: the page's language (the CV linked is in it) and the format. */
     cvNote: '(English, PDF)',
   },
   project: {
@@ -322,7 +323,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Matematik Kulübü, son sınıflarımda: akademik etkinlikler, seminerler ve mantık-matematik yarışmaları düzenleyip yürüttüm.',
+      'Matematik Kulübü, son sınıflarımda: seminerler, mantık ve matematik yarışmaları gibi akademik etkinlikler düzenleyip yürüttüm.',
     ),
     indented(2, 'YetGen “21. Yüzyıl Yetkinlikleri” sertifikası, Mehmet Zorlu Vakfı, 2020.'),
     indented(2, 'Erasmus+ Gençlik Değişimi, Arrecife, İspanya, 2017–2018.'),
@@ -393,7 +394,7 @@ const tr: ConsoleContent = {
       pair('MATLAB, Mathematica, R', 'sayısal ve sembolik hesaplama'),
       pair('Quarto', 'Açık Matematik’in yayın altyapısı'),
     ],
-    spoken: [heading('Konuştuğum diller'), blank(), text('Türkçe (ana dil)'), text('İngilizce')],
+    spoken: [heading('Konuştuğum diller'), blank(), text('Türkçe (ana dili)'), text('İngilizce')],
   },
   secret: {
     artLabel:
@@ -410,7 +411,7 @@ const tr: ConsoleContent = {
     email: 'e-posta',
     location: 'konum',
     cv: 'özgeçmiş',
-    cvNote: '(İngilizce, PDF)',
+    cvNote: '(Türkçe, PDF)',
   },
   project: {
     stack: 'teknolojiler',

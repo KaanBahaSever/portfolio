@@ -1,8 +1,8 @@
 /**
  * Résumé data: the single source of truth for experience, education, volunteering,
  * certifications, activities, skills and languages. Used by the home page (and anything else
- * that summarises the CV) and by `npm run cv`, which builds public/cv/kaan-cv.pdf from it. Keep it
- * factual; re-run `npm run cv` after changing it.
+ * that summarises the CV) and by `npm run cv`, which builds the English and Turkish CVs from it
+ * (public/cv/kaan-cv.pdf, kaan-cv-tr.pdf). Keep it factual; re-run `npm run cv` after changing it.
  *
  * Prose is Localized (read it with pick(value, locale)); dates and technology names are shared
  * by both languages. Fields typed ResumeText (names, titles kept in the original, URLs) may be
@@ -172,8 +172,9 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
       tr: [
         // Turkish groups thousands with a dot: 5.000 ft.
         'Kulüp ekibiyle bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketinin tasarımında ve üretiminde yer aldım.',
-        'Uçuş aviyoniği gömülü yazılımını ve paraşüt açma kontrol sistemini tek başıma geliştirdim; ikisi de yönelim, jiroskop ve altimetre verilerini birleştiren sensör füzyonuna dayanıyordu.',
-        'RF telemetrinin yanında SD kartlı telemetri kayıt protokolünü tasarladım; uçuş verisini ayrıştırıp uçuş sonrası yörünge grafiklerini çizen bir masaüstü paneli geliştirdim.',
+        // "(firmware)", as on the Rocket-Up page and in the console.
+        'Uçuş aviyoniğinin gömülü yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma geliştirdim; ikisi de yönelim, jiroskop ve altimetre verilerini birleştiren sensör füzyonuna dayanıyordu.',
+        'RF telemetri modülleriyle birlikte çalışan SD kart telemetri kayıt protokolünü tasarladım; uçuş verisini ayrıştırıp uçuş sonrası yörünge grafiklerini çizen bir masaüstü paneli geliştirdim.',
       ],
     },
   },
@@ -201,7 +202,7 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
     periodLabel: { en: 'Later university years', tr: 'Son sınıflar' },
     highlights: {
       en: ['Organised and ran academic events, including seminars and logic and mathematics competitions.'],
-      tr: ['Akademik etkinlikler, seminerler ve mantık-matematik yarışmaları düzenleyip yürüttüm.'],
+      tr: ['Seminerler, mantık ve matematik yarışmaları gibi akademik etkinlikler düzenleyip yürüttüm.'],
     },
   },
 ];
@@ -255,7 +256,7 @@ export const SKILLS: readonly SkillGroup[] = [
     items: ['C++ (C++23)', 'Go', 'C', 'Python', 'C#', 'Objective-C', 'TypeScript / JavaScript', 'SQL'],
   },
   {
-    label: { en: 'Systems & networking', tr: 'Sistemler ve ağ' },
+    label: { en: 'Systems & networking', tr: 'Sistem ve ağ' },
     items: [
       'gRPC',
       'Protobuf',
@@ -295,6 +296,7 @@ export const SKILLS: readonly SkillGroup[] = [
 ];
 
 export const LANGUAGES: readonly SpokenLanguage[] = [
-  { name: { en: 'Turkish', tr: 'Türkçe' }, level: { en: 'Native', tr: 'Ana dil' } },
+  // "Ana dili" (mother tongue), not "ana dil" (a parent language that others descend from; TDK).
+  { name: { en: 'Turkish', tr: 'Türkçe' }, level: { en: 'Native', tr: 'Ana dili' } },
   { name: { en: 'English', tr: 'İngilizce' } },
 ];

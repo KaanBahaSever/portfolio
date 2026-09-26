@@ -1,5 +1,5 @@
 /**
- * Site-wide settings: identity, contact links and navigation.
+ * Site-wide settings: identity, contact links, the CV files and navigation.
  * Résumé details (experience, education, skills…) live in src/data/resume.ts.
  * Translatable values are Localized records; read them with pick(value, locale).
  */
@@ -27,8 +27,11 @@ export const SITE = {
   url: 'https://kaanbahasever.com',
   email: 'kaanbahasever@gmail.com',
   location: { en: 'Istanbul, Turkey', tr: 'İstanbul, Türkiye' } satisfies Localized<string>,
-  // public/cv/kaan-cv.pdf (English), generated from the résumé data by `npm run cv`.
-  cvPath: '/cv/kaan-cv.pdf',
+  // The CV in each language (files in public/), generated from the résumé data by `npm run cv`,
+  // which writes them to these paths. Each page links the CV in its own language.
+  cvPath: { en: '/cv/kaan-cv.pdf', tr: '/cv/kaan-cv-tr.pdf' } satisfies Localized<string>,
+  // The name a downloaded CV is saved under: ASCII only, so every system keeps it as written.
+  cvFileName: { en: 'Kaan-Baha-Sever-CV.pdf', tr: 'Kaan-Baha-Sever-Ozgecmis.pdf' } satisfies Localized<string>,
   repositoryUrl: 'https://github.com/KaanBahaSever/portfolio',
   socials: [
     { label: 'GitHub', href: 'https://github.com/KaanBahaSever' },

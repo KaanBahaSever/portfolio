@@ -1,11 +1,13 @@
 ---
 /**
- * Home page hero: headline role, name, a three-sentence introduction, the two primary actions,
- * contact links and location, with Fig. 1 beside the text from lg: up (under it on smaller
- * screens). `data-hero` marks the area whose pointer position nudges the figure's phase.
+ * Home page hero: headline role, name, a three-sentence introduction, the two primary actions
+ * (with a quiet link to the CV in the other language), contact links and location, with Fig. 1
+ * beside the text from lg: up (under it on smaller screens). `data-hero` marks the area whose
+ * pointer position nudges the figure's phase.
  */
 import HeroFigure from './HeroFigure.astro';
 import { HEADLINE_SEPARATOR, headlineParts } from './headline';
+import CvVersionLink from '../ui/CvVersionLink.astro';
 import Icon from '../ui/Icon.astro';
 import { SITE } from '../../config/site';
 import { localizePath, pick } from '../../i18n/config';
@@ -13,6 +15,7 @@ import { formatters } from '../../i18n/format';
 import { common } from '../../i18n/messages/common';
 import { homeMessages } from '../../i18n/messages/home';
 import { getLocale } from '../../i18n/server';
+import { cvLink } from '../../utils/cv';
 
 const locale = getLocale(Astro);
 const t = common[locale];
@@ -73,18 +76,12 @@ const contactLink =
           <Icon name="arrow-right" class="size-4 transition-transform duration-200 group-hover:translate-x-0.5" />
         </a>
         {/*
-          The CV is an English PDF: hreflang/type say so to machines, the mono note to people.
-          Label and note each stay in one piece; when both do not fit on one line (the Turkish
-          "Özgeçmişi indir · PDF · İngilizce" at 320 px) the note wraps under the label and the
-          button grows, instead of both breaking into a cramped 2×2 block.
+          The CV in the page's language (cvLink sets the file, its download name, hreflang and
+          type). Label and note each stay in one piece; when both do not fit on one line (a
+          narrow phone at a large text size) the note wraps under the label and the button
+          grows, instead of both breaking into a cramped 2×2 block.
         */}
-        <a
-          href={SITE.cvPath}
-          download="Kaan-Baha-Sever-CV.pdf"
-          hreflang="en"
-          type="application/pdf"
-          class:list={[secondary, 'flex-wrap gap-y-0.5 py-2']}
-        >
+        <a {...cvLink(locale)} class:list={[secondary, 'flex-wrap gap-y-0.5 py-2']}>
           <Icon name="download" class="size-4 transition-transform duration-200 group-hover:translate-y-0.5" />
           <span class="whitespace-nowrap">{t.labels.downloadCv}</span>{' '}
           {/* The space above keeps the accessible name "Download CV PDF", not "Download CVPDF". */}
@@ -92,6 +89,8 @@ const contactLink =
             {h.cvFormat}
           </span>
         </a>
+        {/* The CV in the other language, as a quiet text link (centred under the stacked buttons on phones). */}
+        <CvVersionLink class="self-center sm:self-auto" />
       </div>
 
       <ul class="mt-6 -mx-2 flex flex-wrap items-center gap-x-1" aria-label={h.contactLabel}>

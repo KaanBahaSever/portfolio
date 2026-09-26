@@ -8,8 +8,11 @@ import { test } from 'node:test';
 import { HEADLINE_SEPARATOR, headlineParts } from '../src/components/home/headline.ts';
 import { SITE } from '../src/config/site.ts';
 import * as resume from '../src/data/resume.ts';
+import { aboutMessages } from '../src/i18n/messages/about.ts';
+import { common } from '../src/i18n/messages/common.ts';
 import { JOURNEY_CHAPTERS, homeMessages } from '../src/i18n/messages/home.ts';
 import { NOT_FOUND_LINKS, notFoundMessages } from '../src/i18n/messages/not-found.ts';
+import { cvLink } from '../src/utils/cv.ts';
 
 const CATALOGUES = { home: homeMessages, notFound: notFoundMessages };
 
@@ -77,8 +80,27 @@ test('the games are not described as search algorithms (only tic-tac-toe searche
   assert.match(notFoundMessages.tr.links.games, /Algoritmik rakiplere/);
 });
 
-test('the Turkish CV button says the CV is in English', () => {
-  assert.match(homeMessages.tr.hero.cvFormat, /İngilizce/);
+test('each language’s CV button downloads the CV in that language', () => {
+  // There is a Turkish CV now: the Turkish button no longer warns that the CV is in English.
+  assert.doesNotMatch(homeMessages.tr.hero.cvFormat, /İngilizce|English/);
+  assert.doesNotMatch(aboutMessages.tr.resume.cvFormat, /İngilizce|English/);
+  for (const locale of ['en', 'tr'] as const) {
+    const link = cvLink(locale);
+    assert.equal(link.href, SITE.cvPath[locale]);
+    assert.equal(link.hreflang, locale);
+    assert.equal(link.type, 'application/pdf');
+  }
+  assert.equal(cvLink('en').href, '/cv/kaan-cv.pdf');
+  assert.equal(cvLink('tr').href, '/cv/kaan-cv-tr.pdf');
+  // Saved under ASCII names, so every system keeps them as written.
+  assert.equal(cvLink('en').download, 'Kaan-Baha-Sever-CV.pdf');
+  assert.equal(cvLink('tr').download, 'Kaan-Baha-Sever-Ozgecmis.pdf');
+});
+
+test('the link to the CV in the other language is labelled in that language', () => {
+  // Rendered with lang="en" on Turkish pages and lang="tr" on English ones (CvVersionLink).
+  assert.equal(common.en.labels.cvVersion, 'English version');
+  assert.equal(common.tr.labels.cvVersion, 'Türkçe sürümü');
 });
 
 test('English copy keeps the house voice: no hype words, no exclamation marks', () => {

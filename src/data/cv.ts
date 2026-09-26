@@ -1,15 +1,22 @@
 /**
- * CV-only content for public/cv/kaan-cv.pdf, built by `npm run cv` (scripts/build-cv.ts).
- * Experience, education, volunteering, activities, skills and languages come from
- * src/data/resume.ts, so the CV and the site cannot drift apart; this module adds what only
- * the printed CV needs: contact details, a short summary and compact project lines.
+ * CV-only content for the two CVs built by `npm run cv` (scripts/build-cv.ts): the English
+ * public/cv/kaan-cv.pdf and the Turkish public/cv/kaan-cv-tr.pdf (SITE.cvPath). Experience,
+ * education, volunteering, activities, skills and languages come from src/data/resume.ts, so the
+ * CVs and the site cannot drift apart; this module adds what only the printed CV needs: a
+ * headline, contact details, a short summary and compact project lines. The words around them
+ * (section titles, the footer, PDF metadata) are in src/i18n/messages/cv.ts.
  *
- * Same facts and voice as the site: the owner is a software developer — never an engineer —
- * and nothing here may go beyond what the site states. The CV is in English (the site labels
- * the download "PDF · English") and, like the site, uses British spelling.
+ * Same facts and voice as the site: the owner is a software developer — never an engineer (nor
+ * "mühendis") — and nothing here may go beyond what the site states. Both languages carry the
+ * same facts: the same projects in the same order, with the same links, stacks and years
+ * (tests/cv-data.test.ts checks it). English uses British spelling, like the site. Turkish is
+ * written natively, in the first person like the Turkish résumé bullets, with ’ before suffixes
+ * on names and numbers ("2024’ten") and the site's Turkish terms (boru hattı, canlıda, av ve
+ * hedef, bilgisayar rakip, Amiral Battı, XOX, büyük daire mesafesi).
  *
- * Pure module, so the build script can import it with plain Node.
+ * Pure module (types only from config.ts), so the build script and tests import it with plain Node.
  */
+import type { Localized } from '../i18n/config.ts';
 
 export interface CvProject {
   name: string;
@@ -31,11 +38,21 @@ export interface CvResearch {
   text: string;
 }
 
-export const CV = {
-  /** Printed under the name. */
+export interface CvContent {
+  /** Printed under the name: the site's headline (SITE.role) in this language. */
+  headline: string;
+  phone: { label: string; href: string };
+  summary: string;
+  projects: readonly CvProject[];
+  research: readonly CvResearch[];
+}
+
+/** Carried over from the previous CV; the same number in both languages. */
+const PHONE = { label: '+90 536 560 78 29', href: 'tel:+905365607829' } as const;
+
+const en: CvContent = {
   headline: 'Software Developer | Math-Driven Solutions & Algorithms',
-  /** Carried over from the previous CV. */
-  phone: { label: '+90 536 560 78 29', href: 'tel:+905365607829' },
+  phone: PHONE,
   summary:
     'Software developer with a mathematics background (Istanbul University). I build systems software in modern C++ and Go: desktop agents, telemetry and messaging platforms, and algorithm-driven applications, together with the CI/CD pipelines that test, package and ship them. From 2021 to 2024 I owned the development lifecycle of a web platform at crowd.inc, from database schema to Linux servers.',
 
@@ -112,7 +129,7 @@ export const CV = {
       stack: ['C#', 'SQL'],
       text: 'Learned programming in C# at a vocational high school from 2016, moving on to data structures and algorithms; by 2019 built database applications on Microsoft SQL Server, and desktop tic-tac-toe and Battleship games as graduation projects.',
     },
-  ] satisfies readonly CvProject[],
+  ],
 
   research: [
     {
@@ -121,5 +138,108 @@ export const CV = {
       url: 'https://github.com/KaanBahaSever/AutonomousParachute',
       text: 'A trajectory-steering algorithm in Python that uses linear algebra and atmospheric descent dynamics to guide a payload to a designated landing coordinate.',
     },
-  ] satisfies readonly CvResearch[],
-} as const;
+  ],
+};
+
+const tr: CvContent = {
+  headline: 'Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar',
+  phone: PHONE,
+  // "İstanbul Üniversitesinde" without an apostrophe: suffixes on institution names are not set
+  // off (TDK), as on the home page and in the console. "crowd.inc bünyesinde", as on the home
+  // page: a suffix on "crowd.inc" would depend on how the name is read aloud. "Boru hatlarını
+  // (pipeline)", as on the Novacast page: job ads and applicant-tracking searches use "pipeline".
+  summary:
+    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajanları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD boru hatlarını (pipeline) da kuruyorum. 2021–2024 yılları arasında crowd.inc bünyesinde bir web platformunun veritabanı şemasından Linux sunucularına kadar tüm geliştirme sürecini yürüttüm.',
+
+  projects: [
+    {
+      name: 'Asion',
+      linkLabel: 'asion.app',
+      url: 'https://asion.app',
+      period: '2024’ten beri · geliştiriliyor, erken erişimde',
+      stack: ['C/C++', 'Objective-C', 'Go', 'gRPC'],
+      // "Barındırılabilecek" (future), as on the Asion page: "built with self-hosting in mind"
+      // is a design goal of a product in early access, not a finished feature.
+      text: 'Bireysel, ekip ve akademik zaman takibi için gizliliği önceleyen, platformlar arası bir üretkenlik ve iş istasyonu etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek. macOS, Linux ve Windows’ta yerel işletim sistemi olay kancaları, hafif bir daemon mimarisi, gRPC/Protobuf ile süreçler arası iletişim ve şifreli SQLCipher veritabanıyla çalışıyor. Tek tıkla test, paketleme, derleme çıktısı üretimi ve dağıtım yapan, çapraz derleme runner’lı çok platformlu GitHub Actions boru hatlarını kurdum.',
+    },
+    {
+      name: 'Novacast',
+      linkLabel: 'novacast.app',
+      url: 'https://novacast.app',
+      period: '2025’ten beri · canlıda',
+      stack: ['Go', 'MQTT'],
+      text: 'Düşük gecikmeli pub/sub boru hatları üzerine kurulu, gerçek zamanlı bir mesaj yayını ve cihaz orkestrasyonu platformu. Çalıştığım bir bilgisayar firmasında ihtiyacı karşılamayan eski bir yazılımın yerini alması için geliştirdim: önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT tabanlı bir mikroservis olarak baştan tasarladım.',
+    },
+    {
+      name: 'Karecik',
+      linkLabel: 'github.com/KaanBahaSever/karecik',
+      url: 'https://github.com/KaanBahaSever/karecik',
+      period: '2021’den beri · canlıda · GPL-3.0',
+      stack: ['Go', 'PostgreSQL'],
+      text: 'Yerel kafe ve restoranların menü ve sipariş yönetimi ile müşteri etkileşimi için kullandığı, çok kiracılı (multi-tenant) bir QR menü SaaS platformu; kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarladım. İlk prototiplerini 2021’de, proje henüz başka adlar taşırken geliştirdim; 2026’da canlıya aldım.',
+    },
+    {
+      name: 'Açık Matematik',
+      linkLabel: 'acik-matematik.com',
+      url: 'https://acik-matematik.com',
+      period: '2023’ten beri · canlıda · açık kaynak',
+      stack: ['Quarto', 'Markdown', 'Python'],
+      text: 'Türkçe lisans matematiği için yeniden üretilebilir sayısal hesaplama destekli bir akademik yayın platformu ve modern ders kitabı girişimi. Fikri 2023’te doğdu; platformu Haziran 2026’da yayına aldım, açık kaynak sürümü Eylül 2026’da duyurdum.',
+    },
+    {
+      name: 'Rocket-Up',
+      linkLabel: 'github.com/KaanBahaSever/Rocket-Up',
+      url: 'https://github.com/KaanBahaSever/Rocket-Up',
+      period: '2020’den beri · geliştiriliyor · MIT',
+      stack: ['C++'],
+      text: 'Yüksek güçlü roket uçuş simülasyonu. 2020’de tek bir amaca yönelik, dar kapsamlı bir Python prototipi olarak başladı; şimdi onu modern C++ ile modüler, açık kaynak bir aerodinamik simülasyon motoru olarak baştan yazıyorum.',
+    },
+    {
+      name: 'NeoSMBIOS',
+      linkLabel: 'github.com/KaanBahaSever/NeoSMBIOS',
+      url: 'https://github.com/KaanBahaSever/NeoSMBIOS',
+      period: 'Açık kaynak · MIT',
+      stack: ['C++'],
+      text: 'C++23 için tek başlık dosyalı (header-only), sıfır kopyalı ve sınır denetimli bir SMBIOS/DMI firmware tablosu ayrıştırıcısı.',
+    },
+    {
+      name: 'i18n-cpp',
+      linkLabel: 'github.com/KaanBahaSever/i18n-cpp',
+      url: 'https://github.com/KaanBahaSever/i18n-cpp',
+      period: 'Açık kaynak · MIT',
+      stack: ['C++'],
+      text: 'C++ için hafif, tek başlık dosyalı bir uluslararasılaştırma (i18n) kütüphanesi: çeviriler dil dosyalarında durur ve anahtarla bulunur; metindeki yer tutucular çalışma zamanında doldurulur.',
+    },
+    {
+      name: 'Kişisel web sitesi',
+      linkLabel: 'kaanbahasever.com',
+      url: 'https://kaanbahasever.com',
+      period: '2026',
+      stack: ['TypeScript', 'Astro'],
+      // "Bilgisayar rakip", as on the games pages and the About page. The no-break space keeps
+      // "Amiral Battı" on one line.
+      text: 'İki dilli (Türkçe/İngilizce) statik site: tamamen cihazda çalışan, gizliliği önceleyen tarayıcı araçları (PDF, görseller, asal çarpanlara ayırma, büyük daire mesafesi), algoritmik oyunlar (av ve hedef ile olasılık yoğunluğu modları olan bir bilgisayar rakibiyle Amiral Battı, minimax ile XOX) ve teknik yazılar.',
+    },
+    {
+      name: 'İlk çalışmalar',
+      linkLabel: 'github.com/KaanBahaSever/BattleShips',
+      url: 'https://github.com/KaanBahaSever/BattleShips',
+      period: '2016 – 2019',
+      stack: ['C#', 'SQL'],
+      // "MS SQL", as in the home page's journey teaser.
+      text: '2016’da meslek lisesinde C# ile programlamaya başladım, sonra veri yapıları ve algoritmalara geçtim; 2019’a kadar MS SQL tabanlı veritabanı uygulamaları, bitirme projesi olarak da masaüstü XOX ve Amiral Battı oyunları geliştirdim.',
+    },
+  ],
+
+  research: [
+    {
+      title: 'Otonom paraşüt güdümü',
+      linkLabel: 'github.com/KaanBahaSever/AutonomousParachute',
+      url: 'https://github.com/KaanBahaSever/AutonomousParachute',
+      // "Lineer cebir", as on the home page, the About page and in the console.
+      text: 'Lineer cebir ve atmosferik iniş dinamiğiyle faydalı yükü belirlenen bir iniş koordinatına yönlendiren, Python ile yazılmış bir yörünge güdüm algoritması.',
+    },
+  ],
+};
+
+export const CV = { en, tr } as const satisfies Localized<CvContent>;

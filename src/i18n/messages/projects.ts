@@ -14,7 +14,7 @@ const en = {
   index: {
     title: 'Projects',
     description:
-      'Projects by Kaan Baha Sever: Asion, Novacast, Karecik, Açık Matematik and open-source C++ libraries, with notes on how each one is built.',
+      'Projects by Kaan Baha Sever: Asion, Novacast, Karecik, Açık Matematik, a high-power rocket simulation and open-source C++ libraries, with notes on how each one is built.',
     eyebrow: 'Selected work',
     lead: 'Things I build, from native daemons in C++ and Go services to open-source mathematics. Each page explains what a project does and how it is put together.',
     /** Fact line under the lead: "6 projects · 4 open source". */
@@ -65,6 +65,8 @@ const en = {
     'acik-matematik': 'A page from first-year analysis: a Riemann sum under a curve and a tangent line.',
     neosmbios: 'An SMBIOS record: no field is read before it is checked against the record’s own length byte.',
     'rocket-up': 'A flight profile: powered ascent, apogee, then descent under a parachute.',
+    'i18n-cpp':
+      'A translation lookup: a key is read from the active language’s .properties file, then a named placeholder is filled in at run time.',
   },
 };
 
@@ -74,7 +76,7 @@ const tr: ProjectsMessages = {
   index: {
     title: 'Projeler',
     description:
-      'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik ve açık kaynak C++ kütüphaneleri; her birinin nasıl kurgulandığına dair notlarla.',
+      'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik, yüksek güçlü bir roket simülasyonu ve açık kaynak C++ kütüphaneleri; her birinin nasıl kurgulandığına dair notlarla.',
     // Same wording as the home page's "Selected work" link and section that lead here.
     eyebrow: 'Seçili işler',
     lead: 'C++ ile yazılmış yerel daemon’lardan Go servislerine ve açık kaynak matematiğe kadar geliştirdiğim projeler. Her sayfa, projenin ne yaptığını ve nasıl bir araya getirildiğini anlatıyor.',
@@ -119,6 +121,8 @@ const tr: ProjectsMessages = {
     'acik-matematik': 'Analiz I dersinden bir sayfa: bir eğrinin altında Riemann toplamı ve bir teğet doğru.',
     neosmbios: 'Bir SMBIOS kaydı: hiçbir alan, kaydın kendi uzunluk baytıyla karşılaştırılmadan okunmaz.',
     'rocket-up': 'Bir uçuş profili: motorlu tırmanış, tepe noktası ve ardından paraşütle iniş.',
+    'i18n-cpp':
+      'Bir çeviri araması: anahtar, etkin dilin .properties dosyasından okunur; ardından adlandırılmış yer tutucu çalışma zamanında doldurulur.',
   },
 };
 

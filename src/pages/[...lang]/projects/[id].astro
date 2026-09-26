@@ -9,7 +9,10 @@ import { ui } from '../../../components/ui/styles';
 import EarlyAccessNotice from '../../../components/projects/EarlyAccessNotice.astro';
 import ProjectBadges from '../../../components/projects/ProjectBadges.astro';
 import ProjectFacts from '../../../components/projects/ProjectFacts.astro';
+import ProjectPlate from '../../../components/projects/ProjectPlate.astro';
 import ProjectProse from '../../../components/projects/ProjectProse.astro';
+import ProjectTitle from '../../../components/projects/ProjectTitle.astro';
+import { hasFigure } from '../../../components/projects/figures';
 import { codeHostName, liveLink } from '../../../components/projects/links';
 import { getPostsForProject, getProjects, type LocalizedProject } from '../../../utils/content';
 import { LOCALES, localizePath } from '../../../i18n/config';
@@ -43,6 +46,9 @@ const live = liveLink(project.data.liveUrl, locale);
 const indexHref = localizePath('/projects/', locale);
 // Text that fell back to English on a Turkish page is marked as such.
 const textLang = project.lang === locale ? undefined : project.lang;
+// The plate under the title shows the line drawing, or the cover when there is no drawing; a
+// cover next to a drawing opens the write-up instead.
+const bodyCover = hasFigure(project.id) ? cover : undefined;
 ---
 
 <BaseLayout title={title} description={shortDescription} width="wide">
@@ -65,7 +71,7 @@ const textLang = project.lang === locale ? undefined : project.lang;
     <header class="mt-4 max-w-3xl">
       <ProjectBadges data={project.data} />
       <div lang={textLang}>
-        <h1 class:list={[ui.pageTitle, 'mt-5']}>{title}</h1>
+        <h1 class:list={[ui.pageTitle, 'mt-5']}><ProjectTitle text={title} /></h1>
         <p class:list={[ui.lead, 'mt-4']}>{shortDescription}</p>
       </div>
 
@@ -109,16 +115,19 @@ const textLang = project.lang === locale ? undefined : project.lang;
     </header>
   </div>
 
+  {/* The project's figure opens the page at full width, above the write-up. */}
+  <ProjectPlate project={project} class="mt-10 sm:mt-12" />
+
   {stage === 'early-access' && <EarlyAccessNotice title={title} live={live} titleLang={textLang} class="mt-10 max-w-3xl" />}
 
-  <div class="mt-12 grid gap-12 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
+  <div class="mt-12 grid gap-10 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-16">
     <ProjectFacts project={project} class="lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:self-start" />
 
     <div class="min-w-0">
       {
-        cover && (
+        bodyCover && (
           <Image
-            src={cover}
+            src={bodyCover}
             alt={coverAlt ?? ''}
             widths={[400, 800, 1200]}
             sizes="(min-width: 1024px) 760px, 100vw"

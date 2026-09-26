@@ -53,3 +53,15 @@ Browsers only let an extension reach a local program through native messaging, w
 every message with a 4-byte little-endian length prefix in front of a JSON payload. Asion
 implements that framing in **C++** inside `asion-native-host`, so the extension and the
 background agent exchange messages without a network service in between.
+
+## Build, test and release automation
+
+Software with native parts on three operating systems has to be built, tested and packaged on
+each of them, every time it changes. For the Asion ecosystem I built multi-platform CI/CD
+pipelines on **GitHub Actions**:
+
+- **Multi-platform workflows**, with cross-compilation runners producing the native builds.
+- **Custom automation scripts** in Bash, Batch and Python that tie the steps together.
+- **One-click testing and packaging**: a single click runs the tests, packages the components
+  and generates the artifacts for every platform.
+- **Deployment pipelines** that take those multi-platform artifacts through to release.

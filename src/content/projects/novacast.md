@@ -4,6 +4,8 @@ shortDescription: A real-time message broadcasting and device orchestration plat
 isOpenSource: false
 liveUrl: https://novacast.app
 techStack: [Go, MQTT]
+stage: production
+since: 2025
 featured: true
 order: 2
 # Only orders entries (newest first among equal `order` values); it is not shown anywhere.
@@ -16,6 +18,13 @@ Novacast is a high-throughput platform for broadcasting messages in real time an
 the devices that receive them. It is designed around low-latency publish/subscribe pipelines:
 a message published once should reach every device that needs it, quickly, and a fleet of
 devices should be steerable from one place. More at [novacast.app](https://novacast.app).
+
+## Where it came from
+
+I developed Novacast in 2025 to replace inadequate legacy software at a computer firm where I
+worked. The first version was a prototype in Python. In late 2025 I re-architected it from the
+ground up as a performant microservice in Go, built around MQTT; that is the version running in
+production today.
 
 ## Why publish/subscribe, and why MQTT
 

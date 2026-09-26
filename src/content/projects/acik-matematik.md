@@ -5,6 +5,8 @@ isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/acik-matematik
 liveUrl: https://acik-matematik.com
 techStack: [Quarto, Markdown, Python]
+stage: production
+since: 2023
 featured: true
 order: 4
 date: 2026-06-02
@@ -16,6 +18,16 @@ Açık Matematik ("Open Mathematics") is an open-source digital publishing platf
 textbook initiative for undergraduate mathematics in Turkish. Turkish course material is often
 scattered, handwritten or hard to read, so the project gathers it into one accessible library:
 cleanly typeset notes, rigorous documentation, no ads, and all of the source open.
+
+## How it came about
+
+Açık Matematik began with a problem of my own: the friction of studying from academic lecture
+notes. Turning that into a platform took a few years:
+
+- **2023**: the project is conceived.
+- **March 2026**: development picks up pace.
+- **June 2026**: the live platform launches at [acik-matematik.com](https://acik-matematik.com).
+- **September 2026**: the open-source release is officially announced.
 
 ## Features
 

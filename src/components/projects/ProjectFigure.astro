@@ -1,10 +1,12 @@
 ---
 /**
- * A small line drawing for a project: thin currentColor strokes on a 240 × 100 grid, with one
- * accent mark for the idea the figure is about. Decorative (aria-hidden): on project pages the
- * <figcaption> carries the meaning; on cards the text next to it does.
+ * A line drawing for a project: thin currentColor strokes on a 240 × 100 grid, with one accent
+ * mark for the idea the figure is about. Small on cards, full width at the top of the project's
+ * page (ProjectPlate). Decorative (aria-hidden): on project pages the <figcaption> carries the
+ * meaning; on cards the text next to it does.
  *
- * Strokes do not scale with the drawing (vector-effect), so lines stay hairlines at any size.
+ * Strokes do not scale with the drawing (vector-effect), so lines stay hairlines at any size;
+ * a CSS stroke-width on the <svg> (class) overrides the default for larger renderings.
  * Add a drawing here together with its caption in src/i18n/messages/projects.ts (`figures`).
  */
 import type { FigureId } from './figures';
@@ -53,6 +55,19 @@ const menuRows = [30, 42, 54, 66];
 /* NeoSMBIOS: a record of 13 byte cells; the formatted area ends where the length byte says. */
 const cell = 16;
 const cellX = (index: number) => 16 + index * cell;
+
+/*
+ * i18n-cpp: the front one of three language files (en, es, fr), its key=value lines as key and
+ * value strokes; the line at `lookupRow` is the one looked up, and it lines up with the message.
+ */
+const propertyRows = [
+  { y: 40, valueEnd: 72 },
+  { y: 50, valueEnd: 64 },
+  { y: 60, valueEnd: 70 },
+  { y: 70, valueEnd: 60 },
+  { y: 80, valueEnd: 68 },
+];
+const lookupRow = 1;
 ---
 
 <svg
@@ -254,6 +269,44 @@ const cellX = (index: number) => 16 + index * cell;
         <g class={accent}>
           <circle cx="128" cy="20" r="3.5" fill="currentColor" fill-opacity="0.2" />
           <circle cx="128" cy="20" r="1.4" fill="currentColor" stroke="none" />
+        </g>
+      </>
+    )
+  }
+
+  {
+    id === 'i18n-cpp' && (
+      <>
+        <g class={faint}>
+          {/* The other two language files, stacked behind; only their visible edges are drawn. */}
+          <path d="M18 76H12V10H68V16" />
+          <path d="M24 82H18V16H74V22" />
+          {propertyRows
+            .filter((_, index) => index !== lookupRow)
+            .map((row) => (
+              <path d={`M31 ${row.y}H43M48 ${row.y}H${row.valueEnd}`} />
+            ))}
+          <rect x="28" y={propertyRows[lookupRow].y - 5} width="48" height="10" rx="2" />
+          {/* Lookup by key, and the run-time value rising into its placeholder. */}
+          <path d={`M84 ${propertyRows[lookupRow].y}H111`} stroke-dasharray="2 3" />
+          <path d={`m108 ${propertyRows[lookupRow].y - 3.5} 4 3.5-4 3.5`} />
+          <path d="M169 75V63" stroke-dasharray="2 3" />
+          <path d="m165.5 65.5 3.5-3.5 3.5 3.5" />
+        </g>
+        <g class={ink}>
+          <path d="M24 22H70L80 32V88H24Z" />
+          <path d="M70 22V32H80" />
+          <path d={`M31 ${propertyRows[lookupRow].y}H43M48 ${propertyRows[lookupRow].y}H${propertyRows[lookupRow].valueEnd}`} />
+          <rect x="116" y="40" width="108" height="20" rx="3" />
+          <path d="M124 50H144M194 50H216" />
+          <rect x="157" y="76" width="24" height="10" rx="1.5" />
+          <path d="M161 81H177" />
+        </g>
+        <g class={accent}>
+          <path d="M154 44c-1.8 0-2.5.8-2.5 2.3v1.6c0 1.2-.6 2.1-1.8 2.1 1.2 0 1.8.9 1.8 2.1v1.6c0 1.5.7 2.3 2.5 2.3" />
+          <path d="M184 44c1.8 0 2.5.8 2.5 2.3v1.6c0 1.2.6 2.1 1.8 2.1-1.2 0-1.8.9-1.8 2.1v1.6c0 1.5-.7 2.3-2.5 2.3" />
+          <rect x="157" y="45" width="24" height="10" rx="1.5" fill="currentColor" fill-opacity="0.15" stroke="none" />
+          <path d="M161 50H177" />
         </g>
       </>
     )

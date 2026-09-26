@@ -12,6 +12,10 @@ sahipleri her şeyi bir yönetim panelinden yönetir. Menünün, kod okutulduğu
 gerekir; bu yüzden servis kesintisiz (zero downtime) ve düşük gecikmeyle çalışacak şekilde
 tasarlandı.
 
+Fikir, üründen daha eski. Konsept ve ilk deneysel prototipler 2021 yılına, projenin daha önceki
+çalışma adlarıyla anıldığı döneme uzanıyor. 2026 yılında bu çalışmayı olgunlaştırıp Karecik
+adıyla canlıya aldım.
+
 ## Özellikler
 
 - **Menü düzenleyici**: sürükleyip bırakarak sıralanan kategoriler ve ürünler, satır içi fiyat

@@ -19,7 +19,7 @@ interface ChapterMarkup {
   numbers: string[];
   figures: string[];
   hasFigure: boolean;
-  /** The drawing components inside the chapter's figure, e.g. ['AccessMatrix']. */
+  /** The drawing components inside the chapter's figure, e.g. ['IdeaNetwork']. */
   drawings: string[];
 }
 
@@ -58,9 +58,11 @@ test('every chapter uses its own number and figure number', () => {
   }
 });
 
-test('crowd.inc shows the access matrix and the community chapter the odd-number square', () => {
+test('crowd.inc shows the idea network and the community chapter the odd-number square', () => {
   const byId = new Map(chapters().map((chapter) => [chapter.id, chapter.drawings]));
-  assert.deepEqual(byId.get('work'), ['AccessMatrix']);
+  assert.deepEqual(byId.get('work'), ['IdeaNetwork']);
+  // The network's two areas are labelled from the catalogue, in the page's language.
+  assert.ok(source.includes('<IdeaNetwork labels={c.work.figureLabels} />'));
   assert.deepEqual(byId.get('community'), ['OddSquares']);
 });
 

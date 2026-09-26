@@ -1,9 +1,9 @@
 /**
  * Geometry behind the About page figures. Each figure is drawn from the model it illustrates
  * (a real Hohmann transfer, a real placement count, a real minimax search, a real cipher, an
- * integrated flight profile, an integrated steering field, an access matrix computed from role
- * inheritance, a square tiled by odd numbers), so the pictures stay honest when someone reads
- * them closely.
+ * integrated flight profile, an integrated steering field, a network of ideas and the people
+ * helping with them, a square tiled by odd numbers), so the pictures stay honest when someone
+ * reads them closely.
  *
  * Pure module: no DOM, no `astro:*` imports and erasable TypeScript only, so `node --test` can
  * load it. Coordinates are unitless model values; the figure components scale them to SVG.
@@ -420,66 +420,176 @@ export function oblique(p: Point3, origin: Point, scale: number, depth = 0.5): P
 }
 
 /* ------------------------------------------------------------------------------------------ */
-/* Access control: roles that inherit their permissions                                         */
+/* An idea network: people share ideas and others help with them                               */
 /* ------------------------------------------------------------------------------------------ */
 
+/** An axis-aligned rectangle: its top left corner and its size. */
+export interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/** True when `p` lies in `rect` (its edge included). */
+export function insideRect(p: Point, rect: Rect): boolean {
+  return p.x >= rect.x && p.x <= rect.x + rect.width && p.y >= rect.y && p.y <= rect.y + rect.height;
+}
+
+/** The golden angle, 180° × (3 − √5) ≈ 137.5°: turning by it each time, no two helpers line up. */
+export const GOLDEN_ANGLE = 180 * (3 - Math.sqrt(5));
+
+/** An idea of the network, and the people who help with this idea and no other. */
+export interface IdeaSeed {
+  at: Point;
+  /** How many people help with this idea only. */
+  helpers: number;
+  /**
+   * The ring they gather in, as [inner, outer] radii. Helper k stands GOLDEN_ANGLE further round
+   * than helper k − 1, and a little further out, so that each takes an equal share of the ring's
+   * area: the way seeds pack a sunflower head (Vogel's model), read here as a crowd forming.
+   */
+  ring: readonly [number, number];
+  /** Direction from the idea to its first helper, in degrees clockwise from +x (y down, as in SVG). */
+  phase: number;
+  /** A private idea: it and everyone who helps with it stay inside the private region. */
+  private?: boolean;
+}
+
+export interface IdeaNetworkSpec {
+  ideas: readonly IdeaSeed[];
+  /**
+   * People who help with two ideas, as [i, j, offset]: each stands halfway between ideas i and j,
+   * `offset` units off the line that joins them (positive: to the right, looking from i to j on
+   * screen), so its two links meet at an angle instead of lying on one straight line.
+   */
+  shared: readonly (readonly [number, number, number])[];
+  /** The private region. */
+  region: Rect;
+}
+
+export interface IdeaNetwork {
+  /** The ideas in the order of the spec, each with its number of helpers (its links). */
+  ideas: { at: Point; private: boolean; helpers: number }[];
+  /** Every idea's own helpers in turn, then the shared helpers. */
+  users: { at: Point; private: boolean }[];
+  /** Who helps with which idea, as indices into `users` and `ideas`. */
+  links: { user: number; idea: number }[];
+  /** The idea with the most helpers (the first of them on a tie). */
+  busiest: number;
+}
+
 /**
- * Role-based access control with inheritance. `additions` lists the roles from least to most
- * privileged, each with the permissions it adds to the role below it, so every role holds
- * everything the roles below it hold. Returns the role × permission matrix, least privileged
- * role first: grants[role][p] is true when that role holds permissions[p].
+ * Lays out a small network of ideas and the people who help with them: each idea's own helpers
+ * in a ring around it, and the people who help with two ideas between those two. Every helper
+ * is linked to the ideas it helps with, and `busiest` is the idea with the most helpers.
  *
- * Throws on a permission that is not in `permissions`, and on a role that adds nothing new: a
- * role that grants no more than the one below it is not a separate level.
+ * Throws on a malformed spec, and when the private boundary would be crossed: a private idea or
+ * anyone who helps with it outside `region`, anything public inside it, or one person helping
+ * with a public and a private idea (the link between those two would cross the boundary).
  */
-export function accessMatrix<P>(additions: readonly (readonly P[])[], permissions: readonly P[]): boolean[][] {
-  const held = new Set<P>();
-  return additions.map((adds, role) => {
-    const before = held.size;
-    for (const permission of adds) {
-      if (!permissions.includes(permission)) {
-        throw new RangeError(`accessMatrix: role ${role} adds an unknown permission, ${String(permission)}`);
-      }
-      held.add(permission);
+export function ideaNetwork(spec: IdeaNetworkSpec): IdeaNetwork {
+  const { ideas, shared, region } = spec;
+  if (ideas.length === 0) throw new RangeError('ideaNetwork: a network needs at least one idea');
+  const users: IdeaNetwork['users'] = [];
+  const links: IdeaNetwork['links'] = [];
+  const add = (at: Point, isPrivate: boolean, what: string): number => {
+    if (insideRect(at, region) !== isPrivate) {
+      throw new RangeError(
+        `ideaNetwork: ${what} is ${isPrivate ? 'private but outside' : 'public but inside'} the private region`,
+      );
     }
-    if (held.size === before) throw new RangeError(`accessMatrix: role ${role} adds no new permission`);
-    return permissions.map((permission) => held.has(permission));
-  });
-}
+    return users.push({ at, private: isPrivate }) - 1;
+  };
 
-/** For each row of a matrix, how many cells at its start are true: where that step of a staircase ends. */
-export function leadingRuns(matrix: readonly (readonly boolean[])[]): number[] {
-  return matrix.map((row) => {
-    const first = row.indexOf(false);
-    return first === -1 ? row.length : first;
+  ideas.forEach((idea, i) => {
+    const isPrivate = idea.private ?? false;
+    const [inner, outer] = idea.ring;
+    if (!(Number.isInteger(idea.helpers) && idea.helpers >= 0)) {
+      throw new RangeError(`ideaNetwork: idea ${i} needs a whole number of helpers, got ${idea.helpers}`);
+    }
+    if (!(inner > 0 && outer >= inner)) {
+      throw new RangeError(`ideaNetwork: idea ${i} needs a ring with 0 < inner ≤ outer, got [${inner}, ${outer}]`);
+    }
+    if (insideRect(idea.at, region) !== isPrivate) {
+      throw new RangeError(`ideaNetwork: idea ${i} is on the wrong side of the private region's boundary`);
+    }
+    for (let k = 0; k < idea.helpers; k++) {
+      // Equal areas: r² grows by the same amount with every helper, from inner² to outer².
+      const r = Math.sqrt(inner ** 2 + ((outer ** 2 - inner ** 2) * k) / Math.max(1, idea.helpers - 1));
+      const angle = ((idea.phase + k * GOLDEN_ANGLE) * Math.PI) / 180;
+      const at = { x: idea.at.x + r * Math.cos(angle), y: idea.at.y + r * Math.sin(angle) };
+      links.push({ user: add(at, isPrivate, `helper ${k} of idea ${i}`), idea: i });
+    }
   });
+
+  shared.forEach(([i, j, offset], s) => {
+    const a = ideas[i];
+    const b = ideas[j];
+    if (!a || !b || i === j) throw new RangeError(`ideaNetwork: shared helper ${s} needs two different ideas`);
+    const isPrivate = a.private ?? false;
+    if ((b.private ?? false) !== isPrivate) {
+      throw new RangeError(`ideaNetwork: shared helper ${s} would join a public and a private idea`);
+    }
+    const dx = b.at.x - a.at.x;
+    const dy = b.at.y - a.at.y;
+    const length = Math.hypot(dx, dy);
+    if (!(length > 0)) throw new RangeError(`ideaNetwork: shared helper ${s} joins two ideas at the same point`);
+    // The midpoint, moved along the right-hand normal (−dy, dx) of the direction from i to j.
+    const at = {
+      x: (a.at.x + b.at.x) / 2 - (dy / length) * offset,
+      y: (a.at.y + b.at.y) / 2 + (dx / length) * offset,
+    };
+    const user = add(at, isPrivate, `shared helper ${s}`);
+    links.push({ user, idea: i }, { user, idea: j });
+  });
+
+  const counts = ideas.map((_, i) => links.filter((link) => link.idea === i).length);
+  return {
+    ideas: ideas.map((idea, i) => ({ at: idea.at, private: idea.private ?? false, helpers: counts[i] ?? 0 })),
+    users,
+    links,
+    busiest: counts.indexOf(Math.max(...counts)),
+  };
 }
 
 /**
- * The permissions of the access-control figure: three actions on public data, then the same
- * three on private data (a dashed line separates the two in the drawing). An example, not a
- * real system's list.
+ * The crowd.inc figure's network, in its SVG units (320 wide): the idea with the most helpers,
+ * seven more public ideas around it (clockwise from the top left), and two private ideas inside
+ * the region on the right. Schematic, like the counts, and the caption says so. `radius` is the
+ * drawn size of an idea and of a person, which the tests use to check that nothing overlaps.
+ * The rings start 20 units out, so that even the shortest link, from a dot to an idea's circle,
+ * is a line of 11 units and still reads as one at 320 px.
  */
-export const RBAC_PERMISSIONS = [
-  'public.read',
-  'public.write',
-  'public.delete',
-  'private.read',
-  'private.write',
-  'private.delete',
-] as const;
-export type RbacPermission = (typeof RBAC_PERMISSIONS)[number];
-
-/**
- * The figure's four roles, least privileged first, each with what it adds to the role below.
- * Illustrative, like the permissions: the caption calls the figure a schematic example.
- */
-export const RBAC_ROLES = [
-  { role: 'guest', adds: ['public.read'] },
-  { role: 'member', adds: ['public.write'] },
-  { role: 'editor', adds: ['public.delete', 'private.read'] },
-  { role: 'admin', adds: ['private.write', 'private.delete'] },
-] as const satisfies readonly { role: string; adds: readonly RbacPermission[] }[];
+export const IDEA_NETWORK = {
+  radius: { idea: 7, user: 2 },
+  region: { x: 228, y: 22, width: 84, height: 144 },
+  ideas: [
+    { at: { x: 100, y: 98 }, helpers: 11, ring: [21, 33], phase: 273 },
+    { at: { x: 34, y: 50 }, helpers: 4, ring: [20, 25], phase: 3 },
+    { at: { x: 96, y: 34 }, helpers: 2, ring: [20, 21], phase: 210 },
+    { at: { x: 160, y: 42 }, helpers: 5, ring: [20, 26], phase: -57 },
+    { at: { x: 200, y: 98 }, helpers: 3, ring: [20, 23], phase: -99 },
+    { at: { x: 172, y: 148 }, helpers: 4, ring: [20, 24], phase: 129 },
+    { at: { x: 102, y: 158 }, helpers: 1, ring: [20, 20], phase: 267 },
+    { at: { x: 30, y: 138 }, helpers: 3, ring: [20, 23], phase: 33 },
+    { at: { x: 266, y: 58 }, helpers: 3, ring: [20, 24], phase: -90, private: true },
+    { at: { x: 272, y: 126 }, helpers: 3, ring: [20, 23], phase: 0, private: true },
+  ],
+  shared: [
+    [0, 1, 6],
+    [0, 3, -8],
+    [0, 5, -4],
+    [0, 7, -6],
+    [2, 1, 4],
+    [2, 3, 4],
+    [3, 4, 6],
+    [4, 5, -6],
+    [6, 5, 4],
+    [6, 7, 4],
+    [8, 9, 10],
+  ],
+} as const satisfies IdeaNetworkSpec & { radius: { idea: number; user: number } };
 
 /* ------------------------------------------------------------------------------------------ */
 /* Sums of odd numbers: a square built from L-shaped pieces                                     */

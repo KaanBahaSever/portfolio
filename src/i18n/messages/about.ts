@@ -126,15 +126,14 @@ const en = {
         /** Follows the period (2021 – 2024). */
         label: 'crowd.inc',
         title: 'Software Developer at crowd.inc',
-        /** The roles and permissions in the figure are an example, not crowd.inc's: say so. */
+        /**
+         * The network is a schematic picture, not crowd.inc's data: say so first, and give no
+         * counts (the site had hundreds of users; the figure draws a few dozen dots).
+         */
         caption:
-          'A schematic example of role-based access control (RBAC). There are four roles, the least privileged at the bottom. Each role inherits every permission of the role below it and adds more, so the granted cells form a staircase. The dashed line separates public data from private data, and the lowest role reaches none of the private data.',
-        /** The matrix's labels, in small mono capitals: rows, columns and the two kinds of data. */
-        figureLabels: {
-          roles: { guest: 'GUEST', member: 'MEMBER', editor: 'EDITOR', admin: 'ADMIN' },
-          actions: { read: 'READ', write: 'WRITE', delete: 'DELETE' },
-          scopes: { public: 'PUBLIC', private: 'PRIVATE' },
-        },
+          'A schematic picture of crowd.inc: people shared their ideas there, and others helped with them. Large circles are ideas and small dots are users; each line shows who helped with which idea, and the highlighted idea has the most helpers. Inside the dashed boundary on the right are the private ideas we turned to in the end, open only to their own members.',
+        /** Labels over the public side and over the private region, in small mono capitals. */
+        figureLabels: { public: 'PUBLIC', private: 'PRIVATE' },
       },
       community: {
         short: 'Community',
@@ -260,14 +259,10 @@ const tr: AboutMessages = {
         label: 'crowd.inc',
         // "crowd.inc" is read "kraud ink", so the suffix is "’te", after the typographic apostrophe.
         title: 'crowd.inc’te yazılım geliştirici',
-        // "Rol tabanlı erişim kontrolü", as the chapter's prose says.
+        // "Fikirler için yardım", in the words the chapter opens with ("bu fikirler için yardım bulduğu").
         caption:
-          'Şematik bir örnek: rol tabanlı erişim kontrolü (RBAC). Dört rol var; en az yetkili olan en altta. Her rol, bir altındaki rolün bütün izinlerini devralıyor ve bunlara yenilerini ekliyor. Bu yüzden verilen izinler, yani dolu hücreler, bir merdiven oluşturuyor. Kesikli çizgi herkese açık verileri özel verilerden ayırıyor; en alttaki rol özel verilerin hiçbirine erişemiyor.',
-        figureLabels: {
-          roles: { guest: 'MİSAFİR', member: 'ÜYE', editor: 'EDİTÖR', admin: 'YÖNETİCİ' },
-          actions: { read: 'OKUMA', write: 'YAZMA', delete: 'SİLME' },
-          scopes: { public: 'HERKESE AÇIK', private: 'ÖZEL' },
-        },
+          'Şematik bir resim: crowd.inc’te insanlar fikirlerini paylaşıyor, başkaları da bu fikirler için yardım ediyordu. Büyük daireler fikirler, küçük noktalar kullanıcılar; çizgiler kimin hangi fikir için yardım ettiğini gösteriyor. Vurgulu daire, en çok yardım alan fikir. Sağdaki kesikli sınırın içinde, son dönemde yöneldiğimiz özel fikirler var; bunlar yalnızca kendi üyelerine açık.',
+        figureLabels: { public: 'HERKESE AÇIK', private: 'ÖZEL' },
       },
       community: {
         short: 'Topluluk',

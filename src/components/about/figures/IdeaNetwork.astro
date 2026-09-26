@@ -1,0 +1,119 @@
+---
+/**
+ * crowd.inc as a network: ideas that people shared (circles with a dot) and the people who
+ * helped with them (small dots), one line for every idea a person helped with. ideaNetwork()
+ * lays it out: each idea's own helpers gather round it the way seeds fill a sunflower head, and
+ * people who helped with two ideas stand between them, which ties the ideas into one network.
+ * The idea with the most helpers, found by counting its links, is the accent. On the right,
+ * inside a dashed boundary with a padlock, private ideas whose people are linked only inside it:
+ * where the platform turned in the end, and the public/private boundary its access control kept.
+ * Schematic: the counts are an example, and the caption says so. Decorative; the two area labels
+ * are visible text, so they come in localized.
+ */
+import { IDEA_NETWORK, ideaNetwork, linePath, round, type Point } from '../geometry';
+
+interface Props {
+  /** Short labels in mono capitals over the public side and over the private region. */
+  labels: { public: string; private: string };
+}
+
+const { labels } = Astro.props;
+
+const { radius, region } = IDEA_NETWORK;
+const network = ideaNetwork(IDEA_NETWORK);
+
+/**
+ * A link from a person to an idea: from the edge of the dot to the idea's circle, touching both
+ * the way the other figures' edges meet their nodes, so that even a short link reads as a line.
+ */
+function link(from: Point, to: Point): string {
+  const length = Math.hypot(to.x - from.x, to.y - from.y);
+  const ux = (to.x - from.x) / length;
+  const uy = (to.y - from.y) / length;
+  const end = length - radius.idea;
+  return linePath([
+    { x: from.x + ux * radius.user, y: from.y + uy * radius.user },
+    { x: from.x + ux * end, y: from.y + uy * end },
+  ]);
+}
+
+// ideaNetwork() only hands out indices into its own lists.
+const links = network.links.map(({ user, idea }) => ({
+  d: link(network.users[user]!.at, network.ideas[idea]!.at),
+  busiest: idea === network.busiest,
+}));
+const ideas = network.ideas.map((idea, i) => ({ ...idea, busiest: i === network.busiest }));
+
+/** Both labels share a baseline above the drawing; the private one follows a small padlock. */
+const LABEL_Y = 12;
+const lock = { x: region.x + 4, y: LABEL_Y };
+const padlock = {
+  body: { x: lock.x - 3, y: lock.y - 5, width: 6, height: 5 },
+  shackle: `M${lock.x - 1.75} ${lock.y - 5} V${lock.y - 6.75} a1.75 1.75 0 0 1 3.5 0 V${lock.y - 5}`,
+};
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+const accent = 'text-accent-600 dark:text-accent-400';
+const label = 'text-zinc-600 dark:text-zinc-400';
+---
+
+<svg
+  viewBox="0 0 320 172"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    {links.filter((l) => !l.busiest).map((l) => <path d={l.d} />)}
+  </g>
+  <g class={accent} stroke="currentColor" stroke-width="1">
+    {links.filter((l) => l.busiest).map((l) => <path d={l.d} />)}
+  </g>
+
+  {/* The boundary around the private ideas. */}
+  <rect
+    class={ink}
+    x={region.x}
+    y={region.y}
+    width={region.width}
+    height={region.height}
+    rx="10"
+    stroke="currentColor"
+    stroke-width="1"
+    stroke-dasharray="3 3"
+  />
+
+  <g class={ink} fill="currentColor">
+    {network.users.map((u) => <circle cx={round(u.at.x)} cy={round(u.at.y)} r={radius.user} />)}
+  </g>
+
+  {
+    ideas.map((idea) => (
+      <g class={idea.busiest ? accent : ink}>
+        <circle
+          cx={idea.at.x}
+          cy={idea.at.y}
+          r={radius.idea}
+          stroke="currentColor"
+          stroke-width={idea.busiest ? 1.25 : 1}
+        />
+        <circle cx={idea.at.x} cy={idea.at.y} r="2.5" fill="currentColor" />
+      </g>
+    ))
+  }
+
+  <g class={label}>
+    <g stroke="currentColor" stroke-width="1">
+      <rect {...padlock.body} rx="1" />
+      <path d={padlock.shackle} />
+    </g>
+    <g class="font-mono" fill="currentColor" font-size="8" letter-spacing="0.06em">
+      <text x="4" y={LABEL_Y}>{labels.public}</text>
+      <text x={lock.x + 7} y={LABEL_Y}>{labels.private}</text>
+    </g>
+  </g>
+</svg>

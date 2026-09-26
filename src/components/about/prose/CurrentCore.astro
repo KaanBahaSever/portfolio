@@ -1,5 +1,10 @@
 ---
-/** Journey chapter 5: modern C++ and Go today (Asion, Novacast) and the mathematics degree. */
+/**
+ * Journey chapter 9: modern C++ and Go today (Asion since 2024, Novacast since 2025) and the
+ * mathematics degree. Novacast: built to replace inadequate legacy software at a computer
+ * company the owner worked at (unnamed); Python prototype first, re-architected in late 2025
+ * as a Go + MQTT microservice; in production.
+ */
 import { ui } from '../../ui/styles';
 import { localizePath } from '../../../i18n/config';
 import { getLocale } from '../../../i18n/server';
@@ -14,17 +19,21 @@ const novacast = localizePath('/projects/novacast/', locale);
   locale === 'tr' ? (
     <>
       <p>
-        Bugün zamanımın çoğunu üç tür yazılıma ayırıyorum: sistem araçları, telemetri ve mesajlaşma platformları ile
-        algoritma odaklı uygulamalar. Tam liste <a href={projects} class={ui.inlineLink}>projeler sayfasında</a>;
-        aşağıda iki örnek var.
+        Bugün zamanımın büyük kısmını, ağırlıklı olarak modern C++ ve Go ile yazdığım üç tür yazılıma ayırıyorum:
+        sistem araçları, telemetri ve mesajlaşma platformları ile algoritma odaklı uygulamalar. Tam liste{' '}
+        <a href={projects} class={ui.inlineLink}>projeler sayfasında</a>; aşağıda iki örnek var.
       </p>
       <p>
-        <a href={asion} class={ui.inlineLink}>Asion</a>, macOS, Linux ve Windows için gizliliği öncelikli bir
-        üretkenlik ve etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek şekilde tasarlandı. Yerel işletim
-        sistemi olay kancalarına (OS event hooks), hafif bir daemon mimarisine ve bileşenleri arasındaki gRPC
-        iletişimine dayanıyor. <a href={novacast} class={ui.inlineLink}>Novacast</a> ise Go ile yazılmış, MQTT
-        kullanan, yüksek hacimli ve gerçek zamanlı bir mesaj yayını ve cihaz orkestrasyonu platformu. Düşük gecikmeli
-        pub/sub veri akışları için tasarlandı.
+        2024’te başladığım <a href={asion} class={ui.inlineLink}>Asion</a>, macOS, Linux ve Windows için gizliliği
+        öncelikli bir üretkenlik ve etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek şekilde tasarlandı.
+        Yerel işletim sistemi olay kancalarına (OS event hooks), hafif bir daemon mimarisine ve bileşenleri arasındaki
+        gRPC iletişimine dayanıyor; şu an erken erişimde.
+      </p>
+      <p>
+        <a href={novacast} class={ui.inlineLink}>Novacast</a>’i 2025’te, çalıştığım bir bilgisayar firmasında kullanılan
+        yetersiz eski yazılımın yerini alsın diye geliştirmeye başladım. Önce Python ile bir prototip yazdım; 2025’in
+        sonlarında onu düşük gecikmeli mesaj yayını ve cihaz orkestrasyonu için Go ve MQTT tabanlı bir mikroservis olarak
+        baştan tasarladım. Bugün canlıda çalışıyor.
       </p>
       <p>
         Bunlarla birlikte İstanbul Üniversitesindeki matematik eğitimimi tamamlıyorum. Reel analiz, soyut cebir ve
@@ -35,16 +44,20 @@ const novacast = localizePath('/projects/novacast/', locale);
   ) : (
     <>
       <p>
-        Most of my time now goes into three kinds of software: system tools, telemetry and messaging platforms, and
-        algorithm-driven applications. The <a href={projects} class={ui.inlineLink}>projects page</a> has the full list;
-        two examples follow.
+        Most of my time now goes into three kinds of software, mostly written in modern C++ and Go: system tools,
+        telemetry and messaging platforms, and algorithm-driven applications. The{' '}
+        <a href={projects} class={ui.inlineLink}>projects page</a> has the full list; two examples follow.
       </p>
       <p>
-        <a href={asion} class={ui.inlineLink}>Asion</a> is a privacy-first productivity and activity tracker for macOS,
-        Linux and Windows, built with self-hosting in mind. It rests on native OS event hooks, a lightweight daemon
-        architecture and gRPC between its components. <a href={novacast} class={ui.inlineLink}>Novacast</a> is a
-        high-throughput, real-time message broadcasting and device orchestration platform, written in Go on top of MQTT
-        and designed for low-latency pub/sub pipelines.
+        <a href={asion} class={ui.inlineLink}>Asion</a>, which I started in 2024, is a privacy-first productivity and
+        activity tracker for macOS, Linux and Windows, built with self-hosting in mind. It rests on native OS event
+        hooks, a lightweight daemon architecture and gRPC between its components, and is in early access.
+      </p>
+      <p>
+        <a href={novacast} class={ui.inlineLink}>Novacast</a> began in 2025 as a replacement for inadequate legacy
+        software at a computer company where I worked. A Python prototype came first; in late 2025 I re-architected it
+        as a Go and MQTT microservice for low-latency message broadcasting and device orchestration. It is now in
+        production.
       </p>
       <p>
         Alongside this I am completing my mathematics degree at Istanbul University. Real analysis, abstract algebra and

@@ -1,11 +1,14 @@
 ---
 /**
- * Journey chapter 3: autonomous parachute guidance and precision landing. Per-locale prose.
+ * Journey chapter 5: autonomous parachute guidance and precision landing. Per-locale prose.
  * The facts name the research but not how it started, so the text does not claim an origin.
+ * The repository link was checked against the GitHub API (public, Python).
  */
+import { ui } from '../../ui/styles';
 import { getLocale } from '../../../i18n/server';
 
 const locale = getLocale(Astro);
+const repository = 'https://github.com/KaanBahaSever/AutonomousParachute';
 ---
 
 {
@@ -17,7 +20,8 @@ const locale = getLocale(Astro);
       </p>
       <p>
         Paraşüt için otonom bir yörünge yönlendirme algoritması geliştirdim. Algoritma, faydalı yükü belirlenen iniş
-        koordinatına ulaştırmak için lineer cebiri atmosferik iniş dinamikleriyle birlikte kullanıyor.
+        koordinatına ulaştırmak için lineer cebiri atmosferik iniş dinamikleriyle birlikte kullanıyor. Python kodu
+        GitHub’da herkese açık: <a href={repository} class={ui.inlineLink}>AutonomousParachute</a>.
       </p>
       <p>Problem her an üç soruya indirgenebilir: Yük nerede, nereye sürükleniyor ve hangi yöne dönmeli?</p>
     </>
@@ -29,7 +33,8 @@ const locale = getLocale(Astro);
       </p>
       <p>
         I developed an autonomous trajectory-steering algorithm for the parachute. It combines linear algebra with
-        atmospheric descent dynamics to guide the payload to a designated landing coordinate.
+        atmospheric descent dynamics to guide the payload to a designated landing coordinate. The Python code is public
+        on GitHub: <a href={repository} class={ui.inlineLink}>AutonomousParachute</a>.
       </p>
       <p>
         At every moment the problem comes down to three questions: where is the payload, where is it drifting, and

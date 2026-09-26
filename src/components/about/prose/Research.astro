@@ -1,0 +1,33 @@
+---
+/**
+ * Journey chapter 3: the TÜBİTAK high-school research project (2019). The facts are the topics
+ * (cryptography, the logic of visual programming) and the flowchart-based tool prototype;
+ * the text does not describe features of that prototype beyond them.
+ */
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>2019’da kriptografi ve görsel programlama mantığı üzerine bir TÜBİTAK lise araştırma projesi yürüttüm.</p>
+      <p>
+        Projenin bir parçası, akış şemasına dayalı görsel bir kodlama aracının erken bir prototipiydi: Bu araçta
+        program, metin olarak yazılmak yerine bir akış şeması olarak kuruluyor.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        In 2019 I carried out a high-school research project with TÜBİTAK, the Scientific and Technological Research
+        Council of Türkiye, on cryptography and the logic of visual programming.
+      </p>
+      <p>
+        Part of it was an early prototype of a visual coding tool based on flowcharts: a program is put together by
+        drawing its flowchart instead of typing it as text.
+      </p>
+    </>
+  )
+}

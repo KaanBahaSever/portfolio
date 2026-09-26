@@ -1,7 +1,8 @@
 /**
  * Geometry behind the About page figures. Each figure is drawn from the model it illustrates
- * (a real placement count, a real minimax search, an integrated flight profile, an integrated
- * steering field), so the pictures stay honest when someone reads them closely.
+ * (a real Hohmann transfer, a real placement count, a real minimax search, a real cipher, an
+ * integrated flight profile, an integrated steering field), so the pictures stay honest when
+ * someone reads them closely.
  *
  * Pure module: no DOM, no `astro:*` imports and erasable TypeScript only, so `node --test` can
  * load it. Coordinates are unitless model values; the figure components scale them to SVG.
@@ -22,6 +23,39 @@ export function linePath(points: readonly Point[]): string {
   return points.map((p, i) => `${i === 0 ? 'M' : 'L'}${round(p.x)} ${round(p.y)}`).join(' ');
 }
 
+/** A cubic Bézier segment. */
+export interface Curve {
+  from: Point;
+  c1: Point;
+  c2: Point;
+  to: Point;
+}
+
+/**
+ * A horizontal S-curve from `from` to `to`: both control points sit halfway across, so the
+ * curve leaves and arrives horizontally. Used for the edges of the graph-like figures.
+ */
+export function sCurve(from: Point, to: Point): Curve {
+  const mid = (from.x + to.x) / 2;
+  return { from, c1: { x: mid, y: from.y }, c2: { x: mid, y: to.y }, to };
+}
+
+/** The point at parameter t ∈ [0, 1] on a cubic Bézier curve (Bernstein form). */
+export function curvePoint(curve: Curve, t: number): Point {
+  const u = 1 - t;
+  const w = [u * u * u, 3 * u * u * t, 3 * u * t * t, t * t * t] as const;
+  return {
+    x: w[0] * curve.from.x + w[1] * curve.c1.x + w[2] * curve.c2.x + w[3] * curve.to.x,
+    y: w[0] * curve.from.y + w[1] * curve.c1.y + w[2] * curve.c2.y + w[3] * curve.to.y,
+  };
+}
+
+/** The SVG path of a cubic Bézier curve: 'M x y C x y x y x y'. */
+export function curvePath(curve: Curve): string {
+  const { from, c1, c2, to } = curve;
+  return `M${round(from.x)} ${round(from.y)} C${round(c1.x)} ${round(c1.y)} ${round(c2.x)} ${round(c2.y)} ${round(to.x)} ${round(to.y)}`;
+}
+
 /**
  * An arrowhead for a segment ending at `tip` and pointing along `direction`: the path of two
  * short strokes (an open chevron), `size` long and `spread` radians either side of the shaft.
@@ -35,6 +69,73 @@ export function arrowHead(tip: Point, direction: Point, size = 4, spread = 0.45)
   const a = wing(spread);
   const b = wing(-spread);
   return `M${round(a.x)} ${round(a.y)} L${round(tip.x)} ${round(tip.y)} L${round(b.x)} ${round(b.y)}`;
+}
+
+/* ------------------------------------------------------------------------------------------ */
+/* Orbital mechanics: the Hohmann transfer                                                     */
+/* ------------------------------------------------------------------------------------------ */
+
+/**
+ * Constants for the lunar transfer in Fig. 1 (km and km³/s²): Earth's gravitational parameter
+ * GM and equatorial radius (WGS 84), and the Moon's mean orbital radius. The parking orbit is
+ * the conventional 300 km example.
+ */
+export const EARTH_MU = 398_600.4418;
+export const EARTH_RADIUS = 6_378.137;
+export const MOON_ORBIT_RADIUS = 384_400;
+export const PARKING_ALTITUDE = 300;
+
+export interface HohmannTransfer {
+  /** Semi-major axis and eccentricity of the transfer ellipse. */
+  a: number;
+  e: number;
+  /** Speed added at departure (periapsis of the ellipse) and at arrival (its apoapsis). */
+  dv1: number;
+  dv2: number;
+  /** Time of flight: half the period of the transfer ellipse. */
+  time: number;
+}
+
+/**
+ * The two-burn Hohmann transfer between coplanar circular orbits of radii r1 < r2 around a
+ * body with gravitational parameter `mu` (units follow the inputs: km and km³/s² give km/s
+ * and seconds). Speeds come from the vis-viva equation v² = μ(2/r − 1/a); the time is half the
+ * ellipse's period, π√(a³/μ). It is the textbook first sketch of a lunar trajectory.
+ */
+export function hohmannTransfer(mu: number, r1: number, r2: number): HohmannTransfer {
+  for (const [name, value] of [
+    ['mu', mu],
+    ['r1', r1],
+    ['r2', r2],
+  ] as const) {
+    if (!(Number.isFinite(value) && value > 0)) {
+      throw new RangeError(`hohmannTransfer: ${name} must be a positive finite number, got ${value}`);
+    }
+  }
+  if (!(r2 > r1)) throw new RangeError('hohmannTransfer: r2 must be larger than r1');
+  const a = (r1 + r2) / 2;
+  const visViva = (r: number) => Math.sqrt(mu * (2 / r - 1 / a));
+  return {
+    a,
+    e: (r2 - r1) / (r2 + r1),
+    dv1: visViva(r1) - Math.sqrt(mu / r1),
+    dv2: Math.sqrt(mu / r2) - visViva(r2),
+    time: Math.PI * Math.sqrt(a ** 3 / mu),
+  };
+}
+
+/**
+ * Points along a conic with its focus at the origin and periapsis on the +x axis, in the
+ * polar form r(θ) = a(1 − e²) / (1 + e cos θ), for θ from `from` to `to` radians in `steps`
+ * equal steps. Mathematical orientation (y up): flip y to draw it in SVG.
+ */
+export function conicArc(a: number, e: number, from: number, to: number, steps: number): Point[] {
+  const p = a * (1 - e * e);
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const theta = from + ((to - from) * i) / steps;
+    const r = p / (1 + e * Math.cos(theta));
+    return { x: r * Math.cos(theta), y: r * Math.sin(theta) };
+  });
 }
 
 /* ------------------------------------------------------------------------------------------ */
@@ -110,6 +211,23 @@ export function minimax(tree: GameTree, maximizing: boolean): { value: number; l
   });
   if (!best) throw new Error('minimax: empty game tree');
   return best;
+}
+
+/* ------------------------------------------------------------------------------------------ */
+/* Cryptography: the Caesar shift                                                               */
+/* ------------------------------------------------------------------------------------------ */
+
+/**
+ * Shifts every Latin letter of `text` by `key` places around the alphabet (A–Z and a–z, mod
+ * 26); anything else is kept. A negative key undoes a positive one. The oldest cipher there
+ * is, and small enough to draw as a flowchart.
+ */
+export function caesarShift(text: string, key: number): string {
+  const k = ((Math.trunc(key) % 26) + 26) % 26;
+  return text.replace(/[A-Za-z]/g, (letter) => {
+    const base = letter <= 'Z' ? 65 : 97;
+    return String.fromCharCode(base + ((letter.charCodeAt(0) - base + k) % 26));
+  });
 }
 
 /* ------------------------------------------------------------------------------------------ */
@@ -196,6 +314,24 @@ export function flightProfile(options: FlightProfileOptions): FlightProfile {
     burnout: { x: burn, y: burnoutHeight },
     apogee: { x: apogeeTime, y: apogeeHeight },
   };
+}
+
+/**
+ * The burn time that takes flightProfile() to `apogee` with the given thrust and gravity.
+ * Apogee = ½·T·b² (powered) + (T·b)²/(2g) (coast) = b²·T·(1 + T/g)/2, solved for b. With the
+ * same motor acceleration, doubling the target altitude takes √2 times the burn.
+ */
+export function burnForApogee(apogee: number, thrust: number, gravity: number): number {
+  for (const [name, value] of [
+    ['apogee', apogee],
+    ['thrust', thrust],
+    ['gravity', gravity],
+  ] as const) {
+    if (!(Number.isFinite(value) && value > 0)) {
+      throw new RangeError(`burnForApogee: ${name} must be a positive finite number, got ${value}`);
+    }
+  }
+  return Math.sqrt((2 * apogee) / (thrust * (1 + thrust / gravity)));
 }
 
 /* ------------------------------------------------------------------------------------------ */

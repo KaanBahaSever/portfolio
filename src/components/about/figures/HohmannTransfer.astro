@@ -1,0 +1,90 @@
+---
+/**
+ * A Hohmann transfer from a circular parking orbit to the Moon's orbit, seen from above the
+ * orbital plane: the transfer half-ellipse (accent) from perigee, where the burn happens, to
+ * apogee, where the Moon waits. The ellipse is conicArc() with the eccentricity that joins the
+ * two radii, so the curve is exact; only the ratio of the radii is compressed (the real one is
+ * about 57), which the caption says. Decorative: the caption carries the numbers.
+ */
+import { arrowHead, conicArc, linePath, round, type Point } from '../geometry';
+
+/** The focus (Earth's centre) and the two radii, in SVG units. Not to scale. */
+const focus: Point = { x: 210, y: 98 };
+const R1 = 30;
+const R2 = 160;
+const a = (R1 + R2) / 2;
+const e = (R2 - R1) / (R2 + R1);
+
+// conicArc() works in mathematical orientation (y up); SVG's y grows downwards.
+const toScreen = (p: Point): Point => ({ x: focus.x + p.x, y: focus.y - p.y });
+const outbound = conicArc(a, e, 0, Math.PI, 64).map(toScreen);
+const returnLeg = conicArc(a, e, Math.PI, 2 * Math.PI, 64).map(toScreen);
+
+const perigee = outbound[0] ?? focus;
+const apogee = outbound.at(-1) ?? focus;
+// A direction tick on the transfer, a little past the top of the ellipse.
+const tickIndex = 36;
+const tick = outbound[tickIndex] ?? perigee;
+const beforeTick = outbound[tickIndex - 1] ?? perigee;
+
+/** An arc of the circle of radius r around the focus, from angle `from` to `to` (degrees). */
+function circleArc(r: number, from: number, to: number, steps = 48): Point[] {
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const angle = ((from + ((to - from) * i) / steps) * Math.PI) / 180;
+    return toScreen({ x: r * Math.cos(angle), y: r * Math.sin(angle) });
+  });
+}
+const moonOrbit = circleArc(R2, 146, 214);
+
+// The departure burn: a short vector along the velocity at perigee (straight up on screen),
+// drawn beside the orbit so it does not hide the curve.
+const burnFrom: Point = { x: perigee.x + 9, y: perigee.y - 2 };
+const burnTo: Point = { x: perigee.x + 9, y: perigee.y - 26 };
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+const paper = 'fill-white dark:fill-zinc-900';
+---
+
+<svg
+  viewBox="0 0 320 196"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    <path d={linePath(moonOrbit)} />
+    <circle cx={focus.x} cy={focus.y} r={R1} />
+    <path d={linePath(returnLeg)} stroke-dasharray="1 3" />
+    {/* The apse line: r₂ from the focus to apogee, r₁ from the focus to perigee. */}
+    <path d={`M${round(apogee.x)} ${focus.y} H${round(perigee.x)}`} stroke-dasharray="2 3" />
+  </g>
+
+  <g class={ink} stroke="currentColor" stroke-width="1">
+    {/* Earth and the Moon are filled with the panel colour so the dashed apse line stops at them. */}
+    <circle cx={focus.x} cy={focus.y} r="10" class={paper} />
+    <circle cx={round(apogee.x)} cy={round(apogee.y)} r="5" class={paper} />
+    <path d={linePath([burnFrom, burnTo])} stroke-width="1.25" />
+    <path d={arrowHead(burnTo, { x: 0, y: -1 }, 4)} stroke-width="1.25" />
+  </g>
+
+  <g class={`${ink} font-serif italic`} fill="currentColor" font-size="12">
+    <text x={round((apogee.x + focus.x) / 2)} y={focus.y + 15} text-anchor="middle">
+      r<tspan font-size="8" dy="2.5">2</tspan>
+    </text>
+    {/* r₁ sits above the axis, between Earth and the parking orbit, clear of both strokes. */}
+    <text x={round(focus.x + (R1 + 10) / 2)} y={focus.y - 6} text-anchor="middle">
+      r<tspan font-size="8" dy="2.5">1</tspan>
+    </text>
+    <text x={burnTo.x + 6} y={burnTo.y + 10}>Δv</text>
+  </g>
+
+  <g class="text-accent-600 dark:text-accent-400" stroke="currentColor">
+    <path d={linePath(outbound)} stroke-width="1.5" />
+    <path d={arrowHead(tick, { x: tick.x - beforeTick.x, y: tick.y - beforeTick.y }, 4.5)} stroke-width="1.5" />
+    <circle cx={round(perigee.x)} cy={round(perigee.y)} r="3" fill="currentColor" stroke="none" />
+  </g>
+</svg>

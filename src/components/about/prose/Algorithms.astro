@@ -1,5 +1,10 @@
 ---
-/** Journey chapter 1: C# and SQL, and the two games. Per-locale prose with links to the games. */
+/**
+ * Journey chapter 2: C# at a vocational high school (2016), MSSQL database applications (2019)
+ * and the desktop games of the graduation projects, with links to the browser versions.
+ * Keep the order of events: the Battleship opponent's Hunt & Target algorithm came LATER than
+ * the high-school game, so do not credit the desktop version with it.
+ */
 import { ui } from '../../ui/styles';
 import { localizePath } from '../../../i18n/config';
 import { getLocale } from '../../../i18n/server';
@@ -7,39 +12,49 @@ import { getLocale } from '../../../i18n/server';
 const locale = getLocale(Astro);
 const battleship = localizePath('/games/battleship/', locale);
 const ticTacToe = localizePath('/games/tic-tac-toe/', locale);
+/** The desktop game's public C# source (Windows Forms), checked against the GitHub API. */
+const battleshipSource = 'https://github.com/KaanBahaSever/BattleShips';
 ---
 
 {
   locale === 'tr' ? (
     <>
       <p>
-        Programlamayı C# ve SQL ile, çoğunlukla kesin olarak tanımlanabilen problemler üzerinde öğrendim: matematiksel
-        hesaplama motorları ve bilgisayarın iyi oynaması gereken küçük oyunlar.
+        Programlamaya 2016’da meslek lisesinde C# ile başladım. Önce temelleri öğrendim, ardından veri yapılarına ve
+        algoritmik problem çözmeye geçtim; bu arada küçük matematiksel hesaplama motorları da yazdım. 2019’a
+        gelindiğinde Microsoft SQL Server (MSSQL) üzerinde çalışan kapsamlı veritabanı uygulamaları geliştiriyordum.
       </p>
       <p>
-        Amiral Battı’da bilgisayar rastgele atış yapmaz. Kalan gemilerin tahtaya hâlâ kaç farklı biçimde
-        yerleştirilebileceğini sayar ve olasılık yoğunluğunun en yüksek olduğu hücreye ateş eder. XOX’ta ise oyun ağacını özyinelemeli minimax
-        ile tarar ve her hamlede rakibin en iyi karşılığı vereceğini varsayar.
+        Lise bitirme projelerim XOX ve Amiral Battı oyunlarının masaüstü sürümleriydi; Amiral Battı’nın{' '}
+        <a href={battleshipSource} class={ui.inlineLink}>C# kaynak kodu</a> GitHub’da. Bilgisayarın Amiral Battı’daki
+        atışlarını bugün yöneten Av ve Hedef (<span lang="en">Hunt &amp; Target</span>) algoritmasını ise sonradan
+        geliştirdim: Önce tahtada gemi arıyor, isabet aldığında da hedefi kıstırıyor.
       </p>
       <p>
-        İki oyunun da tarayıcı sürümleri artık bu sitede: <a href={battleship} class={ui.inlineLink}>Amiral Battı</a>{' '}
+        İki oyunun tarayıcı sürümleri de artık bu sitede ve rakipleri algoritmik: Amiral Battı’da Av ve Hedef, XOX’ta
+        oyun ağacının tamamını tarayan bir minimax araması. <a href={battleship} class={ui.inlineLink}>Amiral Battı</a>{' '}
         ya da <a href={ticTacToe} class={ui.inlineLink}>XOX</a> oynayabilirsiniz.
       </p>
     </>
   ) : (
     <>
       <p>
-        I learned to program in C# and SQL, mostly on problems that could be stated exactly: mathematical calculation
-        engines, and small games in which the computer had to play well.
+        I started programming in 2016 at a vocational high school (<span lang="tr">meslek lisesi</span>), in C#. The
+        fundamentals came first, then data structures and algorithmic problem-solving, with small mathematical
+        calculation engines along the way. By 2019 I was building complete database applications on Microsoft SQL
+        Server (MSSQL).
       </p>
       <p>
-        In Battleship (Amiral Battı) the computer does not fire at random. It counts every way the remaining ships could
-        still lie on the board and shoots where that probability density peaks. In tic-tac-toe (XOX) it searches the
-        game tree with recursive minimax, assuming the best reply at every turn.
+        My graduation projects were desktop versions of tic-tac-toe and Battleship; the{' '}
+        <a href={battleshipSource} class={ui.inlineLink}>C# source of Battleship</a> is on GitHub. The Hunt &amp; Target
+        algorithm that now aims the computer’s Battleship shots came later: it hunts for ships across the board, then
+        closes in on every hit.
       </p>
       <p>
-        Both games now have browser versions on this site: play <a href={battleship} class={ui.inlineLink}>Battleship</a>{' '}
-        or <a href={ticTacToe} class={ui.inlineLink}>tic-tac-toe</a>.
+        Both games now have browser versions on this site, with algorithmic opponents: Hunt &amp; Target for
+        Battleship, and a minimax search of the whole game tree for tic-tac-toe. Play{' '}
+        <a href={battleship} class={ui.inlineLink}>Battleship</a> or{' '}
+        <a href={ticTacToe} class={ui.inlineLink}>tic-tac-toe</a>.
       </p>
     </>
   )

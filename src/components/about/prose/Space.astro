@@ -1,0 +1,41 @@
+---
+/**
+ * Journey chapter 1: the interest in space exploration that came before any code, and the
+ * Medium article (Turkish) on the Apollo 11 crew's visit to Anıtkabir. On English pages the
+ * link says the article is in Turkish and carries hreflang="tr".
+ */
+import { ui } from '../../ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+const article = localizePath('/blog/aydan-anitkabir-e-yolculuk/', locale);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Kod yazmaya başlamadan çok önce uzay araştırmalarına ilgi duyuyordum. Uzay araçlarının mimarilerini inceliyor,
+        Ay görevlerini analiz ediyor ve kuramsal görev planları üzerinde çalışıyordum.
+      </p>
+      <p>
+        Bu ilgi hiç kaybolmadı: Aşağıdaki roketçilik bölümlerinde de, Apollo 11 mürettebatının 1969’daki Anıtkabir
+        ziyaretini anlattığım “<a href={article} class={ui.inlineLink}>Ay’dan Anıtkabir’e Yolculuk</a>” yazısında da
+        sürüyor.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        Long before I wrote any code, I was drawn to space exploration. I studied how spacecraft are architected,
+        analysed lunar missions and worked through theoretical mission plans.
+      </p>
+      <p>
+        The interest never left. It runs through the rocketry chapters below, and through{' '}
+        <a href={article} hreflang="tr" class={ui.inlineLink}>an article I wrote in Turkish</a> about the Apollo 11
+        crew’s visit to Anıtkabir in 1969.
+      </p>
+    </>
+  )
+}

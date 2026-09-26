@@ -1,0 +1,94 @@
+---
+/**
+ * A one-click CI/CD pipeline as a small graph: a trigger runs the tests once, the run fans out
+ * into one build per platform (Linux, macOS, Windows), fans back in to packaging, and ends in a
+ * deployment (the accent node). Squares on the fan-in edges are artifacts in flight, placed
+ * with curvePoint() so they sit exactly on the curves. Decorative; the column labels are
+ * visible text, so they come in localized.
+ */
+import { arrowHead, curvePath, curvePoint, round, sCurve, type Point } from '../geometry';
+
+interface Props {
+  labels: { trigger: string; test: string; build: string; package: string; deploy: string };
+}
+
+const { labels } = Astro.props;
+
+const MID = 70;
+const col = { trigger: 22, test: 82, build: 160, package: 238, deploy: 294 };
+const BUILD_W = 58;
+const BUILD_H = 20;
+/** Platform names are proper nouns: the same in every language. */
+const platforms = ['Linux', 'macOS', 'Windows'].map((name, i) => ({ name, y: 34 + i * 36 }));
+
+const fanOut = platforms.map((p) => sCurve({ x: col.test + 10, y: MID }, { x: col.build - BUILD_W / 2, y: p.y }));
+const fanIn = platforms.map((p) => sCurve({ x: col.build + BUILD_W / 2, y: p.y }, { x: col.package - 10, y: MID }));
+// Early on the fan-in edges, where the three curves are still apart.
+const artifacts: Point[] = fanIn.map((curve) => curvePoint(curve, 0.3));
+
+const straight = (x1: number, x2: number) => ({
+  d: `M${x1} ${MID} H${x2}`,
+  head: arrowHead({ x: x2, y: MID }, { x: 1, y: 0 }, 3.5),
+});
+const edges = [straight(col.trigger + 10, col.test - 11), straight(col.package + 10, col.deploy - 11)];
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+const label = 'text-zinc-600 dark:text-zinc-400';
+---
+
+<svg
+  viewBox="0 0 320 140"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    {[...fanOut, ...fanIn].map((curve) => <path d={curvePath(curve)} />)}
+    {
+      edges.map((edge) => (
+        <>
+          <path d={edge.d} />
+          <path d={edge.head} />
+        </>
+      ))
+    }
+  </g>
+
+  <g class={ink} stroke="currentColor" stroke-width="1">
+    {/* Trigger: one click runs everything. */}
+    <circle cx={col.trigger} cy={MID} r="9" />
+    <path d={`M${col.trigger - 2.5} ${MID - 4} L${col.trigger + 4} ${MID} L${col.trigger - 2.5} ${MID + 4} Z`} fill="currentColor" />
+    {/* Tests: a box with a check mark. */}
+    <rect x={col.test - 10} y={MID - 10} width="20" height="20" rx="3" />
+    <path d={`M${col.test - 5} ${MID} L${col.test - 1.5} ${MID + 3.5} L${col.test + 5} ${MID - 4}`} stroke-width="1.25" />
+    {platforms.map((p) => <rect x={col.build - BUILD_W / 2} y={p.y - BUILD_H / 2} width={BUILD_W} height={BUILD_H} rx="3" />)}
+    {/* Package: a parcel (box, lid line, tape). */}
+    <rect x={col.package - 10} y={MID - 10} width="20" height="20" rx="2" />
+    <path d={`M${col.package - 10} ${MID - 4} H${col.package + 10} M${col.package} ${MID - 10} V${MID - 4}`} />
+  </g>
+
+  <g class={ink} fill="currentColor">
+    {artifacts.map((p) => <rect x={round(p.x - 2)} y={round(p.y - 2)} width="4" height="4" rx="0.5" />)}
+  </g>
+
+  <g class={`${ink} font-mono`} fill="currentColor" font-size="8.5" text-anchor="middle">
+    {platforms.map((p) => <text x={col.build} y={p.y + 3}>{p.name}</text>)}
+  </g>
+
+  <g class="text-accent-600 dark:text-accent-400">
+    <circle cx={col.deploy} cy={MID} r="10" stroke="currentColor" stroke-width="1.25" />
+    <circle cx={col.deploy} cy={MID} r="4" fill="currentColor" />
+  </g>
+
+  <g class={`${label} font-mono`} fill="currentColor" font-size="7.5" letter-spacing="0.06em" text-anchor="middle">
+    <text x={col.trigger} y="136">{labels.trigger}</text>
+    <text x={col.test} y="136">{labels.test}</text>
+    <text x={col.build} y="136">{labels.build}</text>
+    <text x={col.package} y="136">{labels.package}</text>
+    <text x={col.deploy} y="136">{labels.deploy}</text>
+  </g>
+</svg>

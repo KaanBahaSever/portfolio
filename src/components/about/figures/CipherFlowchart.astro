@@ -1,0 +1,146 @@
+---
+/**
+ * Programming by drawing: a Caesar cipher as a flowchart (start, i ← 0, the loop test i < n,
+ * the shift, i ← i + 1, end), and beside it the same program run on a word with k = 3. The
+ * worked example is computed by caesarShift(), so the two rows always agree. Decorative: the
+ * caption describes it; only the branch labels are words, and they come in localized.
+ */
+import { arrowHead, caesarShift, linePath, round, type Point } from '../geometry';
+
+interface Props {
+  /** Labels of the loop test's two branches. */
+  labels: { yes: string; no: string };
+}
+
+const { labels } = Astro.props;
+
+const KEY = 3;
+const PLAIN = 'APOLLO';
+const cipher = caesarShift(PLAIN, KEY);
+
+/** Flowchart column (x of the centre line) and the boxes, top to bottom. */
+const X = 78;
+const start = { x: X, y: 12 };
+const init = { y: 28, h: 20, w: 60 };
+const test = { y: 82, hw: 30, hh: 18 };
+const shift = { y: 116, h: 22, w: 124 };
+const step = { y: 154, h: 20, w: 60 };
+const end: Point = { x: 158, y: test.y };
+
+/** A vertical connector from y1 to y2 on the centre line, with its arrowhead. */
+const down = (y1: number, y2: number) => ({
+  d: linePath([
+    { x: X, y: y1 },
+    { x: X, y: y2 },
+  ]),
+  head: arrowHead({ x: X, y: y2 }, { x: 0, y: 1 }, 3.5),
+});
+const connectors = [
+  down(start.y + 4, init.y),
+  down(init.y + init.h, test.y - test.hh),
+  down(test.y + test.hh, shift.y),
+  down(shift.y + shift.h, step.y),
+];
+
+// Back edge: from the left of "i ← i + 1" round to the left corner of the test.
+const LOOP_X = 8;
+const loop = linePath([
+  { x: X - step.w / 2, y: step.y + step.h / 2 },
+  { x: LOOP_X, y: step.y + step.h / 2 },
+  { x: LOOP_X, y: test.y },
+  { x: X - test.hw, y: test.y },
+]);
+const loopHead = arrowHead({ x: X - test.hw, y: test.y }, { x: 1, y: 0 }, 3.5);
+const exit = linePath([
+  { x: X + test.hw, y: test.y },
+  { x: end.x - 7, y: end.y },
+]);
+const exitHead = arrowHead({ x: end.x - 7, y: end.y }, { x: 1, y: 0 }, 3.5);
+
+const diamond = `M${X} ${test.y - test.hh} L${X + test.hw} ${test.y} L${X} ${test.y + test.hh} L${X - test.hw} ${test.y} Z`;
+
+/** The worked example: one tile per letter, plain text above and cipher text below. */
+const TILE = 18;
+const GAP = 3;
+const TILES_X = 186;
+const ROW_PLAIN = 66;
+const ROW_CIPHER = 112;
+const tiles = [...PLAIN].map((letter, i) => ({
+  x: TILES_X + i * (TILE + GAP),
+  plain: letter,
+  cipher: cipher[i] ?? '',
+}));
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+const label = 'text-zinc-600 dark:text-zinc-400';
+---
+
+<svg
+  viewBox="0 0 320 180"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    {
+      connectors.map((c) => (
+        <>
+          <path d={c.d} />
+          <path d={c.head} />
+        </>
+      ))
+    }
+    <path d={loop} />
+    <path d={loopHead} />
+    <path d={exit} />
+    <path d={exitHead} />
+    {tiles.map((t) => <path d={`M${t.x + TILE / 2} ${ROW_PLAIN + 24} V${ROW_CIPHER - 5}`} />)}
+    {tiles.map((t) => <path d={arrowHead({ x: t.x + TILE / 2, y: ROW_CIPHER - 5 }, { x: 0, y: 1 }, 3)} />)}
+  </g>
+
+  <g class={ink} stroke="currentColor" stroke-width="1">
+    <circle cx={start.x} cy={start.y} r="4" fill="currentColor" />
+    <rect x={X - init.w / 2} y={init.y} width={init.w} height={init.h} rx="3" />
+    <path d={diamond} />
+    <rect x={X - step.w / 2} y={step.y} width={step.w} height={step.h} rx="3" />
+    <circle cx={end.x} cy={end.y} r="7" />
+    <circle cx={end.x} cy={end.y} r="3.5" fill="currentColor" />
+    {tiles.map((t) => <rect x={t.x} y={ROW_PLAIN} width={TILE} height={20} rx="2" />)}
+    {tiles.map((t) => <rect x={t.x} y={ROW_CIPHER} width={TILE} height={20} rx="2" />)}
+  </g>
+
+  <g class={`${ink} font-mono`} fill="currentColor" font-size="9" text-anchor="middle">
+    <text x={X} y={init.y + 13.5}>i ← 0</text>
+    <text x={X} y={test.y + 3}>i &lt; n</text>
+    <text x={X} y={step.y + 13.5}>i ← i + 1</text>
+    {tiles.map((t) => <text x={t.x + TILE / 2} y={ROW_PLAIN + 13.5} font-size="10">{t.plain}</text>)}
+    {tiles.map((t) => <text x={t.x + TILE / 2} y={ROW_CIPHER + 13.5} font-size="10">{t.cipher}</text>)}
+  </g>
+
+  <g class={`${label} font-mono`} fill="currentColor" font-size="8" letter-spacing="0.04em">
+    <text x={X + test.hw + 6} y={test.y - 5}>{labels.no}</text>
+    <text x={X + 6} y={test.y + test.hh + 11}>{labels.yes}</text>
+    <text x={TILES_X} y={ROW_PLAIN - 8}>k = {KEY}</text>
+    <text x={TILES_X - 6} y={round((ROW_PLAIN + 20 + ROW_CIPHER) / 2) + 3} text-anchor="end">+{KEY}</text>
+  </g>
+
+  {/* The one step that encrypts: the accent. */}
+  <g class="text-accent-600 dark:text-accent-400">
+    <rect
+      x={X - shift.w / 2}
+      y={shift.y}
+      width={shift.w}
+      height={shift.h}
+      rx="3"
+      stroke="currentColor"
+      stroke-width="1.25"
+    />
+    <text x={X} y={round(shift.y + 14.5)} class="font-mono" fill="currentColor" font-size="9" text-anchor="middle">
+      c<tspan font-size="6.5" dy="2">i</tspan><tspan dy="-2"> ← (c</tspan><tspan font-size="6.5" dy="2">i</tspan><tspan dy="-2"> + k) mod 26</tspan>
+    </text>
+  </g>
+</svg>

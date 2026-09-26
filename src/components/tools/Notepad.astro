@@ -766,9 +766,15 @@ const surfaceClass = 'np-surface font-mono';
     }
   }
 
+  /*
+   * Past the page's widest column (BaseLayout's 'full', max-w-screen-2xl: 96rem) the inset
+   * takes half of the extra width, so the text starts about where it starts on the page instead
+   * of jumping to the screen's edge and leaving an empty half on the right. vw, not %, so the
+   * text and the status line resolve it to the same length.
+   */
   @media (width >= 64rem) {
     .np-root[data-zen] > .np-card {
-      --np-pad-x: 4rem;
+      --np-pad-x: max(4rem, (100vw - 96rem) / 2 + 4rem);
     }
   }
 

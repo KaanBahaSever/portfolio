@@ -76,10 +76,10 @@ const tr: ProjectsMessages = {
   index: {
     title: 'Projeler',
     description:
-      'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik, yüksek güçlü bir roket simülasyonu ve açık kaynak C++ kütüphaneleri; her birinin nasıl kurgulandığına dair notlarla.',
+      'Kaan Baha Sever’in projeleri: Asion, Novacast, Karecik, Açık Matematik, yüksek güçlü bir roket simülasyonu ve açık kaynak C++ kütüphaneleri. Her birinin nasıl yapıldığını anlatan notlar da var.',
     // Same wording as the home page's "Selected work" link and section that lead here.
     eyebrow: 'Seçili işler',
-    lead: 'C++ ile yazılmış yerel daemon’lardan Go servislerine ve açık kaynak matematiğe kadar geliştirdiğim projeler. Her sayfa, projenin ne yaptığını ve nasıl bir araya getirildiğini anlatıyor.',
+    lead: 'Burada geliştirdiğim projeler var: C++ ile yazdığım yerel daemon’lardan Go servislerine, açık kaynak matematik notlarına kadar. Her sayfada bir projenin ne yaptığını ve nasıl kurulduğunu anlatıyorum.',
     summary: (total, openSource) => `${total} proje · ${openSource} açık kaynak`,
     featured: 'Öne çıkanlar',
     more: 'Diğer projeler',
@@ -88,7 +88,7 @@ const tr: ProjectsMessages = {
   stage: {
     production: 'Canlıda',
   },
-  // "2024'ten beri" would need a suffix that depends on how the year is read aloud.
+  // "2024’ten beri" would need a suffix that depends on how the year is read aloud.
   since: (year) => `Başlangıç: ${year}`,
   card: {
     live: 'Canlı site',
@@ -114,15 +114,15 @@ const tr: ProjectsMessages = {
     figure: (n) => `Şekil ${n}`,
   },
   figures: {
-    asion: 'Zaman ekseninde odak oturumları: hangi pencerenin ne kadar süre etkin kaldığı.',
+    asion: 'Zaman ekseninde pencere oturumları: Hangi pencere ne kadar süre etkin kaldı?',
     novacast:
-      'Pub/sub dağıtımı: yayımlanan tek bir mesaj, broker üzerinden konuya abone olan her cihaza ulaşır.',
-    karecik: 'QR koddan menüye: kod okutulunca işletmenin menüsü müşterinin telefonunda açılır.',
-    'acik-matematik': 'Analiz I dersinden bir sayfa: bir eğrinin altında Riemann toplamı ve bir teğet doğru.',
-    neosmbios: 'Bir SMBIOS kaydı: hiçbir alan, kaydın kendi uzunluk baytıyla karşılaştırılmadan okunmaz.',
+      'Publish/subscribe dağıtımı: Gönderilen tek bir mesaj, broker üzerinden abone olan her cihaza ulaşır.',
+    karecik: 'QR koddan menüye: Kod okutulunca işletmenin menüsü müşterinin telefonunda açılır.',
+    'acik-matematik': 'Birinci sınıf analiz dersinden bir sayfa: eğrinin altında bir Riemann toplamı ve bir teğet doğrusu.',
+    neosmbios: 'Bir SMBIOS kaydı: Hiçbir alan, kaydın kendi uzunluk baytıyla karşılaştırılmadan okunmaz.',
     'rocket-up': 'Bir uçuş profili: motorlu tırmanış, tepe noktası ve ardından paraşütle iniş.',
     'i18n-cpp':
-      'Bir çeviri araması: anahtar, etkin dilin .properties dosyasından okunur; ardından adlandırılmış yer tutucu çalışma zamanında doldurulur.',
+      'Bir çeviriyi bulmak: Anahtar, seçili dilin .properties dosyasından okunur. Ardından isimli yer tutucu çalışma zamanında doldurulur.',
   },
 };
 

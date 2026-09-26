@@ -1,52 +1,54 @@
 ---
 title: Karecik
-shortDescription: Yerel kafe ve restoranların QR menü, müşteri etkileşimi ile menü ve sipariş yönetimi için kullandığı, kesintisiz ve düşük gecikmeli çalışacak şekilde tasarlanmış canlı bir SaaS.
+shortDescription: Yerel kafe ve restoranların QR menü, müşteri etkileşimi, menü ve sipariş yönetimi için kullandığı, canlıda çalışan bir SaaS. Kesintisiz ve düşük gecikmeli olacak şekilde tasarlandı.
 ---
 
 ## Nedir?
 
 Karecik, yerel kafe ve restoranların müşterileriyle etkileşim kurmak, menülerini ve
-siparişlerini yönetmek için kullandığı, canlıda çalışan bir SaaS. Müşteri işletmenin QR kodunu
-okuttuğunda menü telefonunda açılır; menü, işletmenin kendi alt alan adından sunulur. İşletme
-sahipleri her şeyi bir yönetim panelinden yönetir. Menünün, kod okutulduğu anda açılması
-gerekir; bu yüzden servis kesintisiz (zero downtime) ve düşük gecikmeyle çalışacak şekilde
-tasarlandı.
+siparişlerini yönetmek için kullandığı bir SaaS. Şu anda canlıda. Müşteri işletmenin QR kodunu
+okuttuğunda, menü telefonunda açılır. Menü, işletmenin kendi alt alan adından gelir. İşletme
+sahipleri de her şeyi bir yönetim panelinden ayarlar. Menü, kod okutulduğu anda açılmalı. Bu
+yüzden servis kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı.
 
-Fikir, üründen daha eski. Konsept ve ilk deneysel prototipler 2021 yılına, projenin daha önceki
-çalışma adlarıyla anıldığı döneme uzanıyor. 2026 yılında bu çalışmayı olgunlaştırıp Karecik
-adıyla canlıya aldım.
+Fikir aslında üründen eski. Konsept ve ilk deneysel prototipler 2021’e dayanıyor. Proje o
+dönemde başka adlarla anılıyordu. 2026’da bu çalışmayı toparlayıp Karecik adıyla canlıya
+aldım.
 
 ## Özellikler
 
-- **Menü düzenleyici**: sürükleyip bırakarak sıralanan kategoriler ve ürünler, satır içi fiyat
-  düzenleme ve yuvarlama kurallarıyla toplu, yüzdelik fiyat güncelleme.
-- **Şubeler ve menüler**: işletme başına birden çok şube; tüm şubelerle paylaşılan ya da tek
-  bir şubeye özel menüler, şube bazında fiyat ve satış durumu ayarları.
-- **Altı menü dili**: Türkçe, İngilizce, Almanca, Rusça, Arapça ve Fransızca.
-- **Ürün ayrıntıları**: görseller, içindekiler, alerjen uyarıları, kalori bilgisi ve özel
+- **Menü düzenleyici**: Kategoriler ve ürünler sürükle-bırak ile sıralanır, fiyatlar listede
+  doğrudan düzenlenir. Bütün fiyatlar yüzdeyle toplu olarak güncellenebilir; bu sırada
+  yuvarlama kuralları uygulanır.
+- **Şubeler ve menüler**: Bir işletmenin birden çok şubesi olabilir. Menüler bütün şubeler
+  arasında paylaşılabilir ya da tek bir şubeye özel olabilir. Her şube, fiyatları ve ürünlerin
+  satışta olup olmadığını ayrıca belirleyebilir.
+- **Altı dilde menü**: Türkçe, İngilizce, Almanca, Rusça, Arapça ve Fransızca.
+- **Ürün ayrıntıları**: fotoğraflar, içindekiler, alerjen uyarıları, kalori bilgisi ve özel
   rozetler.
-- **Marka kimliği**: temalar, yazı tipleri, vurgu renkleri, arka planlar ve ayarlanabilir bir
-  açılış ekranı; hepsi panelin içindeki canlı mobil önizlemede kontrol edilir.
-- **QR kodlar**: PNG olarak indirme, yazdırma ya da menü adresini kopyalama.
-- **Müşteri menüsü**: işletmenin alt alan adında (yol tabanlı bir yedekle) sunulur; arama, dil
-  değiştirme ve Wi-Fi bilgileri içerir.
+- **Marka görünümü**: temalar, yazı tipleri, vurgu renkleri, arka planlar ve ayarlanabilir bir
+  açılış ekranı. Hepsi, panelin içindeki canlı mobil önizlemede kontrol edilebilir.
+- **QR kodlar**: PNG olarak indirilebilir ya da yazdırılabilir. Menü adresi de kopyalanabilir.
+- **Müşteri menüsü**: İşletmenin alt alan adında açılır; yedek olarak yol tabanlı bir adres de
+  var. Menüde arama, dil değiştirme ve Wi-Fi bilgileri bulunur.
 
 ## Mimari
 
-Her işletme, tek bir kurulumun kiracısıdır (multi-tenant): gelen istek, alt alan adına göre
-ilgili işletmeye eşlenir. Dolayısıyla yeni bir işletme için yeni bir altyapı gerekmez.
+Bütün işletmeler aynı kurulumu paylaşır; her işletme bu kurulumun bir kiracısıdır (tenant).
+Gelen isteğin hangi işletmeye ait olduğu alt alan adından anlaşılır. Bu yüzden yeni bir
+işletme için yeni bir altyapı kurmak gerekmez.
 
-| Katman        | Teknoloji                                                        |
-| ------------- | ---------------------------------------------------------------- |
-| API           | Go 1.22, Fiber v2, pgx; HttpOnly çerezle bellek içi oturumlar    |
-| Veritabanı    | Açılışta uygulanan gömülü SQL migration'larıyla PostgreSQL       |
-| Ön yüz        | React 18, Vite, Tailwind CSS, dnd-kit                            |
-| Kiracılık     | Joker (wildcard) alt alan adı çözümleme, yol tabanlı yedekle     |
-| Altyapı       | Cloudflare                                                       |
+| Katman        | Teknoloji                                                            |
+| ------------- | -------------------------------------------------------------------- |
+| API           | Go 1.22, Fiber v2, pgx; HttpOnly çerezli, bellekte tutulan oturumlar |
+| Veritabanı    | PostgreSQL; gömülü SQL migration’ları uygulama açılırken çalışır     |
+| Ön yüz        | React 18, Vite, Tailwind CSS, dnd-kit                                |
+| Kiracı yapısı | Wildcard alt alan adı çözümlemesi; yedek olarak yol tabanlı adres    |
+| Altyapı       | Cloudflare                                                           |
 
-Kod İngilizce yazıldı; ürünün kendisi Türkçe.
+Kodu İngilizce yazdım; ürün ise Türkçe.
 
 ## Lisans
 
-Karecik, GNU Genel Kamu Lisansı v3.0 (GPL-3.0) altında yayımlanan özgür bir yazılım.
-[Kaynak kodu GitHub'da](https://github.com/KaanBahaSever/karecik).
+Karecik özgür bir yazılım. GNU Genel Kamu Lisansı v3.0 ile yayımlanıyor.
+[Kaynak kodunu GitHub’da görebilirsiniz](https://github.com/KaanBahaSever/karecik).

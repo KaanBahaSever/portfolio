@@ -1,62 +1,64 @@
 ---
 title: Asion
-shortDescription: macOS, Linux ve Windows için gizliliği önceleyen bir üretkenlik ve iş istasyonu etkinlik takip sistemi. Yerel olay kancaları ve hafif bir daemon üzerine, kendi sunucunuzda barındırılabilecek şekilde kurgulandı.
+shortDescription: macOS, Linux ve Windows için gizliliği ön planda tutan bir üretkenlik ve bilgisayar etkinliği takip aracı. İşletim sistemi olay kancaları ve hafif bir daemon ile çalışır; kendi sunucunuzda barındırmak için tasarlandı.
 ---
 
 ## Nedir?
 
-Asion; macOS, Linux ve Windows için geliştirdiğim, platformlar arası bir üretkenlik ve iş
-istasyonu etkinlik takip sistemi. Hangi uygulamanın ve pencerenin odakta olduğunu kaydediyor,
-bu ham veriyi de zamanın gerçekte nasıl harcandığını gösteren bir tabloya dönüştürüyor. Rize.io
-gibi araçlar böyle bir tablonun ne kadar işe yarayabileceğini gösterdi; Asion ise bu kadar
-kişisel bir verinin sahibinin denetiminde kalması gerektiği fikriyle yola çıkıyor. Bu yüzden
-gizliliği önceleyen, kendi sunucunuzda barındırılabilecek (self-hosting) bir yapıyla tasarlandı.
+Asion bir üretkenlik ve bilgisayar etkinliği takip aracı; macOS, Linux ve Windows’ta çalışıyor.
+O an hangi uygulamanın ve hangi pencerenin etkin olduğunu kaydediyor, bu ham veriden de zamanın
+gerçekte nereye gittiğini gösteren bir tablo çıkarıyor. Rize.io gibi araçlar böyle bir tablonun
+ne kadar işe yarayabileceğini gösterdi. Asion ise şu düşünceden yola çıkıyor: Bu kadar kişisel
+bir veri, sahibinin elinde kalmalı. Bu yüzden onu, gizliliği ön planda tutan ve kendi
+sunucunuzda barındırılmaya uygun bir yapıda tasarladım.
 
-İş gününün dürüst bir kaydını tutmak isteyen bireyler, yazılım ekipleri ve bir projeye
-harcanan saatleri takip etmesi gereken araştırmacılar ile öğrenciler için düşünüldü; akademik
-zaman takibi de hedeflerinden biri. 2024'ten beri geliştiriyorum. Proje hâlâ geliştirme
-aşamasında; erken erişim [asion.app](https://asion.app) üzerinden yürütülüyor. Kaynak kodu
-kapalı.
+Asion kimin için? İş gününün dürüst bir kaydını tutmak isteyen herkes ve yazılım ekipleri için.
+Akademik zaman takibi de hedeflerden biri: Araştırmacılar ve öğrenciler, bir projeye kaç saat
+harcadıklarını kayıt altına alabilir. 2024’ten beri üzerinde çalışıyorum. Asion hâlâ
+geliştiriliyor; erken erişim [asion.app](https://asion.app) üzerinden açık. Kaynak kodu kapalı.
 
-## Araya girmeden izlemek
+## Bilgisayarı yormadan izlemek
 
-Bir etkinlik takipçisi bütün gün çalışır; bu yüzden sisteme getirdiği yük sıfıra yakın olmalı.
-Asion **yerel işletim sistemi olay kancalarını** (native OS event hooks) dinler; böylece her
-platform odak değişikliklerini gerçekleştikleri anda bildirir. Toplama işini arka planda
-**hafif bir daemon** üstlenir. Yerel katmanlarda C/C++ ve Objective-C, bunların yanında da Go
-kullanılıyor.
+Bir etkinlik takipçisi bütün gün açık kalır. Bu yüzden bilgisayara getirdiği yük neredeyse
+sıfır olmalı. Asion, **işletim sisteminin kendi olay kancalarını** dinler. Böylece etkin pencere
+değiştiği anda bunu her platform kendisi haber verir. Veriyi arka planda **hafif bir daemon**
+toplar. Platforma özel katmanlarda C/C++ ve Objective-C, bunların yanında da Go kullanıyorum.
 
 ## Mimari
 
-Asion, her biri tek bir işten sorumlu birkaç süreçten oluşur:
+Asion, her biri tek bir iş yapan birkaç süreçten oluşur:
 
-- **`asion-agent`**: arka plan ajanı. Etkin pencereyi işletim sisteminin kancaları üzerinden
-  izler ve etkinliği toplar.
-- **`asion-runner`**: ajanın arkasındaki zamanlanmış ve uzun süren işleri yürütür.
-- **`asion-ui`**: toplanan etkinliğin incelendiği arayüz.
-- **`asion-native-host`**: tarayıcı eklentilerini ajana bağlayan native messaging host.
+- **`asion-agent`**: arka planda çalışan ajan. Etkin pencereyi işletim sisteminin kancalarıyla
+  izler ve etkinlik verisini toplar.
+- **`asion-runner`**: ajanın yanında zamanlanmış ve uzun süren işleri çalıştıran süreç.
+- **`asion-ui`**: toplanan verileri incelediğiniz arayüz.
+- **`asion-native-host`**: tarayıcı eklentilerini ajana bağlayan program (native messaging
+  host).
 
-Bileşenler birbirleriyle **gRPC** üzerinden, **Protobuf** mesajlarıyla konuşur: tipli
-sözleşmeler süreçler arası iletişimi verimli, süreçler arasındaki sınırları da net tutar.
-Etkinlik verisi yerelde, şifreli bir **SQLCipher** veritabanında saklanır; diskteki kayıt,
-anahtarı olmadan okunamaz.
+Bileşenler birbiriyle **gRPC** üzerinden, **Protobuf** mesajlarıyla konuşur. Mesajların yapısı
+ve alan tipleri önceden tanımlı olduğu için süreçler arasındaki iletişim verimli kalır, her
+sürecin sınırı da net olur. Veriler bilgisayarda, şifreli bir **SQLCipher** veritabanında
+saklanır. Anahtarı olmayan biri diskteki kaydı okuyamaz.
 
-## Tarayıcı entegrasyonu
+## Tarayıcıyla bağlantı
 
-Tarayıcılar, bir eklentinin yerel bir programa yalnızca native messaging üzerinden ulaşmasına
-izin verir. Bu yöntemde her mesaj, JSON yükünün önüne eklenen 4 baytlık, little-endian bir
-uzunluk önekiyle çerçevelenir. Asion bu çerçevelemeyi `asion-native-host` içinde **C++** ile
-uygular; böylece eklenti ile arka plandaki ajan, arada bir ağ servisi olmadan mesajlaşır.
+Tarayıcılar, bir eklentinin bilgisayardaki bir programla konuşmasına yalnızca native messaging
+üzerinden izin verir. Bu yöntemde her mesaj JSON olarak gönderilir. Mesajın başına da
+uzunluğunu bildiren 4 baytlık, little-endian bir önek eklenir. Asion bu mesaj biçimini
+`asion-native-host` içinde **C++** ile uygular. Böylece eklenti ile arka plandaki ajan, arada
+bir ağ servisi olmadan mesajlaşır.
 
-## Derleme, test ve sürüm otomasyonu
+## Otomatik derleme, test ve yayın
 
-Üç işletim sisteminde yerel bileşenleri olan bir yazılımın, her değişiklikte bu sistemlerin her
-birinde derlenmesi, test edilmesi ve paketlenmesi gerekir. Asion ekosistemi için **GitHub
-Actions** üzerinde çok platformlu CI/CD boru hatları kurdum:
+Üç işletim sisteminde platforma özel parçaları olan bir yazılım, her değişiklikte bu sistemlerin
+her birinde yeniden derlenmeli, test edilmeli ve paketlenmeli. Bu yüzden Asion ekosistemi için
+**GitHub Actions** üzerinde çok platformlu CI/CD pipeline’ları kurdum:
 
-- **Çok platformlu iş akışları** (workflow) ve yerel derlemeleri üreten çapraz derleme
-  (cross-compilation) runner'ları.
-- Adımları birbirine bağlayan, Bash, Batch ve Python ile yazılmış **özel otomasyon betikleri**.
-- **Tek tıkla test ve paketleme**: tek bir tıklama testleri çalıştırır, bileşenleri paketler ve
-  her platform için derleme çıktılarını (artifact) üretir.
-- Bu çok platformlu derleme çıktılarını sürüme kadar taşıyan **dağıtım boru hatları**.
+- **Çok platformlu iş akışları**: Çapraz derleme yapan runner’lar her platformun yerel
+  derlemesini üretir.
+- **Özel otomasyon betikleri**: Bash, Batch ve Python ile yazılan bu betikler adımları
+  birbirine bağlar.
+- **Tek tıkla test ve paketleme**: Tek bir tıklama testleri çalıştırır, bileşenleri paketler
+  ve her platform için derleme çıktılarını üretir.
+- **Dağıtım pipeline’ları**: Bu çok platformlu derleme çıktılarını sürüm yayımlanana kadar
+  taşır.

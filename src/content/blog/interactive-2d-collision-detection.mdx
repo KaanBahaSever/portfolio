@@ -1,0 +1,274 @@
+---
+title: Interactive 2D Collision Detection
+description: 'Drag the shapes and watch the tests decide: box–box, circle–circle, circle–box, and the separating axis theorem for rotated polygons, derived step by step.'
+pubDate: 2026-09-26
+lang: en
+translationKey: collision-2d
+tags: [geometry, algorithms, graphics]
+---
+
+import CollisionDemo from '../../components/blog/posts/collision/CollisionDemo.astro';
+
+Two shapes on a screen either share a point or they do not. Games, physics simulations, drawing tools and the hit-testing behind every user interface ask this question many times per frame, and they usually want more than a yes or a no: *how deep* is the overlap, and *which way* is out?
+
+This guide derives the classic tests for four pairs of shapes: two axis-aligned boxes, two circles, a circle against a box, and two convex polygons with the separating axis theorem. Each section has a figure to experiment with. Drag the shapes, or select one with the Tab key and move it with the arrow keys; the numbers under each figure come from the same code the text describes.
+
+Coordinates are screen coordinates: $x$ grows to the right and $y$ grows *downwards*, as in SVG and the HTML canvas. Distances are measured in the figure's own units, labelled px.
+
+## What a collision test answers
+
+Treat every shape as a *closed* set, boundary included. Two shapes that only share boundary points therefore intersect: they **touch**. Touching counts as a collision, which is what a physics engine needs for an object resting on the floor. Every test below sorts a pair into one of three cases, separated, touching or overlapping, and reports:
+
+- the **penetration depth** $d$, how far the shapes interpenetrate;
+- the **normal** $\mathbf{n}$, a unit vector pointing from shape $A$ towards shape $B$;
+- the **minimum translation vector** (MTV) $\mathbf{t} = d\,\mathbf{n}$, the shortest translation of $B$ after which the two shapes only touch;
+- a **contact point** where the overlap is, or, when the shapes are apart, the **distance** between them and the two nearest points.
+
+Formally, the MTV is the shortest vector $\mathbf{t}$ for which the interiors of $A$ and $B + \mathbf{t}$ are disjoint, where $B + \mathbf{t} = \lbrace \mathbf{b} + \mathbf{t} : \mathbf{b} \in B \rbrace$. Moving $A$ by $-\mathbf{t}$ works just as well, and a physics step often moves each body part of the way.
+
+## Two boxes: AABB against AABB
+
+An axis-aligned bounding box (AABB) is a rectangle whose sides are parallel to the axes, the set $[x_0, x_1] \times [y_0, y_1]$. It is the simplest shape to test and, as the last section shows, the one used everywhere as a first filter.
+
+### Intervals first
+
+On a line, two closed intervals $[a_0, a_1]$ and $[b_0, b_1]$ are disjoint exactly when one lies entirely to the left of the other, that is when $a_1 < b_0$ or $b_1 < a_0$. So they intersect exactly when
+
+$$
+a_0 \le b_1 \quad\text{and}\quad b_0 \le a_1 .
+$$
+
+A box is the product of an interval on $x$ and an interval on $y$, and the intersection of two products is the product of the intersections:
+
+$$
+A \cap B = \bigl([a_{x0}, a_{x1}] \cap [b_{x0}, b_{x1}]\bigr) \times \bigl([a_{y0}, a_{y1}] \cap [b_{y0}, b_{y1}]\bigr).
+$$
+
+This set is empty as soon as one factor is. Two boxes collide exactly when their *shadows* on the $x$ axis overlap **and** their shadows on the $y$ axis overlap: four comparisons and no arithmetic.
+
+### How deep, and which way out
+
+To separate the boxes along $x$, $B$ can slide right until its left side meets $A$'s right side, a distance of $a_{x1} - b_{x0}$, or left until its right side meets $A$'s left side, a distance of $b_{x1} - a_{x0}$. The cheaper of the two is the overlap on that axis:
+
+$$
+o_x = \min\bigl(a_{x1} - b_{x0},\; b_{x1} - a_{x0}\bigr), \qquad o_y = \min\bigl(a_{y1} - b_{y0},\; b_{y1} - a_{y0}\bigr).
+$$
+
+A positive $o_x$ is an overlap, zero means the shadows touch, and a negative value is a gap of $-o_x$. The boxes collide when $\min(o_x, o_y) \ge 0$; the penetration depth is $d = \min(o_x, o_y)$ and the MTV points along the axis that attains it. When the boxes are apart, the distance between them combines the two gaps:
+
+$$
+\operatorname{dist}(A, B) = \sqrt{\max(0, -o_x)^2 + \max(0, -o_y)^2}.
+$$
+
+```ts
+const overlapX = Math.min(a.max.x - b.min.x, b.max.x - a.min.x);
+const overlapY = Math.min(a.max.y - b.min.y, b.max.y - a.min.y);
+const hit = overlapX >= 0 && overlapY >= 0;
+const depth = hit ? Math.min(overlapX, overlapY) : 0;
+```
+
+Note that $o_x$ is the length of the push, not the length of the common part of the shadows. The two differ when one box sits inside the other. A shadow $[3, 5]$ inside $[0, 10]$ shares only 2 units with it, yet it must travel 7 units to the right, or 5 to the left, to get out. Drag the small box into the large one below and watch the depth grow past the height of the shaded overlap.
+
+<CollisionDemo kind="aabb" lang="en">
+  Two axis-aligned boxes. Their shadows on the $x$ axis (bottom) and the $y$ axis (left) are drawn along the edges; A's is solid and B's dashed. The boxes collide exactly when both pairs of shadows overlap. The shaded rectangle is the overlap, the arrow is the MTV, and the dashed outline shows where B would rest after moving by it.
+</CollisionDemo>
+
+## Two circles
+
+A circle with centre $\mathbf{c}$ and radius $r$ stands here for the whole disc, every point within distance $r$ of $\mathbf{c}$. Two discs intersect exactly when
+
+$$
+\lVert \mathbf{c}_B - \mathbf{c}_A \rVert \le r_A + r_B .
+$$
+
+One direction is the triangle inequality: a point $\mathbf{p}$ in both discs gives $\lVert \mathbf{c}_B - \mathbf{c}_A \rVert \le \lVert \mathbf{c}_B - \mathbf{p} \rVert + \lVert \mathbf{p} - \mathbf{c}_A \rVert \le r_B + r_A$. For the other, walk from $\mathbf{c}_A$ towards $\mathbf{c}_B$: the point at distance $\min(r_A, \lVert \mathbf{c}_B - \mathbf{c}_A \rVert)$ lies in both discs. In code, compare squares and skip the square root: the test is $\delta \cdot \delta \le (r_A + r_B)^2$ with $\delta = \mathbf{c}_B - \mathbf{c}_A$.
+
+The normal is the direction of the line of centres, $\mathbf{n} = \delta / \lVert \delta \rVert$, and the depth is the amount by which the radii overshoot the distance:
+
+$$
+d = r_A + r_B - \lVert \mathbf{c}_B - \mathbf{c}_A \rVert .
+$$
+
+This is the *minimum* translation, not just one that works. If $B$ moves by $\mathbf{v}$, the centres must end up at least $r_A + r_B$ apart, and $\lVert \delta + \mathbf{v} \rVert \le \lVert \delta \rVert + \lVert \mathbf{v} \rVert$, so $\lVert \mathbf{v} \rVert \ge d$; moving along $\mathbf{n}$ achieves it. The two deepest points are $\mathbf{c}_A + r_A \mathbf{n}$ on $A$ and $\mathbf{c}_B - r_B \mathbf{n}$ on $B$; halfway between them is a natural contact point.
+
+One configuration has no line of centres at all: concentric circles. Any direction is then as good as any other, so the code picks one, here $\mathbf{n} = (1, 0)$, rather than dividing by zero.
+
+<CollisionDemo kind="circles" lang="en">
+  Two circles. The dashed line joins the centres; the shaded lens is the overlap. The values under the drawing compare the distance between the centres with the sum of the radii, and the arrow, the MTV, runs along the line of centres from B's deepest point to A's.
+</CollisionDemo>
+
+## A circle against a box
+
+Mixing the two shapes needs one idea: find the point $\mathbf{p}$ of the box nearest to the circle's centre $\mathbf{c}$, and compare its distance with the radius. The squared distance splits into two independent terms,
+
+$$
+\lVert \mathbf{c} - \mathbf{p} \rVert^2 = (c_x - p_x)^2 + (c_y - p_y)^2 ,
+$$
+
+and the box constrains $p_x$ and $p_y$ separately, to $[x_0, x_1]$ and $[y_0, y_1]$. So each term can be minimised on its own, by moving each coordinate of $\mathbf{c}$ into its range:
+
+$$
+\mathbf{p} = \bigl(\operatorname{clamp}(c_x, x_0, x_1),\ \operatorname{clamp}(c_y, y_0, y_1)\bigr), \qquad \operatorname{clamp}(v, lo, hi) = \min\bigl(\max(v, lo), hi\bigr).
+$$
+
+The circle and the box collide exactly when $\lVert \mathbf{c} - \mathbf{p} \rVert \le r$. The depth is $r - \lVert \mathbf{c} - \mathbf{p} \rVert$ and the normal points from $\mathbf{p}$ to $\mathbf{c}$.
+
+```ts
+const p = { x: clamp(c.x, box.min.x, box.max.x), y: clamp(c.y, box.min.y, box.max.y) };
+const dx = c.x - p.x;
+const dy = c.y - p.y;
+const hit = dx * dx + dy * dy <= r * r;
+```
+
+The box's sides, extended, split the plane into nine regions, and the figure draws those lines. Beside a side, one coordinate is clamped and $\mathbf{p}$ slides along that side. Beyond a corner, both are clamped and $\mathbf{p}$ is the corner itself. Inside the box nothing is clamped and $\mathbf{p} = \mathbf{c}$.
+
+That last case is the one a hasty implementation gets wrong. With $\mathbf{p} = \mathbf{c}$ the vector $\mathbf{c} - \mathbf{p}$ is zero, and normalising it produces not-a-number. Geometrically the circle has to leave through a side, and the cheapest side is the nearest one. With $m$ the smallest of the four distances $c_x - x_0$, $x_1 - c_x$, $c_y - y_0$ and $y_1 - c_y$, the depth is
+
+$$
+d = r + m ,
+$$
+
+and the normal is that side's outward normal. No shorter push works: the centre must travel at least $m$ to leave the box and then $r$ more to take the whole disc with it.
+
+<CollisionDemo kind="circle-box" lang="en">
+  A box and a circle. The dotted lines extend the box's sides; $p$ marks the point of the box nearest to the centre $c$, found by clamping. Drag the circle's centre into the box to see the other case: the nearest side lights up and the MTV pushes the circle out through it.
+</CollisionDemo>
+
+## The separating axis theorem
+
+Boxes that rotate and polygons in general need a more general idea. Look again at the box test: two boxes are disjoint exactly when their shadows on $x$ or on $y$ have a gap. The separating axis theorem (SAT) says the same thing works for any two convex shapes, provided the right axes are tried.
+
+**Theorem.** Two convex polygons $A$ and $B$ are disjoint if and only if there is a direction $\mathbf{n}$, a *separating axis*, on which their projections
+
+$$
+\operatorname{proj}_{\mathbf{n}}(S) = \lbrace\, \mathbf{n} \cdot \mathbf{s} : \mathbf{s} \in S \,\rbrace
+$$
+
+are disjoint intervals. Moreover $\mathbf{n}$ can always be chosen among the edge normals of $A$ and $B$.
+
+The algorithm follows directly: for every edge normal of either polygon, project both polygons onto it and compare the two intervals. One gap proves that the shapes are apart. If no axis has a gap, they intersect.
+
+### Projections and candidate axes
+
+The dot product $\mathbf{n} \cdot \mathbf{s}$ is a linear function of $\mathbf{s}$, and a linear function on a polygon takes its extreme values at vertices, so the projection of a polygon with vertices $\mathbf{v}_1, \dots, \mathbf{v}_k$ is
+
+$$
+\operatorname{proj}_{\mathbf{n}}(P) = \Bigl[\min_i \mathbf{n} \cdot \mathbf{v}_i,\ \max_i \mathbf{n} \cdot \mathbf{v}_i\Bigr].
+$$
+
+For an edge from $\mathbf{v}_i$ to $\mathbf{v}_{i+1}$ with direction $\mathbf{e} = \mathbf{v}_{i+1} - \mathbf{v}_i$, a normal is $(e_y, -e_x)$. Parallel edges give the same axis, so a rectangle contributes two axes, a triangle three and a regular hexagon three. To decide *whether* the shapes collide, the normals need not have unit length; to measure *how far* they overlap, they must.
+
+### Why the edge normals suffice
+
+The cleanest argument goes through the Minkowski difference
+
+$$
+A \ominus B = \lbrace\, \mathbf{a} - \mathbf{b} : \mathbf{a} \in A,\ \mathbf{b} \in B \,\rbrace.
+$$
+
+1. $A$ and $B$ share a point exactly when $\mathbf{0} \in A \ominus B$, since a common point $\mathbf{a} = \mathbf{b}$ gives $\mathbf{a} - \mathbf{b} = \mathbf{0}$.
+2. $A \ominus B$ is the Minkowski sum of $A$ and $-B$. For convex polygons this sum is again a convex polygon, and its edges are the edges of $A$ and of $-B$, sorted by direction. Its edge normals are therefore edge normals of $A$ or of $B$, up to sign.
+3. A convex polygon is the intersection of the half-planes $\lbrace \mathbf{x} : \mathbf{n}_j \cdot \mathbf{x} \le h_j \rbrace$ of its edges, where $\mathbf{n}_j$ is the outward normal and $h_j$ the largest value of $\mathbf{n}_j \cdot \mathbf{x}$ on the polygon. So $\mathbf{0}$ lies outside it exactly when some $h_j < 0$.
+4. On $A \ominus B$ that largest value is
+
+$$
+h_j = \max_{\mathbf{a} \in A} \mathbf{n}_j \cdot \mathbf{a} - \min_{\mathbf{b} \in B} \mathbf{n}_j \cdot \mathbf{b},
+$$
+
+and $h_j < 0$ says that all of $A$'s shadow on $\mathbf{n}_j$ lies below all of $B$'s: the projections are disjoint.
+
+Put together: if the polygons are disjoint, one of the edge normals of $A$ or $B$ separates them, and a separating axis of any kind proves disjointness. The case $h_j = 0$ is the touching case, with $\mathbf{0}$ on the boundary of $A \ominus B$.
+
+The same picture gives the MTV for free. Moving $B$ by $\mathbf{t}$ moves $A \ominus B$ by $-\mathbf{t}$, so the shortest translation that pushes $\mathbf{0}$ out of the difference is the distance from $\mathbf{0}$ to its boundary. For a convex polygon containing $\mathbf{0}$, that distance is the smallest $h_j$. Per candidate axis this is the same "cheaper of two pushes" as for boxes, taken over both directions of the axis:
+
+$$
+d = \min_{\mathbf{n}} \min\Bigl(\max_A \mathbf{n} \cdot \mathbf{a} - \min_B \mathbf{n} \cdot \mathbf{b},\ \ \max_B \mathbf{n} \cdot \mathbf{b} - \min_A \mathbf{n} \cdot \mathbf{a}\Bigr).
+$$
+
+The axis of least overlap is therefore not a heuristic: with unit normals it gives the exact penetration depth, and the MTV points along it.
+
+```ts
+/** Penetration depth of two convex polygons, or null when an axis separates them. */
+function sat(a: Vec[], b: Vec[]): number | null {
+  let depth = Infinity;
+  for (const poly of [a, b]) {
+    for (let i = 0; i < poly.length; i++) {
+      const e = sub(poly[(i + 1) % poly.length], poly[i]);
+      const n = normalize({ x: e.y, y: -e.x });
+      const [minA, maxA] = project(a, n);
+      const [minB, maxB] = project(b, n);
+      const overlap = Math.min(maxA - minB, maxB - minA);
+      if (overlap < 0) return null; // a separating axis: no collision
+      depth = Math.min(depth, overlap);
+    }
+  }
+  return depth;
+}
+```
+
+The figure runs a fuller version of this loop. It keeps every axis instead of stopping at the first gap, so that the list under the drawing can show them all, and it also returns the direction, the contact point and the overlap region.
+
+<CollisionDemo kind="sat" lang="en">
+  A rotated rectangle A and a convex polygon B. The list shows every candidate axis with the shadows of A (solid) and B (outlined). The drawing shows one axis with the lines that cast the shadows: the separating axis when there is one, otherwise the axis of the MTV. Choose an axis in the list to draw it instead, and rotate with Q and E or the buttons.
+</CollisionDemo>
+
+A few things to try. Move B until it just clears a corner of A: often only one of B's axes finds the gap, while A's own axes still see overlapping shadows. Switch B to the rectangle and rotate it until its sides line up with A's: its axes become parallel to A's, and the list marks them as adding nothing new. With the pentagon there are seven candidate axes, and the depth is always the smallest overlap among them.
+
+### Oriented rectangles and triangles
+
+An oriented rectangle with centre $\mathbf{c}$, half-extents $w$ and $h$ and angle $\theta$ has the corners
+
+$$
+\mathbf{c} + R(\theta) \begin{pmatrix} \pm w \\ \pm h \end{pmatrix}, \qquad R(\theta) = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix}.
+$$
+
+Its two axes are the columns of $R(\theta)$, $\mathbf{u} = (\cos\theta, \sin\theta)$ and $\mathbf{v} = (-\sin\theta, \cos\theta)$, so they need not be computed from edges at all. Its projection onto a unit axis $\mathbf{n}$ is centred at $\mathbf{n} \cdot \mathbf{c}$ with radius $w \lvert \mathbf{n} \cdot \mathbf{u} \rvert + h \lvert \mathbf{n} \cdot \mathbf{v} \rvert$, which saves projecting four corners. Two oriented rectangles need four axes; a box is the case $\theta = 0$, where the four collapse to the familiar two.
+
+A triangle $\mathbf{a}\mathbf{b}\mathbf{c}$ contributes three axes. The sign of the cross product $(\mathbf{b} - \mathbf{a}) \times (\mathbf{c} - \mathbf{a})$ gives its orientation, which decides whether $(e_y, -e_x)$ points out of the triangle or into it. The orientation does not matter to the SAT test itself, since an interval and its mirror image overlap together, but outward normals make the MTV's direction easier to reason about. The same cross product, applied to the three sub-triangles $\mathbf{p}\mathbf{b}\mathbf{c}$, $\mathbf{a}\mathbf{p}\mathbf{c}$ and $\mathbf{a}\mathbf{b}\mathbf{p}$, tests whether a point $\mathbf{p}$ lies inside: it does when none of the three signs is opposite to the whole triangle's.
+
+### Why convexity matters
+
+The proof used convexity twice: in step 2, where $A \ominus B$ turned out to be a convex polygon, and in step 3, where a point outside a convex polygon is outside one of its edge half-planes. For a concave shape the conclusion fails. In the figure below a small square sits inside the notch of a U without touching it. Every candidate axis sees overlapping shadows, so SAT reports a collision, yet no straight line can pass between the two shapes: the gap lies inside the notch.
+
+<CollisionDemo kind="concave" lang="en">
+  SAT on a concave shape. The U's only edge directions are horizontal and vertical, and on both axes the shadows of the U and the square overlap, so SAT reports a hit. The dashed lines cut the U into three convex pieces; testing the square against each piece gives the true answer.
+</CollisionDemo>
+
+The usual remedy is to split a concave polygon into convex pieces $P_1, \dots, P_k$, for instance into triangles by ear clipping or into fewer pieces by a convex decomposition, and to test each piece. The shapes collide exactly when some piece does. The depth needs more care: the largest of the pieces' depths is only a lower bound for the depth of the whole shape, because a push out of one piece can lead straight into another. For the exact MTV the pieces must be taken together: it is again the shortest way from $\mathbf{0}$ to the boundary, now the boundary of the union of the Minkowski differences $P_i \ominus B$.
+
+## What it costs
+
+The first three tests take constant time: four comparisons for two boxes; one squared distance against a squared sum for two circles; two clamps and one squared distance for a circle and a box.
+
+SAT on polygons with $n$ and $m$ vertices projects $n + m$ vertices onto each of up to $n + m$ axes, which is $O\bigl((n + m)^2\bigr)$ work, with an early exit at the first gap. For the small polygons of a typical game that is fast. For shapes with many vertices, or for 3D, iterative algorithms such as GJK (Gilbert–Johnson–Keerthi), which works with the Minkowski difference through support points, together with EPA (the expanding polytope algorithm) for the depth, scale better.
+
+The bigger cost is the number of pairs. A scene of $N$ shapes has $N(N - 1)/2$ of them: 499,500 pairs for a thousand shapes, in every frame.
+
+## Practical notes
+
+### Broad phase, then narrow phase
+
+Real systems split the work in two. A **broad phase** discards most pairs cheaply and conservatively: it wraps every shape in an axis-aligned bounding box (for an oriented rectangle, the box around its four corners; for a circle, the square of side $2r$) and finds overlapping boxes with a spatial structure, such as a uniform grid, sort and sweep along one axis, or a bounding volume hierarchy. Only the surviving candidates reach the exact tests above, the **narrow phase**. The humble box test thus does double duty.
+
+### Floating-point tolerance
+
+Configurations that touch exactly on paper rarely touch exactly in floating point. In IEEE doubles, $0.1 + 0.2 = 0.30000000000000004$, and adding $0.1$ ten times gives $0.9999999999999999$. Rotating a rectangle by $\pi/2$ uses $\cos(\pi/2) \approx 6.1 \times 10^{-17}$ rather than $0$, so a corner that should land on $x = 2$ lands on $x = 1.9999999999999998$, and two rectangles that should touch overlap by about $2 \times 10^{-16}$. A few practical rules follow:
+
+- Define touching with a tolerance: an overlap within $\pm\varepsilon$ counts as touching. The figures in this post use $\varepsilon = 0.5$ px, about what the eye can tell apart; for general use the code behind them scales a default of $10^{-9}$ with the size of the coordinates, because rounding errors grow with the numbers.
+- Compare squared lengths when only a yes or no is needed, and normalise vectors only when a depth or a direction is required.
+- Guard every division by a length that can be zero: concentric circles, a centre inside a box, zero-length edges, and polygons that collapse to a segment or a point.
+
+### Resolving the collision
+
+The MTV is the simplest resolution: move one shape by it, or split it between the two in proportion to their masses. A physics engine also needs the normal, to remove the part of the velocity that points into the other body. One more pitfall: a fast, small object can pass through a thin one between two frames without ever overlapping it in a single snapshot. Continuous collision detection, which tests the swept shape or solves for the time of impact, or simply smaller time steps, prevents this tunnelling.
+
+## Summary
+
+| Pair | Collide exactly when | Penetration depth | Cost |
+| :-- | :-- | :-- | :-- |
+| Box and box | shadows overlap on $x$ and on $y$ | $\min(o_x, o_y)$ | $O(1)$ |
+| Circle and circle | $\lVert \mathbf{c}_B - \mathbf{c}_A \rVert \le r_A + r_B$ | $r_A + r_B - \lVert \mathbf{c}_B - \mathbf{c}_A \rVert$ | $O(1)$ |
+| Circle and box | $\lVert \mathbf{c} - \mathbf{p} \rVert \le r$, $\mathbf{p}$ clamped | $r - \lVert \mathbf{c} - \mathbf{p} \rVert$, or $r + m$ inside | $O(1)$ |
+| Convex polygons | no edge normal separates the shadows | smallest overlap over the edge normals | $O\bigl((n + m)^2\bigr)$ |
+
+Each test is the same idea at a different level of generality: project onto an axis where the question becomes one-dimensional, and look for a gap. The code behind the figures, with tests for the edge cases discussed here (touching shapes, nested shapes, degenerate polygons, a rotation by $\pi/2$), is in the site's repository under [src/lib/geometry](https://github.com/KaanBahaSever/portfolio/tree/main/src/lib/geometry).

@@ -1,0 +1,760 @@
+---
+/**
+ * An interactive collision figure for the post "Interactive 2D Collision Detection". Two shapes
+ * the reader drags (pointer or touch) or moves from the keyboard (Tab to a shape, arrow keys,
+ * Q/E to rotate), with the result of the matching test drawn live: overlap region, contact
+ * point, penetration depth, MTV and, for SAT, every candidate axis with its two shadows.
+ *
+ *   <CollisionDemo kind="sat" lang="en">Caption, in the post's language.</CollisionDemo>
+ *
+ * - `kind`: 'aabb' (box–box), 'circles' (circle–circle), 'circle-box' (box–circle) or 'sat'.
+ * - `lang`: the post's language, so the labels match the article even if the page interface is
+ *   in the other language. Falls back to the page locale.
+ * - `id`: prefix for element ids; the default is unique per kind, so give a second figure of the
+ *   same kind on one page its own.
+ *
+ * The starting position is rendered here, at build time, with the same pure modules the
+ * controller (controller.ts) uses afterwards, so the figure is complete before any script runs.
+ * Every figure keeps its own state; several can share a page.
+ */
+import type { Locale } from '../../../../i18n/config';
+import { formatters } from '../../../../i18n/format';
+import { getLocale } from '../../../../i18n/server';
+import { axisRows, readout, statusText } from './describe';
+import { automaticAxis, drawOver, drawUnder, shapePath, tagPosition } from './draw';
+import { collisionMessages, type DemoKind } from './messages';
+import { LARGE_STEP_FACTOR, MOVE_STEP, POLYGON_NAMES, ROTATE_STEP, WORLD, analyse, canRotate, initialScene } from './scene';
+import { demoUi } from './styles';
+
+interface Props {
+  kind: DemoKind;
+  lang?: Locale;
+  id?: string;
+}
+
+const { kind, lang, id = `collision-${kind}` } = Astro.props;
+const locale = lang ?? getLocale(Astro);
+const m = collisionMessages[locale];
+const format = formatters(locale);
+
+const scene = initialScene(kind);
+const analysis = analyse(scene);
+// Before the controller measures the real scale, draw for a desktop-sized figure.
+const view = { k: 1, axis: automaticAxis(analysis) };
+const under = drawUnder(scene, analysis, view);
+const over = drawOver(scene, analysis, view);
+const status = statusText(analysis, m, format);
+const items = readout(analysis, m, format);
+const rows = analysis.kind === 'sat' ? axisRows(analysis.result.axes, m, format) : [];
+const shownAxis = rows[view.axis]?.name ?? '';
+const rotatable = canRotate(scene);
+const names = m.shapes[kind];
+
+const helpId = `${id}-help`;
+const axesHeadingId = `${id}-axes`;
+const gridId = `${id}-grid`;
+const majorId = `${id}-grid-major`;
+const hatchId = `${id}-hatch`;
+const steps = { move: MOVE_STEP, large: MOVE_STEP * LARGE_STEP_FACTOR, rotate: ROTATE_STEP };
+const rotateLabel = format.number(ROTATE_STEP);
+---
+
+<figure
+  class="collision-demo not-prose my-10"
+  id={id}
+  data-collision-demo
+  data-kind={kind}
+  data-locale={locale}
+  data-relation={analysis.result.relation}
+>
+  <div class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <svg
+      data-stage
+      viewBox={`0 0 ${WORLD.width} ${WORLD.height}`}
+      class="stage block h-auto w-full"
+      role="group"
+      aria-label={m.stage[kind]}
+    >
+      <defs>
+        <pattern id={gridId} width="20" height="20" patternUnits="userSpaceOnUse">
+          <path d="M20 0H0V20" class="cd-grid" />
+        </pattern>
+        <pattern id={majorId} width="100" height="100" patternUnits="userSpaceOnUse">
+          <path d="M100 0H0V100" class="cd-grid-major" />
+        </pattern>
+        <pattern id={hatchId} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="7" class="cd-hatch" />
+        </pattern>
+      </defs>
+      <rect width={WORLD.width} height={WORLD.height} fill={`url(#${gridId})`} aria-hidden="true" />
+      <rect width={WORLD.width} height={WORLD.height} fill={`url(#${majorId})`} aria-hidden="true" />
+      {
+        /*
+         * Both drawing layers ignore the pointer: a press on the overlap region, the contact point
+         * or the MTV arrow falls through to the shape beneath, so a box nested inside the other
+         * can still be grabbed anywhere on it.
+         */
+      }
+      <g data-layer="under" aria-hidden="true" pointer-events="none" set:html={under} />
+      {
+        (['a', 'b'] as const).map((key) => {
+          const shape = scene[key];
+          const d = shapePath(shape);
+          const tag = tagPosition(shape);
+          return (
+            /*
+             * role="application": the shape handles its own keys (arrows move, Q/E rotate), so screen
+             * readers must pass them through instead of using them to read the page. The label
+             * names the shape; the help text below says how to move it.
+             */
+            <g
+              data-shape={key}
+              tabindex="0"
+              role="application"
+              aria-roledescription={m.shapeRole}
+              aria-label={names[key]}
+              aria-describedby={helpId}
+              class={`cd-shape cd-shape-${key}`}
+            >
+              <path data-part="hit" class="cd-hit" d={d} />
+              <path data-part="halo" class="cd-halo" d={d} />
+              <path data-part="body" class="cd-body" d={d} style={key === 'b' ? `fill: url(#${hatchId})` : undefined} />
+              <text data-part="tag" class="cd-tag" x={tag.x} y={tag.y}>
+                {key.toUpperCase()}
+              </text>
+            </g>
+          );
+        })
+      }
+      <g data-layer="over" aria-hidden="true" pointer-events="none" set:html={over} />
+    </svg>
+
+    <div class="border-t border-zinc-200 p-4 sm:p-5 dark:border-zinc-800">
+      <noscript>
+        <p
+          class="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200"
+        >
+          {m.noscript}
+        </p>
+      </noscript>
+
+      <p class="flex items-center gap-2.5 font-mono text-sm font-medium text-zinc-900 dark:text-zinc-100">
+        <span class="cd-indicator" aria-hidden="true"></span>
+        <span data-status>{status}</span>
+      </p>
+      {/* The line above changes on every frame; this region repeats it once the reader pauses. */}
+      <p data-live class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+      <dl class="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
+        {
+          items.map((item) => (
+            <div class="min-w-0" data-readout={item.key}>
+              <dt class="text-xs leading-snug text-zinc-600 dark:text-zinc-400">{item.label}</dt>
+              <dd data-value class="mt-0.5 font-mono text-sm text-zinc-900 tabular-nums dark:text-zinc-100">
+                {item.value}
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      {
+        kind === 'sat' && (
+          <section aria-labelledby={axesHeadingId} class="mt-5 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+            <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+              <h3 id={axesHeadingId} class={demoUi.legend}>
+                {m.axes.heading}
+              </h3>
+              <p data-axis-shown class="font-mono text-xs text-zinc-600 dark:text-zinc-400">
+                {m.axes.shownAuto(shownAxis)}
+              </p>
+            </div>
+            <p class:list={[demoUi.hint, 'mt-1 text-xs']}>{m.axes.hint}</p>
+            <ul data-axis-list class="mt-2 grid gap-1">
+              {rows.map((row, index) => (
+                <li>
+                  <button
+                    type="button"
+                    data-axis-row={index}
+                    data-state={row.state}
+                    data-shown={index === view.axis ? '' : undefined}
+                    aria-pressed="false"
+                    class="cd-row"
+                  >
+                    <span class="cd-row-name">
+                      <span class="sr-only">{m.axes.axisWord} </span>
+                      <span data-axis-name>{row.name}</span>
+                    </span>
+                    <svg class="cd-row-bars" viewBox="0 0 100 16" preserveAspectRatio="none" aria-hidden="true">
+                      <line x1="0" y1="8" x2="100" y2="8" class="cd-row-axis" />
+                      <rect data-bar="a" x={row.bars.a[0]} y="2" width={row.bars.a[1]} height="4" class="cd-row-a" />
+                      <rect data-bar="b" x={row.bars.b[0]} y="10" width={row.bars.b[1]} height="4" class="cd-row-b" />
+                      <rect
+                        data-bar="common"
+                        x={row.bars.common?.[0] ?? 0}
+                        y="6.5"
+                        width={row.bars.common?.[1] ?? 0}
+                        height="3"
+                        class="cd-row-common"
+                      />
+                      <rect
+                        data-bar="gap"
+                        x={row.bars.gap?.[0] ?? 0}
+                        y="6.5"
+                        width={row.bars.gap?.[1] ?? 0}
+                        height="3"
+                        class="cd-row-gap"
+                      />
+                    </svg>
+                    <span data-axis-detail class="cd-row-detail">
+                      {row.detail}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-zinc-600 dark:text-zinc-400" aria-hidden="true">
+              <span class="inline-flex items-center gap-2">
+                <span class="cd-key cd-key-a" />
+                {m.axes.legendA}
+              </span>
+              <span class="inline-flex items-center gap-2">
+                <span class="cd-key cd-key-b" />
+                {m.axes.legendB}
+              </span>
+            </p>
+          </section>
+        )
+      }
+
+      <div class="mt-5 flex flex-wrap items-end gap-x-4 gap-y-3">
+        {
+          rotatable && (
+            <fieldset class="min-w-0">
+              <legend class={demoUi.legend}>{m.controls.shapeB}</legend>
+              <div class:list={[demoUi.segmented, 'mt-2']}>
+                {POLYGON_NAMES.map((name) => (
+                  <label class={demoUi.segment}>
+                    <input
+                      type="radio"
+                      class="sr-only"
+                      name={`${id}-polygon`}
+                      value={name}
+                      checked={name === 'triangle'}
+                      data-polygon
+                    />
+                    {m.polygons[name]}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          )
+        }
+        {
+          rotatable && (
+            <fieldset class="min-w-0">
+              <legend class={demoUi.legend}>{m.controls.rotate}</legend>
+              <div class="mt-2 flex items-center gap-2">
+                <div class={demoUi.segmented} role="radiogroup" aria-label={m.controls.rotateTarget}>
+                  {(['a', 'b'] as const).map((key) => (
+                    <label class={demoUi.segment}>
+                      <input
+                        type="radio"
+                        class="sr-only"
+                        name={`${id}-target`}
+                        value={key}
+                        checked={key === 'a'}
+                        data-rotate-target
+                        aria-label={names[key]}
+                      />
+                      <span aria-hidden="true" class="font-serif text-base italic">
+                        {key.toUpperCase()}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  data-rotate="-1"
+                  class={demoUi.iconButton}
+                  aria-label={m.controls.anticlockwise(rotateLabel)}
+                  title={m.controls.anticlockwise(rotateLabel)}
+                >
+                  <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M8 8.5A7 7 0 1 1 5.2 15" />
+                    <path d="M4 5.5v4.5h4.5" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  data-rotate="1"
+                  class={demoUi.iconButton}
+                  aria-label={m.controls.clockwise(rotateLabel)}
+                  title={m.controls.clockwise(rotateLabel)}
+                >
+                  <svg viewBox="0 0 24 24" class="size-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M16 8.5A7 7 0 1 0 18.8 15" />
+                    <path d="M20 5.5v4.5h-4.5" />
+                  </svg>
+                </button>
+              </div>
+            </fieldset>
+          )
+        }
+        <button type="button" data-reset class={demoUi.button}>
+          <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 12a8 8 0 1 0 2.3-5.6" />
+            <path d="M4 4v4.5h4.5" />
+          </svg>
+          {m.controls.reset}
+        </button>
+      </div>
+
+      <p id={helpId} class:list={[demoUi.hint, 'mt-4']}>
+        {
+          locale === 'tr' ? (
+            <>
+              Şekli sürükleyin ya da <kbd class={demoUi.kbd}>Tab</kbd> ile seçip ok tuşlarıyla {steps.move} px taşıyın
+              (<kbd class={demoUi.kbd}>Shift</kbd> ile {steps.large} px).
+              {rotatable && (
+                <>
+                  {' '}
+                  <kbd class={demoUi.kbd}>Q</kbd> ve <kbd class={demoUi.kbd}>E</kbd> seçili şekli {steps.rotate}° döndürür.
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              Drag a shape, or select it with <kbd class={demoUi.kbd}>Tab</kbd> and move it {steps.move} px with the arrow
+              keys (<kbd class={demoUi.kbd}>Shift</kbd>: {steps.large} px).
+              {rotatable && (
+                <>
+                  {' '}
+                  <kbd class={demoUi.kbd}>Q</kbd> and <kbd class={demoUi.kbd}>E</kbd> rotate it by {steps.rotate}°.
+                </>
+              )}
+            </>
+          )
+        }
+      </p>
+    </div>
+  </div>
+  <figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+    <slot />
+  </figcaption>
+</figure>
+
+<style>
+  /*
+   * Colours of the drawing. Strokes that carry meaning (outlines, MTV, contact point) keep at
+   * least 3:1 against the paper in both themes; the grid and casting lines are decoration.
+   */
+  .collision-demo {
+    --cd-ink: var(--color-zinc-800);
+    --cd-muted: var(--color-zinc-500);
+    --cd-muted-text: var(--color-zinc-600);
+    --cd-accent: var(--color-accent-600);
+    --cd-accent-strong: var(--color-accent-700);
+    --cd-paper: var(--color-white);
+    --cd-grid: color-mix(in oklab, var(--color-zinc-900) 5%, transparent);
+    --cd-grid-major: color-mix(in oklab, var(--color-zinc-900) 10%, transparent);
+    --cd-fill-a: color-mix(in oklab, var(--color-zinc-900) 6%, transparent);
+    --cd-region: color-mix(in oklab, var(--color-accent-500) 26%, transparent);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .collision-demo {
+      --cd-ink: var(--color-zinc-200);
+      --cd-muted: var(--color-zinc-400);
+      --cd-muted-text: var(--color-zinc-400);
+      --cd-accent: var(--color-accent-400);
+      --cd-accent-strong: var(--color-accent-300);
+      --cd-paper: var(--color-zinc-900);
+      --cd-grid: color-mix(in oklab, white 5%, transparent);
+      --cd-grid-major: color-mix(in oklab, white 9%, transparent);
+      --cd-fill-a: color-mix(in oklab, white 7%, transparent);
+      --cd-region: color-mix(in oklab, var(--color-accent-400) 26%, transparent);
+    }
+  }
+
+  /*
+   * --k is the number of world units per CSS pixel; line widths and text sizes are multiplied by
+   * it so that they look the same at every width. The controller measures it; these are guesses
+   * for the first paint.
+   */
+  .stage {
+    --k: 0.85;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  @media (max-width: 639px) {
+    .stage {
+      --k: 1.8;
+    }
+  }
+
+  .stage :global(.cd-grid) {
+    fill: none;
+    stroke: var(--cd-grid);
+    stroke-width: calc(1px * var(--k));
+  }
+
+  .stage :global(.cd-grid-major) {
+    fill: none;
+    stroke: var(--cd-grid-major);
+    stroke-width: calc(1px * var(--k));
+  }
+
+  .stage :global(.cd-hatch) {
+    stroke: var(--cd-ink);
+    stroke-opacity: 0.3;
+    stroke-width: calc(1px * var(--k));
+  }
+
+  /* ------------------------------------------------ shapes */
+
+  .cd-shape {
+    cursor: grab;
+    outline: none;
+    /* A drag on a shape moves it; anywhere else, the page scrolls as usual. */
+    touch-action: none;
+  }
+
+  .cd-shape[data-dragging] {
+    cursor: grabbing;
+  }
+
+  .cd-hit {
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: calc(16px * var(--k));
+    stroke-linejoin: round;
+    pointer-events: all;
+  }
+
+  .cd-body {
+    fill: var(--cd-fill-a);
+    stroke: var(--cd-ink);
+    stroke-width: calc(1.75px * var(--k));
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+
+  /* The keyboard focus ring: an accent band around the outline (SVG shapes draw no outline). */
+  .cd-halo {
+    fill: none;
+    stroke: var(--cd-accent-strong);
+    stroke-width: calc(7px * var(--k));
+    stroke-linejoin: round;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease-out;
+  }
+
+  .cd-shape:focus-visible .cd-halo {
+    opacity: 1;
+  }
+
+  .cd-tag {
+    fill: var(--cd-ink);
+    font-family: var(--font-serif);
+    font-size: calc(19px * var(--k));
+    font-style: italic;
+    text-anchor: middle;
+    dominant-baseline: central;
+    pointer-events: none;
+    paint-order: stroke;
+    stroke: var(--cd-paper);
+    stroke-width: calc(4px * var(--k));
+    stroke-linejoin: round;
+  }
+
+  /* ------------------------------------------------ overlays (markup from draw.ts) */
+
+  .stage :global(.cd-cast) {
+    stroke: var(--cd-muted);
+    stroke-opacity: 0.55;
+    stroke-width: calc(1px * var(--k));
+    stroke-dasharray: calc(2px * var(--k)) calc(3px * var(--k));
+  }
+
+  .stage :global(.cd-guide) {
+    stroke: var(--cd-muted);
+    stroke-width: calc(1.25px * var(--k));
+    stroke-dasharray: calc(5px * var(--k)) calc(4px * var(--k));
+  }
+
+  .stage :global(.cd-clamp) {
+    stroke: var(--cd-ink);
+    stroke-width: calc(1.25px * var(--k));
+  }
+
+  .stage :global(.cd-axis) {
+    stroke: var(--cd-muted);
+    stroke-width: calc(1px * var(--k));
+  }
+
+  .stage :global(.cd-bar) {
+    stroke: var(--cd-ink);
+    stroke-width: calc(4px * var(--k));
+  }
+
+  .stage :global(.cd-bar-b) {
+    stroke-dasharray: calc(3px * var(--k)) calc(2px * var(--k));
+  }
+
+  .stage :global(.cd-common) {
+    stroke: var(--cd-accent);
+    stroke-width: calc(3px * var(--k));
+  }
+
+  .stage :global(.cd-gap),
+  .stage :global(.cd-gap-tick) {
+    stroke: var(--cd-accent-strong);
+    stroke-width: calc(2px * var(--k));
+  }
+
+  .stage :global(.cd-gap) {
+    stroke-dasharray: calc(4px * var(--k)) calc(3px * var(--k));
+  }
+
+  .stage :global(.cd-axis-name) {
+    fill: var(--cd-muted-text);
+    font-family: var(--font-mono);
+    font-size: calc(11px * var(--k));
+    font-weight: 500;
+    dominant-baseline: central;
+    paint-order: stroke;
+    stroke: var(--cd-paper);
+    stroke-width: calc(5px * var(--k));
+    stroke-linejoin: round;
+  }
+
+  .stage :global(.cd-region) {
+    fill: var(--cd-region);
+    stroke: var(--cd-accent);
+    stroke-width: calc(1.5px * var(--k));
+    stroke-linejoin: round;
+  }
+
+  .stage :global(.cd-ghost) {
+    fill: none;
+    stroke: var(--cd-accent-strong);
+    stroke-width: calc(1.25px * var(--k));
+    stroke-dasharray: calc(6px * var(--k)) calc(4px * var(--k));
+    stroke-linejoin: round;
+  }
+
+  .stage :global(.cd-arrow-shaft) {
+    stroke: var(--cd-accent-strong);
+    stroke-width: calc(2px * var(--k));
+    stroke-linecap: round;
+  }
+
+  .stage :global(.cd-arrow-head) {
+    fill: var(--cd-accent-strong);
+  }
+
+  .stage :global(.cd-contact) {
+    fill: var(--cd-accent-strong);
+    stroke: var(--cd-paper);
+    stroke-width: calc(2px * var(--k));
+  }
+
+  .stage :global(.cd-point) {
+    fill: var(--cd-paper);
+    stroke: var(--cd-accent-strong);
+    stroke-width: calc(2px * var(--k));
+  }
+
+  .stage :global(.cd-center) {
+    fill: var(--cd-ink);
+  }
+
+  .stage :global(.cd-face) {
+    stroke: var(--cd-accent-strong);
+    stroke-width: calc(4px * var(--k));
+    stroke-linecap: round;
+  }
+
+  .stage :global(.cd-closest) {
+    stroke: var(--cd-ink);
+    stroke-width: calc(1.25px * var(--k));
+    stroke-dasharray: calc(4px * var(--k)) calc(3px * var(--k));
+  }
+
+  .stage :global(.cd-closest-end) {
+    fill: var(--cd-paper);
+    stroke: var(--cd-ink);
+    stroke-width: calc(1.25px * var(--k));
+  }
+
+  .stage :global(.cd-var) {
+    fill: var(--cd-ink);
+    font-family: var(--font-serif);
+    font-size: calc(16px * var(--k));
+    font-style: italic;
+    paint-order: stroke;
+    stroke: var(--cd-paper);
+    stroke-width: calc(4px * var(--k));
+    stroke-linejoin: round;
+  }
+
+  /* ------------------------------------------------ status and SAT rows */
+
+  .cd-indicator {
+    width: 0.625rem;
+    height: 0.625rem;
+    flex: none;
+    border: 1.5px solid var(--cd-muted);
+    border-radius: 9999px;
+    transition:
+      background-color 150ms ease-out,
+      border-color 150ms ease-out;
+  }
+
+  [data-relation='touching'] .cd-indicator {
+    border-color: var(--cd-accent-strong);
+  }
+
+  [data-relation='overlapping'] .cd-indicator {
+    border-color: var(--cd-accent-strong);
+    background-color: var(--cd-accent-strong);
+  }
+
+  .cd-row {
+    display: grid;
+    width: 100%;
+    min-height: 2.75rem;
+    grid-template-columns: 2.25rem minmax(0, 1fr);
+    align-items: center;
+    column-gap: 0.75rem;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    text-align: start;
+    color: var(--color-zinc-700);
+    transition: background-color 150ms ease-out;
+  }
+
+  .cd-row:hover {
+    background-color: var(--color-zinc-100);
+  }
+
+  /* The axis drawn on the figure gets an accent rule; a pinned one also a frame. */
+  .cd-row[data-shown] {
+    box-shadow: inset 3px 0 0 var(--cd-accent-strong);
+  }
+
+  .cd-row[aria-pressed='true'] {
+    background-color: var(--color-zinc-100);
+    box-shadow:
+      inset 3px 0 0 var(--cd-accent-strong),
+      inset 0 0 0 1px var(--color-zinc-300);
+  }
+
+  .cd-row-name {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-zinc-900);
+  }
+
+  .cd-row-bars {
+    width: 100%;
+    height: 1rem;
+    overflow: visible;
+  }
+
+  .cd-row-detail {
+    grid-column: 2;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.1rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (min-width: 640px) {
+    .cd-row {
+      grid-template-columns: 2.5rem minmax(0, 1fr) 13rem;
+    }
+
+    .cd-row-detail {
+      grid-column: 3;
+    }
+  }
+
+  .cd-row[data-state='separating'] .cd-row-name,
+  .cd-row[data-state='separating'] .cd-row-detail {
+    color: var(--cd-accent-strong);
+    font-weight: 600;
+  }
+
+  .cd-row-axis {
+    stroke: var(--cd-muted);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .cd-row-a {
+    fill: var(--cd-ink);
+  }
+
+  .cd-row-b {
+    fill: var(--cd-paper);
+    stroke: var(--cd-ink);
+    stroke-width: 1px;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .cd-row-common {
+    fill: var(--cd-accent);
+  }
+
+  .cd-row-gap {
+    fill: var(--cd-accent-strong);
+    opacity: 0.35;
+  }
+
+  .cd-key {
+    display: inline-block;
+    width: 1.25rem;
+    height: 0.3125rem;
+    border: 1px solid var(--cd-ink);
+  }
+
+  .cd-key-a {
+    background-color: var(--cd-ink);
+  }
+
+  .cd-key-b {
+    background-color: var(--cd-paper);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .cd-row {
+      color: var(--color-zinc-300);
+    }
+
+    .cd-row:hover,
+    .cd-row[aria-pressed='true'] {
+      background-color: var(--color-zinc-800);
+    }
+
+    .cd-row[aria-pressed='true'] {
+      box-shadow:
+        inset 3px 0 0 var(--cd-accent-strong),
+        inset 0 0 0 1px var(--color-zinc-600);
+    }
+
+    .cd-row-name {
+      color: var(--color-zinc-100);
+    }
+  }
+</style>
+
+<script>
+  import { initCollisionDemo } from './controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-collision-demo]').forEach(initCollisionDemo);
+</script>

@@ -72,7 +72,7 @@ $$
 n\,(n - L + 1).
 $$
 
-(İki şeyi aralarına işaret koymadan yan yana yazmak, matematikte onları çarpmak demek.) Kruvazör için $10 \cdot 8 = 80$.
+(İki şeyi aralarına işaret koymadan yan yana yazmak, matematikte onları çarpmak demek. İki sayının arasına konan $\cdot$ noktası da çarpma işareti.) Kruvazör için $10 \cdot 8 = 80$.
 
 **Üçüncü adım: sütunlar.** Tahta kare olduğu için aynı hesap sütunlarda da işler. Tahtayı 90 derece çevirdiğinizi düşünün: Satırlar sütun, yatay gemiler dikey gemi olur. Demek ki dikey konumların sayısı da $n\,(n - L + 1)$; kruvazör için yine 80.
 
@@ -84,7 +84,7 @@ $$
 
 Kruvazör için $2 \cdot 10 \cdot (10 - 3 + 1) = 2 \cdot 10 \cdot 8 = 160$.
 
-“Ya yatay ya dikey” diyebilmek için geminin en az iki hücre uzunluğunda olması, yani $L > 1$ olması gerekiyor. Tek hücrelik bir gemi olsaydı, onun “yatay” ve “dikey” hâli aynı hücrede duran aynı gemi olurdu. Böyle bir geminin konum sayısı tahtadaki hücre sayısı kadardır, yani $n \cdot n = n^2$; formül ise her konumu iki kez sayar ve bunun iki katını, $2n^2$ bulurdu. Neyse ki filoda tek hücrelik gemi yok. Tahtadan uzun bir gemi ise hiçbir yere sığmaz; formülü yalnızca tahtaya sığan gemiler için kullanıyoruz.
+“Ya yatay ya dikey” diyebilmek için geminin en az iki hücre uzunluğunda olması, yani $L > 1$ olması gerekiyor ($>$ işareti “büyüktür” demek). Tek hücrelik bir gemi olsaydı, onun “yatay” ve “dikey” hâli aynı hücrede duran aynı gemi olurdu. Böyle bir geminin konum sayısı tahtadaki hücre sayısı kadardır, yani $n \cdot n = n^2$; formül ise her konumu iki kez sayar ve bunun iki katını, $2n^2$ bulurdu. Neyse ki filoda tek hücrelik gemi yok. Tahtadan uzun bir gemi ise hiçbir yere sığmaz; formülü yalnızca tahtaya sığan gemiler için kullanıyoruz.
 
 Filodaki gemilerin boyları 5, 4, 3, 3 ve 2. Formül bunlar için sırasıyla 120, 140, 160, 160 ve 180 konum verir; hepsi birlikte {n.placements}.
 
@@ -114,7 +114,7 @@ Bu sayıyı neden hesaplıyoruz? İki sebebi var. Birincisi, akıllı seviyeleri
 
 Şimdi hesaplayalım. Şöyle düşünün: Elinizde 100 kartlık bir deste var; kartların {n.shipCells} tanesi kırmızı (gemi hücreleri), geri kalan 83 tanesi siyah (boş su). Rastgele ateş etmek, desteyi iyice karıştırıp kartları sırayla açmak gibi. Oyun, son kırmızı kart açıldığı anda biter.
 
-Kırmızı kartlar siyahları yığınlara ayırır: ilk kırmızıdan önceki yığın, art arda gelen iki kırmızı arasındaki yığınlar ve son kırmızıdan sonraki yığın. {n.shipCells} kırmızı kart olduğu için 18 yığın var; bazıları boş da olabilir. İyi karıştırılmış bir deste hiçbir yığını kayırmaz, bu yüzden ortalamada her yığında eşit sayıda kart olur: 83 siyah kart 18 yığına paylaşılır, yığın başına ortalama $83/18$, yani yaklaşık {n.random.gap} kart.
+Kırmızı kartlar siyahları yığınlara ayırır: ilk kırmızıdan önceki yığın, art arda gelen iki kırmızı arasındaki yığınlar ve son kırmızıdan sonraki yığın. {n.shipCells} kırmızı kart olduğu için 18 yığın var; bazıları boş da olabilir. İyi karıştırılmış bir deste hiçbir yığını kayırmaz, bu yüzden ortalamada her yığında eşit sayıda kart olur: 83 siyah kart 18 yığına paylaşılır, yığın başına ortalama $83/18$ (83 bölü 18), yani yaklaşık {n.random.gap} kart.
 
 Oyun son kırmızı kartta bittiğine göre, açılmadan kalan tek yığın en sondaki yığın. Demek ki ortalama bir oyunda 100 karttan yalnızca son yığın kadarı açılmadan kalır:
 
@@ -170,7 +170,7 @@ Bunu gerçek bir oyunda izlemek, anlatmaktan kolay. Aşağıda Normal seviye, ya
 
 Bu oyunda desen {n.replay.saved} atış kazandırdı ve farkın çoğu av atışlarından geliyor: av atışları {n.replay.noParity.hunt} yerine {n.replay.parity.hunt}, hedef atışları {n.replay.noParity.target} yerine {n.replay.parity.target}.
 
-Tek bir oyun şansa bağlı olabilir, ama {n.games} oyunun ortalaması da aynı şeyi söylüyor. Yazının sonundaki simülasyonda desen, oyun başına ortalama {n.saved.parity} atış kazandırıyor: Av ve hedef desensiz ortalama {n.mean['no-parity']}, desenle {n.mean.parity} atış sürüyor. Kazanç oyunun yarısına yaklaşmıyor bile, çünkü desenden yalnızca av atışları yararlanıyor; gemileri bitiren atışlar iki durumda da aşağı yukarı aynı. Desen en kötü durumu da iyileştiriyor: {n.games} oyunun en uzunu desenle {n.worst.parity}, desensiz {n.worst['no-parity']} atış sürdü.
+Tek bir oyun şansa bağlı olabilir, ama {n.games} oyunun ortalaması da aynı şeyi söylüyor. Yazının sonundaki simülasyonda desen, oyun başına ortalama {n.saved.parity} atış kazandırıyor: Av ve hedef desensiz ortalama {n.mean['no-parity']}, desenle {n.mean.parity} atış sürüyor. Desen taranacak hücreleri yarıya indiriyor ama oyun yarıya inmekten çok uzak, çünkü desenden yalnızca av atışları yararlanıyor; gemileri bitiren atışlar iki durumda da aşağı yukarı aynı. Desen en kötü durumu da iyileştiriyor: {n.games} oyunun en uzunu desenle {n.worst.parity}, desensiz {n.worst['no-parity']} atış sürdü.
 
 ### Durum makinesi
 
@@ -192,7 +192,7 @@ Av ve hedef, filo hakkında tek bir bilgi kullanır: en kısa geminin boyu. Zor 
 
 <InitialDensity lang="tr">İlk atıştan önceki yoğunluk. Her hücredeki sayı, beş geminin o hücreden geçen konumlarının sayısı: köşelerde {n.emptyMin}, ortadaki dört hücrede {n.emptyMax}. Zor seviye ilk atışını bu dört hücreden birine yapar.</InitialDensity>
 
-Bu iki sayıyı kendimiz de bulabiliriz. Bir köşe hücresinden her geminin tek bir yatay ve tek bir dikey konumu geçer: köşeden başlayanlar. Beş gemi için $5 \cdot 2 = 10$. Ortadaki bir hücreden ise $L$ boyundaki bir gemi $L$ yatay ve $L$ dikey konumla geçebilir, çünkü o hücre geminin birinci, ikinci, … ya da sonuncu hücresi olabilir. Beş gemi için bu $2 \cdot (5 + 4 + 3 + 3 + 2) = 2 \cdot 17 = 34$ eder. Hiçbir hücre bundan fazlasını toplayamaz; kruvazör şeklinde gördüğümüz gibi, kenara yaklaştıkça sayı düşer.
+Bu iki sayıyı kendimiz de bulabiliriz. Bir köşe hücresinden her geminin tek bir yatay ve tek bir dikey konumu geçer: bir ucu o köşede duranlar. Beş gemi için $5 \cdot 2 = 10$. Ortadaki dört hücrenin her birinden ise $L$ boyundaki bir gemi $L$ yatay ve $L$ dikey konumla geçebilir, çünkü o hücre geminin birinci, ikinci, … ya da sonuncu hücresi olabilir. Beş gemi için bu $2 \cdot (5 + 4 + 3 + 3 + 2) = 2 \cdot 17 = 34$ eder. Hiçbir hücre bundan fazlasını toplayamaz; kruvazör şeklinde gördüğümüz gibi, kenara yaklaştıkça sayı düşer.
 
 Yöntemin adı da buradan geliyor: Bir hücrenin sayısını toplam konum sayısına ({n.placements}) bölerseniz, bütün konumlar arasından rastgele seçilen birinin o hücreden geçme olasılığını bulursunuz.
 
@@ -238,7 +238,7 @@ Yoğunluk her gemiyi tek başına düşünür; bu yüzden hiçbir filoda bir ara
 
 ## Kaç atış?
 
-Stratejileri karşılaştırmak için her birine aynı {n.games} filoyu batırttım. Oyunlar numaralı: $i$ numaralı oyunda filo, oyunun kendi rastgele yerleştirmesiyle ve $i$ tohumuyla kurulur; bilgisayarın rastgele seçimleri de $7919\,i + 17$ tohumuyla başlar (rastgele sayı üreteci, oyunun testlerindeki gibi mulberry32). Böylece her oyun birebir yeniden oynatılabilir; yukarıda adım adım izlediğiniz {n.replay.seed} numaralı oyun da bunlardan biri. Dördüncü strateji olan desensiz av ve hedef, tarama deseni kapatılmış Normal seviye: Rastgele avlanıyor, Normal seviye gibi hedefliyor.
+Stratejileri karşılaştırmak için her birine aynı {n.games} filoyu batırttım. Oyunlar numaralı: $i$ numaralı oyunda filo, oyunun kendi rastgele yerleştirmesiyle ve $i$ tohumuyla kurulur; bilgisayarın rastgele seçimleri de $7919\,i + 17$ tohumuyla başlar (rastgele sayı üreteci, oyunun testlerindeki gibi mulberry32). Böylece her oyun birebir yeniden oynatılabilir; yukarıda adım adım izlediğiniz {n.replay.seed} numaralı oyun da bunlardan biri. Aşağıdaki tabloda üç seviyenin yanında dördüncü bir strateji daha var: desensiz av ve hedef. Bu, tarama deseni kapatılmış Normal seviye: Rastgele avlanıyor, Normal seviye gibi hedefliyor.
 
 <SimulationTable lang="tr" />
 

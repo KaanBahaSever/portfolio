@@ -1,54 +1,54 @@
 ---
 title: Karecik
-shortDescription: Canlıda çalışan bir QR menü SaaS platformu. Yerel kafe ve restoranlar menülerini, siparişlerini ve müşteri iletişimini bununla yönetiyor. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı.
+shortDescription: Yerel kafe ve restoranların kullandığı bir QR menü hizmeti. İşletmeler menülerini ve siparişlerini buradan yönetiyor, müşterileriyle de buradan iletişim kuruyor. Kesintisiz ve hızlı çalışsın diye tasarladım.
 ---
 
 ## Nedir?
 
-Karecik, yerel kafe ve restoranların müşterileriyle etkileşim kurmak, menülerini ve
-siparişlerini yönetmek için kullandığı bir SaaS. Şu anda canlıda. Müşteri, işletmenin QR kodunu
-okuttuğunda menü telefonunda açılır. Menü, işletmenin kendi alt alan adından gelir. İşletme
-sahipleri de her şeyi bir yönetim panelinden ayarlar. Menü, kod okutulduğu anda açılmalı. Bu
-yüzden servis kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı.
+Müşteri, işletmenin QR kodunu okutuyor ve menü telefonunda açılıyor. Her işletmenin kendine ait
+bir adresi (alt alan adı) var; menü o adreste. İşletme sahibi de her şeyi bir yönetim panelinden
+ayarlıyor. Kodu okutan kimse beklemek istemez. Bu yüzden hıza ve kesintisiz çalışmaya çok önem
+verdim.
 
-Fikir aslında üründen eski. Konsept ve ilk deneysel prototipler 2021’e dayanıyor. Proje o
-dönemde başka adlarla anılıyordu. 2026’da bu çalışmayı toparlayıp Karecik adıyla canlıya
-aldım.
+Aslında fikir de ilk deneme sürümleri de 2021’e dayanıyor; projeye o zamanlar başka adlar
+vermiştim. 2026’da bu çalışmayı toparladım ve Karecik adıyla yayına aldım.
 
-## Özellikler
+## Neler var?
 
-- **Menü düzenleyici**: Kategoriler ve ürünler sürükle-bırak ile sıralanır, fiyatlar listede
-  doğrudan düzenlenir. Fiyatlar yüzdeyle toplu olarak da güncellenebilir; bu sırada yuvarlama
-  kuralları uygulanır.
-- **Şubeler ve menüler**: Bir işletmenin birden çok şubesi olabilir. Bir menü bütün şubelerde
-  ortak kullanılabilir ya da tek bir şubeye özel olabilir. Her şube, fiyatları ve hangi
-  ürünlerin satışta olduğunu kendine göre değiştirebilir.
-- **Altı dilde menü**: Türkçe, İngilizce, Almanca, Rusça, Arapça ve Fransızca.
+- **Menü düzenleme**: Kategorileri ve ürünleri sürükleyip bırakarak sıralıyorsunuz, fiyatları da
+  doğrudan listede değiştiriyorsunuz. Fiyatları yüzde olarak topluca artırıp azaltmak da mümkün;
+  yeni tutarlar belli kurallara göre yuvarlanıyor.
+- **Şubeler**: Bir işletmenin birden çok şubesi olabiliyor. Bir menüyü bütün şubelerde
+  kullanabilir ya da tek bir şubeye ayırabilirsiniz. Her şube kendi fiyatlarını belirleyebiliyor,
+  hangi ürünleri satacağını da kendisi seçebiliyor.
+- **Altı dil**: Menüler Türkçe, İngilizce, Almanca, Rusça, Arapça ve Fransızca olabiliyor.
 - **Ürün ayrıntıları**: fotoğraflar, içindekiler, alerjen uyarıları, kalori bilgisi ve özel
   rozetler.
-- **Marka görünümü**: temalar, yazı tipleri, vurgu renkleri, arka planlar ve ayarlanabilir bir
-  açılış ekranı. Hepsi panelin içindeki canlı mobil önizlemede kontrol edilebilir.
-- **QR kodlar**: PNG olarak indirilebilir ya da yazdırılabilir. Menü adresi de kopyalanabilir.
-- **Müşteri menüsü**: İşletmenin alt alan adında açılır; yedek olarak yol tabanlı bir adres de
-  var. Müşteriler menüde arama yapabilir, dili değiştirebilir ve Wi-Fi bilgilerini görebilir.
+- **İşletmeye özel görünüm**: Tema, yazı tipi, vurgu rengi ve arka planı seçebilir, menü açılırken
+  çıkan karşılama ekranını da ayarlayabilirsiniz. Sonucu paneldeki canlı telefon önizlemesinde
+  hemen görürsünüz.
+- **QR kodlar**: Kodu PNG olarak indirebilir, yazdırabilir ya da menünün adresini
+  kopyalayabilirsiniz.
+- **Müşterinin gördüğü menü**: İşletmenin kendi adresinde açılıyor, yedek bir adresi de var.
+  Müşteriler menüde arama yapabiliyor, dili değiştirebiliyor ve Wi-Fi bilgilerini görebiliyor.
 
-## Mimari
+## Nasıl kurdum?
 
-Bütün işletmeler aynı kurulumu paylaşır; her işletme bu kurulumun bir kiracısıdır (tenant).
-Gelen isteğin hangi işletmeye ait olduğu alt alan adından anlaşılır. Bu yüzden yeni bir
-işletme için yeni bir altyapı kurmak gerekmez.
+Bütün işletmeler aynı sistemi kullanıyor. Sunucu, gelen her isteğin hangi işletmeye ait olduğunu
+alt alan adından anlıyor. Bu yüzden yeni bir işletme eklendiğinde ayrıca bir şey kurmam
+gerekmiyor.
 
-| Katman        | Teknoloji                                                            |
-| ------------- | -------------------------------------------------------------------- |
-| API           | Go 1.22, Fiber v2, pgx; HttpOnly çerezli, bellekte tutulan oturumlar |
-| Veri tabanı   | PostgreSQL; gömülü SQL migration’ları uygulama açılırken çalışır     |
-| Ön yüz        | React 18, Vite, Tailwind CSS, dnd-kit                                |
-| Kiracı yapısı | Wildcard alt alan adı çözümlemesi; yedek olarak yol tabanlı adres    |
-| Altyapı       | Cloudflare                                                           |
+| Kısım          | Kullandıklarım                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| Sunucu (API)   | Go 1.22, Fiber v2, pgx; oturumlar bellekte tutuluyor, tarayıcı HttpOnly bir çerezle tanınıyor |
+| Veri tabanı    | PostgreSQL; tablo değişiklikleri (SQL migration’ları) programın içinde, açılışta uygulanıyor  |
+| Arayüz         | React 18, Vite, Tailwind CSS; sürükle-bırak için dnd-kit                                      |
+| İşletme ayrımı | Alt alan adına göre (wildcard); yedek olarak adres yoluna göre                                |
+| Altyapı        | Cloudflare                                                                                    |
 
-Kodu İngilizce yazdım; ürün ise Türkçe.
+Kodu İngilizce yazdım, uygulamanın kendisi ise Türkçe.
 
 ## Lisans
 
-Karecik özgür bir yazılım. GNU Genel Kamu Lisansı v3.0 ile yayımlanıyor.
+Karecik özgür bir yazılım; GNU Genel Kamu Lisansı v3.0 ile yayımlanıyor.
 [Kaynak kodunu GitHub’da görebilirsiniz](https://github.com/KaanBahaSever/karecik).

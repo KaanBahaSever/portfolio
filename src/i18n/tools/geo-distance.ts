@@ -152,14 +152,14 @@ const tr: GeoDistanceMessages = {
   meta: {
     title: 'Büyük daire mesafesi',
     description:
-      'İki enlem/boylam noktası arasındaki mesafeyi, yönleri ve orta noktayı haversine formülüyle hesaplayın; sonucu WGS-84 elipsoidi üzerinde Vincenty yöntemiyle karşılaştırın. Tarayıcınızda çalışır.',
+      'Enlem ve boylamını girdiğiniz iki nokta arasındaki mesafeyi, yönleri ve orta noktayı haversine formülüyle hesaplayın. Sonuç, WGS-84 elipsoidinde Vincenty yöntemiyle bulunan mesafeyle karşılaştırılır. Araç tarayıcınızda çalışır.',
   },
   header: {
     eyebrow: 'Tarayıcı aracı',
-    lead: 'Dünya yüzeyindeki iki nokta arasındaki en kısa mesafeyi enlem ve boylamlarından hesaplayın; rota bir küre üzerinde çizilir. Ondalık derece ya da derece, dakika ve saniye girebilirsiniz.',
+    lead: 'İki noktanın enlem ve boylamını girin, Dünya yüzeyinde aralarındaki en kısa mesafeyi görün. Rota bir küre üzerinde çizilir. Koordinatları ondalık derece ya da derece, dakika ve saniye olarak yazabilirsiniz.',
   },
   toolLabel: 'Büyük daire mesafesi hesaplayıcı',
-  noscript: 'Bu hesaplayıcı JavaScript gerektirir. JavaScript olmadan sayfa, İstanbul ile New York arasındaki sonucu gösterir.',
+  noscript: 'Bu hesaplayıcı JavaScript olmadan çalışmaz. JavaScript kapalıyken sayfa, İstanbul ile New York arasındaki sonucu gösterir.',
   points: {
     heading: 'Noktalar',
     hint: 'Ondalık derece (41,0082) ya da derece, dakika ve saniye (41°00′29,5″K) girin. İki alanı birden doldurmak için “enlem, boylam” çiftini noktanın alanlarından birine yapıştırın.',
@@ -186,7 +186,7 @@ const tr: GeoDistanceMessages = {
     minutesRange: 'Dakika 60’tan küçük olmalıdır.',
     secondsRange: 'Saniye 60’tan küçük olmalıdır.',
     fraction: 'Yalnızca son kısım ondalıklı olabilir: 41,5°30′ değil, 41°30,5′ yazın.',
-    signAndHemisphere: 'Eksi işaretini ya da yarım küre harfini kullanın; ikisini birlikte kullanmayın.',
+    signAndHemisphere: 'Ya eksi işareti ya da yarım küre harfi kullanın, ikisini birden değil.',
     wrongAxis: {
       lat: 'Bu değer bir boylam (doğu ya da batı). Buraya enlemi girin.',
       lon: 'Bu değer bir enlem (kuzey ya da güney). Buraya boylamı girin.',
@@ -251,7 +251,7 @@ const tr: GeoDistanceMessages = {
     projection: 'Ortografik',
     view: {
       distinct: 'Küreye çok uzaktan, rotanın eğriliği görünecek bir açıdan bakılıyor.',
-      coincident: 'Küreye çok uzaktan, noktaya dönük olarak bakılıyor.',
+      coincident: 'Küreye çok uzaktan, nokta tam karşıda kalacak şekilde bakılıyor.',
       antipodal: 'Tek bir rota olmadığı için A ve B kürenin karşıt kenarlarında duruyor.',
     },
     legend: 'Düz çizgi: A ile B arasındaki rota. Kesikli çizgi: bu büyük dairenin geri kalanı. Nokta: orta nokta.',
@@ -265,7 +265,7 @@ const tr: GeoDistanceMessages = {
   privacy: {
     label: 'Gizlilik',
     title: 'Hiçbir şey cihazınızdan çıkmaz.',
-    body: 'Mesafe tarayıcınızda hesaplanır. Girdiğiniz koordinatlar hiçbir yere gönderilmez ya da saklanmaz; sayfa konumunuzu da hiçbir zaman istemez.',
+    body: 'Mesafe tarayıcınızda hesaplanır. Girdiğiniz koordinatlar hiçbir yere gönderilmez ve saklanmaz. Sayfa konumunuzu da hiçbir zaman istemez.',
   },
   formulaTitle: 'Nasıl hesaplanır?',
   tips: 'İpuçları',

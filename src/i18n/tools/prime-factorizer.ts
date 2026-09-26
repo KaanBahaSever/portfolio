@@ -193,14 +193,14 @@ const tr: PrimeFactorizerMessages = {
   meta: {
     title: 'Asal çarpanlara ayırma',
     description:
-      '40 basamağa kadar tam sayıları tarayıcınızda çarpanlarına ayırın: kanonik asal çarpan gösterimi, tüm bölenler ve τ(n), σ(n), φ(n) değerleri. Hiçbir şey yüklenmez.',
+      '40 basamağa kadar tam sayıları tarayıcınızda asal çarpanlarına ayırın. Tüm bölenleri ve τ(n), σ(n), φ(n) değerlerini de görün. Hiçbir şey bir sunucuya yüklenmez.',
   },
   header: {
     eyebrow: 'Tarayıcı aracı',
-    lead: 'Bir tam sayı yazın; asal çarpanlarını, tüm bölenlerini ve birkaç klasik aritmetik fonksiyonun değerini görün. Hesaplama cihazınızda, arka planda çalışan bir iş parçacığında yapılır; böylece 40 basamaklı sayılarda bile sayfa donmaz.',
+    lead: 'Bir tam sayı yazın; asal çarpanlarını, tüm bölenlerini ve birkaç klasik aritmetik fonksiyonun değerini görün. Hesaplama cihazınızda, arka planda ayrı bir iş parçacığında yapılır. Bu sayede 40 basamaklı sayılarda bile sayfa donmaz.',
   },
   toolLabel: 'Asal çarpanlara ayırma',
-  noscript: 'Bu araç JavaScript gerektirir. Tamamen tarayıcınızda çalışır; hiçbir şey yüklenmez.',
+  noscript: 'Bu araç JavaScript olmadan çalışmaz. Hesaplama tamamen tarayıcınızda yapılır, hiçbir şey bir sunucuya yüklenmez.',
 
   form: {
     label: 'Tam sayı',
@@ -215,11 +215,11 @@ const tr: PrimeFactorizerMessages = {
 
   errors: {
     empty: 'Bir tam sayı girin.',
-    invalidChar: (char) => `“${char}” burada kullanılamaz. 360 gibi bir tam sayının rakamlarını girin.`,
+    invalidChar: (char) => `“${char}” burada kullanılamaz. 360 gibi bir tam sayının rakamlarını yazın.`,
     expression: 'Formül yerine sayının kendisini girin: tüm rakamlarını yazın.',
     decimal: 'Bir tam sayı girin: bu sayının ondalık kısmı var gibi görünüyor.',
-    grouping: 'Ayırıcıları kontrol edin: binlik ayırıcılar rakamları üçerli gruplara böler, ör. 1.000.000.',
-    sign: 'En fazla bir işaret kullanın ve onu sayının en başına yazın.',
+    grouping: 'Ayırıcıları kontrol edin. Binlik ayırıcılar, 1.000.000’da olduğu gibi rakamları üçerli gruplara ayırır.',
+    sign: 'En fazla bir işaret kullanın ve bunu sayının en başına yazın.',
     noDigits: 'İşaretten sonra rakam girin.',
     tooLong: (digits, max) =>
       `Bu sayı ${trNumber(digits)} basamaklı; bu araç en fazla ${trNumber(max)} basamaklı sayıları çarpanlarına ayırır.`,
@@ -245,7 +245,7 @@ const tr: PrimeFactorizerMessages = {
     announceProbablePrime: (value) => `${value} olası bir asal sayıdır.`,
     announceFactors: (value, spoken) => `${value} sayısının asal çarpanlara ayrılışı: ${spoken}.`,
     announceIncomplete: (count, elapsed) =>
-      `Arama ${elapsed} sonra durduruldu: ${trNumber(count)} bileşik çarpan süre içinde ayrıştırılamadı.`,
+      `Arama ${elapsed} sonra durdu: ${trNumber(count)} bileşik çarpan süre sınırı içinde ayrıştırılamadı.`,
   },
 
   result: {
@@ -274,7 +274,7 @@ const tr: PrimeFactorizerMessages = {
       plus: 'artı',
       minusOne: 'eksi 1',
       probable: (value) => `${value} (olası asal)`,
-      unfactored: (value) => `${value} (bileşik, henüz ayrıştırılamadı)`,
+      unfactored: (value) => `${value} (bileşik, henüz ayrıştırılmadı)`,
     },
     notes: {
       zero: '0’ın asal çarpanlara ayrılışı yoktur. Her tam sayı 0’ı böler (0 = d × 0); bu yüzden 0’ın sonsuz sayıda böleni vardır ve τ, σ, φ fonksiyonları 0 için tanımlı değildir.',
@@ -284,9 +284,9 @@ const tr: PrimeFactorizerMessages = {
       negative: (magnitude) =>
         `Negatif bir sayı −1 × |n| biçiminde çarpanlarına ayrılır. Aşağıdaki bölenler, fonksiyonlar ve özellikler |n| = ${magnitude} için geçerlidir.`,
       probable:
-        '† ile işaretlenen çarpanlar Baillie–PSW olası asallık testini geçti. Bu testi geçen hiçbir bileşik sayı bilinmiyor; yine de 3,3 × 10²⁴ değerinin üzerindeki sayılar için bu bir ispat değildir.',
+        '† ile işaretli çarpanlar Baillie–PSW olası asallık testini geçti. Bu testi geçen hiçbir bileşik sayı bilinmiyor. Yine de 3,3 × 10²⁴ değerinin üzerindeki sayılar için testi geçmek bir ispat sayılmaz.',
       incomplete: (count) =>
-        `Köşeli parantez içindeki ${count === 1 ? 'çarpan' : 'çarpanlar'} bileşiktir, ancak süre sınırı içinde ayrıştırılamadı. Pollard’ın rho yöntemi bir p asal çarpanını bulmak için yaklaşık √p adım atar; kalan asal çarpanların hepsi 15 ya da daha fazla basamaklı olduğunda bu durum yaşanır.`,
+        `Köşeli parantez içindeki ${count === 1 ? 'çarpan' : 'çarpanlar'} bileşik, ama süre sınırı içinde ayrıştırılamadı. Pollard’ın rho yöntemi bir p asal çarpanını yaklaşık √p adımda bulur. Bu yüzden kalan asal çarpanların hepsi yaklaşık 15 basamak ya da daha uzunsa süre yetmez.`,
     },
     searchLonger: (seconds) => `${seconds} daha ara`,
   },
@@ -302,7 +302,7 @@ const tr: PrimeFactorizerMessages = {
     truncated: (shown, total) => `Toplam ${total} bölenden en küçük ${shown} tanesi gösteriliyor.`,
     copyLimit: (cap, total) => `Kopyala düğmesi, toplam ${total} bölenden en küçük ${cap} tanesini kopyalar.`,
     unavailable:
-      'Bölenler ancak tüm asal çarpanlar bilindiğinde hesaplanabilir; bu sayının asal çarpanlarının hepsi henüz bulunamadı.',
+      'Bölenleri bulmak için tüm asal çarpanların bilinmesi gerekir. Bu sayının asal çarpanlarının hepsi henüz bulunmadı.',
   },
 
   functions: {
@@ -315,7 +315,7 @@ const tr: PrimeFactorizerMessages = {
     phi: { name: 'Euler’in φ fonksiyonu', note: '1, 2, …, n arasında n ile ortak asal çarpanı olmayan sayıların adedi.' },
     omega: {
       name: 'Asal çarpanlar',
-      value: (distinct, total) => `${trNumber(distinct)} farklı · katlılıkla ${trNumber(total)}`,
+      value: (distinct, total) => `${trNumber(distinct)} farklı · tekrarlar dahil ${trNumber(total)}`,
     },
     unknown: 'Tüm asal çarpanlar bilinmeli',
   },

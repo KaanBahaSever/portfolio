@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import PrimeFactorizer from '../../../components/tools/PrimeFactorizer.astro';
+import ToolTips from '../../../components/tools-index/ToolTips.astro';
+import type { ToolTip } from '../../../components/tools-index/types';
+import Icon from '../../../components/ui/Icon.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import { localizePath, type Localized } from '../../../i18n/config';
+import { formatters } from '../../../i18n/format';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { primeFactorizerMessages } from '../../../i18n/tools/prime-factorizer';
+import { SMALL_PRIME_LIMIT } from '../../../lib/math/primality';
+import { MAX_DIGITS, TIME_LIMIT_MS } from '../../../scripts/tools/prime-factorizer/limits';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = primeFactorizerMessages[locale];
+const en = formatters('en');
+const tr = formatters('tr');
+const seconds = TIME_LIMIT_MS / 1000;
+
+// Page-only prose: kept here rather than in the catalogue, which also ships to the browser.
+const tips: Localized<ToolTip[]> = {
+  en: [
+    {
+      lead: 'What you can type.',
+      body: `Whole numbers of up to ${MAX_DIGITS} digits, with or without separators: 1 000 000, 1_000_000 and 1,000,000 all work. A negative number −n is factored as −1 × n, and 0 and 1 are explained rather than factored.`,
+    },
+    {
+      lead: 'How it works.',
+      body: `Trial division by every prime below ${en.number(SMALL_PRIME_LIMIT)} comes first. What is left goes to Pollard’s rho method in Brent’s variant, after quick checks for perfect powers and for two factors close to √n. All arithmetic is exact, with BigInt.`,
+    },
+    {
+      lead: 'Prime or probable prime?',
+      body: 'Below 3.3 × 10²⁴, Miller–Rabin with the first 13 primes as bases is a proof, so the answer is exact. Larger factors are checked with the Baillie–PSW test: no composite number is known to pass it, but it is not a proof, so such factors are marked †.',
+    },
+    {
+      lead: 'When it takes too long.',
+      body: `Rho needs about √p steps to find a prime factor p, so a 40-digit number made of two 20-digit primes could take hours. The search stops after ${en.number(seconds)} seconds and shows which factor is left; you can then let it search longer.`,
+    },
+    {
+      lead: 'Carmichael numbers.',
+      body: '561 = 3 × 11 × 17 passes Fermat’s test aⁿ⁻¹ ≡ 1 (mod n) for every base a coprime to it, just as a prime would. Miller–Rabin also looks at the square roots of 1 along the way, and that exposes it.',
+    },
+    {
+      lead: 'Keyboard.',
+      body: 'Enter factors the number and Esc cancels a long search. The examples fill in the field and factor the number at once.',
+    },
+  ],
+  tr: [
+    {
+      lead: 'Neler yazılabilir?',
+      body: `En fazla ${MAX_DIGITS} basamaklı tam sayılar; ayırıcıyla ya da ayırıcısız: 1 000 000, 1_000_000 ve 1.000.000 yazımlarının hepsi geçerlidir. Negatif bir −n sayısı −1 × n olarak çarpanlarına ayrılır; 0 ve 1 ise çarpanlara ayrılmak yerine açıklanır.`,
+    },
+    {
+      lead: 'Nasıl çalışır?',
+      body: `Önce ${tr.number(SMALL_PRIME_LIMIT)} değerinin altındaki her asal sayıyla deneme bölmesi yapılır. Kalan kısım, sayının tam kuvvet olup olmadığına ve √n’ye yakın iki çarpanı olup olmadığına hızlıca bakıldıktan sonra Pollard’ın rho yöntemine (Brent’in iyileştirmesiyle) verilir. Tüm hesaplar BigInt ile tam olarak yapılır.`,
+    },
+    {
+      lead: 'Asal mı, olası asal mı?',
+      body: '3,3 × 10²⁴ değerinin altında, ilk 13 asal sayıyı taban alan Miller–Rabin testi bir ispattır; sonuç kesindir. Daha büyük çarpanlar Baillie–PSW testiyle denetlenir: bu testi geçen hiçbir bileşik sayı bilinmiyor, ancak test bir ispat olmadığı için bu çarpanlar † ile işaretlenir.',
+    },
+    {
+      lead: 'Çok uzun sürerse.',
+      body: `Rho yöntemi bir p asal çarpanını bulmak için yaklaşık √p adım atar; bu yüzden iki 20 basamaklı asalın çarpımı olan 40 basamaklı bir sayı saatler sürebilir. Arama ${tr.number(seconds)} saniye sonra durur ve hangi çarpanın kaldığını gösterir; dilerseniz aramayı uzatabilirsiniz.`,
+    },
+    {
+      lead: 'Carmichael sayıları.',
+      body: '561 = 3 × 11 × 17, kendisiyle aralarında asal olan her a tabanı için Fermat testini (aⁿ⁻¹ ≡ 1 mod n) tıpkı bir asal sayı gibi geçer. Miller–Rabin testi ara adımlarda 1’in kareköklerini de denetlediği için bu sayıyı yakalar.',
+    },
+    {
+      lead: 'Klavye.',
+      body: 'Enter tuşu sayıyı çarpanlarına ayırır, Esc tuşu uzun bir aramayı iptal eder. Bir örneği seçtiğinizde sayı alana yazılır ve hemen çarpanlarına ayrılır.',
+    },
+  ],
+};
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    eyebrow={m.header.eyebrow}
+    title={m.meta.title}
+    lead={m.header.lead}
+    back={{ href: localizePath('/tools/', locale), label: common[locale].nav.tools }}
+  />
+
+  <PrimeFactorizer />
+
+  <aside
+    aria-label={m.privacy.label}
+    class="mt-8 flex gap-3 rounded-xl border border-accent-600/20 bg-accent-50 p-4 text-sm leading-relaxed text-accent-950 sm:mt-10 sm:p-5 dark:border-accent-500/25 dark:bg-accent-500/10 dark:text-accent-100"
+  >
+    <Icon name="lock" class="mt-0.5 size-5 shrink-0 text-accent-700 dark:text-accent-400" />
+    <p><strong class="font-semibold">{m.privacy.title}</strong> {m.privacy.body}</p>
+  </aside>
+
+  <ToolTips title={m.tipsTitle} tips={tips[locale]} columns={3} />
+</BaseLayout>

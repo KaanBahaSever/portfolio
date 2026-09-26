@@ -30,30 +30,30 @@ const cells = Array.from({ length: 9 }, (_, i) => i);
             <h3 class={h3}>Kurallar</h3>
             <div class={body}>
               <p>
-                Oyuncular 3×3 tahtaya sırayla X ve O koyar. Bir satırı, sütunu ya da çaprazı ilk tamamlayan kazanır;
-                çizgi oluşmadan dolan tahta berabere biter.
+                İki oyuncu 3×3’lük tahtaya sırayla X ve O koyar. Bir satırı, sütunu ya da çaprazı kendi işaretleriyle
+                ilk dolduran kazanır. Tahta dolar ve kimse üç işaretini dizemezse oyun berabere biter.
               </p>
               <p>
-                Bilgisayara ya da aynı cihazda bir arkadaşınıza karşı oynayabilir, işaretinizi ve ilk hamleyi kimin
-                yapacağını seçebilirsiniz.
+                Bilgisayara ya da aynı cihazdaki bir arkadaşınıza karşı oynayabilirsiniz. İşaretinizi ve ilk hamleyi
+                kimin yapacağını da siz seçersiniz.
               </p>
             </div>
             <h3 class:list={[h3, 'mt-8']}>Klavye</h3>
             <ul class={list}>
               <li>
-                Ok tuşlarıyla kareler arasında gezinin; <kbd class={ui.kbd}>Enter</kbd> ya da{' '}
-                <kbd class={ui.kbd}>Boşluk</kbd> ile seçili kareye oynayın.
+                Ok tuşlarıyla kareler arasında gezinin, <kbd class={ui.kbd}>Enter</kbd> ya da{' '}
+                <kbd class={ui.kbd}>Boşluk</kbd> tuşuyla seçili kareye oynayın.
               </li>
               <li>
-                <kbd class={ui.kbd}>1</kbd>–<kbd class={ui.kbd}>9</kbd> rakam tuşlarıyla doğrudan bir kareye
-                oynayabilirsiniz. Hangi
-                rakamın hangi kareye denk geldiğini “Rakam tuşları” ayarından seçin: <em>1 sol üstte</em> düzeni telefon
-                tuş takımı gibi okuma sırasını izler, <em>7 sol üstte</em> düzeni klavyenin sayısal tuş takımıyla aynı
-                yerleşimdedir.
+                <kbd class={ui.kbd}>1</kbd>–<kbd class={ui.kbd}>9</kbd> rakam tuşlarıyla bir kareye doğrudan
+                oynayabilirsiniz. Hangi rakamın hangi kareye denk geleceğini “Rakam tuşları” ayarından seçin.{' '}
+                <em>1 sol üstte</em> düzeninde rakamlar, telefon tuş takımındaki gibi soldan sağa ve yukarıdan aşağı
+                dizilir. <em>7 sol üstte</em> düzeni ise klavyedeki sayısal tuş takımıyla aynıdır.
               </li>
             </ul>
             <p class={body}>
-              Ekran okuyucular her hamleyi ve sonucu duyurur; değerlendirme açıkken her karenin adı puanını da içerir.
+              Ekran okuyucu kullanıyorsanız her hamleyi ve sonucu duyarsınız. Değerlendirme açıkken her karenin adıyla
+              birlikte puanı da okunur.
             </p>
           </>
         ) : (
@@ -112,29 +112,31 @@ const cells = Array.from({ length: 9 }, (_, i) => i);
       <div class="max-w-3xl">
         <div class={body}>
           <p>
-            <strong class={strong}>Minimax.</strong> Bilgisayar hamlesini seçmek için olası her devamı oyunun sonuna
-            kadar oynar. Biten bir oyun, <var>n</var> hamle sonra kazanan taraf için 10 − <var>n</var>, kaybeden taraf
-            için bunun eksisi, beraberlikte 0 puan alır; iki tarafın da kendisi için en iyi hamleyi yapacağı varsayılır.
-            Puandan <var>n</var> çıkarıldığı için bilgisayar hızlı bir galibiyeti daha geç olanına, yenilgi kaçınılmazsa
-            da en uzun savunmayı erken bir yenilgiye tercih eder.
+            <strong class={strong}>Minimax.</strong> Bilgisayar, hamlesini seçmek için oyunun devam edebileceği bütün
+            yolları sonuna kadar oynar. Oyun bundan sonraki <var>n</var>. hamlede biterse kazanan taraf
+            10 − <var>n</var> puan, kaybeden taraf da bunun eksisini alır; beraberlik 0 puandır. İki tarafın da hep
+            kendisi için en iyi hamleyi yapacağı varsayılır. Puandan <var>n</var> çıkarıldığı için bilgisayar çabuk
+            kazanmayı geç kazanmaya tercih eder. Yenilgiden kaçamıyorsa da oyunu olabildiğince uzatan savunmayı seçer.
           </p>
           <p>
-            <strong class={strong}>Alfa–beta budama.</strong> Devamların birçoğunu incelemeye hiç gerek yoktur: bir
-            yanıt, bir hamlenin daha önce bulunmuş bir seçenekten kötü olduğunu gösterdiği anda o hamlenin kalan
-            yanıtları kararı değiştiremez ve atlanır. Sonuç tam minimax ile birebir aynıdır, yalnızca daha az pozisyon
-            incelenir. Bu sayfanın testleri iki iddiayı da doğrular: iki arama ulaşılabilir her pozisyonda aynı değeri
-            verir, Yenilmez seviye de kim başlarsa başlasın olası hiçbir hamle dizisine karşı kaybetmez.
+            <strong class={strong}>Alfa–beta budama.</strong> Bu yolların birçoğuna hiç bakmak gerekmez. Bir hamleye
+            verilen yanıtlardan biri, o hamlenin daha önce bulunan bir seçenekten kötü olduğunu gösterirse geri kalan
+            yanıtlar kararı değiştiremez. Bilgisayar da onları atlar. Sonuç, budamasız minimax aramasıyla tamamen
+            aynıdır; yalnızca daha az pozisyona bakılır. Bu sayfanın testleri iki iddiayı da doğrular: İki arama
+            ulaşılabilecek her pozisyonda aynı değeri verir ve Yenilmez seviye, kim başlarsa başlasın, hiçbir hamle
+            dizisine karşı kaybetmez.
           </p>
           <p>
-            <strong class={strong}>Seviyeler.</strong> Kolay herhangi bir boş kareye oynar. Orta iki hamle ileriyi
-            görür: kazanabiliyorsa kazanır, sizin kazanmanızı engeller ama yaklaşan bir çatalı göremez. Yenilmez sonuna
-            kadar tarar ve en iyi hamleler arasından rastgele seçer; oyunlar değişir ama asla kaybetmez. İki taraf da
-            kusursuz oynarsa XOX berabere biter.
+            <strong class={strong}>Seviyeler.</strong> Kolay, boş karelerden herhangi birine oynar. Orta, iki hamle
+            ilerisini görür. Kazanabiliyorsa kazanır, sizin kazanmanızı da engeller ama bir çatal kurulacağını
+            önceden göremez. Çatal, aynı anda iki kazanma tehdidi kuran hamledir. Yenilmez, oyunu sonuna kadar tarar ve
+            en iyi hamleler arasından rastgele birini seçer. Bu yüzden oyunlar her seferinde aynı gitmez ama bilgisayar
+            hiç kaybetmez. İki taraf da kusursuz oynarsa XOX berabere biter.
           </p>
           <p>
-            <strong class={strong}>Değerlendirme.</strong> “Değerlendirmeyi göster”, sıradaki oyuncu için bu puanları
-            boş karelere yazar: +9 hemen kazanır, daha küçük artı puanlar daha geç kazanır, 0 berabere kalır, eksi
-            puanlar ise en iyi oyuna karşı kaybeder.
+            <strong class={strong}>Değerlendirme.</strong> “Değerlendirmeyi göster” seçeneği, sıradaki oyuncunun
+            puanlarını boş karelere yazar. +9 hemen kazanmak, daha küçük artı puanlar daha geç kazanmak, 0 beraberlik
+            demektir. Eksi puanlar ise rakip en iyi şekilde oynarsa kaybetmek demektir.
           </p>
         </div>
       </div>

@@ -97,7 +97,7 @@ export type ConsoleMessages = typeof en;
 const tr: ConsoleMessages = {
   title: 'Konsol',
   description:
-    'Projeleri, becerileri ve iletişim bilgilerini komut satırından adım adım keşfedebileceğiniz sade bir terminal.',
+    'Siteyi komut yazarak gezebileceğiniz sade bir terminal: projeler, beceriler ve iletişim bilgileri, her seferinde tek bir komutla.',
   toolbar: {
     label: 'Terminal ayarları',
     fontSize: 'Yazı boyutu',
@@ -114,9 +114,9 @@ const tr: ConsoleMessages = {
     input: 'Komut',
     commandEcho: 'Komut:',
     inputHint:
-      'Bir komut yazıp Enter tuşuna basın; help ile başlayabilirsiniz. Tab tuşu komut ve dosya adlarını tamamlar; satır boşken odağı sonraki öğeye taşır. Yukarı ve aşağı ok tuşları önceki komutları getirir.',
+      'Bir komut yazıp Enter tuşuna basın; help ile başlayabilirsiniz. Tab tuşu komut ve dosya adlarını tamamlar, satır boşken sonraki öğeye geçer. Yukarı ve aşağı ok tuşları önceki komutları geri getirir.',
   },
-  noscript: 'Konsol için JavaScript gerekiyor. Konsolda gösterilen her şey sitenin geri kalanında da var:',
+  noscript: 'Konsol JavaScript olmadan çalışmıyor. Burada gösterilen her şey sitenin geri kalanında da var:',
   noscriptLink: 'ana sayfaya gidin',
   help: {
     heading: 'Komutlar',
@@ -141,9 +141,9 @@ const tr: ConsoleMessages = {
       cd: 'dizin değiştirir (.., ~ ve / kullanılabilir)',
       pwd: 'bulunduğunuz dizini yazar',
       cat: 'bir ya da daha fazla dosyayı gösterir',
-      projects: 'bağlantılarıyla birlikte proje özetleri',
-      open: 'projenin sayfasına gider',
-      echo: 'yazdığınız metni ekrana yazar',
+      projects: 'projelerin özetleri ve bağlantıları',
+      open: 'bir projenin sayfasını açar',
+      echo: 'yazdığınız metni ekrana geri yazar',
       history: 'önceki komutları listeler',
       clear: 'ekranı temizler (kısayol: Ctrl+L)',
       exit: 'konsoldan çıkar',
@@ -153,25 +153,25 @@ const tr: ConsoleMessages = {
   errors: {
     commandNotFound: (command) => `komut bulunamadı: ${command} — komutlar için 'help' yazın`,
     commandSuggestion: (command, suggestion) =>
-      `komut bulunamadı: ${command} — bunu mu demek istediniz: ${suggestion}`,
+      `komut bulunamadı: ${command} — '${suggestion}' mi demek istediniz?`,
     noSuchPath: (command, path) => `${command}: ${path}: Böyle bir dosya ya da dizin yok`,
-    notADirectory: (command, path) => `${command}: ${path}: Bir dizin değil`,
-    isADirectory: (command, path) => `${command}: ${path}: Bir dizin`,
-    missingFile: 'cat: dosya adı eksik — örnek: cat about.txt',
+    notADirectory: (command, path) => `${command}: ${path}: Dizin değil`,
+    isADirectory: (command, path) => `${command}: ${path}: Bu bir dizin`,
+    missingFile: 'cat: dosya adı eksik — şunu deneyin: cat about.txt',
     missingProject: "open: proje adı eksik — projeleri görmek için 'projects' yazın",
     tooManyArguments: (command) => `${command}: çok fazla argüman`,
-    unterminatedQuote: (quote) => `sözdizimi hatası: kapatılmamış tırnak ${quote}`,
-    unknownProject: (name) => `open: proje bulunamadı: ${name} — projeleri görmek için 'projects' yazın`,
+    unterminatedQuote: (quote) => `sözdizimi hatası: ${quote} tırnağı kapatılmamış`,
+    unknownProject: (name) => `open: “${name}” adında bir proje yok — projeleri görmek için 'projects' yazın`,
     // The typed name is quoted and is the subject, so it needs no case suffix.
     ambiguousProject: (name, candidates) => `open: “${name}” birden çok projeyle eşleşiyor: ${candidates.join(', ')}`,
     unknownHelpTopic: (topic) => `help: böyle bir komut yok: ${topic}`,
   },
   notices: {
-    opening: (title) => `Açılıyor: ${title}…`,
+    opening: (title) => `${title} açılıyor…`,
     logout: 'oturum kapatıldı',
   },
   history: {
-    empty: 'Henüz komut yok.',
+    empty: 'Henüz hiç komut yazılmadı.',
   },
 };
 

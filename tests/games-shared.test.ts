@@ -141,8 +141,13 @@ test('interpolated values stand alone in the Turkish battle messages', () => {
   const tr = battleshipMessages.tr;
   assert.equal(tr.battle.playerShot.hit('C7'), 'C7: isabet.');
   assert.equal(tr.battle.computerShot.miss('B2'), 'Bilgisayarın atışı: B2, ıska.');
-  assert.equal(tr.status.overlaps('Kruvazör', 'C7', 'Muhrip'), 'Kruvazör, başlangıç C7: Muhrip ile çakışıyor.');
-  assert.equal(tr.result.winSummary(47), 'Düşman filosunun tamamını batırdınız. Atış sayısı: 47.');
+  // A coordinate or a count never takes a case suffix ("C7’den", "47’de" would depend on how it is
+  // read aloud): it is followed by a word that carries the suffix instead.
+  assert.equal(
+    tr.status.overlaps('Kruvazör', 'C7', 'Muhrip'),
+    'Kruvazör, C7 hücresinden başlarsa Muhrip ile çakışır.',
+  );
+  assert.equal(tr.result.winSummary(47), 'Düşman filosunun tamamını 47 atışta batırdınız.');
   assert.equal(battleshipMessages.en.cell.label('C7', 'hit'), 'C7, hit');
   assert.equal(battleshipMessages.en.cell.label('C7', 'Cruiser', 'sunk'), 'C7, Cruiser, sunk');
 });

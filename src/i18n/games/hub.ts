@@ -31,17 +31,17 @@ const tr: GamesHubMessages = {
   meta: {
     title: 'Oyunlar',
     description:
-      'Tarayıcıda Amiral Battı ve XOX oynayın. Bilgisayar rakipler hamlelerini olasılık yoğunluğu ve minimax aramasıyla seçer.',
+      'Tarayıcıda bilgisayara karşı Amiral Battı ve XOX oynayın. Rakiplerden biri olasılık yoğunluğuyla, öteki minimax aramasıyla hamle seçiyor.',
   },
   eyebrow: 'Eğlence matematiği',
   title: 'Oyunlar',
-  lead: 'Programlamayı öğrenirken C# ile geliştirdiğim iki klasik oyunu tarayıcı için yeniden yazdım. Her bilgisayar rakibin arkasında küçük bir algoritma var; iki sayfada da onun nasıl düşündüğünü izleyebilirsiniz.',
+  lead: 'Bu iki klasik oyunu ilk kez C#’la, programlamayı öğrenirken yazmıştım. Şimdi onları tarayıcı için baştan yazdım. Her oyunda bilgisayar küçük bir algoritmayla oynuyor; iki sayfada da onun nasıl düşündüğünü izleyebilirsiniz.',
   figure: (n) => `Şekil ${n}`,
   play: 'Oyna',
   opponent: 'Rakip:',
-  note: 'İki oyun da fareyle, dokunmatik ekranla ya da yalnızca klavyeyle oynanabilir ve her hamle ekran okuyuculara bildirilir. Oyunlar tamamen tarayıcınızda çalışır: hiçbir şey kaydedilmez ya da gönderilmez.',
+  note: 'İki oyunu da fareyle, dokunmatik ekranla ya da yalnızca klavyeyle oynayabilirsiniz. Her hamle ekran okuyuculara da bildirilir. Oyunlar tamamen tarayıcınızda çalışır; hiçbir şey kaydedilmez, hiçbir yere gönderilmez.',
   backToGames: 'Tüm oyunlar',
-  noscript: 'Bu oyun JavaScript gerektirir. Tamamen tarayıcınızda çalışır; hiçbir yere veri gönderilmez.',
+  noscript: 'Bu oyun için JavaScript gerekiyor. Oyun tamamen tarayıcınızda çalışır ve hiçbir yere bir şey göndermez.',
 };
 
 export const gamesHubMessages = { en, tr } as const satisfies Localized<GamesHubMessages>;

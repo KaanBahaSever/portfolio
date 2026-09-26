@@ -150,9 +150,9 @@ const tr: BattleshipMessages = {
   meta: {
     title: 'Amiral Battı',
     description:
-      'Olasılık yoğunluğu haritasıyla nişan alan bir bilgisayara karşı Amiral Battı oynayın. Filonuzu yerleştirin, zorluğu seçin ve bilgisayar hedef ararken ısı haritasını izleyin.',
+      'Olasılık yoğunluğu haritasıyla nişan alan bir bilgisayara karşı Amiral Battı oynayın. Filonuzu yerleştirin, zorluk seviyesini seçin ve bilgisayar gemilerinizi ararken ısı haritasını izleyin.',
   },
-  lead: 'Filonuzu yerleştirin, ardından sırayla bilgisayarın sularına ateş edin. Zor seviyede bilgisayar, olası gemi konumlarının en çok üst üste bindiği hücreye ateş eder; bu olasılık yoğunluğunu oyun boyunca izleyebilirsiniz.',
+  lead: 'Filonuzu yerleştirin, sonra sıra size geldikçe bilgisayarın sularına ateş edin. Zor seviyede bilgisayar, olası gemi konumlarının en çok üst üste geldiği hücreye ateş eder. Bilgisayar gemilerinizi ararken bu olasılık yoğunluğunu siz de izleyebilirsiniz.',
   region: 'Amiral Battı oyunu',
   phases: { setup: 'Hazırlık', battle: 'Savaş', over: 'Oyun bitti' },
   ships: {
@@ -175,7 +175,7 @@ const tr: BattleshipMessages = {
   cell: {
     label: (coordinate, ...details) => [coordinate, ...details].join(', '),
     empty: 'boş',
-    unknown: 'henüz atış yapılmadı',
+    unknown: 'henüz ateş edilmedi',
     miss: 'ıska',
     hit: 'isabet',
     sunk: 'battı',
@@ -185,8 +185,8 @@ const tr: BattleshipMessages = {
     difficulties: { easy: 'Kolay', normal: 'Normal', hard: 'Zor' },
     difficultyHints: {
       easy: 'Rastgele hücrelere ateş eder.',
-      normal: 'Dama tahtası düzeninde tarar, her isabetten sonra hedefi kıstırır.',
-      hard: 'Olası gemi konumlarının en çok üst üste bindiği hücreye, yani olasılık yoğunluğunun tepesine ateş eder.',
+      normal: 'Tahtayı dama deseniyle tarar, bir gemiyi vurunca da çevresini yoklar.',
+      hard: 'Olası gemi konumlarının en çok üst üste geldiği hücreye, yani olasılık yoğunluğunun en yüksek olduğu yere ateş eder.',
     },
     fleet: 'Filonuz',
     placed: 'Yerleştirildi',
@@ -202,12 +202,12 @@ const tr: BattleshipMessages = {
   },
   status: {
     selected: (ship, orientation) =>
-      `${ship} seçildi. Seçtiğiniz hücreden ${orientation === 'horizontal' ? 'sağa' : 'aşağı'} doğru uzanır.`,
+      `${ship} seçildi. Seçeceğiniz hücreden ${orientation === 'horizontal' ? 'sağa' : 'aşağı'} doğru uzanacak.`,
     rotated: (orientation) =>
       orientation === 'horizontal' ? 'Yatay: gemiler sağa doğru uzanır.' : 'Dikey: gemiler aşağı doğru uzanır.',
-    fits: (ship, from, to) => `${ship}, ${from}–${to}: yerleştirilebilir.`,
-    offBoard: (ship, from) => `${ship}, başlangıç ${from}: tahtanın dışına taşıyor.`,
-    overlaps: (ship, from, others) => `${ship}, başlangıç ${from}: ${others} ile çakışıyor.`,
+    fits: (ship, from, to) => `${ship}, ${from}–${to}: sığıyor.`,
+    offBoard: (ship, from) => `${ship}, ${from} hücresinden başlarsa tahtanın dışına taşar.`,
+    overlaps: (ship, from, others) => `${ship}, ${from} hücresinden başlarsa ${others} ile çakışır.`,
     placed: (ship, from, to) => `${ship} yerleştirildi: ${from}–${to}.`,
     pickUp: (ship) => `${ship}: taşımak için seçin.`,
     allPlaced:
@@ -216,7 +216,7 @@ const tr: BattleshipMessages = {
     randomized: 'Filo rastgele yerleştirildi.',
     cleared: 'Tahta temizlendi.',
     needFleet: 'Önce beş geminin hepsini yerleştirin.',
-    newGame: 'Yeni oyun. Filonuz bıraktığınız yerde: savaşı başlatın ya da önce gemilerin yerini değiştirin.',
+    newGame: 'Yeni oyun. Gemileriniz bıraktığınız yerde duruyor. Savaşı başlatabilir ya da önce gemilerin yerini değiştirebilirsiniz.',
   },
   battle: {
     newGame: 'Yeni oyun',
@@ -252,7 +252,7 @@ const tr: BattleshipMessages = {
   heat: {
     toggle: 'Bilgisayarın ısı haritasını göster',
     caption:
-      'Renk tonu, bilgisayarın tahtanız üzerindeki olasılık yoğunluğunu gösterir: bir hücrenin yeşil tonu ne kadar yoğunsa onu kapsayan olası gemi konumu o kadar çoktur. Zor seviyede bilgisayar en yoğun renkli hücreye ateş eder.',
+      'Renkler, bilgisayarın sizin tahtanız için hesapladığı olasılık yoğunluğunu gösterir. Bir hücrenin yeşili ne kadar belirginse o hücreden geçen olası gemi konumu o kadar çoktur. Zor seviyede bilgisayar, yeşilin en belirgin olduğu hücreye ateş eder.',
     low: 'Düşük',
     high: 'Yüksek',
     peaks: (coordinates, count) => `${count === 1 ? 'En olası hedef' : 'En olası hedefler'}: ${coordinates}`,
@@ -263,9 +263,9 @@ const tr: BattleshipMessages = {
     eyebrow: 'Oyun bitti',
     win: 'Kazandınız',
     loss: 'Bilgisayar kazandı',
-    winSummary: (shots) => `Düşman filosunun tamamını batırdınız. Atış sayısı: ${shots}.`,
+    winSummary: (shots) => `Düşman filosunun tamamını ${shots} atışta batırdınız.`,
     lossSummary: (shots) =>
-      `Bilgisayar filonuzu batırdı. Atış sayısı: ${shots}. Kalan düşman gemileri artık düşman tahtasında görünüyor.`,
+      `Bilgisayar filonuzu ${shots} atışta batırdı. Batmayan düşman gemileri artık düşman tahtasında görünüyor.`,
     replay: 'Yeniden oyna',
     review: 'Tahtalara göz at',
   },

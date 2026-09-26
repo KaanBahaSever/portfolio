@@ -55,7 +55,7 @@ const en: CvContent = {
   headline: 'Software Developer | Math-Driven Solutions & Algorithms',
   phone: PHONE,
   summary:
-    'Software developer with a mathematics background (Istanbul University). I build systems software in modern C++ and Go: desktop agents, telemetry and messaging platforms, and algorithm-driven applications, together with the CI/CD pipelines that test, package and ship them. From 2021 to 2024 I owned the development lifecycle of a web platform at crowd.inc, from database schema to Linux servers.',
+    'Software developer with a mathematics background (Istanbul University). I build systems software in modern C++ and Go: desktop agents, telemetry and messaging platforms, and algorithm-driven applications, together with the CI/CD pipelines that test, package and ship them. From 2021 to 2024 I owned the development lifecycle at crowd.inc, from database schema to Linux servers.',
 
   projects: [
     {
@@ -109,7 +109,7 @@ const tr: CvContent = {
   // off (TDK), as on the home page and in the console. "crowd.inc’te", as on the home page: the
   // name is read "kraud ink". "CI/CD süreçleri", the owner's own term in the skills list.
   summary:
-    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajan yazılımları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD süreçlerini de kuruyorum. 2021–2024 arasında crowd.inc’te bir web platformunun geliştirme sürecini baştan sona yürüttüm: veri tabanı şemasından Linux sunucularına kadar.',
+    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajan yazılımları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD süreçlerini de kuruyorum. 2021–2024 arasında crowd.inc’te geliştirme sürecini baştan sona yürüttüm: veri tabanı şemasından Linux sunucularına kadar.',
 
   projects: [
     {

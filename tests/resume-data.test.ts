@@ -60,6 +60,35 @@ test('experience lists only the crowd.inc role, as Software Developer', () => {
   }
 });
 
+test('the crowd.inc entry says what the platform was, in both languages', () => {
+  // The owner's words (2026-09-27): a site for sharing ideas and finding help for them, with
+  // hundreds of users, many projects, ideas and goals, and a later turn towards private ideas.
+  const [job] = EXPERIENCE;
+  const { en, tr } = job!.summary;
+  for (const fact of [
+    /platform where people shared their ideas and found help for them/,
+    /hundreds of users/,
+    /many projects, ideas and goals/,
+    /later we turned towards private ideas/,
+  ]) {
+    assert.match(en, fact);
+  }
+  for (const fact of [
+    /fikirlerini paylaşıp bu fikirler için yardım bulduğu bir platform/,
+    /Yüzlerce kullanıcısı vardı/,
+    /birçok projeye ev sahipliği yaptı/,
+    /bir sürü fikir ve hedef/,
+    /özel fikirlere yöneldik/,
+  ]) {
+    assert.match(tr, fact);
+  }
+  // "Hundreds", never an exact or rounded user count.
+  for (const text of [en, tr]) assert.doesNotMatch(text, /\d[\d.,]*\+?\s*(users|kullanıcı)/i);
+  // What he did there still follows.
+  assert.match(en, /I owned the software development lifecycle end to end/);
+  assert.match(tr, /Geliştirme sürecinin tamamından ben sorumluydum/);
+});
+
 test('the résumé never calls the owner an engineer, in either language', () => {
   // Other people keep their titles: the GDSC guest is a network security engineer.
   const guest = /network security engineer|ağ güvenliği mühendis/gi;

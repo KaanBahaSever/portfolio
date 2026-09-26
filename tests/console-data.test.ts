@@ -242,6 +242,9 @@ test('the console never calls the owner an engineer, in either language', () => 
   }
   assert.match(everyText('en'), /crowd\.inc — Software Developer, July 2021 – March 2024/);
   assert.match(everyText('tr'), /crowd\.inc — Yazılım Geliştirici, Temmuz 2021 – Mart 2024/);
+  // whoami says in a few words what crowd.inc was.
+  assert.match(everyText('en'), /crowd\.inc \(2021–2024\), an idea-sharing platform with hundreds of users/);
+  assert.match(everyText('tr'), /yüzlerce kullanıcısı olan fikir paylaşma platformu crowd\.inc’te/);
 });
 
 test('skills/devops.txt covers the CI/CD work, and every run link finds its file from anywhere', () => {
@@ -276,12 +279,19 @@ test('about.txt tells the current story in both languages', () => {
   assert.match(en, /rewritten from scratch as Rocket-Up/);
   assert.match(en, /Google Developer Student Clubs core team, 2023/);
   assert.match(en, /Mathematics Club/);
+  // What crowd.inc was, in the owner's words, before what he did there.
+  assert.match(en, /crowd\.inc was a website where people shared their ideas and found help for them/);
+  assert.match(en, /It had hundreds of users and was home to many projects, ideas and goals\. Later we turned towards private ideas\./);
+  assert.match(en, /we turned towards private ideas\.\n.*I owned the software lifecycle/);
 
   const trData = build('tr');
   const tr = fileLines(trData, ['about.txt']).map(plainText).join('\n');
   assert.match(tr, /bir alçak irtifa \(5\.000 ft\) ve iki yüksek irtifa \(10\.000 ft\)/);
   assert.match(tr, /Rocket-Up/);
   assert.match(tr, /Matematik Kulübü/);
+  assert.match(tr, /crowd\.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir web sitesiydi/);
+  assert.match(tr, /Yüzlerce kullanıcısı vardı; birçok projeye ev sahipliği yaptı, sitede bir sürü fikir ve hedef paylaşıldı/);
+  assert.match(tr, /Sonraları da herkese açık olmayan, özel fikirlere yöneldik\.\n.*Geliştirmenin her aşamasını ben yürüttüm/);
   assert.match(tr, /av ve hedef algoritmasını sonradan geliştirdim/);
   assert.match(tr, /Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu/);
   // Plain Turkish: no English gloss for the algorithm, no calques of "around/next to the code".

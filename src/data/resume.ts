@@ -54,7 +54,7 @@ export interface ExperienceItem extends DatedPeriod {
   organization: ResumeText;
   url?: string;
   location?: Localized<string>;
-  /** One sentence on the scope of the role, shown before the highlights. */
+  /** A few sentences, shown before the highlights: what the place was, then the scope of the role. */
   summary: Localized<string>;
   highlights: Localized<readonly string[]>;
   /** Technologies used in the role (proper nouns, not translated). */
@@ -112,9 +112,12 @@ export const EXPERIENCE: readonly ExperienceItem[] = [
     organization: 'crowd.inc',
     start: '2021-07',
     end: '2024-03',
+    // What crowd.inc was, in the owner's words (2026-09-27): a site for sharing ideas and finding
+    // help for them, with hundreds of users (no exact number), many projects, ideas and goals, and
+    // a later turn towards private ideas. Nothing beyond that: no dates, figures or outcomes.
     summary: {
-      en: 'Owned the software development lifecycle end to end, from relational schema design in PostgreSQL to RESTful APIs in Python and Flask with a jQuery front end.',
-      tr: 'Geliştirme sürecinin tamamından ben sorumluydum: PostgreSQL’de ilişkisel veri tabanı şemasını tasarladım, Python ve Flask ile REST API’ler yazdım, ön yüzü jQuery ile geliştirdim.',
+      en: 'crowd.inc was a platform where people shared their ideas and found help for them. It had hundreds of users and was home to many projects, ideas and goals; later we turned towards private ideas. I owned the software development lifecycle end to end, from relational schema design in PostgreSQL to RESTful APIs in Python and Flask with a jQuery front end.',
+      tr: 'crowd.inc, insanların fikirlerini paylaşıp bu fikirler için yardım bulduğu bir platformdu. Yüzlerce kullanıcısı vardı; birçok projeye ev sahipliği yaptı, platformda bir sürü fikir ve hedef paylaşıldı. Sonraları da herkese açık olmayan, özel fikirlere yöneldik. Geliştirme sürecinin tamamından ben sorumluydum: PostgreSQL’de ilişkisel veri tabanı şemasını tasarladım, Python ve Flask ile REST API’ler yazdım, ön yüzü jQuery ile geliştirdim.',
     },
     highlights: {
       en: [

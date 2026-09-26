@@ -1,36 +1,35 @@
 ---
 title: NeoSMBIOS
-shortDescription: C++23 için tek başlık dosyasından oluşan, veriyi kopyalamadan çalışan bir SMBIOS/DMI ayrıştırıcısı. Gömülü yazılımın sunduğu tabloları WMI ya da işletim sistemi başlık dosyaları olmadan okur.
+shortDescription: BIOS’un sunduğu donanım bilgilerini (SMBIOS/DMI tablolarını) okuyan, C++23 ile yazılmış tek dosyalık bir kütüphane. Veriyi kopyalamadan çalışıyor; ne WMI ne de işletim sisteminin başlık dosyaları gerekiyor.
 ---
 
 ## Nedir?
 
-NeoSMBIOS, bilgisayarın gömülü yazılımının sunduğu SMBIOS/DMI tablolarını okur. Bu tablolarda anakart üreticisi,
-seri numaraları, BIOS sürümü, işlemci ve bellek modülleri gibi bilgiler bulunur. Kütüphane bu
-bilgileri tipi belli, sınır kontrolü yapılmış view’lar olarak döndürür. MIT Lisansı ile yayımlanan
-tek bir başlık dosyasıdır.
+NeoSMBIOS, bilgisayarın donanım bilgilerini okuyan bir C++ kütüphanesi. Anakarttaki gömülü
+yazılım (BIOS) bu bilgileri SMBIOS/DMI tabloları hâlinde sunuyor: anakart üreticisi, seri
+numaraları, BIOS sürümü, işlemci ve bellek modülleri gibi. Kütüphane bu tabloları çözüp her
+bilgiyi türü belli ve sınırları kontrol edilmiş olarak veriyor. MIT Lisansı ile yayımlanan tek
+bir başlık dosyası.
 
-NeoSMBIOS yalnızca veriyi çözer; gömülü yazılımın kendisine hiç dokunmaz. Ona bir
-`std::span<const std::uint8_t>` verirsiniz; baytlar Win32’den, sysfs’ten, bir bellek
-eşlemesinden ya da kaydedilmiş bir dosyadan gelebilir. Bu yüzden Windows’ta WMI bağımlılığı
-olmaz, hiçbir yerde de işletim sistemi başlık dosyası gerekmez.
+Yalnızca veriyi çözüyor, gömülü yazılıma hiç dokunmuyor. Baytları ona siz veriyorsunuz
+(`std::span<const std::uint8_t>`); Windows’ta Win32’den, Linux’ta sysfs’ten, bellekten ya da
+kaydedilmiş bir dosyadan gelebilirler. Bu yüzden ne Windows’ta WMI gerekiyor ne de işletim sisteminin
+başlık dosyaları.
 
-## Özellikler
+## Neler sunuyor?
 
-- **Tek başlık dosyası, bağımlılık yok, bellek ayırma yok**: girdi `std::span`, çıktı
-  `std::string_view`.
-- **Donanım olmadan test edilebilir**: Makineden hiçbir şey okunmadığı için ayrıştırıcı,
-  kaydedilmiş tablolarla birim testinden geçirilebilir. Root ya da yönetici yetkisi de
-  gerekmez.
-- **Sürüm farklarına dayanıklı**: Her alan okunmadan önce kaydın kendi uzunluk baytıyla
-  karşılaştırılır. Eski bir BIOS’tan yeni bir alan istendiğinde kaydın sonu aşılmaz;
-  `std::nullopt` döner.
-- **İstisna fırlatmaz**: Ayrıştırmada `std::expected`, gömülü yazılımın vermeyebileceği alanlarda
-  `std::optional` kullanılır.
-- Yaygın yapı türleri için **sade bir `.get_xxx()` API’si**, tabloyu dolaşmak için de
+- **Tek dosya, başka kütüphane yok, ek bellek yok**: `std::span` giriyor, `std::string_view`
+  çıkıyor; hiçbir şey kopyalanmıyor.
+- **Donanım olmadan test**: Makineden hiçbir şey okunmadığı için kaydedilmiş tablolarla, yönetici
+  (root) yetkisi olmadan test edilebiliyor.
+- **Sürüm farklarına dayanıklı**: Her alan önce kaydın kendi uzunluk baytıyla karşılaştırılıyor.
+  Eski bir BIOS’tan yeni bir alan istenirse kaydın sonu aşılmıyor, `std::nullopt` (“yok”) geliyor.
+- **İstisna fırlatmıyor**, yani sorunlar programın akışını kesmiyor: Tablo çözülürken
+  `std::expected`, BIOS’un vermeyebileceği alanlarda `std::optional` kullanılıyor.
+- Sık kullanılan kayıt türleri için **sade `.get_xxx()` işlevleri**, tabloyu dolaşmak için de
   `std::ranges` desteği.
 
-## Gereksinimler
+## Ne gerekiyor?
 
-C++23 gerekir: GCC 14, Clang 18 ya da MSVC 19.40 (Visual Studio 2022 17.10) ve sonrası. Daha
-eski bir standartla derlerseniz başlık dosyası anlaşılır bir hata verip derlemeyi durdurur.
+C++23 gerekiyor: GCC 14, Clang 18, MSVC 19.40 (Visual Studio 2022 17.10) ya da daha yenisi. Daha
+eski bir standartla derlerseniz başlık dosyası, anlaşılır bir hatayla derlemeyi durduruyor.

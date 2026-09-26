@@ -4,14 +4,15 @@
  * engineer; links are https (or tel:/mailto:); project tag lists stay short; none of the removed
  * Swift-era details come back. The English and Turkish CVs carry the same facts: same projects in
  * the same order, same links, stacks, years and status. Last, the PDFs the site links exist,
- * fit on two pages and declare their language.
+ * fit on two pages, are set in the site's fonts and declare their language.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-import { PDFDocument, PDFName } from 'pdf-lib';
+import { PDFDocument, PDFName, StandardFonts } from 'pdf-lib';
 
+import { embeddedFontNames, fontFallbackProblem } from '../scripts/cv-fonts.ts';
 import { SITE } from '../src/config/site.ts';
 import { CV } from '../src/data/cv.ts';
 import { LOCALES } from '../src/i18n/config.ts';
@@ -119,22 +120,35 @@ test('the words around the CV compose titles the way each language does', () => 
   assert.equal(cvMessages.en.degree('Bachelor of Science', 'Mathematics'), 'Bachelor of Science in Mathematics');
   assert.equal(cvMessages.tr.degree('Lisans', 'Matematik'), 'Matematik (Lisans)');
   assert.equal(cvMessages.en.role('Vice President', 'Rocket Club'), 'Vice President, Rocket Club');
-  assert.equal(cvMessages.tr.role('Başkan Yardımcısı', 'Roket Kulübü'), 'Roket Kulübü, Başkan Yardımcısı');
+  assert.equal(cvMessages.tr.role('Başkan Yardımcısı', 'Roket Kulübü'), 'Roket Kulübü Başkan Yardımcısı');
   // Lower case by each language's rules: Turkish "I" is "ı", not "i".
   assert.equal(cvMessages.en.language('Turkish', 'Native'), 'Turkish (native)');
-  assert.equal(cvMessages.tr.language('Türkçe', 'Ana dil'), 'Türkçe (ana dil)');
+  assert.equal(cvMessages.tr.language('Türkçe', 'Ana dili'), 'Türkçe (ana dili)');
   assert.equal(cvMessages.tr.language('X', 'IRMAK'), 'X (ırmak)');
   assert.equal(cvMessages.en.documentTitle(SITE.name), 'Kaan Baha Sever — CV');
   assert.equal(cvMessages.tr.documentTitle(SITE.name), 'Kaan Baha Sever — Özgeçmiş');
 });
 
+test('the font check catches a PDF printed in other fonts', async () => {
+  const doc = await PDFDocument.create();
+  const helvetica = await doc.embedFont(StandardFonts.Helvetica);
+  doc.addPage().drawText('Kaan Baha Sever', { font: helvetica });
+  const pdf = await PDFDocument.load(await doc.save());
+  assert.deepEqual(embeddedFontNames(pdf), ['Helvetica']);
+  const problem = fontFallbackProblem(pdf) ?? '';
+  assert.match(problem, /outside the site: Helvetica/);
+  assert.match(problem, /missing: IBMPlexSans, JetBrainsMono, Newsreader/);
+});
+
 for (const locale of LOCALES) {
-  test(`the ${locale} CV the site links exists, fits on two pages and declares its language`, async () => {
+  test(`the ${locale} CV the site links exists, fits on two pages, uses the site's fonts and declares its language`, async () => {
     const bytes = readFileSync(new URL(`../public${SITE.cvPath[locale]}`, import.meta.url));
     assert.equal(bytes.subarray(0, 5).toString('latin1'), '%PDF-');
     assert.ok(!bytes.includes('/Subtype /Type3'), 'Type 3 fonts');
     const pdf = await PDFDocument.load(bytes, { updateMetadata: false });
     assert.ok(pdf.getPageCount() >= 1 && pdf.getPageCount() <= 2, `${pdf.getPageCount()} pages`);
+    // Set in the site's typefaces, not a silent system-font fallback.
+    assert.equal(fontFallbackProblem(pdf), undefined, embeddedFontNames(pdf).join(', '));
     assert.equal(pdf.getTitle(), cvMessages[locale].documentTitle(SITE.name));
     assert.equal(pdf.getSubject(), CV[locale].headline);
     const lang = pdf.catalog.lookup(PDFName.of('Lang'));

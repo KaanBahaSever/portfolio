@@ -195,7 +195,8 @@ Run from the project root (Node 22.18+, see `.node-version`; the tests run TypeS
   metadata are in `src/i18n/messages/cv.ts`. A local headless Chrome or Edge prints them
   (`CHROME_PATH` overrides the browser); `-- --lang en` or `-- --lang tr` builds one language,
   `-- --keep-html` also writes the HTML next to each PDF for inspection. Each CV must fit on two
-  pages (the build fails otherwise): tighten the wording rather than the type. Re-run it
+  pages (the build fails otherwise): tighten the wording rather than the type. The build also
+  fails if a font file is missing or the browser fell back to system fonts. Re-run it
   whenever that data changes and commit both PDFs. Each page's "Download CV" button gets the CV
   in its own language, with a small link to the other one.
 - **Site URL**: `site` in `astro.config.mjs` and `url` in `src/config/site.ts` (used for

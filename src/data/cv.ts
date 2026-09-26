@@ -12,7 +12,7 @@
  * (tests/cv-data.test.ts checks it). English uses British spelling, like the site. Turkish is
  * written natively, in the first person like the Turkish résumé bullets, with ’ before suffixes
  * on names and numbers ("2024’ten") and the site's Turkish terms (boru hattı, canlıda, av ve
- * hedef, Amiral Battı, XOX, büyük daire mesafesi).
+ * hedef, bilgisayar rakip, Amiral Battı, XOX, büyük daire mesafesi).
  *
  * Pure module (types only from config.ts), so the build script and tests import it with plain Node.
  */
@@ -144,19 +144,23 @@ const en: CvContent = {
 const tr: CvContent = {
   headline: 'Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar',
   phone: PHONE,
-  // "crowd.inc bünyesinde", as on the home page: a suffix on "crowd.inc" would depend on how
-  // the name is read aloud.
+  // "İstanbul Üniversitesinde" without an apostrophe: suffixes on institution names are not set
+  // off (TDK), as on the home page and in the console. "crowd.inc bünyesinde", as on the home
+  // page: a suffix on "crowd.inc" would depend on how the name is read aloud. "Boru hatlarını
+  // (pipeline)", as on the Novacast page: job ads and applicant-tracking searches use "pipeline".
   summary:
-    'Matematik altyapısına sahip bir yazılım geliştiriciyim (İstanbul Üniversitesi). Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajanları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD boru hatlarını da kuruyorum. 2021–2024 yılları arasında crowd.inc bünyesinde bir web platformunun geliştirme yaşam döngüsünü, veritabanı şemasından Linux sunucularına kadar üstlendim.',
+    'İstanbul Üniversitesinde matematik okuyan bir yazılım geliştiriciyim. Modern C++ ve Go ile sistem yazılımları geliştiriyorum: masaüstü ajanları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Bunları test eden, paketleyen ve yayına alan CI/CD boru hatlarını (pipeline) da kuruyorum. 2021–2024 yılları arasında crowd.inc bünyesinde bir web platformunun veritabanı şemasından Linux sunucularına kadar tüm geliştirme sürecini yürüttüm.',
 
   projects: [
     {
       name: 'Asion',
       linkLabel: 'asion.app',
       url: 'https://asion.app',
-      period: '2024’ten beri · geliştiriliyor, erken erişim',
+      period: '2024’ten beri · geliştiriliyor, erken erişimde',
       stack: ['C/C++', 'Objective-C', 'Go', 'gRPC'],
-      text: 'Bireyler, ekipler ve akademik zaman takibi için gizliliği önceleyen, platformlar arası bir üretkenlik ve iş istasyonu etkinlik takip sistemi; self-hosting düşünülerek tasarlandı. macOS, Linux ve Windows’ta yerel işletim sistemi olay kancaları, hafif bir daemon mimarisi, gRPC/Protobuf ile süreçler arası iletişim ve şifreli SQLCipher veritabanıyla çalışıyor. Tek tıkla test, paketleme, derleme çıktısı üretimi ve dağıtım yapan, çapraz derleme runner’lı çok platformlu GitHub Actions boru hatlarını kurdum.',
+      // "Barındırılabilecek" (future), as on the Asion page: "built with self-hosting in mind"
+      // is a design goal of a product in early access, not a finished feature.
+      text: 'Bireysel, ekip ve akademik zaman takibi için gizliliği önceleyen, platformlar arası bir üretkenlik ve iş istasyonu etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek. macOS, Linux ve Windows’ta yerel işletim sistemi olay kancaları, hafif bir daemon mimarisi, gRPC/Protobuf ile süreçler arası iletişim ve şifreli SQLCipher veritabanıyla çalışıyor. Tek tıkla test, paketleme, derleme çıktısı üretimi ve dağıtım yapan, çapraz derleme runner’lı çok platformlu GitHub Actions boru hatlarını kurdum.',
     },
     {
       name: 'Novacast',
@@ -172,7 +176,7 @@ const tr: CvContent = {
       url: 'https://github.com/KaanBahaSever/karecik',
       period: '2021’den beri · canlıda · GPL-3.0',
       stack: ['Go', 'PostgreSQL'],
-      text: 'Yerel kafe ve restoranların menü ve sipariş yönetimi ile müşteri etkileşimi için kullandığı, çok kiracılı (multi-tenant) bir QR menü SaaS platformu; kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarlandı. İlk prototiplerini 2021’de önceki çalışma adlarıyla geliştirdim; 2026’da canlıya aldım.',
+      text: 'Yerel kafe ve restoranların menü ve sipariş yönetimi ile müşteri etkileşimi için kullandığı, çok kiracılı (multi-tenant) bir QR menü SaaS platformu; kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarladım. İlk prototiplerini 2021’de, proje henüz başka adlar taşırken geliştirdim; 2026’da canlıya aldım.',
     },
     {
       name: 'Açık Matematik',
@@ -180,7 +184,7 @@ const tr: CvContent = {
       url: 'https://acik-matematik.com',
       period: '2023’ten beri · canlıda · açık kaynak',
       stack: ['Quarto', 'Markdown', 'Python'],
-      text: 'Türkçe lisans matematiği için yeniden üretilebilir sayısal hesaplamayla desteklenen bir akademik yayın platformu ve modern ders kitabı girişimi. Fikri 2023’te doğdu; platform Haziran 2026’da yayına girdi, açık kaynak sürüm Eylül 2026’da duyuruldu.',
+      text: 'Türkçe lisans matematiği için yeniden üretilebilir sayısal hesaplama destekli bir akademik yayın platformu ve modern ders kitabı girişimi. Fikri 2023’te doğdu; platformu Haziran 2026’da yayına aldım, açık kaynak sürümü Eylül 2026’da duyurdum.',
     },
     {
       name: 'Rocket-Up',
@@ -212,7 +216,9 @@ const tr: CvContent = {
       url: 'https://kaanbahasever.com',
       period: '2026',
       stack: ['TypeScript', 'Astro'],
-      text: 'Tamamen cihazda çalışan, gizliliği önceleyen tarayıcı araçları (PDF, görseller, asal çarpanlara ayırma, büyük daire mesafesi), algoritmik oyunlar (av ve hedef ile olasılık yoğunluğu modları olan bir Amiral Battı yapay zekâsı, minimax ile XOX) ve teknik yazılar içeren iki dilli (Türkçe/İngilizce) statik bir site.',
+      // "Bilgisayar rakip", as on the games pages and the About page. The no-break space keeps
+      // "Amiral Battı" on one line.
+      text: 'İki dilli (Türkçe/İngilizce) statik site: tamamen cihazda çalışan, gizliliği önceleyen tarayıcı araçları (PDF, görseller, asal çarpanlara ayırma, büyük daire mesafesi), algoritmik oyunlar (av ve hedef ile olasılık yoğunluğu modları olan bir bilgisayar rakibiyle Amiral Battı, minimax ile XOX) ve teknik yazılar.',
     },
     {
       name: 'İlk çalışmalar',

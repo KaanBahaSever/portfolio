@@ -20,7 +20,8 @@
  * Layout choices that keep the CV readable by applicant-tracking systems: one column, each
  * section heading on its own line before its content, all text as real text (the only graphic is
  * the decorative brand mark), static fonts (Chrome turns variable fonts into Type 3 fonts,
- * which PDF checkers flag), and at most two pages (the build fails otherwise). The Turkish text
+ * which PDF checkers flag), and at most two pages (the build fails otherwise). It also fails when
+ * the browser fell back to system fonts (scripts/cv-fonts.ts). The Turkish text
  * runs longer than the English: keep it within the limit by tightening the wording in
  * src/data/cv.ts, never by shrinking the type.
  *
@@ -53,6 +54,7 @@ import {
 import { LOCALES, LOCALE_META, isLocale, type Locale } from '../src/i18n/config.ts';
 import { cvMessages } from '../src/i18n/messages/cv.ts';
 import { formatPeriod } from '../src/utils/resume-dates.ts';
+import { fontFallbackProblem } from './cv-fonts.ts';
 
 const MAX_PAGES = 2;
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -102,11 +104,16 @@ const joinMeta = (parts: readonly string[]) => parts.join('<span class="sep">·<
 
 /**
  * The site's typefaces as static files (latin + latin-ext: Turkish letters such as ğ, ş and İ
- * are in latin-ext), only in the weights the stylesheet below uses.
+ * are in latin-ext), only in the weights the stylesheet below uses. A missing file fails here,
+ * with its path: the browser would otherwise fall back to system fonts without a word (the
+ * printed PDF is checked for that too, in buildCv).
  */
 function fontFaces(): string {
-  const file = (pkg: string, name: string) =>
-    pathToFileURL(join(ROOT, 'node_modules', '@fontsource', pkg, 'files', name)).href;
+  const file = (pkg: string, name: string) => {
+    const path = join(ROOT, 'node_modules', '@fontsource', pkg, 'files', name);
+    if (!existsSync(path)) throw new Error(`Font file not found: ${path}. Run npm ci.`);
+    return pathToFileURL(path).href;
+  };
   const faces: [family: string, pkg: string, weight: number][] = [
     ['Plex Sans', 'ibm-plex-sans', 400],
     ['Plex Sans', 'ibm-plex-sans', 600],
@@ -403,6 +410,10 @@ async function buildCv(locale: Locale, work: string, keepHtml: boolean): Promise
   if (raw.includes('/Subtype /Type3')) throw new Error(`Type 3 fonts in the ${locale} CV: use static font files.`);
 
   const pdf = await PDFDocument.load(raw, { updateMetadata: false });
+  const fallback = fontFallbackProblem(pdf);
+  if (fallback) {
+    throw new Error(`The ${locale} CV was not printed in the site's fonts (${fallback}): the font files did not load.`);
+  }
   const pages = pdf.getPageCount();
   if (pages > MAX_PAGES) throw new Error(`The ${locale} CV runs to ${pages} pages; trim it to ${MAX_PAGES}.`);
 

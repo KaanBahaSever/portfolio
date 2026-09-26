@@ -53,8 +53,8 @@ const tr: CvMessages = {
   },
   // As on the home page: "Matematik (Lisans)".
   degree: (degree, field) => `${field} (${degree})`,
-  // The organisation first, as Turkish names a post ("Roket Kulübü Başkan Yardımcısı").
-  role: (role, organization) => `${organization}, ${role}`,
+  // The organisation first and no comma, as Turkish names a post ("Roket Kulübü Başkan Yardımcısı").
+  role: (role, organization) => `${organization} ${role}`,
   language: (name, level) => `${name} (${level.toLocaleLowerCase('tr-TR')})`,
 };
 

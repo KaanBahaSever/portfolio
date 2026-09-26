@@ -11,6 +11,9 @@
  *
  * Every change updates data-theme, the root's color-scheme and the theme-color metas, then
  * dispatches THEME_CHANGE_EVENT on document for scripts that read colours at runtime.
+ *
+ * tests/theme-controller.test.ts runs this module against stubbed browser globals (one fresh
+ * copy per simulated page), so keep its browser access to the globals it stubs.
  */
 import { getPageLocale } from '../i18n/client.ts';
 import { common } from '../i18n/messages/common.ts';

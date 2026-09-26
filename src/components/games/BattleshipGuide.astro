@@ -1,15 +1,29 @@
 ---
 /**
- * The prose under the Battleship board: how to play and how the computer aims. Written once per
- * locale (inline markup such as <kbd> and the density formula do not survive string templates).
+ * The prose under the Battleship board: how to play, how the computer aims and where the game
+ * comes from. Written once per locale (inline markup such as <kbd> and the density formula do not
+ * survive string templates).
+ *
+ * The story is the owner's own: Battleship was the game he played with his father as a child, so
+ * he wanted to design his own. Add no details to it. Keep the order of events: the desktop version
+ * (a high-school graduation project) came first, the Hunt & Target algorithm later.
  */
 import Section from '../ui/Section.astro';
 import { ui } from '../ui/styles';
+import { localizePath } from '../../i18n/config';
 import { battleshipMessages } from '../../i18n/games/battleship';
 import { getLocale } from '../../i18n/server';
 
 const locale = getLocale(Astro);
 const m = battleshipMessages[locale];
+
+/** The blog post about the computer's aim, in the page's language (the two posts have their own slugs). */
+const post = localizePath(
+  locale === 'tr' ? '/blog/amiral-batti-av-ve-hedef/' : '/blog/battleship-hunt-and-target/',
+  locale,
+);
+/** The desktop game's public C# source (Windows Forms), as linked from the About page. */
+const desktopSource = 'https://github.com/KaanBahaSever/BattleShips';
 
 const h3 = 'font-serif text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100';
 const body = 'mt-3 space-y-3 leading-relaxed text-zinc-700 dark:text-zinc-300';
@@ -214,6 +228,41 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
             would mean going through an enormous number of arrangements, so the per-ship count is the usual
             approximation. In 300 simulated games against random fleets, Easy needed about 95 shots on average to sink
             the fleet, Normal about 51 and Hard about 44.
+          </p>
+        </div>
+      </div>
+    )
+  }
+</Section>
+
+<Section id="story" index="03" title={m.guide.story}>
+  {
+    locale === 'tr' ? (
+      <div class="max-w-3xl">
+        <div class={body}>
+          <p>
+            Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu. İlk
+            sürümü, lise bitirme projelerimden biri olarak C# ile yazdığım bir masaüstü oyunuydu
+            (<a href={desktopSource} class={ui.inlineLink}>kaynak kodu GitHub’da</a>); Normal seviyedeki av ve hedef
+            algoritması ise sonradan geldi.
+          </p>
+          <p>
+            Bilgisayarın nasıl nişan aldığını <a href={post} class={ui.inlineLink}>bir blog yazısında</a> adım adım
+            anlattım.
+          </p>
+        </div>
+      </div>
+    ) : (
+      <div class="max-w-3xl">
+        <div class={body}>
+          <p>
+            Battleship was the game I played with my father as a child, which is why I wanted to design my own. The
+            first version was a desktop game in C#, one of my high-school graduation projects
+            (<a href={desktopSource} class={ui.inlineLink}>source on GitHub</a>); the Hunt &amp; Target algorithm behind
+            Normal came later.
+          </p>
+          <p>
+            <a href={post} class={ui.inlineLink}>A blog post</a> explains, step by step, how the computer aims.
           </p>
         </div>
       </div>

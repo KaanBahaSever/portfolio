@@ -1,8 +1,9 @@
 /**
  * Geometry behind the About page figures. Each figure is drawn from the model it illustrates
  * (a real Hohmann transfer, a real placement count, a real minimax search, a real cipher, an
- * integrated flight profile, an integrated steering field), so the pictures stay honest when
- * someone reads them closely.
+ * integrated flight profile, an integrated steering field, an access matrix computed from role
+ * inheritance, a square tiled by odd numbers), so the pictures stay honest when someone reads
+ * them closely.
  *
  * Pure module: no DOM, no `astro:*` imports and erasable TypeScript only, so `node --test` can
  * load it. Coordinates are unitless model values; the figure components scale them to SVG.
@@ -416,4 +417,115 @@ export function oblique(p: Point3, origin: Point, scale: number, depth = 0.5): P
     x: origin.x + scale * (p.x + depth * p.y * Math.cos(angle)),
     y: origin.y - scale * (p.z + depth * p.y * Math.sin(angle)),
   };
+}
+
+/* ------------------------------------------------------------------------------------------ */
+/* Access control: roles that inherit their permissions                                         */
+/* ------------------------------------------------------------------------------------------ */
+
+/**
+ * Role-based access control with inheritance. `additions` lists the roles from least to most
+ * privileged, each with the permissions it adds to the role below it, so every role holds
+ * everything the roles below it hold. Returns the role × permission matrix, least privileged
+ * role first: grants[role][p] is true when that role holds permissions[p].
+ *
+ * Throws on a permission that is not in `permissions`, and on a role that adds nothing new: a
+ * role that grants no more than the one below it is not a separate level.
+ */
+export function accessMatrix<P>(additions: readonly (readonly P[])[], permissions: readonly P[]): boolean[][] {
+  const held = new Set<P>();
+  return additions.map((adds, role) => {
+    const before = held.size;
+    for (const permission of adds) {
+      if (!permissions.includes(permission)) {
+        throw new RangeError(`accessMatrix: role ${role} adds an unknown permission, ${String(permission)}`);
+      }
+      held.add(permission);
+    }
+    if (held.size === before) throw new RangeError(`accessMatrix: role ${role} adds no new permission`);
+    return permissions.map((permission) => held.has(permission));
+  });
+}
+
+/** For each row of a matrix, how many cells at its start are true: where that step of a staircase ends. */
+export function leadingRuns(matrix: readonly (readonly boolean[])[]): number[] {
+  return matrix.map((row) => {
+    const first = row.indexOf(false);
+    return first === -1 ? row.length : first;
+  });
+}
+
+/**
+ * The permissions of the access-control figure: three actions on public data, then the same
+ * three on private data (a dashed line separates the two in the drawing). An example, not a
+ * real system's list.
+ */
+export const RBAC_PERMISSIONS = [
+  'public.read',
+  'public.write',
+  'public.delete',
+  'private.read',
+  'private.write',
+  'private.delete',
+] as const;
+export type RbacPermission = (typeof RBAC_PERMISSIONS)[number];
+
+/**
+ * The figure's four roles, least privileged first, each with what it adds to the role below.
+ * Illustrative, like the permissions: the caption calls the figure a schematic example.
+ */
+export const RBAC_ROLES = [
+  { role: 'guest', adds: ['public.read'] },
+  { role: 'member', adds: ['public.write'] },
+  { role: 'editor', adds: ['public.delete', 'private.read'] },
+  { role: 'admin', adds: ['private.write', 'private.delete'] },
+] as const satisfies readonly { role: string; adds: readonly RbacPermission[] }[];
+
+/* ------------------------------------------------------------------------------------------ */
+/* Sums of odd numbers: a square built from L-shaped pieces                                     */
+/* ------------------------------------------------------------------------------------------ */
+
+export interface Gnomon {
+  /** The piece's cells as [row, column]; piece k has 2k − 1 of them. */
+  cells: Cell[];
+  /** The cell where the two arms of the L meet: [k − 1, k − 1]. */
+  corner: Cell;
+  /** The piece's outline in cell units (x = column, y = row, y down), for a closed SVG path. */
+  outline: Point[];
+}
+
+/**
+ * The n nested L-shaped pieces (gnomons) that build an n×n square of unit cells, smallest
+ * first. Piece k (k = 1 … n) holds the cells whose larger coordinate is k − 1: column k − 1
+ * down to row k − 1, then row k − 1 back to the left edge. Its 2k − 1 cells turn the
+ * (k − 1)×(k − 1) square into a k×k one, which is why the odd numbers add up to squares:
+ * 1 + 3 + … + (2n − 1) = n².
+ */
+export function gnomons(n: number): Gnomon[] {
+  if (!(Number.isInteger(n) && n > 0)) throw new RangeError(`gnomons: n must be a positive integer, got ${n}`);
+  return Array.from({ length: n }, (_, index) => {
+    const k = index + 1;
+    const edge = k - 1;
+    const cells: Cell[] = [
+      ...Array.from({ length: edge }, (_, row): Cell => [row, edge]),
+      ...Array.from({ length: k }, (_, i): Cell => [edge, edge - i]),
+    ];
+    const outline: Point[] =
+      k === 1
+        ? [
+            { x: 0, y: 0 },
+            { x: 1, y: 0 },
+            { x: 1, y: 1 },
+            { x: 0, y: 1 },
+          ]
+        : [
+            { x: edge, y: 0 },
+            { x: k, y: 0 },
+            { x: k, y: k },
+            { x: 0, y: k },
+            { x: 0, y: edge },
+            { x: edge, y: edge },
+          ];
+    return { cells, corner: [edge, edge], outline };
+  });
 }

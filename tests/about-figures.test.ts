@@ -6,6 +6,9 @@ import {
   EARTH_RADIUS,
   MOON_ORBIT_RADIUS,
   PARKING_ALTITUDE,
+  RBAC_PERMISSIONS,
+  RBAC_ROLES,
+  accessMatrix,
   burnForApogee,
   caesarShift,
   conicArc,
@@ -13,14 +16,17 @@ import {
   curvePoint,
   densestCell,
   flightProfile,
+  gnomons,
   hohmannTransfer,
   integrateTrajectory,
+  leadingRuns,
   linePath,
   minimax,
   placementDensity,
   sCurve,
   steer,
   steeringDirection,
+  type RbacPermission,
 } from '../src/components/about/geometry.ts';
 import { LOCALES } from '../src/i18n/config.ts';
 import { JOURNEY_CHAPTERS, aboutMessages } from '../src/i18n/messages/about.ts';
@@ -177,6 +183,122 @@ test('integrateTrajectory lands on the ground and drifts with the crosswind', ()
   assert.ok(Math.max(...positions.map((p) => p.z)) > 3);
 });
 
+test('accessMatrix: every role holds the permissions of the roles below it, and more', () => {
+  const grants = accessMatrix<RbacPermission>(
+    RBAC_ROLES.map((r) => r.adds),
+    RBAC_PERMISSIONS,
+  );
+  assert.equal(grants.length, 4);
+  for (const row of grants) assert.equal(row.length, RBAC_PERMISSIONS.length);
+  for (let role = 1; role < grants.length; role++) {
+    const below = grants[role - 1]!;
+    const here = grants[role]!;
+    // Nested: nothing the role below holds is lost…
+    below.forEach((held, p) => assert.ok(!held || here[p], `role ${role} keeps ${RBAC_PERMISSIONS[p]}`));
+    // …and each role adds at least one permission.
+    assert.ok(here.some((held, p) => held && !below[p]), `role ${role} adds a permission`);
+  }
+  // The most privileged role holds everything.
+  assert.ok(grants.at(-1)!.every(Boolean));
+});
+
+test('accessMatrix: the lowest role reaches no private data', () => {
+  const grants = accessMatrix<RbacPermission>(
+    RBAC_ROLES.map((r) => r.adds),
+    RBAC_PERMISSIONS,
+  );
+  const lowest = grants[0]!;
+  RBAC_PERMISSIONS.forEach((permission, p) => {
+    if (permission.startsWith('private.')) assert.equal(lowest[p], false, permission);
+  });
+  // The dashed line splits the columns once: all public ones first, then all private ones.
+  const firstPrivate = RBAC_PERMISSIONS.findIndex((p) => p.startsWith('private.'));
+  assert.ok(firstPrivate > 0);
+  assert.ok(RBAC_PERMISSIONS.slice(0, firstPrivate).every((p) => p.startsWith('public.')));
+  assert.ok(RBAC_PERMISSIONS.slice(firstPrivate).every((p) => p.startsWith('private.')));
+});
+
+test('accessMatrix: the granted cells form a staircase', () => {
+  const grants = accessMatrix<RbacPermission>(
+    RBAC_ROLES.map((r) => r.adds),
+    RBAC_PERMISSIONS,
+  );
+  const runs = leadingRuns(grants);
+  // Every row is one unbroken run from the first column…
+  grants.forEach((row, role) => {
+    assert.deepEqual(
+      row,
+      row.map((_, p) => p < runs[role]!),
+      `role ${role} is granted a prefix of the columns`,
+    );
+  });
+  // …and every step is longer than the one below it.
+  for (let role = 1; role < runs.length; role++) assert.ok(runs[role]! > runs[role - 1]!, `step ${role}`);
+  assert.deepEqual(runs, [1, 2, 4, 6]);
+  assert.deepEqual(leadingRuns([[true, false, true], [false], []]), [1, 0, 0]);
+});
+
+test('accessMatrix rejects unknown permissions and roles that add nothing', () => {
+  assert.deepEqual(accessMatrix([['a'], ['b']], ['a', 'b']), [
+    [true, false],
+    [true, true],
+  ]);
+  assert.throws(() => accessMatrix([['a'], ['c']], ['a', 'b']), RangeError);
+  assert.throws(() => accessMatrix([['a'], ['a']], ['a', 'b']), RangeError);
+  assert.throws(() => accessMatrix([[]], ['a']), RangeError);
+});
+
+test('gnomons: piece k has 2k − 1 cells, and the pieces tile the n × n square without overlap', () => {
+  for (const n of [1, 2, 5, 8]) {
+    const pieces = gnomons(n);
+    assert.equal(pieces.length, n);
+    const seen = new Set<string>();
+    pieces.forEach((piece, i) => {
+      const k = i + 1;
+      assert.equal(piece.cells.length, 2 * k - 1, `n = ${n}, piece ${k}`);
+      for (const [row, col] of piece.cells) {
+        assert.ok(row >= 0 && col >= 0 && row < n && col < n, `n = ${n}: [${row}, ${col}] is on the board`);
+        const key = `${row},${col}`;
+        assert.ok(!seen.has(key), `n = ${n}: [${row}, ${col}] is in two pieces`);
+        seen.add(key);
+      }
+      // The first k pieces make the k × k square.
+      assert.equal(seen.size, k * k);
+      for (const [row, col] of piece.cells) assert.equal(Math.max(row, col), k - 1);
+      assert.deepEqual(piece.corner, [k - 1, k - 1]);
+      assert.ok(piece.cells.some(([row, col]) => row === k - 1 && col === k - 1), 'the corner is one of its cells');
+    });
+    assert.equal(seen.size, n * n);
+  }
+  assert.throws(() => gnomons(0), RangeError);
+  assert.throws(() => gnomons(2.5), RangeError);
+});
+
+test('gnomons: each outline encloses exactly its piece', () => {
+  // Shoelace formula: the area inside the outline equals the number of unit cells…
+  const area = (points: readonly { x: number; y: number }[]) =>
+    Math.abs(
+      points.reduce((sum, p, i) => {
+        const q = points[(i + 1) % points.length]!;
+        return sum + p.x * q.y - q.x * p.y;
+      }, 0),
+    ) / 2;
+  for (const piece of gnomons(5)) {
+    assert.equal(area(piece.outline), piece.cells.length);
+    // …and every cell's centre lies within the outline's bounds.
+    const xs = piece.outline.map((p) => p.x);
+    const ys = piece.outline.map((p) => p.y);
+    for (const [row, col] of piece.cells) {
+      assert.ok(col + 0.5 > Math.min(...xs) && col + 0.5 < Math.max(...xs));
+      assert.ok(row + 0.5 > Math.min(...ys) && row + 0.5 < Math.max(...ys));
+    }
+  }
+  // 1 + 3 + 5 + 7 + 9 = 5²: the numbers the figure writes on the pieces.
+  const sizes = gnomons(5).map((piece) => piece.cells.length);
+  assert.deepEqual(sizes, [1, 3, 5, 7, 9]);
+  assert.equal(sizes.reduce((a, b) => a + b, 0), 25);
+});
+
 test('linePath formats rounded move/line commands', () => {
   assert.equal(linePath([{ x: 0, y: 0 }, { x: 1.26, y: 2.04 }]), 'M0 0 L1.3 2');
   assert.equal(linePath([]), '');
@@ -220,4 +342,21 @@ test('figure captions and labels interpolate formatted values without case suffi
   // Visible figure labels are translated, not English left in the Turkish page.
   assert.notDeepEqual(tr.journey.chapters.research.figureLabels, en.journey.chapters.research.figureLabels);
   assert.notEqual(tr.journey.chapters.automation.figureLabels.build, en.journey.chapters.automation.figureLabels.build);
+  assert.notDeepEqual(tr.journey.chapters.work.figureLabels, en.journey.chapters.work.figureLabels);
+});
+
+test('the access-control figure is presented as an example, and the odd-number square states its sum', () => {
+  const { en, tr } = aboutMessages;
+  // The roles and permissions are illustrative, not crowd.inc's: the caption says so first.
+  assert.match(en.journey.chapters.work.caption, /^A schematic example /);
+  assert.match(tr.journey.chapters.work.caption, /^Şematik bir örnek/);
+  // Every role in the model has a label in both languages, and nothing more.
+  for (const locale of LOCALES) {
+    const labels = aboutMessages[locale].journey.chapters.work.figureLabels;
+    assert.deepEqual(Object.keys(labels.roles).sort(), RBAC_ROLES.map((r) => r.role).sort(), locale);
+  }
+  // The sum is spelled out in both captions, held together by no-break spaces.
+  for (const caption of [en.journey.chapters.community.caption, tr.journey.chapters.community.caption]) {
+    assert.ok(caption.includes('1 + 3 + 5 + 7 + 9 = 5²'), caption);
+  }
 });

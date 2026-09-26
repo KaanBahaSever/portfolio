@@ -1,0 +1,85 @@
+---
+/**
+ * A proof without words that the first n odd numbers add up to n²: a 5×5 square of unit cells
+ * cut into the nested L-shaped pieces (gnomons) from gnomons(), each labelled at its corner with
+ * its number of cells (1, 3, 5, 7, 9); the last piece is the accent. Beside each piece's corner
+ * row, the running sum it completes, which is always a square. Decorative: the caption says the
+ * same in words, and the figure's only text is numbers, the same in every language.
+ */
+import { gnomons, linePath, round, type Point } from '../geometry';
+
+const N = 5;
+const CELL = 22;
+const origin = { x: 30, y: 12 };
+const pieces = gnomons(N);
+
+const toScreen = (p: Point): Point => ({ x: origin.x + p.x * CELL, y: origin.y + p.y * CELL });
+const side = N * CELL;
+
+const shapes = pieces.map((piece, i) => {
+  const [row, col] = piece.corner;
+  const size = piece.cells.length;
+  const terms = pieces.slice(0, i + 1).map((p) => p.cells.length);
+  return {
+    last: i === pieces.length - 1,
+    d: `${linePath(piece.outline.map(toScreen))} Z`,
+    size,
+    label: { x: origin.x + (col + 0.5) * CELL, y: origin.y + (row + 0.5) * CELL + 3.5 },
+    sum: `${terms.join(' + ')} = ${i + 1}²`,
+  };
+});
+
+/** The unit grid inside the square, so every cell of every piece can be counted. */
+const grid = Array.from({ length: N - 1 }, (_, i) => {
+  const at = (i + 1) * CELL;
+  return `M${origin.x + at} ${origin.y} V${origin.y + side} M${origin.x} ${origin.y + at} H${origin.x + side}`;
+}).join(' ');
+
+/** The running sums are right-aligned here, so their "= k²" line up in a column. */
+const SUMS_X = 296;
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+const accent = 'text-accent-600 dark:text-accent-400';
+const label = 'text-zinc-600 dark:text-zinc-400';
+---
+
+<svg
+  viewBox={`0 0 320 ${origin.y * 2 + side}`}
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path class={muted} d={grid} stroke="currentColor" stroke-width="1" stroke-dasharray="1 2.5" />
+
+  <g class={ink} stroke="currentColor" stroke-width="1">
+    {shapes.filter((s) => !s.last).map((s) => <path d={s.d} />)}
+  </g>
+
+  <g class={accent}>
+    {
+      shapes
+        .filter((s) => s.last)
+        .map((s) => <path d={s.d} stroke="currentColor" stroke-width="1.5" fill="currentColor" fill-opacity="0.1" />)
+    }
+  </g>
+
+  <g class="font-mono tabular-nums" fill="currentColor" font-size="10" text-anchor="middle">
+    {
+      shapes.map((s) => (
+        <text class={s.last ? accent : ink} x={round(s.label.x)} y={round(s.label.y)}>{s.size}</text>
+      ))
+    }
+  </g>
+
+  <g class="font-mono tabular-nums" fill="currentColor" font-size="9" text-anchor="end">
+    {
+      shapes.map((s) => (
+        <text class={s.last ? accent : label} x={SUMS_X} y={round(s.label.y)}>{s.sum}</text>
+      ))
+    }
+  </g>
+</svg>

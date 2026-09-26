@@ -35,6 +35,12 @@ interface ChapterText {
   [extra: string]: unknown;
 }
 
+/**
+ * The sum the odd-number figure (#journey-community) proves, the same in both languages. No-break
+ * spaces keep the equation on one line when a narrow caption wraps.
+ */
+const ODD_SUM = `${['1', '3', '5', '7', '9'].join(' + ')} = 5²`;
+
 const en = {
   meta: {
     title: 'About',
@@ -120,11 +126,23 @@ const en = {
         /** Follows the period (2021 – 2024). */
         label: 'crowd.inc',
         title: 'Software Developer at crowd.inc',
+        /** The roles and permissions in the figure are an example, not crowd.inc's: say so. */
+        caption:
+          'A schematic example of role-based access control (RBAC). There are four roles, the least privileged at the bottom. Each role inherits every permission of the role below it and adds more, so the granted cells form a staircase. The dashed line separates public data from private data, and the lowest role reaches none of the private data.',
+        /** The matrix's labels, in small mono capitals: rows, columns and the two kinds of data. */
+        figureLabels: {
+          roles: { guest: 'GUEST', member: 'MEMBER', editor: 'EDITOR', admin: 'ADMIN' },
+          actions: { read: 'READ', write: 'WRITE', delete: 'DELETE' },
+          scopes: { public: 'PUBLIC', private: 'PRIVATE' },
+        },
       },
       community: {
         short: 'Community',
         label: 'GDSC · Mathematics Club',
         title: 'Community: workshops, live streams and competitions',
+        /** Do not claim this proof was shown at the club; it is the kind of puzzle the club was about. */
+        caption:
+          `A proof without words, the kind of puzzle that suits the Mathematics Club’s seminars and competitions. Add up the odd numbers in order and you always get a square: each L-shaped piece adds the next odd number and makes the side one unit longer, so ${ODD_SUM}.`,
       },
       core: {
         short: 'C++ and Go',
@@ -164,50 +182,52 @@ const tr: AboutMessages = {
   meta: {
     title: 'Hakkımda',
     description:
-      'Kaan Baha Sever: İstanbul’da yazılım geliştirici ve matematik öğrencisi. Meslek lisesinde C# ile başlayan, roket aviyoniğinden C++ ve Go’ya uzanan bir yol.',
+      'Kaan Baha Sever, İstanbul’da yaşayan bir yazılım geliştirici ve matematik öğrencisi. Programlamaya meslek lisesinde C# ile başladı, roket aviyoniği üzerinde çalıştı; bugün C++ ve Go kullanıyor.',
   },
   header: {
     eyebrow: 'Hakkımda',
-    title: 'Sistem yazılımında matematiksel sezgi',
+    title: 'Matematik sezgimi sistem yazılımında kullanıyorum',
   },
   glance: {
     heading: 'Kısaca',
-    location: 'Konum',
+    location: 'Yaşadığım yer',
     study: 'Eğitim',
     studyValue: 'Matematik lisansı, İstanbul Üniversitesi',
-    languages: 'Günlük işlerde',
+    languages: 'Her gün kullandığım',
     languagesValue: 'Modern C++ ve Go',
     building: 'Şu an geliştirdiğim',
   },
   journey: {
-    title: 'Bugüne kadarki yolculuk',
+    title: 'Bugüne nasıl geldim',
     intro:
-      'Kabaca kronolojik sırayla: uzay uçuşlarına duyduğum erken ilgiden bugün geliştirdiğim yazılımlara. Şekiller her bölümün ardındaki fikri özetliyor; çoğu elle çizilmedi, o fikrin küçük bir modelinden hesaplandı.',
+      'Bölümler kabaca zaman sırasıyla ilerliyor: uzay uçuşlarına duyduğum ilk meraktan bugün geliştirdiğim yazılımlara kadar. Şekiller her bölümün ana fikrini basitçe gösteriyor. Çoğunu elle çizmedim, o fikrin küçük bir modelinden hesapladım.',
     contents: 'Bölümler',
     figure: (n) => `Şekil ${n}`,
     chapters: {
       space: {
         short: 'Uzay',
         label: '2016 öncesi',
-        title: 'Göğe bakmak: uzay araştırmaları',
-        // "Yerberi" is the TDK term for perigee. The values sit in parentheses or before a
-        // fixed noun ("gün"), so no case suffix depends on how a number is read.
+        title: 'Gökyüzüne bakmak: uzay araştırmaları',
+        // "Yerberi" is the TDK term for perigee; the caption says what it means. The values sit
+        // in parentheses or before a fixed noun ("gün"), so no suffix depends on how a number
+        // is read.
         caption: (dv, days) =>
-          `Hohmann transferi, bir Ay görevinin klasik ilk taslağı. Yerberide yapılan tek bir motor ateşlemesi (Δv ≈ ${dv} km/s), 300 km yükseklikteki park yörüngesini (yarıçap r₁), uzak ucu yaklaşık ${days} gün sonra Ay’ın yörüngesine (yarıçap r₂) ulaşan bir elipse dönüştürür. Ölçekli değildir.`,
+          `Hohmann transferi: bir Ay görevi planlanırken çizilen klasik ilk taslak. Yerberide, yani Dünya’ya en yakın noktada, motor bir kez ateşlenir (Δv ≈ ${dv} km/s). Bu ateşleme, 300 km yükseklikteki park yörüngesini (yarıçap r₁) uzatıp bir elipse çevirir. Araç yaklaşık ${days} gün sonra elipsin uzak ucunda Ay’ın yörüngesine (yarıçap r₂) ulaşır. Çizim ölçekli değildir.`,
       },
       algorithms: {
         short: 'Temeller',
         label: 'C# · MSSQL',
         title: 'Programlamanın temelleri',
+        // "Hücre" and "ıska", as the Battleship game itself says.
         caption:
-          'Tarayıcı sürümlerinin ardındaki algoritmalar. Solda: Amiral Battı’daki bilgisayar rakibin av modu. Her hücrenin tonu, beş ıskadan sonra kalan filonun o hücreyi kapsayan kaç farklı yerleşimi olduğunu gösterir; sıradaki atış en yoğun hücreye yapılır. Sağda: minimax, en kötü sonucu en iyi olan hamleyi seçer.',
+          'Oyunların tarayıcı sürümlerindeki algoritmalar. Solda Amiral Battı’daki bilgisayar rakip gemi arıyor: Beş ıskadan sonra her hücrenin rengi, kalan gemilerin o hücreyi kaç farklı yerleşimle kapladığını gösteriyor. Sıradaki atış en koyu hücreye yapılıyor. Sağda minimax, en kötü durumda bile en iyi sonucu veren hamleyi seçiyor.',
       },
       research: {
-        short: 'TÜBİTAK araştırması',
+        short: 'TÜBİTAK projesi',
         label: '2019 · TÜBİTAK',
-        title: 'Araştırma: kriptografi ve görsel programlama',
+        title: 'Kriptografi ve görsel programlama üzerine bir araştırma',
         caption:
-          'Çizerek programlama: akış şeması olarak bir Sezar şifresi. Mesajın her cᵢ harfi, i sayacı mesajın uzunluğu olan n değerine ulaşana kadar alfabede k adım kaydırılır (mod 26). Sağda aynı program k = 3 ile çalıştırılmış.',
+          'Programı yazmak yerine çizmek: Sezar şifresinin akış şeması. Mesajdaki her cᵢ harfi alfabede k harf ileri kaydırılır (mod 26). Bu, i sayacı mesajın uzunluğuna (n) ulaşana kadar sürer. Sağda aynı program k = 3 ile çalışıyor.',
         figureLabels: { yes: 'evet', no: 'hayır' },
       },
       avionics: {
@@ -215,7 +235,7 @@ const tr: AboutMessages = {
         label: 'Roket Kulübü',
         title: 'Roketçilik ve uçuş aviyoniği',
         caption:
-          'İki irtifa sınıfı aynı ölçekte, idealleştirilmiş uçuşlar olarak: hedef irtifası 5.000 ft olan bir alçak irtifa roketi ve hedef irtifası 10.000 ft olan iki yüksek irtifa roketi. Tepe noktası dh/dt = 0 olan yerdir; noktalar kaydedilen telemetri ölçümlerini gösterir.',
+          'İki irtifa sınıfı aynı ölçekte, ideal uçuşlarla gösteriliyor: hedef irtifası 5.000 ft olan bir alçak irtifa roketi ve hedefi 10.000 ft olan iki yüksek irtifa roketi. Tepe noktası, roketin yükselmeyi bıraktığı yerdir (dh/dt = 0). Noktalar, kaydedilen telemetri ölçümlerini temsil ediyor.',
         figureLabels: {
           feet: (value) => `${value} ft`,
           rockets: (n) => `${n} roket`,
@@ -225,30 +245,42 @@ const tr: AboutMessages = {
         short: 'Paraşüt güdümü',
         label: 'Araştırma',
         title: 'Otonom paraşüt güdümü ve hassas iniş',
-        caption: 'İniş hedefinin çevresindeki yönlendirme alanı (üstten görünüm). Vurgulu yol, güdümlü bir inişi gösterir.',
+        caption:
+          'İniş hedefinin çevresindeki yönlendirme alanı, kuş bakışı. Oklar her noktada gidilmesi gereken yönü gösteriyor. Vurgulu çizgi, güdümlü bir inişin izlediği yol.',
       },
       simulation: {
         short: 'Uçuş simülasyonu',
         label: 'Python (2020) → C++ (bugün)',
         title: 'Uçuş simülasyonu: prototipten Rocket-Up’a',
-        caption: 'Üç boyutta adım adım integre edilen bir yörünge, yerdeki izdüşümü ve bir andaki hız vektörü.',
+        caption:
+          'Üç boyutta adım adım hesaplanan bir yörünge. Kesikli çizgi yörüngenin yerdeki izdüşümünü, v oku da bir andaki hız vektörünü gösteriyor.',
       },
       work: {
         short: 'crowd.inc',
         label: 'crowd.inc',
-        // "bünyesinde" keeps the suffix off the dotted company name, as on the home page.
-        title: 'crowd.inc bünyesinde yazılım geliştirici',
+        // "crowd.inc" is read "kraud ink", so the suffix is "’te", after the typographic apostrophe.
+        title: 'crowd.inc’te Yazılım Geliştirici',
+        // "Rol tabanlı erişim denetimi", as the chapter's prose says.
+        caption:
+          'Şematik bir örnek: rol tabanlı erişim denetimi (RBAC). Dört rol var; en az yetkili olan en altta. Her rol, bir altındaki rolün bütün izinlerini devralıyor ve bunlara yenilerini ekliyor. Bu yüzden izin verilen hücreler bir merdiven oluşturuyor. Kesikli çizgi herkese açık verileri özel verilerden ayırıyor; en alttaki rol özel verilerin hiçbirine erişemiyor.',
+        figureLabels: {
+          roles: { guest: 'MİSAFİR', member: 'ÜYE', editor: 'EDİTÖR', admin: 'YÖNETİCİ' },
+          actions: { read: 'OKUMA', write: 'YAZMA', delete: 'SİLME' },
+          scopes: { public: 'HERKESE AÇIK', private: 'ÖZEL' },
+        },
       },
       community: {
         short: 'Topluluk',
         label: 'GDSC · Matematik Kulübü',
         title: 'Topluluk: atölyeler, canlı yayınlar ve yarışmalar',
+        caption:
+          `Sözsüz bir ispat: Matematik Kulübünün seminerlerine ve yarışmalarına yakışacak türden bir bulmaca. Tek sayıları sırayla toplayınca hep bir tam kare çıkar. L biçimindeki her parça sıradaki tek sayıyı ekler ve karenin kenarını bir birim uzatır: ${ODD_SUM}.`,
       },
       core: {
         short: 'C++ ve Go',
         label: 'Bugün',
-        title: 'Bugünkü odak: modern C++ ve Go',
-        caption: 'Yayınla/abone ol (pub/sub): mesajlar tek bir aracıdan (broker) birçok aboneye dağılır.',
+        title: 'Bugün en çok yazdığım diller: modern C++ ve Go',
+        caption: 'Yayıncı/abone (pub/sub) modeli: Mesajlar tek bir aracıdan (broker) birçok aboneye dağılır.',
         figureLabels: { publisher: 'YAYINCI', broker: 'ARACI', subscriber: 'ABONE' },
       },
       automation: {
@@ -256,7 +288,7 @@ const tr: AboutMessages = {
         label: 'Bugün · CI/CD',
         title: 'Otomasyon: tek tıkla test, paketleme ve dağıtım',
         caption:
-          'Tek bir tetikleme testleri çalıştırır, her platform için ayrı bir derlemeye dallanır; ardından çıktılar paketlenip dağıtılmak üzere yeniden birleşir.',
+          'Tek bir tetikleme önce testleri çalıştırır. Sonra akış dallanır ve her platform için ayrı bir derleme başlar. Derlemelerin çıktıları yeniden bir araya gelir, paketlenir ve dağıtılır.',
         // "Tetikleme", as the caption says; plain "tetik" reads as a gun's trigger.
         figureLabels: { trigger: 'TETİKLEME', test: 'TEST', build: 'DERLEME', package: 'PAKET', deploy: 'DAĞITIM' },
       },
@@ -264,12 +296,12 @@ const tr: AboutMessages = {
   },
   milestones: {
     title: 'Kilometre taşları',
-    intro: 'Tarihli kayıtlar, en eskiden en yeniye.',
+    intro: 'Önemli tarihleri eskiden yeniye doğru sıraladım.',
   },
   resume: {
     title: 'Özgeçmiş',
-    // "beceriler" matches the home page's skills heading ("Beceriler") this sentence points to.
-    text: 'Deneyim, eğitim ve beceriler ana sayfada özetleniyor.',
+    // "becerilerimin" contains the home page's skills heading ("Beceriler") this sentence points to.
+    text: 'Deneyimimin, eğitimimin ve becerilerimin özeti ana sayfada.',
     experienceLink: 'Ana sayfadaki deneyim bölümü',
     cvFormat: '(PDF)',
   },

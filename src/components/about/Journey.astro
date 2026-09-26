@@ -1,8 +1,8 @@
 ---
 /**
  * "The journey so far" (section #journey, linked from the home page as /about/#journey): a
- * list of chapters, then the chapters themselves in rough chronological order, most with a
- * small figure of the idea behind them. Chapter text lives in ./prose/* (per locale); names,
+ * list of chapters, then the chapters themselves in rough chronological order, each with a
+ * small figure of the idea behind it. Chapter text lives in ./prose/* (per locale); names,
  * labels and captions in about.ts. JOURNEY_CHAPTERS gives the chapter numbers and the list at
  * the top; a chapter has a figure exactly when its catalogue entry has a caption, which numbers
  * the figures. The chapters below are written out by hand, and tests/about-journey.test.ts
@@ -13,6 +13,7 @@
  */
 import Chapter from './Chapter.astro';
 import Figure from './Figure.astro';
+import AccessMatrix from './figures/AccessMatrix.astro';
 import AltitudeClasses from './figures/AltitudeClasses.astro';
 import BrokerGraph from './figures/BrokerGraph.astro';
 import CipherFlowchart from './figures/CipherFlowchart.astro';
@@ -20,6 +21,7 @@ import DensityGrid from './figures/DensityGrid.astro';
 import DescentField from './figures/DescentField.astro';
 import HohmannTransfer from './figures/HohmannTransfer.astro';
 import MinimaxTree from './figures/MinimaxTree.astro';
+import OddSquares from './figures/OddSquares.astro';
 import Pipeline from './figures/Pipeline.astro';
 import Trajectory3d from './figures/Trajectory3d.astro';
 import { EARTH_MU, EARTH_RADIUS, MOON_ORBIT_RADIUS, PARKING_ALTITUDE, hohmannTransfer } from './geometry';
@@ -169,11 +171,17 @@ const item = 'py-10 first:pt-8 last:pb-0 sm:py-14 sm:first:pt-10';
         title={c.work.title}
       >
         <Work />
+        <Figure slot="figure" number={figure('work')} caption={c.work.caption}>
+          <AccessMatrix labels={c.work.figureLabels} />
+        </Figure>
       </Chapter>
     </li>
     <li class={item}>
       <Chapter id="journey-community" number={number('community')} label={c.community.label} title={c.community.title}>
         <Community />
+        <Figure slot="figure" number={figure('community')} caption={c.community.caption}>
+          <OddSquares />
+        </Figure>
       </Chapter>
     </li>
     <li class={item}>

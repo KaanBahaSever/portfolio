@@ -186,7 +186,7 @@ const tr: AboutMessages = {
   },
   header: {
     eyebrow: 'Hakkımda',
-    title: 'Matematik sezgimi sistem yazılımında kullanıyorum',
+    title: 'Sistem yazılımına matematikçi gözüyle bakıyorum',
   },
   glance: {
     heading: 'Kısaca',
@@ -259,10 +259,10 @@ const tr: AboutMessages = {
         short: 'crowd.inc',
         label: 'crowd.inc',
         // "crowd.inc" is read "kraud ink", so the suffix is "’te", after the typographic apostrophe.
-        title: 'crowd.inc’te Yazılım Geliştirici',
-        // "Rol tabanlı erişim denetimi", as the chapter's prose says.
+        title: 'crowd.inc’te yazılım geliştirici',
+        // "Rol tabanlı erişim kontrolü", as the chapter's prose says.
         caption:
-          'Şematik bir örnek: rol tabanlı erişim denetimi (RBAC). Dört rol var; en az yetkili olan en altta. Her rol, bir altındaki rolün bütün izinlerini devralıyor ve bunlara yenilerini ekliyor. Bu yüzden verilen izinler, yani dolu hücreler, bir merdiven oluşturuyor. Kesikli çizgi herkese açık verileri özel verilerden ayırıyor; en alttaki rol özel verilerin hiçbirine erişemiyor.',
+          'Şematik bir örnek: rol tabanlı erişim kontrolü (RBAC). Dört rol var; en az yetkili olan en altta. Her rol, bir altındaki rolün bütün izinlerini devralıyor ve bunlara yenilerini ekliyor. Bu yüzden verilen izinler, yani dolu hücreler, bir merdiven oluşturuyor. Kesikli çizgi herkese açık verileri özel verilerden ayırıyor; en alttaki rol özel verilerin hiçbirine erişemiyor.',
         figureLabels: {
           roles: { guest: 'MİSAFİR', member: 'ÜYE', editor: 'EDİTÖR', admin: 'YÖNETİCİ' },
           actions: { read: 'OKUMA', write: 'YAZMA', delete: 'SİLME' },

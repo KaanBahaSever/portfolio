@@ -39,7 +39,7 @@ const tr: RowPlacementsMessages = {
   cells: 'hücre',
   counts: 'konum',
   aria: (positions, length, n, last, counts, highlighted, starts) =>
-    `Tahtanın tek bir satırı; hücreleri soldan sağa 1, 2, …, ${n} diye numaralanmış. ${length} hücrelik bir geminin bu satırdaki ${positions} yatay konumu gösteriliyor: başlangıç hücresi k = 1, 2, …, ${last} olan birer konum. Her hücrenin altında, o hücreyi kaplayan konumların sayısı yazılı: ${counts}. Vurgulanan ${highlighted} numaralı hücreyi, başlangıç hücresi k = ${starts} olan konumlar kaplıyor.`,
+    `Tahtanın tek bir satırı; hücreleri soldan sağa 1, 2, …, ${n} diye numaralanmış. ${length} hücrelik bir geminin bu satırdaki ${positions} yatay konumu gösteriliyor; her başlangıç hücresi için bir konum var (k = 1, 2, …, ${last}). Her hücrenin altında, o hücreyi kaplayan konumların sayısı yazılı: ${counts}. Vurgulanan ${highlighted} numaralı hücreyi, başlangıç hücresi k = ${starts} olan konumlar kaplıyor.`,
 };
 const messages = { en, tr } as const satisfies Localized<RowPlacementsMessages>;
 

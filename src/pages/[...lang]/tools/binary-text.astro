@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BinaryText from '../../../components/tools/BinaryText.astro';
+import Icon from '../../../components/ui/Icon.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import Section from '../../../components/ui/Section.astro';
+import { ui } from '../../../components/ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { binaryTextMessages } from '../../../i18n/tools/binary-text';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = binaryTextMessages[locale];
+const t = common[locale];
+
+// Tips carry bit patterns set as code, so each language has its own markup below. The numbers
+// in front are decorative: the ordered list already conveys position.
+const item = 'grid grid-cols-[2rem_minmax(0,1fr)] items-baseline gap-x-2';
+const number = 'font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400';
+const body = 'text-sm leading-relaxed text-zinc-600 dark:text-zinc-400';
+const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    eyebrow={m.header.eyebrow}
+    title={m.meta.title}
+    lead={m.header.lead}
+    back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+  />
+
+  <BinaryText />
+
+  <Section id="tips" title={m.tipsTitle}>
+    <div class="grid gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      {
+        locale === 'tr' ? (
+          <ol class="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+            <li class={item}>
+              <span aria-hidden="true" class={number}>01</span>
+              <p class={body}>
+                <strong class={strong}>UTF-8 nasıl çalışır?</strong> ASCII karakterleri (0–127 arasındaki kod noktaları){' '}
+                <code class={ui.code}>0</code> ile başlayan tek bir bayt kaplar. Diğer karakterler iki ila dört bayt
+                kaplar: ilk bayt, toplam bayt sayısı kadar 1 içeren <code class={ui.code}>110</code>,{' '}
+                <code class={ui.code}>1110</code> ya da <code class={ui.code}>11110</code> ile, sonraki her bayt da{' '}
+                <code class={ui.code}>10</code> ile başlar. ğ, ş ve ı gibi Türkçe harfler iki bayt, çoğu emoji dört bayttır.
+              </p>
+            </li>
+            <li class={item}>
+              <span aria-hidden="true" class={number}>02</span>
+              <p class={body}>
+                <strong class={strong}>İkili kodu yapıştırırken.</strong> Baytları boşluk, satır sonu ya da virgülle
+                ayırın veya uzunluğu 8’in katı olan kesintisiz bir bit dizisi yapıştırın. Grupların başında{' '}
+                <code class={ui.code}>0b</code> ön eki de olabilir (ör. <code class={ui.code}>0b01001000</code>).
+                Bir hata olduğunda araç yerini satır ve sütunla bildirir; “{m.problems.show}” düğmesi o kısmı seçer.
+              </p>
+            </li>
+            <li class={item}>
+              <span aria-hidden="true" class={number}>03</span>
+              <p class={body}>
+                <strong class={strong}>Neden yalnızca ASCII?</strong> Bazı protokoller, dosya biçimleri ve alıştırmalar
+                7 bitlik ASCII bekler. Bu seçeneği açtığınızda ü, ı ya da bir emoji gibi 127’den büyük karakterler, sorun
+                çıkarmadan önce işaretlenir.
+              </p>
+            </li>
+            <li class={item}>
+              <span aria-hidden="true" class={number}>04</span>
+              <p class={body}>
+                <strong class={strong}>Tek emoji, birden fazla kod noktası.</strong> Ten rengi seçilmiş emojiler,
+                bayraklar ve aile emojileri birden fazla kod noktasından oluşur; parçalar çoğu zaman ZWJ
+                (<code class={ui.code}>U+200D</code>) ile birleştirilir. Bu yüzden tablo her parçayı ayrı bir satırda
+                gösterir; bayt sırası işareti (<code class={ui.code}>U+FEFF</code>) gibi görünmez karakterler de orada
+                adlarıyla görünür.
+              </p>
+            </li>
+          </ol>
+        ) : (
+          <ol class="grid gap-x-10 gap-y-6 sm:grid-cols-2">
+            <li class={item}>
+              <span aria-hidden="true" class={number}>01</span>
+              <p class={body}>
+                <strong class={strong}>How UTF-8 works.</strong> ASCII characters (code points 0–127) take one byte,
+                which starts with <code class={ui.code}>0</code>. Every other character takes two to four: its first byte
+                starts with <code class={ui.code}>110</code>, <code class={ui.code}>1110</code> or{' '}
+                <code class={ui.code}>11110</code>, one 1 for each byte, and every byte after it starts with{' '}
+                <code class={ui.code}>10</code>. Turkish letters such as ğ, ş and ı take two bytes; most emoji take four.
+              </p>
+            </li>
+            <li class={item}>
+              <span aria-hidden="true" class={number}>02</span>
+              <p class={body}>
+                <strong class={strong}>Pasting binary.</strong> Separate bytes with spaces, line breaks or commas, or
+                paste one continuous run of bits whose length is a multiple of 8. A <code class={ui.code}>0b</code> prefix
+                is fine too, as in <code class={ui.code}>0b01001000</code>. When something is wrong, the tool gives the
+                line and column; “{m.problems.show}” selects the spot.
+              </p>
+            </li>
+            <li class={item}>
+              <span aria-hidden="true" class={number}>03</span>
+              <p class={body}>
+                <strong class={strong}>Why ASCII only?</strong> Some protocols, file formats and exercises expect 7-bit
+                ASCII. With this option on, characters above 127, such as ü, ı or an emoji, are flagged before they
+                cause trouble.
+              </p>
+            </li>
+            <li class={item}>
+              <span aria-hidden="true" class={number}>04</span>
+              <p class={body}>
+                <strong class={strong}>One emoji, several code points.</strong> Emoji with a skin tone, flags and
+                families are built from several code points, often joined by ZWJ (<code class={ui.code}>U+200D</code>),
+                so the table lists each part on its own row. Invisible characters such as the byte order mark
+                (<code class={ui.code}>U+FEFF</code>) show up there by name.
+              </p>
+            </li>
+          </ol>
+        )
+      }
+
+      <aside
+        aria-label={m.privacy.label}
+        class="flex gap-3 self-start rounded-xl border border-accent-600/20 bg-accent-50 p-4 text-sm leading-relaxed text-accent-950 sm:p-5 dark:border-accent-500/25 dark:bg-accent-500/10 dark:text-accent-100"
+      >
+        <Icon name="lock" class="mt-0.5 size-5 shrink-0 text-accent-700 dark:text-accent-400" />
+        <p><strong class="font-semibold">{m.privacy.title}</strong> {m.privacy.body}</p>
+      </aside>
+    </div>
+  </Section>
+</BaseLayout>

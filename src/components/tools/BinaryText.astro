@@ -1,0 +1,382 @@
+---
+/**
+ * Binary ↔ text converter UI. Behaviour lives in src/scripts/tools/binary-text/controller.ts;
+ * every hook is a data-* attribute scoped to the root section. Text comes from
+ * src/i18n/tools/binary-text.ts, which the controller reads too.
+ *
+ * Two fields stay in sync: the one being edited is the input, the other follows. The
+ * controller only ever writes to the field that is not being edited, and writing a value from
+ * script fires no input event, so an update can never echo back.
+ */
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { getLocale } from '../../i18n/server';
+import { binaryTextMessages } from '../../i18n/tools/binary-text';
+import { DEFAULT_FORMAT, GROUPINGS, SEPARATORS } from '../../lib/text/binary.ts';
+
+const locale = getLocale(Astro);
+const m = binaryTextMessages[locale];
+
+/** Example values are data, the same in both languages; lang marks the Turkish one for speech. */
+const examples = [
+  { value: 'Hi', lang: 'en' },
+  { value: 'Merhaba dünya', lang: 'tr' },
+  { value: '🚀', lang: undefined, label: m.examples.emoji },
+];
+
+const chip =
+  'inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 text-sm text-zinc-800 transition-[border-color,color,translate] duration-150 hover:border-accent-600 hover:text-accent-800 active:translate-y-px dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:border-accent-500 dark:hover:text-accent-300';
+
+/**
+ * The two fields. The border is the field's outline, so it keeps 3:1 (zinc-500, as ui.field).
+ * The input side has the card fill; the output side sinks to the page colour, a quiet cue for
+ * "this one follows". A stale output (the input has an error) gets a dashed amber border and a
+ * text tag, so the state never rests on colour alone.
+ */
+const field =
+  'block min-h-40 w-full resize-y rounded-xl border border-zinc-500 bg-white px-3.5 py-3 text-base leading-relaxed text-zinc-900 transition-[background-color,border-color] duration-200 placeholder:text-zinc-500 data-[output]:bg-zinc-50 data-[stale]:border-dashed data-[stale]:border-amber-600 aria-[invalid=true]:border-rose-600 sm:min-h-52 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:data-[output]:bg-zinc-950 dark:data-[stale]:border-amber-400 dark:aria-[invalid=true]:border-rose-400';
+
+/** Mono role tag above each field ("Input" / "Output"); the controller swaps the words. */
+const roleTag =
+  'label-mono inline-flex items-center gap-1.5 text-zinc-600 data-[role=input]:text-accent-700 dark:text-zinc-400 dark:data-[role=input]:text-accent-400';
+const staleTag =
+  'label-mono hidden text-amber-800 group-data-[stale]/pane:inline dark:text-amber-300';
+
+const copyButton =
+  'group/copy inline-flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100';
+
+/** Segmented control option, as in the Image compressor: a hidden radio inside a 44 px label. */
+const segment =
+  'relative flex min-h-11 min-w-11 flex-1 cursor-pointer items-center justify-center rounded-md px-3 text-sm font-medium whitespace-nowrap text-zinc-600 transition-colors select-none hover:text-zinc-900 has-checked:bg-white has-checked:text-zinc-900 has-checked:shadow-sm has-checked:ring-1 has-checked:ring-accent-600 has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent-700 has-disabled:cursor-not-allowed has-disabled:opacity-45 has-disabled:hover:text-zinc-600 sm:flex-none dark:text-zinc-400 dark:hover:text-zinc-100 dark:has-checked:bg-zinc-800 dark:has-checked:text-zinc-50 dark:has-checked:ring-accent-500 dark:has-focus-visible:outline-accent-400 dark:has-disabled:hover:text-zinc-400';
+const segmentGroup = 'flex rounded-lg border border-zinc-200 bg-zinc-100/80 p-0.5 dark:border-zinc-800 dark:bg-zinc-950';
+const legend = 'float-left mb-2 w-full text-sm font-semibold text-zinc-900 dark:text-zinc-100';
+
+/** Header labels: mono caps, a size smaller and without tracking on phones so the table fits 288 px. */
+const th =
+  'label-mono px-2 py-2.5 text-left align-bottom font-medium text-zinc-600 max-sm:text-[0.6875rem] max-sm:tracking-normal sm:px-3 dark:text-zinc-400';
+---
+
+<section data-binary-text aria-label={m.toolLabel} class="mt-8 sm:mt-10">
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <noscript>
+    <p
+      class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+    >
+      {m.noscript}
+    </p>
+  </noscript>
+
+  <!-- 1. Examples and Clear -->
+  <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+    <div role="group" aria-labelledby="bt-examples-label" class="flex flex-wrap items-center gap-2">
+      <span id="bt-examples-label" class="label-mono mr-1 text-zinc-600 dark:text-zinc-400">{m.examples.label}</span>
+      {
+        examples.map((example) => (
+          <button type="button" data-example={example.value} class={chip}>
+            {example.label ? (
+              <>
+                <span aria-hidden="true">{example.value}</span>
+                <span>{example.label}</span>
+              </>
+            ) : (
+              <span lang={example.lang !== locale ? example.lang : undefined}>{example.value}</span>
+            )}
+          </button>
+        ))
+      }
+    </div>
+    <button type="button" data-clear class:list={[ui.buttonGhost, '-mr-3']}>
+      <Icon name="trash" class="size-5" />
+      {m.clear}
+    </button>
+  </div>
+
+  <!-- 2. The two fields and the direction between them -->
+  <div
+    data-panes
+    data-direction="text-to-binary"
+    class="group/panes mt-3 grid grid-cols-[minmax(0,1fr)] gap-2 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:gap-4"
+  >
+    <div data-pane="text" class="group/pane flex min-w-0 flex-col gap-2">
+      <div class="flex min-h-6 flex-wrap items-baseline justify-between gap-x-3">
+        <label for="bt-text" class="flex items-baseline gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          {m.text.label}{' '}
+          <span class="font-mono text-xs font-normal text-zinc-600 dark:text-zinc-400">{m.text.format}</span>
+        </label>
+        <span class="flex items-baseline gap-3" aria-hidden="true">
+          <span class={staleTag}>{m.stale.tag}</span>
+          <span data-role-tag data-role="input" class={roleTag}>
+            <span class="size-1.5 rounded-full bg-current"></span><span data-role-word>{m.roles.input}</span>
+          </span>
+        </span>
+      </div>
+      <textarea
+        id="bt-text"
+        data-field="text"
+        rows="7"
+        dir="auto"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        autocorrect="off"
+        placeholder={m.text.placeholder}
+        aria-describedby="bt-text-hint"
+        class={field}></textarea>
+      <p id="bt-text-hint" class="sr-only">{m.text.hint}</p>
+      <p id="bt-text-stale" class="sr-only">{m.stale.note}</p>
+      <div class="flex min-h-11 items-center justify-between gap-3">
+        <p data-count="text" class="min-w-0 font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400">
+          {m.counts.characters(0)} · {m.counts.bytes(0)}
+        </p>
+        <button type="button" data-copy="text" data-state="idle" aria-label={m.copy.text} disabled class:list={[copyButton, '-mr-3']}>
+          <Icon name="copy" class="size-4 group-data-[state=copied]/copy:hidden" />
+          <Icon name="check" class="hidden size-4 text-accent-700 group-data-[state=copied]/copy:block dark:text-accent-400" />
+          <span data-copy-label>{m.copy.label}</span>
+        </button>
+      </div>
+    </div>
+
+    <!--
+      Direction: the arrow points from the field being edited to the one that follows (down/up on
+      phones, where the fields are stacked). Decorative: the fields' descriptions say how they sync.
+    -->
+    <div class="flex items-center justify-center md:pb-8" aria-hidden="true">
+      <span
+        class="flex size-10 items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-500 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="size-5 rotate-90 transition-transform duration-300 ease-out group-data-[direction=binary-to-text]/panes:-rotate-90 md:rotate-0 md:group-data-[direction=binary-to-text]/panes:rotate-180"
+        >
+          <path d="M4.5 12h14"></path>
+          <path d="m13.5 7 5 5-5 5" class="stroke-accent-600 dark:stroke-accent-400"></path>
+          <circle cx="4.5" cy="12" r="1.5" class="fill-accent-600 stroke-none dark:fill-accent-400"></circle>
+        </svg>
+      </span>
+    </div>
+
+    <div data-pane="binary" class="group/pane flex min-w-0 flex-col gap-2">
+      <div class="flex min-h-6 flex-wrap items-baseline justify-between gap-x-3">
+        <label for="bt-binary" class="flex items-baseline gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          {m.binary.label}{' '}
+          <span class="font-mono text-xs font-normal text-zinc-600 dark:text-zinc-400">{m.binary.format}</span>
+        </label>
+        <span class="flex items-baseline gap-3" aria-hidden="true">
+          <span class={staleTag}>{m.stale.tag}</span>
+          <span data-role-tag data-role="output" class={roleTag}>
+            <span class="size-1.5 rounded-full bg-current"></span><span data-role-word>{m.roles.output}</span>
+          </span>
+        </span>
+      </div>
+      <textarea
+        id="bt-binary"
+        data-field="binary"
+        data-output
+        rows="7"
+        dir="ltr"
+        translate="no"
+        spellcheck="false"
+        autocapitalize="off"
+        autocomplete="off"
+        autocorrect="off"
+        placeholder={m.binary.placeholder}
+        aria-describedby="bt-binary-hint"
+        class:list={[field, 'font-mono break-all sm:pointer-fine:text-sm']}></textarea>
+      <p id="bt-binary-hint" class="sr-only">{m.binary.hint}</p>
+      <p id="bt-binary-stale" class="sr-only">{m.stale.note}</p>
+      <div class="flex min-h-11 items-center justify-between gap-3">
+        <p class="flex min-w-0 flex-wrap gap-x-3 font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400">
+          <span data-count="binary">{m.counts.bits(0)} · {m.counts.bytes(0)}</span>
+          <span data-pending class="text-zinc-800 empty:hidden dark:text-zinc-200"></span>
+        </p>
+        <button type="button" data-copy="binary" data-state="idle" aria-label={m.copy.binary} disabled class:list={[copyButton, '-mr-3']}>
+          <Icon name="copy" class="size-4 group-data-[state=copied]/copy:hidden" />
+          <Icon name="check" class="hidden size-4 text-accent-700 group-data-[state=copied]/copy:block dark:text-accent-400" />
+          <span data-copy-label>{m.copy.label}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shown when copying fails (the field's content is then selected for the device's own Copy). -->
+  <p data-copy-status class="mt-2 text-sm text-zinc-700 empty:hidden dark:text-zinc-300"></p>
+
+  <!--
+    3. What is wrong and where. Not a live region itself: the controller announces problems through
+    the status above once typing pauses, so a screen reader is not interrupted at every keystroke.
+  -->
+  <div
+    data-problem
+    hidden
+    class="mt-2 flex flex-col gap-3 rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm text-rose-950 sm:flex-row sm:items-start dark:border-rose-500/35 dark:bg-rose-500/10 dark:text-rose-50"
+  >
+    <div class="flex min-w-0 flex-1 gap-3">
+      <Icon name="alert" class="mt-0.5 size-4 shrink-0 text-rose-700 dark:text-rose-300" />
+      <div class="min-w-0 flex-1 space-y-2">
+        <p id="bt-problem-message" data-problem-message class="font-medium break-words"></p>
+        <p
+          data-problem-excerpt
+          aria-hidden="true"
+          translate="no"
+          class="overflow-hidden font-mono text-[0.8125rem] break-all text-rose-900/80 empty:hidden dark:text-rose-100/80"
+        >
+        </p>
+        <p data-problem-hint class="break-words text-rose-900 empty:hidden dark:text-rose-100"></p>
+      </div>
+    </div>
+    <button
+      type="button"
+      data-problem-show
+      class="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start rounded-lg border border-rose-300 bg-white px-3 font-medium text-rose-900 transition-colors hover:bg-rose-100 dark:border-rose-500/40 dark:bg-transparent dark:text-rose-100 dark:hover:bg-rose-500/15"
+    >
+      {m.problems.show}
+    </button>
+  </div>
+
+  <!-- 4. Options -->
+  <div class:list={[ui.card, 'mt-6 flex flex-col gap-5 p-4 sm:flex-row sm:flex-wrap sm:items-start sm:gap-x-8 sm:p-5']}>
+    <h2 class="sr-only">{m.options.heading}</h2>
+
+    <fieldset class="min-w-0">
+      <legend class={legend}>{m.options.separator}</legend>
+      <div class:list={['clear-both', segmentGroup]}>
+        {
+          SEPARATORS.map((separator) => (
+            <label class={segment}>
+              <input
+                type="radio"
+                name="bt-separator"
+                value={separator}
+                data-separator
+                checked={separator === DEFAULT_FORMAT.separator}
+                class="sr-only"
+              />
+              {m.options.separators[separator]}
+            </label>
+          ))
+        }
+      </div>
+    </fieldset>
+
+    <fieldset data-grouping-fieldset class="min-w-0 sm:max-w-80" aria-describedby="bt-grouping-hint">
+      <legend class={legend}>{m.options.grouping}</legend>
+      <div class:list={['clear-both', segmentGroup]}>
+        {
+          GROUPINGS.map((grouping) => (
+            <label class={segment}>
+              <input
+                type="radio"
+                name="bt-grouping"
+                value={grouping}
+                data-grouping
+                checked={grouping === DEFAULT_FORMAT.grouping}
+                class="sr-only"
+              />
+              {m.options.groupings[grouping]}
+            </label>
+          ))
+        }
+      </div>
+      <p id="bt-grouping-hint" data-grouping-hint class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        {m.options.groupingHint}
+      </p>
+    </fieldset>
+
+    <label class="-mx-2 flex min-h-11 cursor-pointer items-start gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-zinc-50 sm:mt-6 sm:max-w-72 dark:hover:bg-zinc-800/50">
+      <input
+        type="checkbox"
+        data-ascii
+        aria-describedby="bt-ascii-detail"
+        class="mt-0.5 size-5 shrink-0 cursor-pointer accent-accent-700 dark:accent-accent-500"
+      />
+      <span class="flex min-w-0 flex-col gap-0.5">
+        <span class="text-sm font-medium text-zinc-900 dark:text-zinc-100">{m.options.ascii.label}</span>
+        {/* Left out of the name (it would run into the label) and read as the description instead. */}
+        <span id="bt-ascii-detail" aria-hidden="true" class="text-sm text-zinc-600 dark:text-zinc-400">
+          {m.options.ascii.detail}
+        </span>
+      </span>
+    </label>
+  </div>
+
+  <!-- 5. Breakdown of the current text -->
+  <section data-breakdown aria-labelledby="bt-breakdown-heading" class="mt-12 sm:mt-16">
+    <div
+      class="flex min-h-11 flex-wrap items-end justify-between gap-x-4 gap-y-1 border-b border-zinc-200 pb-3 dark:border-zinc-800"
+    >
+      <h2 id="bt-breakdown-heading" class="font-serif text-2xl font-medium tracking-tight sm:text-3xl">
+        {m.breakdown.heading}
+      </h2>
+      <p class="flex items-baseline gap-3 font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400">
+        <span data-breakdown-stale hidden class="label-mono text-amber-800 dark:text-amber-300">{m.stale.tag}</span>
+        <span data-breakdown-summary></span>
+      </p>
+    </div>
+
+    <div data-breakdown-empty class="mt-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+      <!-- One byte, the letter H: the leading 0 is UTF-8's one-byte marker. -->
+      <svg
+        viewBox="0 0 170 44"
+        class="h-11 w-auto shrink-0 text-zinc-500 dark:text-zinc-400"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <g fill="none" stroke="currentColor" stroke-width="1" opacity="0.55">
+          <path d="M0.5 0.5h160v24H0.5z"></path>
+          <path d="M20.5 0.5v24M40.5 0.5v24M60.5 0.5v24M80.5 0.5v24M100.5 0.5v24M120.5 0.5v24M140.5 0.5v24"></path>
+        </g>
+        <rect x="1" y="1" width="19" height="23" class="fill-accent-600/15 dark:fill-accent-400/20"></rect>
+        <g class="font-mono" font-size="12" text-anchor="middle" fill="currentColor">
+          {
+            [0, 1, 0, 0, 1, 0, 0, 0].map((bit, index) => (
+              <text x={10.5 + index * 20} y="17" class:list={[index === 0 && 'fill-accent-700 dark:fill-accent-400']}>
+                {bit}
+              </text>
+            ))
+          }
+        </g>
+        <text x="0.5" y="40" class="font-mono" font-size="10" fill="currentColor">H · U+0048</text>
+      </svg>
+      <p class="max-w-prose text-sm text-zinc-600 dark:text-zinc-400">{m.breakdown.empty}</p>
+    </div>
+
+    <div
+      data-breakdown-table
+      hidden
+      role="region"
+      aria-labelledby="bt-breakdown-heading"
+      tabindex="0"
+      class="mt-2 overflow-x-auto rounded-lg focus-visible:outline-offset-2"
+    >
+      <table class="w-full border-collapse text-sm">
+        <caption class="sr-only">{m.breakdown.caption}</caption>
+        <thead>
+          <tr class="border-b border-zinc-200 dark:border-zinc-800">
+            <th scope="col" class:list={[th, 'hidden w-12 sm:table-cell']}>{m.breakdown.columns.index}</th>
+            <th scope="col" class={th}>{m.breakdown.columns.character}</th>
+            <th scope="col" class={th}>{m.breakdown.columns.codePoint}</th>
+            <th scope="col" class={th}>{m.breakdown.columns.hex}</th>
+            <th scope="col" class={th}>{m.breakdown.columns.binary}</th>
+          </tr>
+        </thead>
+        <tbody data-breakdown-body></tbody>
+      </table>
+    </div>
+    <p data-breakdown-capped hidden class="mt-3 text-sm text-zinc-600 dark:text-zinc-400"></p>
+    <p data-breakdown-legend hidden class="mt-4 max-w-prose text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+      {m.breakdown.legend}
+    </p>
+  </section>
+</section>
+
+<script>
+  import { initBinaryText } from '../../scripts/tools/binary-text/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-binary-text]').forEach(initBinaryText);
+</script>

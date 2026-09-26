@@ -173,12 +173,13 @@ const panel = `${ui.card} min-w-0 p-4 sm:p-6`;
   >
   </p>
 
-  <!-- 3. Result -->
+  <!-- 3. Result. aria-busy while a search runs; data-stale dims the previous number's result
+       while a new number is searched (the global reduced-motion rule drops the fade). -->
   <section
     data-result
     hidden
     aria-labelledby="pf-result-heading"
-    class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-4 sm:gap-6"
+    class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-4 transition-opacity duration-200 data-stale:opacity-50 sm:gap-6"
   >
     <h2 id="pf-result-heading" class="sr-only">{m.result.heading}</h2>
 

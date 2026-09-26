@@ -11,7 +11,7 @@ import {
   type Factorization,
   type PrimePower,
 } from '../src/lib/math/factorize.ts';
-import { primality } from '../src/lib/math/primality.ts';
+import { DETERMINISTIC_LIMIT, primality } from '../src/lib/math/primality.ts';
 
 /** Brute-force factorization of a small positive integer. */
 function bruteFactor(n: number): Array<[number, number]> {
@@ -131,7 +131,7 @@ test('two large factors close to √n are found by Fermat’s method', () => {
   assert.deepEqual(result.factors, [[p, 1], [q, 1]]);
 });
 
-test('the largest prime factor of 25 digits or more is reported as probable', () => {
+test('prime factors at or above ψ₁₃ are reported as probable, those below are proven', () => {
   const m127 = 2n ** 127n - 1n; // 39 digits
   const result = factorize(m127);
   assert.deepEqual(result.factors, [[m127, 1]]);
@@ -142,8 +142,12 @@ test('the largest prime factor of 25 digits or more is reported as probable', ()
   assert.deepEqual(product.factors, [[2n, 1], [3n, 1], [m89, 1]]);
   assert.deepEqual(product.probable, [m89]);
 
-  // Below ψ₁₃ the verdict is a proof: nothing is marked probable.
+  // Below ψ₁₃ the verdict is a proof: nothing is marked probable, 25-digit primes included.
   assert.deepEqual(factorize(2n ** 61n - 1n).probable, []);
+  let p25 = 10n ** 24n + 1n;
+  while (primality(p25) !== 'prime') p25 += 2n;
+  assert.ok(p25 < DETERMINISTIC_LIMIT && p25.toString().length === 25);
+  assert.deepEqual(factorize(6n * p25), { factors: [[2n, 1], [3n, 1], [p25, 1]], unfactored: [], probable: [] });
 });
 
 test('a stopped search lists what it could not split, and can be continued', () => {

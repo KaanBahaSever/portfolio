@@ -35,7 +35,8 @@ const LONG_PRODUCT = 28;
 export function renderCanonical(container: HTMLElement, terms: readonly Term[], negative: boolean, locale: Locale): void {
   const fragment = document.createDocumentFragment();
   // A no-break space keeps the × with the term before it; the space after is where lines break.
-  const times = () => [' ', h('span', 'text-zinc-400 dark:text-zinc-500', '×'), ' '];
+  // The × belongs to the result, not the decoration: zinc-500 keeps it above 3:1 in both themes.
+  const times = () => [' ', h('span', 'text-zinc-500', '×'), ' '];
   if (negative) {
     fragment.append(h('span', 'whitespace-nowrap', `${MINUS}1`), ...times());
   }

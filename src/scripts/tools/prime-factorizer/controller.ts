@@ -118,6 +118,8 @@ export function initPrimeFactorizer(root: HTMLElement): void {
   /** Generation of the latest run; results of older runs are dropped. */
   let job = 0;
   let running = false;
+  /** A fresh number, or "search longer" on the cofactors of the one shown. */
+  let runKind: 'fresh' | 'continue' = 'fresh';
   let runStart = 0;
   let lastProgress: FactorProgressUpdate | null = null;
   let progressDelay = 0;
@@ -200,17 +202,20 @@ export function initPrimeFactorizer(root: HTMLElement): void {
         : elapsed;
   }
 
-  function startProgress(): void {
+  function startProgress(kind: 'fresh' | 'continue'): void {
     running = true;
+    runKind = kind;
     lastProgress = null;
     runStart = performance.now();
-    root.dataset.busy = 'true';
+    el.result.setAttribute('aria-busy', 'true');
     el.searchLonger.hidden = true;
     window.clearTimeout(progressDelay);
     window.clearInterval(ticker);
-    // Quick results never show the row, so it does not flicker.
+    // Quick results never show the row (nor dim the old result), so nothing flickers.
     progressDelay = window.setTimeout(() => {
       el.progress.hidden = false;
+      // The result on screen belongs to the previous number while a new one is searched.
+      if (kind === 'fresh') el.result.dataset.stale = 'true';
       tick();
       ticker = window.setInterval(tick, 200);
       announce(m.status.factoring);
@@ -219,7 +224,8 @@ export function initPrimeFactorizer(root: HTMLElement): void {
 
   function stopProgress(): void {
     running = false;
-    delete root.dataset.busy;
+    el.result.removeAttribute('aria-busy');
+    delete el.result.dataset.stale;
     window.clearTimeout(progressDelay);
     window.clearInterval(ticker);
     // The Cancel button is about to disappear: keep keyboard focus in the tool.
@@ -229,16 +235,32 @@ export function initPrimeFactorizer(root: HTMLElement): void {
     if (hadFocus) el.input.focus({ preventScroll: true });
   }
 
-  function onProgress(token: number) {
+  /**
+   * `alreadyFound`: prime factors an earlier search found. A continuation only factors the
+   * cofactors left over, so the worker's own count starts again from zero.
+   */
+  function onProgress(token: number, alreadyFound = 0) {
     return (update: FactorProgressUpdate) => {
-      if (token === job) lastProgress = update;
+      if (token === job) lastProgress = { ...update, found: update.found + alreadyFound };
     };
+  }
+
+  /**
+   * After a fresh run is cancelled or fails, the result on screen is still the previous
+   * number's: it goes, so nothing suggests it answers the number in the field.
+   */
+  function dropStaleResult(): void {
+    if (runKind !== 'fresh') return;
+    shown = null;
+    allDivisors = null;
+    el.result.hidden = true;
   }
 
   function onFailure(token: number) {
     return (error: unknown) => {
       if (token !== job || isAbortError(error)) return;
       stopProgress();
+      dropStaleResult();
       setStatus(m.status.failed, 'error');
       announce(m.status.failed);
     };
@@ -257,7 +279,7 @@ export function initPrimeFactorizer(root: HTMLElement): void {
       show(value, magnitude === 0n ? null : { factors: [], unfactored: [], probable: [] }, 0);
       return;
     }
-    startProgress();
+    startProgress('fresh');
     engine
       .run([magnitude], TIME_LIMIT_MS, onProgress(token))
       .then(({ result, elapsedMs }) => {
@@ -274,10 +296,11 @@ export function initPrimeFactorizer(root: HTMLElement): void {
     if (!previous?.result || previous.result.unfactored.length === 0) return;
     const token = ++job;
     const earlier = previous.result;
+    const alreadyFound = earlier.factors.reduce((count, [, exponent]) => count + exponent, 0);
     setStatus('');
-    startProgress();
+    startProgress('continue');
     engine
-      .run(earlier.unfactored, EXTRA_TIME_MS, onProgress(token))
+      .run(earlier.unfactored, EXTRA_TIME_MS, onProgress(token, alreadyFound))
       .then(({ result, elapsedMs }) => {
         if (token !== job) return;
         stopProgress();
@@ -292,6 +315,7 @@ export function initPrimeFactorizer(root: HTMLElement): void {
     job++;
     engine.cancel();
     stopProgress();
+    dropStaleResult();
     setStatus(m.status.cancelled);
     announce(m.status.cancelled);
     // A cancelled continuation leaves the previous result as it was, with its button.
@@ -421,7 +445,11 @@ export function initPrimeFactorizer(root: HTMLElement): void {
     }
 
     el.divisorCount.textContent = m.divisors.count(big(total), total === 1n);
+    // Past the cap, Copy (like the expanded list) takes only the smallest DIVISOR_CAP divisors.
+    const capped = total > BigInt(DIVISOR_CAP);
+    const cap = big(BigInt(DIVISOR_CAP));
     el.copyDivisors.hidden = false;
+    el.copyDivisors.setAttribute('aria-label', capped ? m.result.copySmallestDivisors(cap) : m.result.copyDivisors);
     resetCopyButton(el.copyDivisors);
 
     const list = divisorsExpanded
@@ -442,16 +470,20 @@ export function initPrimeFactorizer(root: HTMLElement): void {
     else el.divisorList.removeAttribute('tabindex');
 
     el.divisorNote.textContent =
-      divisorsExpanded && more ? m.divisors.truncated(big(BigInt(list.length)), big(total)) : '';
+      divisorsExpanded && more
+        ? m.divisors.truncated(big(BigInt(list.length)), big(total))
+        : capped
+          ? m.divisors.copyLimit(cap, big(total))
+          : '';
 
     const expandable = total > BigInt(DIVISOR_PREVIEW);
     el.divisorToggle.hidden = !expandable;
     el.divisorToggle.toggleAttribute('data-expanded', divisorsExpanded);
     el.divisorToggleLabel.textContent = divisorsExpanded
       ? m.divisors.showFewer
-      : total <= BigInt(DIVISOR_CAP)
-        ? m.divisors.showAll(big(total))
-        : m.divisors.showFirst(big(BigInt(DIVISOR_CAP)));
+      : capped
+        ? m.divisors.showFirst(cap)
+        : m.divisors.showAll(big(total));
   }
 
   // ---------------------------------------------------------------- copy
@@ -464,7 +496,7 @@ export function initPrimeFactorizer(root: HTMLElement): void {
     query<HTMLElement>(button, '[data-copy-label]').textContent = m.result.copy;
   }
 
-  async function copy(button: HTMLButtonElement, text: string): Promise<void> {
+  async function copy(button: HTMLButtonElement, text: string, announcement = m.result.copiedAnnouncement): Promise<void> {
     const copied = await writeToClipboard(text);
     window.clearTimeout(copiedTimers.get(button));
     if (!copied) {
@@ -475,7 +507,7 @@ export function initPrimeFactorizer(root: HTMLElement): void {
     setStatus('');
     button.dataset.state = 'copied';
     query<HTMLElement>(button, '[data-copy-label]').textContent = m.result.copied;
-    announce(m.result.copiedAnnouncement);
+    announce(announcement);
     copiedTimers.set(
       button,
       window.setTimeout(() => resetCopyButton(button), COPIED_MS),
@@ -495,7 +527,12 @@ export function initPrimeFactorizer(root: HTMLElement): void {
   el.copyDivisors.addEventListener('click', () => {
     const current = shown;
     if (!current?.result || !current.analysis.complete) return;
-    void copy(el.copyDivisors, divisorsCopyText(divisorsUpToCap(current.result)));
+    const capped = current.analysis.divisorCount !== null && current.analysis.divisorCount > BigInt(DIVISOR_CAP);
+    void copy(
+      el.copyDivisors,
+      divisorsCopyText(divisorsUpToCap(current.result)),
+      capped ? m.result.copiedSmallestDivisors(big(BigInt(DIVISOR_CAP))) : m.result.copiedAnnouncement,
+    );
   });
 
   // ---------------------------------------------------------------- events

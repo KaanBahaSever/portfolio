@@ -52,7 +52,7 @@ const tips: Localized<ToolTip[]> = {
   tr: [
     {
       lead: 'Neler yazılabilir?',
-      body: `En fazla ${MAX_DIGITS} basamaklı tam sayılar; ayırıcıyla ya da ayırıcısız: 1 000 000, 1_000_000 ve 1.000.000 yazımlarının hepsi geçerlidir. Negatif bir −n sayısı −1 × n olarak ayrılır; 0 ve 1 ise çarpanlara ayrılmak yerine açıklanır.`,
+      body: `En fazla ${MAX_DIGITS} basamaklı tam sayılar; ayırıcıyla ya da ayırıcısız: 1 000 000, 1_000_000 ve 1.000.000 yazımlarının hepsi geçerlidir. Negatif bir −n sayısı −1 × n olarak çarpanlarına ayrılır; 0 ve 1 ise çarpanlara ayrılmak yerine açıklanır.`,
     },
     {
       lead: 'Nasıl çalışır?',
@@ -68,11 +68,11 @@ const tips: Localized<ToolTip[]> = {
     },
     {
       lead: 'Carmichael sayıları.',
-      body: '561 = 3 × 11 × 17, kendisiyle aralarında asal her a tabanı için Fermat testini (aⁿ⁻¹ ≡ 1 mod n) tıpkı bir asal sayı gibi geçer. Miller–Rabin testi yol üzerindeki 1’in kareköklerine de baktığı için bu sayıyı yakalar.',
+      body: '561 = 3 × 11 × 17, kendisiyle aralarında asal olan her a tabanı için Fermat testini (aⁿ⁻¹ ≡ 1 mod n) tıpkı bir asal sayı gibi geçer. Miller–Rabin testi ara adımlarda 1’in kareköklerini de denetlediği için bu sayıyı yakalar.',
     },
     {
       lead: 'Klavye.',
-      body: 'Enter tuşu sayıyı çarpanlarına ayırır, Esc tuşu uzun bir aramayı iptal eder. Örnekler alanı doldurur ve sayıyı hemen çarpanlarına ayırır.',
+      body: 'Enter tuşu sayıyı çarpanlarına ayırır, Esc tuşu uzun bir aramayı iptal eder. Bir örneği seçtiğinizde sayı alana yazılır ve hemen çarpanlarına ayrılır.',
     },
   ],
 };

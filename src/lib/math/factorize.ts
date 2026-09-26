@@ -25,8 +25,8 @@ export interface Factorization {
    */
   unfactored: bigint[];
   /**
-   * Prime factors of 25 digits or more, whose primality rests on the Baillie–PSW probable-prime
-   * test rather than a proof (see primality.ts). Ascending.
+   * Prime factors at or above ψ₁₃ ≈ 3.3 × 10²⁴, whose primality rests on the Baillie–PSW
+   * probable-prime test rather than a proof (see primality.ts). Ascending.
    */
   probable: bigint[];
 }

@@ -94,7 +94,10 @@ const en = {
     copied: 'Copied',
     copyFactorization: 'Copy the factorization',
     copyDivisors: 'Copy the divisors',
+    /** The divisors' Copy button when there are more divisors than the list ever holds. */
+    copySmallestDivisors: (cap: string) => `Copy the smallest ${cap} divisors`,
     copiedAnnouncement: 'Copied to clipboard',
+    copiedSmallestDivisors: (cap: string) => `Copied the smallest ${cap} divisors.`,
     copyFailed: 'Couldn’t copy automatically. Select the text and use your device’s Copy command.',
     /** The factorization read aloud: "2 to the power 3 times 3 to the power 2 times 5". */
     spoken: {
@@ -109,11 +112,12 @@ const en = {
     notes: {
       zero: '0 has no prime factorization. Every integer divides 0 (0 = d × 0), so 0 has infinitely many divisors, and τ, σ and φ are not defined for it.',
       one: '1 is the empty product: it has no prime factors and is neither prime nor composite. Its only positive divisor is 1.',
-      minusOne: '−1 is a unit, like 1: it has no prime factors and is neither prime nor composite. Its only positive divisor is 1.',
+      minusOne:
+        '−1 is a unit, like 1: it has no prime factors and is neither prime nor composite. Its only positive divisor is 1, and the functions and properties below describe |n| = 1.',
       negative: (magnitude: string) =>
         `A negative number factors as −1 × |n|. The divisors, functions and properties below describe |n| = ${magnitude}.`,
       probable:
-        'Factors marked † passed the Baillie–PSW probable-prime test. No composite number is known to pass it, but for numbers of 25 digits or more it is not a proof.',
+        'Factors marked † passed the Baillie–PSW probable-prime test. No composite number is known to pass it, but above 3.3 × 10²⁴ it is not a proof.',
       incomplete: (count: number) =>
         `The ${count === 1 ? 'factor' : 'factors'} in brackets ${count === 1 ? 'is' : 'are'} composite but could not be split within the time limit. Pollard’s rho needs about √p steps to find a prime factor p, so this happens when every prime factor left has about 15 digits or more.`,
     },
@@ -128,6 +132,8 @@ const en = {
     showFirst: (cap: string) => `Show the first ${cap}`,
     showFewer: 'Show fewer',
     truncated: (shown: string, total: string) => `Showing the smallest ${shown} of ${total} divisors.`,
+    /** Under the collapsed list when there are more divisors than the cap: what Copy takes. */
+    copyLimit: (cap: string, total: string) => `Copy takes the smallest ${cap} of the ${total} divisors.`,
     unavailable: 'The divisors follow from the complete factorization, which is not known yet.',
   },
 
@@ -257,7 +263,9 @@ const tr: PrimeFactorizerMessages = {
     copied: 'Kopyalandı',
     copyFactorization: 'Çarpanlara ayrılışı kopyala',
     copyDivisors: 'Bölenleri kopyala',
+    copySmallestDivisors: (cap) => `En küçük ${cap} böleni kopyala`,
     copiedAnnouncement: 'Panoya kopyalandı',
+    copiedSmallestDivisors: (cap) => `En küçük ${cap} bölen kopyalandı.`,
     copyFailed: 'Otomatik olarak kopyalanamadı. Metni seçip cihazınızın Kopyala komutunu kullanın.',
     spoken: {
       power: (base, exponent) => `${base} üzeri ${exponent}`,
@@ -271,13 +279,14 @@ const tr: PrimeFactorizerMessages = {
     notes: {
       zero: '0’ın asal çarpanlara ayrılışı yoktur. Her tam sayı 0’ı böler (0 = d × 0); bu yüzden 0’ın sonsuz sayıda böleni vardır ve τ, σ, φ fonksiyonları 0 için tanımlı değildir.',
       one: '1 boş çarpımdır: hiç asal çarpanı yoktur, ne asal ne de bileşiktir. Tek pozitif böleni 1’dir.',
-      minusOne: '−1, tıpkı 1 gibi bir birimdir: hiç asal çarpanı yoktur, ne asal ne de bileşiktir. Tek pozitif böleni 1’dir.',
+      minusOne:
+        '−1, tıpkı 1 gibi bir birimdir: hiç asal çarpanı yoktur, ne asal ne de bileşiktir. Tek pozitif böleni 1’dir; aşağıdaki fonksiyonlar ve özellikler |n| = 1 için geçerlidir.',
       negative: (magnitude) =>
-        `Negatif bir sayı −1 × |n| biçiminde ayrılır. Aşağıdaki bölenler, fonksiyonlar ve özellikler |n| = ${magnitude} için geçerlidir.`,
+        `Negatif bir sayı −1 × |n| biçiminde çarpanlarına ayrılır. Aşağıdaki bölenler, fonksiyonlar ve özellikler |n| = ${magnitude} için geçerlidir.`,
       probable:
-        '† ile işaretlenen çarpanlar Baillie–PSW olası asallık testini geçti. Bu testi geçen hiçbir bileşik sayı bilinmiyor; yine de 25 ve daha fazla basamaklı sayılar için bu bir ispat değildir.',
+        '† ile işaretlenen çarpanlar Baillie–PSW olası asallık testini geçti. Bu testi geçen hiçbir bileşik sayı bilinmiyor; yine de 3,3 × 10²⁴ değerinin üzerindeki sayılar için bu bir ispat değildir.',
       incomplete: (count) =>
-        `Köşeli parantez içindeki ${count === 1 ? 'çarpan' : 'çarpanlar'} bileşik, ancak süre sınırı içinde ayrıştırılamadı. Pollard’ın rho yöntemi bir p asal çarpanını bulmak için yaklaşık √p adım atar; kalan asal çarpanların hepsi 15 ya da daha fazla basamaklı olduğunda bu durum yaşanır.`,
+        `Köşeli parantez içindeki ${count === 1 ? 'çarpan' : 'çarpanlar'} bileşiktir, ancak süre sınırı içinde ayrıştırılamadı. Pollard’ın rho yöntemi bir p asal çarpanını bulmak için yaklaşık √p adım atar; kalan asal çarpanların hepsi 15 ya da daha fazla basamaklı olduğunda bu durum yaşanır.`,
     },
     searchLonger: (seconds) => `${seconds} daha ara`,
   },
@@ -291,7 +300,9 @@ const tr: PrimeFactorizerMessages = {
     showFirst: (cap) => `İlk ${cap} böleni göster`,
     showFewer: 'Daha az göster',
     truncated: (shown, total) => `Toplam ${total} bölenden en küçük ${shown} tanesi gösteriliyor.`,
-    unavailable: 'Bölenler tam asal çarpan ayrılışından elde edilir; bu sayının tam ayrılışı henüz bilinmiyor.',
+    copyLimit: (cap, total) => `Kopyala düğmesi, toplam ${total} bölenden en küçük ${cap} tanesini kopyalar.`,
+    unavailable:
+      'Bölenler ancak tüm asal çarpanlar bilindiğinde hesaplanabilir; bu sayının asal çarpanlarının hepsi henüz bulunamadı.',
   },
 
   functions: {
@@ -306,7 +317,7 @@ const tr: PrimeFactorizerMessages = {
       name: 'Asal çarpanlar',
       value: (distinct, total) => `${trNumber(distinct)} farklı · katlılıkla ${trNumber(total)}`,
     },
-    unknown: 'Tam ayrılış gerekiyor',
+    unknown: 'Tüm asal çarpanlar bilinmeli',
   },
 
   properties: {
@@ -326,7 +337,7 @@ const tr: PrimeFactorizerMessages = {
       deficient: 'Eksik sayı: σ(n) < 2n.',
     },
     carmichael: 'Carmichael sayısı',
-    carmichaelNote: 'Bileşik olduğu hâlde, kendisiyle aralarında asal her tabanda Fermat testini geçer.',
+    carmichaelNote: 'Bileşik olduğu hâlde, kendisiyle aralarında asal olan her tabanda Fermat testini geçer.',
     unknown: 'Bilinmiyor',
   },
 

@@ -270,6 +270,8 @@ test('about.txt tells the current story in both languages', () => {
   assert.doesNotMatch(en, /launched successfully|high-power/);
   assert.match(en, /2016: programming fundamentals in C# at a vocational high school/);
   assert.match(en, /Hunt & Target algorithm came later/);
+  // Why Battleship, in the owner's words (and the same in Turkish below).
+  assert.match(en, /Battleship was the game I played with my father as a child, which is why I wanted to design my own/);
   assert.doesNotMatch(en, /aims with probability densities/);
   assert.match(en, /rewritten from scratch as Rocket-Up/);
   assert.match(en, /Google Developer Student Clubs core team, 2023/);
@@ -281,6 +283,7 @@ test('about.txt tells the current story in both languages', () => {
   assert.match(tr, /Rocket-Up/);
   assert.match(tr, /Matematik Kulübü/);
   assert.match(tr, /av ve hedef \(hunt & target\) algoritmasını sonradan geliştirdim/);
+  assert.match(tr, /Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu/);
   assert.doesNotMatch(tr, /Hunt & Target|Kodun çevresinde|kodun yanında/);
   // The Rocket-Up page and the research repository are linked, localized where they are site pages.
   const links = hrefs(fileLines(trData, ['about.txt']));

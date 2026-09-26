@@ -6,7 +6,9 @@
  *
  * Lines are rich-text data (src/lib/console/rich.ts), not HTML. Links use locale-free page paths
  * ('/games/'); the builder localizes them. File names and commands stay English in both languages.
- * Every fact here comes from the CV: do not add roles, dates or numbers that are not there.
+ * Every fact here comes from the CV: do not add roles, dates or numbers that are not there. The one
+ * exception is the owner's own word on why he made Battleship (he played it with his father as a
+ * child): keep it as he told it, without added details.
  * The owner is a software developer: nothing here calls him an engineer ("mühendis"); other
  * people keep their own titles (tests/console-data.test.ts enforces it).
  */
@@ -99,7 +101,7 @@ const en = {
     ),
     indented(
       2,
-      'My high school graduation projects were desktop Tic-Tac-Toe (“XOX”) and Battleship (“Amiral Battı”); the Battleship opponent’s Hunt & Target algorithm came later. Both games now run in the browser: ',
+      'My high school graduation projects were desktop Tic-Tac-Toe (“XOX”) and Battleship (“Amiral Battı”). Battleship was the game I played with my father as a child, which is why I wanted to design my own; the computer opponent’s Hunt & Target algorithm came later. Both games now run in the browser: ',
       link('games', '/games/'),
       '.',
     ),
@@ -311,7 +313,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Lise bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; Amiral Battı rakibinin av ve hedef (hunt & target) algoritmasını sonradan geliştirdim. İki oyun da artık tarayıcıda çalışıyor: ',
+      'Lise bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı. Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu. Bilgisayar rakibin av ve hedef (hunt & target) algoritmasını sonradan geliştirdim. İki oyun da artık tarayıcıda çalışıyor: ',
       link('oyunlar', '/games/'),
       '.',
     ),

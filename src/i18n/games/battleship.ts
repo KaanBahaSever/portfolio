@@ -131,7 +131,7 @@ const en = {
       `${count === 1 ? 'Most likely target' : 'Most likely targets'}: ${coordinates}`,
     more: (n: number) => `${n} more`,
   },
-  guide: { howToPlay: 'How to play', aiming: 'How the computer aims' },
+  guide: { howToPlay: 'How to play', aiming: 'How the computer aims', story: 'Behind the game' },
   result: {
     eyebrow: 'Game over',
     win: 'You win',
@@ -258,7 +258,7 @@ const tr: BattleshipMessages = {
     peaks: (coordinates, count) => `${count === 1 ? 'En olası hedef' : 'En olası hedefler'}: ${coordinates}`,
     more: (n) => `${n} hücre daha`,
   },
-  guide: { howToPlay: 'Nasıl oynanır', aiming: 'Bilgisayar nasıl nişan alır' },
+  guide: { howToPlay: 'Nasıl oynanır', aiming: 'Bilgisayar nasıl nişan alır', story: 'Oyunun hikâyesi' },
   result: {
     eyebrow: 'Oyun bitti',
     win: 'Kazandınız',

@@ -63,7 +63,8 @@ const en = {
         title: 'Algorithmic foundations',
         meta: '2016 – 2019 · C# · MS SQL',
         // The early Battleship was a plain desktop game: its Hunt & Target opponent came later.
-        text: 'It began in 2016 with C# at a vocational high school: data structures and algorithmic problem-solving, then database applications on MS SQL. The graduation projects were desktop Tic-Tac-Toe and Battleship; the Hunt & Target algorithm came later.',
+        // Battleship was the game the owner played with his father as a child; add no details.
+        text: 'It began in 2016 with C# at a vocational high school: data structures and algorithmic problem-solving, then database applications on MS SQL. The graduation projects were desktop Tic-Tac-Toe and Battleship, the game I played with my father as a child; the Hunt & Target algorithm came later.',
       },
       avionics: {
         title: 'Rocket avionics',
@@ -162,7 +163,7 @@ const tr: HomeMessages = {
       foundations: {
         title: 'Algoritmik temeller',
         meta: '2016 – 2019 · C# · MS SQL',
-        text: 'Her şey 2016’da bir meslek lisesinde C# ile başladı: veri yapıları ve algoritmik problem çözme, ardından MS SQL tabanlı veritabanı uygulamaları. Bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; av ve hedef (hunt & target) algoritmasını ise sonradan geliştirdim.',
+        text: 'Her şey 2016’da bir meslek lisesinde C# ile başladı: veri yapıları ve algoritmik problem çözme, ardından MS SQL tabanlı veritabanı uygulamaları. Bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; Amiral Battı’yı çocukken babamla oynardım. Av ve hedef (hunt & target) algoritmasını ise sonradan geliştirdim.',
       },
       avionics: {
         title: 'Roket aviyoniği',

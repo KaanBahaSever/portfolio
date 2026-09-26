@@ -183,6 +183,8 @@ test('the journey teaser follows the About page and tells the current story', ()
   // The early Battleship was a plain desktop game; Hunt & Target came later.
   assert.match(chapters.foundations.text, /2016/);
   assert.match(chapters.foundations.text, /Hunt & Target algorithm came later/);
+  // Battleship was the game the owner played with his father as a child (in both languages).
+  assert.match(chapters.foundations.text, /Battleship, the game I played with my father as a child/);
   assert.doesNotMatch(chapters.foundations.text, /probability/i);
   assert.match(chapters.avionics.text, /one low-altitude \(5,000 ft\) and two high-altitude \(10,000 ft\)/);
   assert.doesNotMatch(chapters.avionics.text, /launch/i);
@@ -190,7 +192,8 @@ test('the journey teaser follows the About page and tells the current story', ()
   assert.match(chapters.simulation.text, /2020/);
   assert.match(chapters.simulation.text, /Rocket-Up/);
   // Turkish uses the site's name for the algorithm (as on the Playground card), English in parentheses.
-  assert.match(homeMessages.tr.journey.chapters.foundations.text, /av ve hedef \(hunt & target\) algoritmasını/);
+  assert.match(homeMessages.tr.journey.chapters.foundations.text, /[Aa]v ve hedef \(hunt & target\) algoritmasını/);
+  assert.match(homeMessages.tr.journey.chapters.foundations.text, /Amiral Battı’yı çocukken babamla oynardım/);
   assert.doesNotMatch(homeMessages.tr.journey.chapters.foundations.text, /Hunt & Target/);
   assert.match(homeMessages.tr.journey.chapters.avionics.text, /5\.000 ft/);
   assert.match(homeMessages.tr.journey.chapters.simulation.text, /Rocket-Up/);

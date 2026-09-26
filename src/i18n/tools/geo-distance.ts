@@ -223,7 +223,7 @@ const tr: GeoDistanceMessages = {
         'A noktası bir kutupta; oradan her yön güneyi (Güney Kutbu’nda kuzeyi) gösterir. Başlangıç yönü, girdiğiniz boylamın meridyenine göre ölçülür.',
       poleB: 'B noktası bir kutupta. Varış yönü, bu nokta için girdiğiniz boylamın meridyenine göre ölçülür.',
       vincenty:
-        'Neredeyse karşıt olan bu noktalar için Vincenty yöntemi yakınsamıyor; bu yüzden elipsoit üzerindeki mesafe gösterilmiyor.',
+        'Neredeyse karşıt olan bu noktalarda Vincenty yöntemi bir sonuca ulaşamıyor; bu yüzden elipsoit üzerindeki mesafe gösterilmiyor.',
     },
   },
   compass: {
@@ -254,7 +254,8 @@ const tr: GeoDistanceMessages = {
       coincident: 'Küreye çok uzaktan, nokta tam karşıda kalacak şekilde bakılıyor.',
       antipodal: 'Tek bir rota olmadığı için A ve B kürenin karşıt kenarlarında duruyor.',
     },
-    legend: 'Düz çizgi: A ile B arasındaki rota. Kesikli çizgi: bu büyük dairenin geri kalanı. Nokta: orta nokta.',
+    // "Düz çizgi" also reads as "straight line", which the curved route is not.
+    legend: 'Kesintisiz çizgi: A ile B arasındaki rota. Kesikli çizgi: aynı büyük dairenin geri kalanı. Nokta: orta nokta.',
   },
   announce: {
     result: (distance, bearing) => `Mesafe: ${distance}. Başlangıç yönü: ${bearing}.`,

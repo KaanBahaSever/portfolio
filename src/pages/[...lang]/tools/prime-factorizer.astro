@@ -56,7 +56,7 @@ const tips: Localized<ToolTip[]> = {
     },
     {
       lead: 'Nasıl çalışır?',
-      body: `Araç önce sayıyı ${tr.number(SMALL_PRIME_LIMIT)} değerinin altındaki bütün asal sayılara bölmeyi dener. Sonra geriye kalan kısmın tam kuvvet olup olmadığına ve √n’ye yakın iki çarpanı olup olmadığına hızlıca bakar. En son bu kısmı Pollard’ın rho yöntemiyle, Brent’in geliştirdiği sürümle ayrıştırır. Bütün hesaplarda BigInt kullanılır, yani hiçbir sonuç yuvarlanmaz.`,
+      body: `Araç önce sayıyı ${tr.number(SMALL_PRIME_LIMIT)} değerinin altındaki bütün asal sayılara bölmeyi dener. Sonra kalan kısım bir tam kuvvet mi, √n’ye yakın iki çarpanı var mı diye hızlıca bakar. En son bu kısmı, Pollard’ın rho yönteminin Brent sürümüyle ayrıştırır. Bütün hesaplarda BigInt kullanılır, yani hiçbir sonuç yuvarlanmaz.`,
     },
     {
       lead: 'Asal mı, olası asal mı?',
@@ -64,7 +64,7 @@ const tips: Localized<ToolTip[]> = {
     },
     {
       lead: 'Çok uzun sürerse ne olur?',
-      body: `Rho yöntemi bir p asal çarpanını yaklaşık √p adımda bulur. Bu yüzden 20 basamaklı iki asalın çarpımı olan 40 basamaklı bir sayıyı ayırmak saatler sürebilir. Arama ${tr.number(seconds)} saniye sonra durur ve geriye hangi çarpanın kaldığını gösterir. İsterseniz aramayı uzatabilirsiniz.`,
+      body: `Rho yöntemi bir p asal çarpanını yaklaşık √p adımda bulur. Bu yüzden 20 basamaklı iki asalın çarpımı olan 40 basamaklı bir sayıyı çarpanlarına ayırmak saatler sürebilir. Arama ${tr.number(seconds)} saniye sonra durur ve araç geriye hangi çarpanın kaldığını gösterir. İsterseniz aramayı uzatabilirsiniz.`,
     },
     {
       lead: 'Carmichael sayıları.',
@@ -72,7 +72,7 @@ const tips: Localized<ToolTip[]> = {
     },
     {
       lead: 'Klavye kısayolları.',
-      body: 'Enter tuşuna basınca sayı çarpanlarına ayrılır, Esc tuşu da uzun süren bir aramayı iptal eder. Bir örneğe tıkladığınızda sayı alana yazılır ve hemen çarpanlarına ayrılır.',
+      body: 'Enter tuşuna basınca sayı çarpanlarına ayrılır, Esc tuşuna basınca da uzun süren arama iptal edilir. Bir örneğe tıkladığınızda sayı alana yazılır ve hemen çarpanlarına ayrılır.',
     },
   ],
 };

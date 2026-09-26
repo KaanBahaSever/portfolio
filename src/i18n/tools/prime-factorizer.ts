@@ -243,7 +243,7 @@ const tr: PrimeFactorizerMessages = {
     failed: 'Hesaplama beklenmedik biçimde durdu. Yeniden deneyin.',
     announcePrime: (value) => `${value} bir asal sayıdır.`,
     announceProbablePrime: (value) => `${value} olası bir asal sayıdır.`,
-    announceFactors: (value, spoken) => `${value} sayısının asal çarpanlara ayrılışı: ${spoken}.`,
+    announceFactors: (value, spoken) => `${value} sayısının asal çarpanları: ${spoken}.`,
     announceIncomplete: (count, elapsed) =>
       `Arama ${elapsed} sonra durdu: ${trNumber(count)} bileşik çarpan süre sınırı içinde ayrıştırılamadı.`,
   },
@@ -258,10 +258,11 @@ const tr: PrimeFactorizerMessages = {
       zero: 'Sıfır',
     },
     digits: (count) => `${trNumber(count)} basamak`,
-    canonicalLabel: 'Asal çarpanlara ayrılış',
+    // "Ayrılış" means a departure; the result is the number in its factored form.
+    canonicalLabel: 'Asal çarpanlarına ayrılmış hâli',
     copy: 'Kopyala',
     copied: 'Kopyalandı',
-    copyFactorization: 'Çarpanlara ayrılışı kopyala',
+    copyFactorization: 'Asal çarpanları kopyala',
     copyDivisors: 'Bölenleri kopyala',
     copySmallestDivisors: (cap) => `En küçük ${cap} böleni kopyala`,
     copiedAnnouncement: 'Panoya kopyalandı',
@@ -277,7 +278,7 @@ const tr: PrimeFactorizerMessages = {
       unfactored: (value) => `${value} (bileşik, henüz ayrıştırılmadı)`,
     },
     notes: {
-      zero: '0’ın asal çarpanlara ayrılışı yoktur. Her tam sayı 0’ı böler (0 = d × 0); bu yüzden 0’ın sonsuz sayıda böleni vardır ve τ, σ, φ fonksiyonları 0 için tanımlı değildir.',
+      zero: '0 asal çarpanlarına ayrılamaz. Her tam sayı 0’ı böler (0 = d × 0); bu yüzden 0’ın sonsuz sayıda böleni vardır ve τ, σ, φ fonksiyonları 0 için tanımlı değildir.',
       one: '1 boş çarpımdır: hiç asal çarpanı yoktur, ne asal ne de bileşiktir. Tek pozitif böleni 1’dir.',
       minusOne:
         '−1, tıpkı 1 gibi bir birimdir: hiç asal çarpanı yoktur, ne asal ne de bileşiktir. Tek pozitif böleni 1’dir; aşağıdaki fonksiyonlar ve özellikler |n| = 1 için geçerlidir.',
@@ -286,7 +287,7 @@ const tr: PrimeFactorizerMessages = {
       probable:
         '† ile işaretli çarpanlar Baillie–PSW olası asallık testini geçti. Bu testi geçen hiçbir bileşik sayı bilinmiyor. Yine de 3,3 × 10²⁴ değerinin üzerindeki sayılar için testi geçmek bir ispat sayılmaz.',
       incomplete: (count) =>
-        `Köşeli parantez içindeki ${count === 1 ? 'çarpan' : 'çarpanlar'} bileşik, ama süre sınırı içinde ayrıştırılamadı. Pollard’ın rho yöntemi bir p asal çarpanını yaklaşık √p adımda bulur. Bu yüzden kalan asal çarpanların hepsi yaklaşık 15 basamak ya da daha uzunsa süre yetmez.`,
+        `Köşeli parantez içindeki ${count === 1 ? 'çarpan' : 'çarpanlar'} bileşik, ama süre sınırı içinde ayrıştırılamadı. Pollard’ın rho yöntemi bir p asal çarpanını yaklaşık √p adımda bulur. Bu yüzden kalan asal çarpanların hepsi yaklaşık 15 basamaklı ya da daha büyükse süre yetmez.`,
     },
     searchLonger: (seconds) => `${seconds} daha ara`,
   },
@@ -302,7 +303,7 @@ const tr: PrimeFactorizerMessages = {
     truncated: (shown, total) => `Toplam ${total} bölenden en küçük ${shown} tanesi gösteriliyor.`,
     copyLimit: (cap, total) => `Kopyala düğmesi, toplam ${total} bölenden en küçük ${cap} tanesini kopyalar.`,
     unavailable:
-      'Bölenleri bulmak için tüm asal çarpanların bilinmesi gerekir. Bu sayının asal çarpanlarının hepsi henüz bulunmadı.',
+      'Bölenleri bulmak için tüm asal çarpanların bilinmesi gerekir. Bu sayının asal çarpanları henüz tam olarak bulunamadı.',
   },
 
   functions: {

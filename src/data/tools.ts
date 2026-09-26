@@ -48,7 +48,7 @@ export const TOOLS: readonly ToolInfo[] = [
     title: { en: 'Image compressor', tr: 'Görsel sıkıştırıcı' },
     description: {
       en: 'Shrink JPEG, PNG and WebP images with a quality slider and format choice, and compare before and after side by side.',
-      tr: 'JPEG, PNG ve WebP görsellerini kalite ayarı ve biçim seçimiyle küçültün. Önceki ve sonraki hâlini yan yana karşılaştırın.',
+      tr: 'JPEG, PNG ve WebP görsellerini kalite ayarı ve biçim seçimiyle küçültün. Öncesini ve sonrasını yan yana karşılaştırın.',
     },
     status: 'ready',
     href: '/tools/image-compressor/',

@@ -206,7 +206,7 @@ const tr: BinaryTextMessages = {
   },
   header: {
     eyebrow: 'UTF-8 · tarayıcınızda çalışır',
-    lead: 'İki alandan birine yazın, diğeri anında güncellenir. Metin yazarsanız UTF-8 baytlarının bitlerini, bit yazarsanız metni görürsünüz. Aşağıda da her karakter, kod noktasına ve baytlarına ayrılır.',
+    lead: 'İki alandan birine yazın, diğeri anında güncellenir. Metin yazarsanız metnin UTF-8 baytlarını bit olarak, bit yazarsanız metni görürsünüz. Aşağıda da her karakter kod noktasına ve baytlarına ayrılır.',
   },
   toolLabel: 'İkili kod ve metin dönüştürücü',
   noscript: 'Bu araç JavaScript olmadan çalışmaz. Dönüştürme tamamen tarayıcınızda yapılır, hiçbir şey bir sunucuya yüklenmez.',
@@ -277,7 +277,7 @@ const tr: BinaryTextMessages = {
   problems: {
     where: (line, column) => `Satır ${trNumber(line)}, sütun ${trNumber(column)}`,
     show: 'Alanda göster',
-    invalidCharacter: (where, char, codePoint) => `${where}: “${char}” (${codePoint}) ikili bir rakam değil.`,
+    invalidCharacter: (where, char, codePoint) => `${where}: “${char}” (${codePoint}) 0 ya da 1 değil.`,
     invalidCharacterHint:
       'Yalnızca 0 ve 1 kullanın; baytları boşluk, satır sonu ya da virgülle ayırın. Grupların başında 0b olabilir.',
     // "3. grupta", "1.501. baytta": ordinals keep Turkish number formatting, and the suffix sits
@@ -305,7 +305,7 @@ const tr: BinaryTextMessages = {
       overlong: () =>
         'Bu dizi gereğinden uzun bir kodlama: karakterin daha kısa bir kodlaması var ve UTF-8 yalnızca en kısasına izin verir.',
       surrogate: () => 'Bu dizi, bir UTF-16 vekil kod noktasını (U+D800–U+DFFF) kodluyor; UTF-8 buna izin vermez.',
-      'too-large': () => 'Bu dizi, Unicode’un üst sınırı olan U+10FFFF değerini aşan bir değer kodluyor.',
+      'too-large': () => 'Bu dizi, Unicode’un son kod noktası olan U+10FFFF’ten büyük bir değer kodluyor.',
       'missing-continuation': (detail) =>
         `Bu bayt ${trNumber(detail.expected)} baytlık bir karakter başlatıyor, ancak ${trNumber(detail.at)}. bayt 10 ile başlamıyor.`,
       truncated: (detail) =>
@@ -332,7 +332,7 @@ const tr: BinaryTextMessages = {
   breakdown: {
     heading: 'Karakter karakter',
     caption: 'Metnin kod noktaları ve UTF-8 baytları',
-    regionLabel: 'Karakter dökümü tablosu',
+    regionLabel: 'Karakter tablosu',
     columns: {
       index: '#',
       character: 'Karakter',
@@ -346,7 +346,7 @@ const tr: BinaryTextMessages = {
     // "… kod noktasından": the suffix sits on the noun, never on the number.
     capped: (shown, total) => `${trNumber(total)} kod noktasından ilk ${trNumber(shown)} tanesi gösteriliyor.`,
     legend:
-      'Kalın bitler kod noktasını taşır. Önlerindeki soluk bitler UTF-8’in işaretleridir: 0 ile başlayan bayt tek başına bir karakterdir; 110, 1110 ve 11110 sırasıyla iki, üç ve dört baytlık bir karakteri başlatır; 10 ise bir karakterin devam baytlarını gösterir.',
+      'Kalın bitler kod noktasını taşır. Önlerindeki soluk bitler UTF-8’in işaretleridir: 0 ile başlayan bayt tek başına bir karakterdir; 110, 1110 ve 11110 sırasıyla iki, üç ve dört baytlık bir karakteri başlatır; 10 ile başlayan her bayt ise bir karakterin devamıdır.',
     notAscii: 'ASCII değil',
     noBytes: 'yok',
     kinds: {

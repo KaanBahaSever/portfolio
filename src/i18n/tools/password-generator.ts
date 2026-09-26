@@ -117,7 +117,7 @@ const tr: PasswordMessages = {
     // Describes the setting, like "Seçilen her türü dahil et" below; "…kaçın" read as advice
     // and could also be taken as "run away".
     label: 'Birbirine benzeyen karakterleri hariç tut',
-    detail: 'Kolayca karışan I, l, 1, |, O, o ve 0 karakterleri parolaya girmez.',
+    detail: 'Kolayca karıştırılan I, l, 1, |, O, o ve 0 parolada kullanılmaz.',
   },
   eachType: {
     label: 'Seçilen her türü dahil et',

@@ -86,7 +86,7 @@ const tips: Localized<ToolTip[]> = {
   tr: [
     {
       lead: 'Koordinatı birçok şekilde yazabilirsiniz.',
-      body: 'Ondalık derece yazabilirsiniz (41,0082 ya da −33,8688). Yarım küre harfi sayının önünde ya da arkasında olabilir (41,0082 K, K 41,0082). Derece ve ondalık dakika (41°0,492′K) ya da derece, dakika, saniye (41°00′29,5″K) biçimini de kullanabilirsiniz. Dakika ve saniye işareti yerine düz \' ve " de olur. Güney ve batı için eksi işareti ya da G ve B harfleri yeterli; İngilizce N, S, E, W harfleri de geçerli. Ondalık ayırıcı virgül de olabilir, nokta da.',
+      body: 'Ondalık derece kullanabilirsiniz (41,0082 ya da −33,8688). Yarım küre harfi sayının önünde ya da arkasında olabilir (41,0082 K, K 41,0082). Derece ve ondalık dakika (41°0,492′K) ya da derece, dakika ve saniye (41°00′29,5″K) de yazabilirsiniz. Dakika ve saniye için düz \' ve " işaretleri de olur. Güney ve batı için eksi işareti ya da G ve B harfini kullanın; İngilizce N, S, E ve W harfleri de geçerli. Ondalık ayırıcı virgül de olabilir, nokta da.',
     },
     {
       lead: 'Haritadan yapıştırın.',
@@ -94,15 +94,15 @@ const tips: Localized<ToolTip[]> = {
     },
     {
       lead: 'Rota neden kıvrılıyor?',
-      body: 'Büyük daire, Dünya’nın merkezinden geçen bir düzlemin yüzeyi kestiği çemberdir. Bu çemberin yayları, küre üzerindeki en kısa yollardır. Düz haritalar bu yayları çarpıttığı için uzun uçuşlar haritada kutuplara doğru kıvrılıyormuş gibi görünür.',
+      body: 'Büyük daire, Dünya’nın merkezinden geçen bir düzlemin yeryüzünü kestiği çemberdir. Bu çemberin yayları, küre üzerindeki en kısa yollardır. Düz haritalar bu yayları çarpıttığı için uzun uçuşlar haritada kutuplara doğru kıvrılıyormuş gibi görünür.',
     },
     {
       lead: 'Yön yol boyunca değişir.',
       body: 'Bir meridyen ya da ekvator boyunca gitmiyorsanız büyük daire rotasında pusula yönü sürekli değişir. Bu yüzden varış yönü başlangıç yönünden farklıdır. Hep aynı pusula yönünde giden rota (loksodrom) ise daha uzundur.',
     },
     {
-      lead: 'Küre ne kadar doğru?',
-      body: 'Dünya kutuplardan biraz basıktır. Bu yüzden ortalama yarıçaplı bir küre üzerinde ölçülen mesafe, GPS’in kullandığı WGS-84 elipsoidindeki mesafeden yaklaşık %0,6’ya kadar farklı çıkabilir. Elipsoit değerini ise yaklaşık yarım milimetre hassasiyetle çalışan Vincenty yöntemi verir.',
+      lead: 'Küre modeli ne kadar doğru?',
+      body: 'Dünya kutuplardan biraz basıktır. Bu yüzden ortalama yarıçaplı bir küre üzerinde ölçülen mesafe, GPS’in kullandığı WGS-84 elipsoidindeki mesafeden yaklaşık %0,6’ya kadar farklı çıkabilir. Elipsoit değeri ise yaklaşık yarım milimetreye kadar doğru sonuç veren Vincenty yöntemiyle hesaplanır.',
     },
     {
       lead: 'Kaç basamak yeterli?',
@@ -178,7 +178,7 @@ const tips: Localized<ToolTip[]> = {
         {
           locale === 'tr' ? (
             <p class={body}>
-              Burada hav <var>θ</var> = sin<sup>2</sup>(<var>θ</var>/2), yani haversine fonksiyonudur. Formül bu
+              Burada hav, haversine fonksiyonudur: hav <var>θ</var> = sin<sup>2</sup>(<var>θ</var>/2). Formül bu
               şekilde yazılınca kısa mesafelerde de doğru sonuç verir. Küresel kosinüs teoremi ise kısa mesafelerde
               yuvarlama hataları yüzünden hassasiyet kaybeder.
             </p>
@@ -220,12 +220,12 @@ const tips: Localized<ToolTip[]> = {
           locale === 'tr' ? (
             <div class={body}>
               <p>
-                Varış yönünü bulmak için B’den A’ya giden rotanın başlangıç yönü hesaplanır ve 180° çevrilir. Orta
+                Varış yönünü bulmak için B’den A’ya giden rotanın başlangıç yönü hesaplanır ve 180° döndürülür. Orta
                 noktayı bulmak için de Dünya’nın merkezinden iki noktaya birer konum vektörü çizilir ve bu iki vektör
-                toplanır. Toplam vektörün yüzeyi kestiği yer orta noktadır.
+                toplanır. Toplam vektörün yeryüzünü kestiği yer orta noktadır.
               </p>
               <p>
-                Sonuçlardaki elipsoit satırı aynı problemi WGS-84 elipsoidi üzerinde çözer (<var>a</var> ={' '}
+                Sonuçlardaki elipsoit satırı aynı hesabı WGS-84 elipsoidi üzerinde yapar (<var>a</var> ={' '}
                 {semiMajorAxis} m, <var>f</var> = 1/{inverseFlattening}). Bunun için Dünya’nın basıklığını hesaba katan
                 Vincenty yöntemi (1975) kullanılır. Bu yöntem sonuca adım adım, yinelemeyle yaklaşır.
               </p>

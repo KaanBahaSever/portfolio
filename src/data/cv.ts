@@ -75,8 +75,8 @@ const en: CvContent = {
     },
     {
       name: 'Karecik',
-      linkLabel: 'github.com/KaanBahaSever/karecik',
-      url: 'https://github.com/KaanBahaSever/karecik',
+      linkLabel: 'karecik.com',
+      url: 'https://karecik.com',
       period: 'Since 2021 · in production · GPL-3.0',
       stack: ['Go', 'PostgreSQL'],
       text: 'A multi-tenant QR-menu SaaS that local cafés and restaurants use to manage menus and orders and to interact with customers, built for zero downtime and low latency. Early prototypes date from 2021 under earlier working titles; it shipped to production in 2026.',
@@ -133,8 +133,8 @@ const tr: CvContent = {
     },
     {
       name: 'Karecik',
-      linkLabel: 'github.com/KaanBahaSever/karecik',
-      url: 'https://github.com/KaanBahaSever/karecik',
+      linkLabel: 'karecik.com',
+      url: 'https://karecik.com',
       period: '2021’den beri · canlıda · GPL-3.0',
       stack: ['Go', 'PostgreSQL'],
       text: 'Çok kiracılı (multi-tenant) bir QR menü SaaS platformu. Yerel kafe ve restoranlar menülerini ve siparişlerini bu platformla yönetiyor, müşterileriyle de buradan iletişim kuruyor. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarladım. İlk prototipler 2021’de, proje henüz başka adlar taşırken yazıldı; platform 2026’da canlıya alındı.',

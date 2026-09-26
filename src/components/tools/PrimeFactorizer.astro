@@ -1,0 +1,293 @@
+---
+/**
+ * Integer & prime factorizer UI. Behaviour lives in src/scripts/tools/prime-factorizer/
+ * (controller.ts on the page, factor-worker.ts for the search); every hook is a data-* attribute
+ * scoped to the root section. Text comes from src/i18n/tools/prime-factorizer.ts, which the
+ * controller reads too.
+ *
+ * The result area is an empty skeleton here: the controller fills it after each run.
+ */
+import Icon from '../ui/Icon.astro';
+import { ui } from '../ui/styles';
+import { getLocale } from '../../i18n/server';
+import { primeFactorizerMessages } from '../../i18n/tools/prime-factorizer';
+import { MAX_DIGITS } from '../../scripts/tools/prime-factorizer/limits';
+
+const locale = getLocale(Astro);
+const m = primeFactorizerMessages[locale];
+const spoken = m.result.spoken;
+
+interface Example {
+  value: string;
+  caption: string;
+  /** Written as base^exponent ± 1 (visible with <sup>, read aloud in words). */
+  formula?: { base: string; exponent: string; sign: 'minus' | 'plus' };
+}
+
+const examples: Example[] = [
+  { value: '360', caption: m.examples.highlyComposite },
+  {
+    value: '18446744073709551615',
+    caption: m.examples.uint64,
+    formula: { base: '2', exponent: '64', sign: 'minus' },
+  },
+  { value: '2147483647', caption: m.examples.mersenne, formula: { base: '2', exponent: '31', sign: 'minus' } },
+  { value: '561', caption: m.examples.carmichael },
+  { value: '4294967297', caption: m.examples.fermat, formula: { base: '2', exponent: '32', sign: 'plus' } },
+  { value: '8128', caption: m.examples.perfect },
+];
+
+// Like ui.buttonPrimary, one size up (min-h-14, text-base) to match the big field. Written out
+// rather than appended, because conflicting utilities do not override by order.
+const submitClass =
+  'inline-flex min-h-14 shrink-0 items-center justify-center gap-2 rounded-lg bg-accent-700 px-6 text-base font-semibold text-white shadow-sm transition-colors hover:bg-accent-800 dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400';
+/**
+ * The field's border is its only outline (3:1 against the card in both themes, see ui.field).
+ * aria-invalid swaps it for rose; the message below says what is wrong in words.
+ */
+const inputClass =
+  'min-h-14 w-full min-w-0 flex-1 rounded-lg border border-zinc-500 bg-white px-4 font-mono text-xl tracking-wide text-zinc-900 tabular-nums placeholder:text-zinc-500 aria-invalid:border-rose-600 sm:text-2xl dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-400 dark:aria-invalid:border-rose-400';
+const chipClass =
+  'group flex min-h-11 flex-col items-start justify-center rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-left transition-[border-color,translate] duration-200 hover:-translate-y-px hover:border-accent-600 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:border-accent-500';
+const subheading = 'label-mono text-zinc-600 dark:text-zinc-400';
+const copyClass =
+  'group inline-flex min-h-11 shrink-0 items-center justify-center gap-2 self-start rounded-lg border border-zinc-300 bg-white px-3 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800';
+const panel = `${ui.card} min-w-0 p-4 sm:p-6`;
+---
+
+<section data-prime-factorizer aria-label={m.toolLabel} class="mt-8 sm:mt-10">
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <noscript>
+    <p
+      class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+    >
+      {m.noscript}
+    </p>
+  </noscript>
+
+  <!-- 1. Input -->
+  <form data-form novalidate class:list={[ui.card, 'relative isolate overflow-hidden p-4 sm:p-6']}>
+    <div class="bg-graph mask-fade-b pointer-events-none absolute inset-0 -z-10 opacity-70" aria-hidden="true"></div>
+    <label for="pf-input" class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{m.form.label}</label>
+    <div class="mt-2 flex flex-col gap-3 sm:flex-row">
+      <input
+        id="pf-input"
+        data-input
+        name="n"
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+        enterkeyhint="go"
+        maxlength="160"
+        placeholder={m.form.placeholder}
+        aria-describedby="pf-message pf-preview pf-hint"
+        class={inputClass}
+      />
+      <button type="submit" data-submit class={submitClass}>
+        {m.form.submit}
+      </button>
+    </div>
+    <p
+      id="pf-message"
+      data-message
+      aria-live="polite"
+      class="mt-2 flex gap-2 text-sm font-medium text-rose-700 empty:hidden dark:text-rose-400"
+    >
+    </p>
+    <p
+      id="pf-preview"
+      data-preview
+      translate="no"
+      class="mt-2 font-mono text-sm break-all text-zinc-600 tabular-nums empty:hidden dark:text-zinc-400"
+    >
+    </p>
+    <p id="pf-hint" class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">{m.form.hint(MAX_DIGITS)}</p>
+
+    <div class="mt-5 border-t border-zinc-200 pt-4 dark:border-zinc-800">
+      <p id="pf-examples-label" class={subheading}>{m.form.examplesLabel}</p>
+      <ul aria-labelledby="pf-examples-label" class="mt-3 flex flex-wrap gap-2">
+        {
+          examples.map((example) => (
+            <li>
+              <button type="button" data-example={example.value} class={chipClass}>
+                {example.formula ? (
+                  <>
+                    <span aria-hidden="true" class="font-mono text-sm text-zinc-900 dark:text-zinc-100">
+                      {example.formula.base}
+                      <sup>{example.formula.exponent}</sup> {example.formula.sign === 'minus' ? '−' : '+'} 1
+                    </span>
+                    <span class="sr-only">
+                      {spoken.power(example.formula.base, example.formula.exponent)}{' '}
+                      {example.formula.sign === 'minus' ? spoken.minus : spoken.plus} 1,
+                    </span>
+                  </>
+                ) : (
+                  <span class="font-mono text-sm text-zinc-900 dark:text-zinc-100">{example.value}</span>
+                )}
+                <span class="text-xs text-zinc-600 transition-colors group-hover:text-accent-700 dark:text-zinc-400 dark:group-hover:text-accent-400">
+                  {example.caption}
+                </span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </form>
+
+  <!-- 2. Progress (shown only when a search takes a moment) and the last status -->
+  <div
+    data-progress
+    hidden
+    class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border border-zinc-200 bg-white p-3 sm:p-4 dark:border-zinc-800 dark:bg-zinc-900"
+  >
+    <svg
+      class="size-5 shrink-0 animate-spin text-accent-700 [animation-duration:1.4s] dark:text-accent-400"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="12" cy="12" r="9" class="text-zinc-200 dark:text-zinc-700" stroke="currentColor"></circle>
+      <path d="M12 3a9 9 0 0 1 9 9"></path>
+    </svg>
+    <p class="min-w-0 flex-1 text-sm text-zinc-700 dark:text-zinc-300">
+      <span class="font-semibold text-zinc-900 dark:text-zinc-100">{m.status.factoring}</span>
+      <span data-progress-text class="font-mono text-xs tabular-nums"></span>
+    </p>
+    <button type="button" data-cancel class={ui.buttonSecondary}>
+      <Icon name="close" class="size-4" />
+      {m.form.cancel}
+    </button>
+  </div>
+  <p
+    data-status
+    class="mt-4 text-sm text-zinc-600 empty:hidden data-[tone=error]:font-medium data-[tone=error]:text-rose-700 dark:text-zinc-400 dark:data-[tone=error]:text-rose-400"
+  >
+  </p>
+
+  <!-- 3. Result -->
+  <section
+    data-result
+    hidden
+    aria-labelledby="pf-result-heading"
+    class="mt-6 grid grid-cols-[minmax(0,1fr)] gap-4 sm:gap-6"
+  >
+    <h2 id="pf-result-heading" class="sr-only">{m.result.heading}</h2>
+
+    <!-- 3a. The number, its canonical factorization and the factor tree beside it -->
+    <div
+      class:list={[panel, 'relative isolate grid gap-6 overflow-hidden md:grid-cols-[minmax(0,1fr)_auto] md:items-start']}
+    >
+      <div class="bg-graph mask-fade-radial pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+      <div class="min-w-0">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <p class="min-w-0 font-mono text-xs break-all text-zinc-600 tabular-nums dark:text-zinc-400">
+            <span data-number translate="no"></span>
+            <span aria-hidden="true" class="px-1 text-zinc-400 dark:text-zinc-600">·</span>
+            <span data-digits></span>
+          </p>
+          <span
+            data-kind
+            class="inline-flex shrink-0 items-center rounded-md px-2 py-1 font-mono text-[0.6875rem] leading-none font-medium tracking-[0.06em] whitespace-nowrap uppercase ring-1 ring-inset data-[tone=accent]:bg-accent-50 data-[tone=accent]:text-accent-800 data-[tone=accent]:ring-accent-700/20 data-[tone=muted]:bg-zinc-100 data-[tone=muted]:text-zinc-700 data-[tone=muted]:ring-zinc-500/15 dark:data-[tone=accent]:bg-accent-400/10 dark:data-[tone=accent]:text-accent-300 dark:data-[tone=accent]:ring-accent-400/25 dark:data-[tone=muted]:bg-zinc-800 dark:data-[tone=muted]:text-zinc-300 dark:data-[tone=muted]:ring-zinc-400/15"
+          ></span>
+        </div>
+
+        <div data-canonical-block class="mt-4">
+          <h3 class={subheading}>{m.result.canonicalLabel}</h3>
+          <div class="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <!-- Superscripts for sighted readers; the same product in words for screen readers. -->
+            <p
+              data-canonical
+              aria-hidden="true"
+              translate="no"
+              class="min-w-0 font-serif text-3xl leading-snug text-zinc-900 [font-variant-numeric:lining-nums] [overflow-wrap:anywhere] data-[size=long]:text-2xl sm:text-4xl sm:data-[size=long]:text-3xl dark:text-zinc-100 [&_sup]:text-[0.55em] [&_sup]:font-medium"
+            >
+            </p>
+            <p data-canonical-spoken class="sr-only"></p>
+            <button type="button" data-copy="factorization" aria-label={m.result.copyFactorization} class={copyClass}>
+              <Icon name="copy" class="size-4 group-data-[state=copied]:hidden" />
+              <Icon name="check" class="hidden size-4 text-accent-700 group-data-[state=copied]:block dark:text-accent-400" />
+              <span data-copy-label>{m.result.copy}</span>
+            </button>
+          </div>
+        </div>
+
+        <ul data-notes class="mt-4 space-y-2 empty:hidden"></ul>
+        <button type="button" data-search-longer hidden class:list={[ui.buttonSecondary, 'mt-4']}>
+          <Icon name="refresh" class="size-4" />
+          <span data-search-longer-label></span>
+        </button>
+      </div>
+
+      <!-- Factor tree (decorative; the product says the same in text) -->
+      <figure data-figure class="min-w-0 md:w-72 lg:w-80">
+        <div
+          class="relative isolate flex min-h-40 items-center justify-center overflow-hidden rounded-lg border border-zinc-200 bg-white/60 p-3 dark:border-zinc-800 dark:bg-zinc-950/40"
+        >
+          <div class="bg-graph-fine mask-fade-radial pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+          <svg data-tree class="block h-auto max-w-full" aria-hidden="true" focusable="false"></svg>
+        </div>
+        <figcaption class="mt-3 text-xs leading-5 text-zinc-600 dark:text-zinc-400">
+          <span class="label-mono me-1.5 text-zinc-900 dark:text-zinc-100">{m.figure.label}</span>
+          {m.figure.caption}
+        </figcaption>
+      </figure>
+    </div>
+
+    <!-- 3b. Arithmetic functions and properties -->
+    <div data-functions class:list={[panel, 'grid gap-8 md:grid-cols-2']}>
+      <section aria-labelledby="pf-functions-heading" class="min-w-0">
+        <h3 id="pf-functions-heading" class={subheading}>{m.functions.heading}</h3>
+        <dl data-function-list class="mt-2 divide-y divide-zinc-200 dark:divide-zinc-800"></dl>
+      </section>
+      <section aria-labelledby="pf-properties-heading" class="min-w-0">
+        <h3 id="pf-properties-heading" class={subheading}>{m.properties.heading}</h3>
+        <dl data-property-list class="mt-2 divide-y divide-zinc-200 dark:divide-zinc-800"></dl>
+      </section>
+    </div>
+
+    <!-- 3c. Divisors -->
+    <section data-divisors aria-labelledby="pf-divisors-heading" class={panel}>
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="min-w-0">
+          <h3 id="pf-divisors-heading" class={subheading}>{m.divisors.heading}</h3>
+          <p data-divisor-count class="mt-1 font-serif text-2xl text-zinc-900 [font-variant-numeric:lining-nums] dark:text-zinc-100">
+          </p>
+        </div>
+        <button type="button" data-copy="divisors" aria-label={m.result.copyDivisors} class={copyClass}>
+          <Icon name="copy" class="size-4 group-data-[state=copied]:hidden" />
+          <Icon name="check" class="hidden size-4 text-accent-700 group-data-[state=copied]:block dark:text-accent-400" />
+          <span data-copy-label>{m.result.copy}</span>
+        </button>
+      </div>
+      <!-- Scrolls inside its own box once expanded; focusable so the keyboard can scroll it. -->
+      <ol
+        data-divisor-list
+        aria-label={m.divisors.listLabel}
+        translate="no"
+        class="mt-4 flex max-h-96 flex-wrap gap-x-1.5 gap-y-1.5 overflow-y-auto overscroll-contain font-mono text-sm text-zinc-800 tabular-nums empty:hidden focus-visible:outline-offset-4 dark:text-zinc-200"
+      >
+      </ol>
+      <p data-divisor-note class="mt-3 text-sm text-zinc-600 empty:hidden dark:text-zinc-400"></p>
+      <!-- The label says what a press does ("Show all 24" / "Show fewer"), so no aria-expanded on top. -->
+      <button type="button" data-divisor-toggle hidden class:list={[ui.buttonGhost, 'group -ml-3 mt-2']}>
+        <Icon name="chevron-down" class="size-4 transition-transform duration-200 group-data-expanded:rotate-180" />
+        <span data-divisor-toggle-label></span>
+      </button>
+    </section>
+  </section>
+</section>
+
+<script>
+  import { initPrimeFactorizer } from '../../scripts/tools/prime-factorizer/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-prime-factorizer]').forEach(initPrimeFactorizer);
+</script>

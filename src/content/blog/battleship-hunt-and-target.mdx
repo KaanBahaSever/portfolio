@@ -14,6 +14,7 @@ import HitDensity from '../../components/blog/posts/battleship/HitDensity.astro'
 import HuntSnapshot from '../../components/blog/posts/battleship/HuntSnapshot.astro';
 import InitialDensity from '../../components/blog/posts/battleship/InitialDensity.astro';
 import ParityFigure from '../../components/blog/posts/battleship/ParityFigure.astro';
+import RowPlacements from '../../components/blog/posts/battleship/RowPlacements.astro';
 import ShotsChart from '../../components/blog/posts/battleship/ShotsChart.astro';
 import SimulationTable from '../../components/blog/posts/battleship/SimulationTable.astro';
 import StateMachine from '../../components/blog/posts/battleship/StateMachine.astro';
@@ -39,13 +40,46 @@ The game has a longer history than this site. For my high-school graduation proj
 
 The board has 100 cells, labelled A to J across and 1 to 10 down. The fleet is the classic one: a carrier of five cells, a battleship of four, a cruiser and a submarine of three each, and a destroyer of two, {n.shipCells} cells in all. Ships lie horizontally or vertically inside the board; on this site they may touch but never overlap. After every shot the shooter learns *miss* or *hit*, and when the last cell of a ship is hit, which ship has sunk. The game then reveals the sunk ship's outline, so the shooter also knows exactly which cells it occupied.
 
-How many ways can a single ship be hidden? A ship of length $L$ fits in $n - L + 1$ places along each of the $n$ rows, and as many down each of the $n$ columns, so on an empty $n \times n$ board it has
+### How many ways can a single ship be hidden?
+
+Number the rows and columns from zero, as the lattices below will: on a board of side $n$, a cell is a pair $(r, c)$, with row $r$ and column $c$ in $\lbrace 0, 1, \dots, n - 1 \rbrace$ (column A is $c = 0$, row 1 is $r = 0$). A placement of a ship of length $L$, the set of cells it covers, is fixed by two choices: its orientation, and its first cell, the leftmost cell of a horizontal ship or the topmost of a vertical one.
+
+A horizontal ship whose first cell is $(r, j)$ covers $(r, j), (r, j + 1), \dots, (r, j + L - 1)$. It stays on the board exactly when its last cell does, when $j + L - 1 \le n - 1$, that is, when $0 \le j \le n - L$. So, as long as the ship is no longer than the board ($L \le n$), each of the $n$ rows offers $n - L + 1$ starting columns, and the set $H_L$ of horizontal placements has $|H_L| = n\,(n - L + 1)$ elements. Reflecting the board in its diagonal, $(r, c) \mapsto (c, r)$, turns rows into columns and horizontal placements into vertical ones, one for one, so the set $V_L$ of vertical placements is just as large. Adding the two gives
 
 $$
-2n\,(n - L + 1)
+|H_L| + |V_L| = 2n\,(n - L + 1).
 $$
 
-positions.
+<RowPlacements lang="en">Every horizontal position of a cruiser ($L = 3$) in one row, as the game's code lists them: $n - L + 1 = 8$, one for each starting column $j$. The bottom row gives $f_3(c)$, the number of positions that cover column $c$; the highlighted column 4 is covered by the positions that start at $j = 2$, 3 and 4.</RowPlacements>
+
+Is that the number of placements? Only if no placement is counted twice. In general, by inclusion–exclusion,
+
+$$
+|H_L \cup V_L| = |H_L| + |V_L| - |H_L \cap V_L|,
+$$
+
+and the formula needs the last term to vanish. For $L \ge 2$, that is $L > 1$, it does. Two different cells cannot share both a row and a column, so a ship of two or more cells has a well-defined direction and no placement is both horizontal and vertical: $H_L \cap V_L = \varnothing$. For $L = 1$ the direction means nothing. A "horizontal" and a "vertical" one-cell ship on the same cell are the same placement, so $H_1 = V_1$, $|H_1 \cap V_1| = n^2$, and the right count is $n^2$, not $2n^2$: the formula would count every cell twice. (This is also why the game's code, when it lists the positions of a ship, gives a one-cell ship a single orientation.) At the other end, a ship longer than the board fits nowhere. For $L > n$ the factor $n - L + 1$ is zero or negative: at $L = n + 1$ the formula still gives 0, by luck, and beyond that it goes negative. The honest count per line is $\max(0,\, n - L + 1)$. Altogether,
+
+$$
+|H_L \cup V_L| =
+\begin{cases}
+n^2, & L = 1,\\
+2n\,(n - L + 1), & 2 \le L \le n,\\
+0, & L > n.
+\end{cases}
+$$
+
+Every ship of the classic fleet has $2 \le L \le 5 \le n = 10$, so the middle case covers all of them.
+
+The same argument counts the placements through a single cell, which the Hard computer will need later. A horizontal placement with first column $j$ covers column $c$ exactly when $j \le c \le j + L - 1$. Together with $0 \le j \le n - L$, that leaves the starting columns $\max(0,\, c - L + 1) \le j \le \min(c,\, n - L)$, so a cell in column $c$ lies on
+
+$$
+f_L(c) = \min(c,\, n - L) - \max(0,\, c - L + 1) + 1
+$$
+
+horizontal placements of the ship. The same number can be written as $\min(c + 1,\, n - c,\, L,\, n - L + 1)$: the room to the left, the room to the right, the length of the ship or the number of positions in a line, whichever runs out first. Vertical placements count the same way down the column, so for $2 \le L \le n$ the cell $(r, c)$ is covered by $f_L(c) + f_L(r)$ placements of the ship. In a corner, where $r$ and $c$ are each $0$ or $n - 1$, $f_L(0) = f_L(n - 1) = 1$ for every ship, so the five ships cover it $2 \cdot 5 = 10$ times. The four central cells of the 10 × 10 board, where $r, c \in \lbrace 4, 5 \rbrace$, have $f_L(r) = f_L(c) = L$ for every ship with $L \le 5$, that is, for the whole fleet, which makes $2\,(5 + 4 + 3 + 3 + 2) = 34$. These are the values the game's code finds for the corners and the centre of the first density map below, {n.emptyMin} and {n.emptyMax}. A double count checks the formula: each of the $n - L + 1$ placements in a row covers $L$ cells, so $\sum_c f_L(c) = L\,(n - L + 1)$, and for the cruiser above, $1 + 2 + 3 + 3 + 3 + 3 + 3 + 3 + 2 + 1 = 24 = 3 \cdot 8$.
+
+On the 10 × 10 board the lengths of the fleet, $L = 5, 4, 3, 3, 2$, give 120, 140, 160, 160 and 180 positions, {n.placements} in all.
 
 <FleetFigure lang="en">The five ships and the number of positions each one has on an empty board, counted by the game's code and matching the formula above.</FleetFigure>
 
@@ -125,7 +159,7 @@ where $h(p)$ is the number of open hits that placement $p$ covers and $w$ is a w
 
 <InitialDensity lang="en">The density before the first shot: the number of positions of the five ships that cover each cell, from {n.emptyMin} in the corners to {n.emptyMax} in the four central cells, where the Hard computer fires first.</InitialDensity>
 
-Edges and corners are covered by fewer placements, since a ship there can only extend inwards. A cell lies on at most $L$ horizontal and $L$ vertical placements of a ship of length $L$, so its count is at most $2 \cdot 17 = 34$ for the full fleet, and the four central cells reach that bound. Divided by the total number of placements, {n.placements}, $d(c)$ is the probability that a placement drawn at random from all of them covers $c$, which is where the name comes from.
+Edges and corners are covered by fewer placements, since a ship there can only extend inwards. A cell lies on at most $L$ horizontal and $L$ vertical placements of a ship of length $L$, so its count is at most $2 \cdot 17 = 34$ for the full fleet, and the four central cells reach that bound. The number on the cell in row $r$ and column $c$ is the sum, over the five ships, of the counts $f_L(c) + f_L(r)$ from the start of the post. Divided by the total number of placements, {n.placements}, $d(c)$ is the probability that a placement drawn at random from all of them covers $c$, which is where the name comes from.
 
 Misses remove placements, and the density drops around them:
 

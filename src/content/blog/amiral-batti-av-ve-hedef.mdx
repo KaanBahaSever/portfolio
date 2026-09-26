@@ -1,6 +1,6 @@
 ---
 title: 'Amiral Battı: Av ve Hedef Algoritması'
-description: Amiral Battı’da bilgisayar parite deseniyle nasıl avlanır, vurduğu gemiyi nasıl sıkıştırır, olası gemi konumlarını nasıl tartar? Şekiller oyunun kendi kodundan.
+description: Amiral Battı’da bilgisayar parite deseniyle nasıl avlanır, vurduğu gemiyi nasıl bitirir, olası her konumu nasıl tartar? Şekiller oyunun koduyla hesaplandı.
 pubDate: 2026-09-26
 lang: tr
 translationKey: battleship-hunt-target
@@ -14,6 +14,7 @@ import HitDensity from '../../components/blog/posts/battleship/HitDensity.astro'
 import HuntSnapshot from '../../components/blog/posts/battleship/HuntSnapshot.astro';
 import InitialDensity from '../../components/blog/posts/battleship/InitialDensity.astro';
 import ParityFigure from '../../components/blog/posts/battleship/ParityFigure.astro';
+import RowPlacements from '../../components/blog/posts/battleship/RowPlacements.astro';
 import ShotsChart from '../../components/blog/posts/battleship/ShotsChart.astro';
 import SimulationTable from '../../components/blog/posts/battleship/SimulationTable.astro';
 import StateMachine from '../../components/blog/posts/battleship/StateMachine.astro';
@@ -24,38 +25,71 @@ export const n = postNumbers('tr');
 export const gameHref = localizePath('/games/battleship/', 'tr');
 
 {/*
-  Şekiller ve metne yerleştirilen sayılar derleme sırasında oyunun kendi koduyla
-  (src/lib/games/battleship/) hesaplanıyor; bkz. src/components/blog/posts/battleship/.
-  İngilizcesi battleship-hunt-and-target.mdx; iki yazıyı birlikte güncel tutun.
+  Şekiller ve metindeki sayılar, derleme sırasında oyunun kendi koduyla (src/lib/games/battleship/)
+  hesaplanıyor; bkz. src/components/blog/posts/battleship/. İngilizce aslı
+  battleship-hunt-and-target.mdx; iki yazıyı birlikte güncel tutun.
 */}
 
-Amiral Battı ilk bakışta bir şans oyunu gibi görünür. İki oyuncu 10 × 10’luk bir ızgaraya beşer gemi saklar, sırayla hücre söyler ve ortada su sıçramaları ile isabetlerden başka görünen bir şey yoktur. Oysa rakibi hakkında hiçbir şey bilmeyen bir bilgisayar, kör şansın gerektirdiği atışların yarısından azıyla bütün filoyu batırabilir. Bunun ardında kombinatorik, olasılık ve küçük bir durum makinesinden oluşan hoş bir karışım var.
+Amiral Battı ilk bakışta bir şans oyunu gibi görünür. İki oyuncu 10 × 10’luk bir ızgaraya beşer gemi saklar ve sırayla birer hücre söyler; ortada su sıçramalarıyla isabetlerden başka görünen bir şey yoktur. Oysa rakibi hakkında hiçbir şey bilmeyen bir bilgisayar, kör şansın gerektirdiği atışların yarısından azıyla bütün filoyu batırabilir. Bunun sırrı kombinatorik, olasılık ve küçük bir durum makinesinin hoş bir karışımında saklı.
 
-Bu yazıda <a href={gameHref}>sitedeki Amiral Battı oyununun</a> bilgisayar rakibini zorluk seviyelerine göre adım adım inceliyorum: rastgele atış, parite deseniyle *av ve hedef* ve son olarak kalan gemilerin hâlâ alabileceği her konumu sayan *olasılık yoğunluğu*. Aşağıdaki bütün tahtalar, grafikler ve simülasyon sonuçları, site derlenirken oyunu çalıştıran TypeScript koduyla hesaplanıyor: bir şekil bilgisayarın E5’e ateş ettiğini gösteriyorsa, oyunun kodu gerçekten o hücreyi seçmiştir.
+Bu yazıda <a href={gameHref}>sitedeki Amiral Battı oyununun</a> bilgisayar rakibini, zorluk seviyelerini birer birer ele alarak masaya yatırıyorum: rastgele atış, parite deseni üzerinde *av ve hedef*, son olarak da kalan gemilerin hâlâ alabileceği her konumu sayan *olasılık yoğunluğu*. Aşağıdaki bütün tahtalar, grafikler ve simülasyon sonuçları, site derlenirken oyunu çalıştıran TypeScript koduyla hesaplanıyor. Bir şekil bilgisayarın E5’e ateş ettiğini gösteriyorsa, oyunun kodu gerçekten o hücreyi seçmiştir.
 
-Oyunun bu siteden daha eski bir geçmişi var. Lise bitirme projem için C# ile masaüstünde çalışan bir Amiral Battı yazmıştım; [özgün kodu GitHub’da](https://github.com/KaanBahaSever/BattleShips) duruyor. O sürüm sade bir masaüstü oyunuydu. Burada anlatılan av ve hedef algoritmasını daha sonra geliştirdim; tarayıcınızdaki sürüm de onu oynuyor.
+Oyunun bu siteden daha eski bir geçmişi de var. Lise bitirme projem için C# ile bir masaüstü Amiral Battı yazmıştım; [özgün kodu GitHub’da](https://github.com/KaanBahaSever/BattleShips) duruyor. O sürüm sade bir oyundu; burada anlatılan av ve hedef algoritması sonradan geldi ve tarayıcınızdaki sürüm onunla oynuyor.
 
 ## Problem
 
-Tahtada, sütunları A’dan J’ye, satırları 1’den 10’a adlandırılmış 100 hücre var. Filo klasik filodur: beş hücrelik bir uçak gemisi, dört hücrelik bir zırhlı, üçer hücrelik bir kruvazör ve bir denizaltı, iki hücrelik bir muhrip; toplam {n.shipCells} hücre. Gemiler tahtanın içinde yatay ya da dikey durur; bu sitede birbirine değebilir ama üst üste binemez. Atış yapan taraf her atıştan sonra *ıska* ya da *isabet* cevabını alır; bir geminin son hücresi vurulduğunda da hangi geminin battığını öğrenir. Oyun batan geminin ana hatlarını gösterdiği için atış yapan taraf o geminin tam olarak hangi hücrelerde durduğunu da bilir.
+Tahta 100 hücreden oluşur: Sütunlar soldan sağa A’dan J’ye, satırlar yukarıdan aşağıya 1’den 10’a kadar adlandırılır. Filo, bildiğimiz klasik filo: beş hücrelik bir uçak gemisi, dört hücrelik bir zırhlı, üçer hücrelik bir kruvazörle bir denizaltı ve iki hücrelik bir muhrip; toplam {n.shipCells} hücre. Gemiler tahtanın içinde yatay ya da dikey durur; bu sitede birbirine değebilir ama asla üst üste binemez. Ateş eden taraf her atıştan sonra *ıska* ya da *isabet* yanıtını alır; bir geminin son hücresi de vurulduğunda hangi geminin battığını öğrenir. Oyun batan geminin ana hatlarını gösterdiği için o geminin tam olarak hangi hücreleri kapladığını da bilir.
 
-Tek bir gemi kaç farklı biçimde saklanabilir? $L$ uzunluğundaki bir gemi, $n$ satırın her birinde $n - L + 1$ farklı yere sığar; $n$ sütunun her birinde de aynı sayıda yere. Dolayısıyla boş bir $n \times n$ tahtada
+### Bir gemi kaç farklı yere saklanabilir?
+
+Satırları ve sütunları, aşağıda tarama desenlerinde de yapacağımız gibi, sıfırdan başlayarak numaralandıralım. Kenarı $n$ hücre olan bir tahtada her hücre bir $(r, c)$ çiftidir: $r$ satırı, $c$ sütunu gösterir ve ikisi de $\lbrace 0, 1, \dots, n - 1 \rbrace$ kümesinden değer alır (A sütunu $c = 0$, 1. satır $r = 0$). $L$ uzunluğundaki bir geminin konumu, yani kapladığı hücrelerin kümesi, iki seçimle belirlenir: yönüyle ve ilk hücresiyle; ilk hücre, yatay bir gemide en soldaki, dikey bir gemide en üstteki hücredir.
+
+İlk hücresi $(r, j)$ olan yatay bir gemi $(r, j), (r, j + 1), \dots, (r, j + L - 1)$ hücrelerini kaplar. Gemi ancak ve ancak son hücresi de tahtada kalıyorsa, yani $j + L - 1 \le n - 1$ ise tahtaya sığar; bu da $0 \le j \le n - L$ koşuluna denktir. Dolayısıyla gemi tahtadan uzun olmadığı sürece ($L \le n$), $n$ satırın her birinde geminin başlayabileceği $n - L + 1$ sütun vardır ve yatay konumların oluşturduğu $H_L$ kümesinin eleman sayısı $|H_L| = n\,(n - L + 1)$ olur. Tahtayı köşegenine göre yansıtmak, yani her $(r, c)$ hücresini $(c, r)$ hücresine götürmek, satırları sütunlara, yatay konumları da birebir dikey konumlara dönüştürür. Bu yüzden dikey konumların kümesi $V_L$ de aynı büyüklüktedir ve ikisini topladığımızda şunu buluruz:
 
 $$
-2n\,(n - L + 1)
+|H_L| + |V_L| = 2n\,(n - L + 1).
 $$
 
-konumu vardır.
+<RowPlacements lang="tr">Bir kruvazörün ($L = 3$) tek bir satırdaki bütün yatay konumları; listeyi oyunun kodu çıkarıyor. Her $j$ başlangıç sütunu için bir tane olmak üzere $n - L + 1 = 8$ konum var. Alt satırda $f_3(c)$, yani $c$ sütununu kaplayan konumların sayısı yazılı; vurgulanan 4 numaralı sütunu $j = 2$, 3 ve 4’te başlayan konumlar kaplıyor.</RowPlacements>
 
-<FleetFigure lang="tr">Beş gemi ve her birinin boş bir tahtadaki konum sayısı. Sayılar oyunun kodundan geliyor ve yukarıdaki formülle örtüşüyor.</FleetFigure>
+Peki bu toplam gerçekten konum sayısı mı? Ancak hiçbir konum iki kez sayılmıyorsa. Genel olarak içerme-dışlama ilkesine göre
 
-Tek başına bir geminin en fazla 180 konumu olur; ama bütün filo, gemiler üst üste binmeden {n.fleets} farklı biçimde dizilebilir. Bu sayıyı kaba kuvvetle saydım: en büyük üç geminin bütün konumlarını tek tek dolaştım, en küçük iki gemi içinse ilk üç gemiye değmeyen konum çiftlerini saydım ve bunlardan çakışan çiftleri çıkardım. Hiçbir pratik oyuncu, ister insan ister program olsun, bütün filolar üzerinden düşünmez: ilk atıştan önce bu filolardan yaklaşık $3 \times 10^{10}$ tane vardır ve her atış bu kümeyi tarif etmesi güç bir biçimde küçültür. Aşağıdaki stratejilerin hepsi bunun yerine gemileri tek tek ele alıyor.
+$$
+|H_L \cup V_L| = |H_L| + |V_L| - |H_L \cap V_L|
+$$
+
+olur; formülün doğru olması için son terimin sıfır olması gerekir. $L \ge 2$, yani $L > 1$ olduğunda bu terim gerçekten sıfırdır. Farklı iki hücre hem aynı satırı hem aynı sütunu paylaşamaz; bu yüzden en az iki hücreli bir geminin belirli bir yönü vardır ve hiçbir konum aynı anda hem yatay hem dikey olamaz: $H_L \cap V_L = \varnothing$. $L = 1$ olduğunda ise yönün hiçbir anlamı kalmaz. Aynı hücrede duran tek hücrelik “yatay” bir gemiyle “dikey” bir gemi aynı konumdur; dolayısıyla $H_1 = V_1$ ve $|H_1 \cap V_1| = n^2$ olur. Doğru sayı $2n^2$ değil, yalnızca $n^2$; formül her hücreyi iki kez sayardı. (Oyunun kodunda bir geminin konumlarını listeleyen fonksiyon da bu yüzden tek hücrelik bir gemiye tek bir yön tanır.) Öbür uçta, tahtadan uzun bir gemi hiçbir yere sığmaz. $L > n$ için $n - L + 1$ çarpanı sıfır ya da negatiftir: $L = n + 1$ iken formül rastlantı eseri yine doğru sonucu, yani sıfırı verir; daha uzun gemilerde ise ortaya anlamsız, negatif bir sayı çıkar. Bir satırdaki ya da sütundaki konumları doğru sayan ifade ise $\max(0,\, n - L + 1)$ olur. Hepsini bir araya getirirsek:
+
+$$
+|H_L \cup V_L| =
+\begin{cases}
+n^2, & L = 1,\\
+2n\,(n - L + 1), & 2 \le L \le n,\\
+0, & L > n.
+\end{cases}
+$$
+
+Klasik filodaki her gemi $2 \le L \le 5 \le n = 10$ koşulunu sağlar; filonun bütün gemileri böylece ortadaki duruma girer ve $2n\,(n - L + 1)$ formülü hepsi için geçerlidir.
+
+Aynı akıl yürütme, tek bir hücrenin üzerinden geçen konumları da sayar; Zor seviye ileride tam olarak bu sayılara ihtiyaç duyacak. İlk sütunu $j$ olan yatay bir konum, $c$ sütununu ancak ve ancak $j \le c \le j + L - 1$ ise kaplar. Bunu $0 \le j \le n - L$ koşuluyla birleştirince geriye $\max(0,\, c - L + 1) \le j \le \min(c,\, n - L)$ aralığındaki başlangıç sütunları kalır. Demek ki $c$ sütunundaki bir hücrenin üzerinden geminin
+
+$$
+f_L(c) = \min(c,\, n - L) - \max(0,\, c - L + 1) + 1
+$$
+
+yatay konumu geçer. Aynı sayı $\min(c + 1,\, n - c,\, L,\, n - L + 1)$ biçiminde de yazılabilir: Soldaki yer, sağdaki yer, geminin uzunluğu ve bir satırdaki konum sayısı; bunlardan hangisi önce tükenirse sayıyı o belirler. Dikey konumlar da sütun boyunca aynı biçimde sayılır; böylece $2 \le L \le n$ için $(r, c)$ hücresini o geminin tam $f_L(c) + f_L(r)$ konumu kaplar. Bir köşede satır ve sütun numaralarının her biri $0$ ya da $n - 1$ değerini alır; her gemi için $f_L(0) = f_L(n - 1) = 1$ olduğundan beş gemi bir köşeyi toplam $2 \cdot 5 = 10$ kez kaplar. 10 × 10’luk tahtanın ortasındaki dört hücrede ($r, c \in \lbrace 4, 5 \rbrace$) ise uzunluğu en fazla 5 olan her gemi için, yani filonun tamamı için $f_L(r) = f_L(c) = L$ olur; toplam $2\,(5 + 4 + 3 + 3 + 2) = 34$ çıkar. Oyunun kodunun aşağıdaki ilk yoğunluk haritasında bulduğu değerler de tam bunlar: köşelerde {n.emptyMin}, ortadaki dört hücrede {n.emptyMax}. Formülü çift sayma yöntemiyle de doğrulayabiliriz: Bir satırdaki $n - L + 1$ konumun her biri $L$ hücre kapladığından $\sum_c f_L(c) = L\,(n - L + 1)$ olmalıdır. Yukarıdaki kruvazör için gerçekten de $1 + 2 + 3 + 3 + 3 + 3 + 3 + 3 + 2 + 1 = 24 = 3 \cdot 8$.
+
+10 × 10’luk tahtada formül, filonun $L = 5, 4, 3, 3, 2$ uzunluklarındaki gemileri için sırasıyla 120, 140, 160, 160 ve 180 konum verir; hepsinin toplamı {n.placements}.
+
+<FleetFigure lang="tr">Beş gemi ve her birinin boş bir tahtadaki konum sayısı. Değerleri oyunun kodu hesaplıyor; hepsi yukarıdaki formülle örtüşüyor.</FleetFigure>
+
+Tek başına bir geminin en fazla 180 konumu vardır; oysa bütün filo, gemiler üst üste binmeden {n.fleets} farklı biçimde dizilebilir. Bu sayıyı kaba kuvvetle hesapladım: En büyük üç geminin bütün konum üçlülerini tek tek dolaştım; her üçlü için en küçük iki geminin bu üç gemiyle çakışmayan konum çiftlerini saydım ve bu çiftlerden kendi aralarında çakışanları çıkardım. İnsan olsun program olsun, pratikte hiçbir oyuncu bütün filolar üzerinden düşünmez: İlk atıştan önce bu filolardan yaklaşık $3 \times 10^{10}$ tane vardır ve her atış bu kümeyi tarif etmesi güç bir biçimde küçültür. Aşağıdaki stratejilerin hepsi bu yüzden gemileri tek tek ele alıyor.
 
 ## Kıyas noktası: rastgele atış
 
-Kolay seviye, henüz denemediği hücrelerden rastgele birine ateş eder. Oyun, {n.shipCells} gemi hücresinin sonuncusunu vuran atışla biter; yani bir oyunun uzunluğu olan $T$, 100 hücrenin rastgele bir sıralamasında son gemi hücresinin sırasıdır. Bu, klasik bir sıra istatistiği.
+Kolay seviye, henüz denemediği hücrelerden rastgele birine ateş eder. Oyun, {n.shipCells} gemi hücresinin sonuncusunu vuran atışla biter. Dolayısıyla bir oyunun uzunluğu $T$, 100 hücre rastgele sıralandığında son gemi hücresinin kaçıncı geldiğidir: klasik bir sıra istatistiği.
 
-17 gemi hücresi, geri kalan 83 hücreyi 18 boşluğa ayırır: ilk gemi hücresinden önceki boşluk, ardışık gemi hücreleri arasındakiler ve sonuncudan sonraki boşluk. Simetri gereği her boşluğun beklenen büyüklüğü aynıdır, yani $83/18$; oyun da son boşluktan hemen önce biter. Buradan
+Toplam 17 gemi hücresi, geri kalan 83 hücreyi 18 boşluğa böler: ilk gemi hücresinden önceki boşluk, ardışık gemi hücreleri arasındaki boşluklar ve sonuncudan sonraki boşluk. Simetri gereği bu boşlukların beklenen büyüklükleri eşittir, her biri $83/18$ hücre; oyun da son boşluktan hemen önce biter. Buradan
 
 $$
 \mathbb{E}[T] = 100 - \frac{83}{18} = \frac{17 \cdot 101}{18} \approx 95{,}4
@@ -63,125 +97,125 @@ $$
 
 bulunur.
 
-Dağılımın tamamı da aynı açıklıkla yazılabilir. Oyunun $t$. atışa kadar bitmesi, 17 gemi hücresinin hepsinin ilk $t$ atış arasında olması demektir:
+Dağılımın tamamı da aynı açıklıkla yazılabilir. Oyunun ilk $t$ atış içinde bitmesi, 17 gemi hücresinin hepsinin bu $t$ atışta vurulmuş olması demektir:
 
 $$
 P(T \le t) = \binom{t}{17} \bigg/ \binom{100}{17} .
 $$
 
-Oyunların medyan uzunluğu {n.random.median} atış; en geç 85 atışta biten oyunların oranı ise yalnızca {n.random.within85}. Rastgele atış filoyu eninde sonunda batırır ama çoğunlukla ancak ateş edilecek su tükenmek üzereyken.
+Oyunların medyan uzunluğu {n.random.median} atış; 85 atış içinde biten oyunların oranı ise yalnızca {n.random.within85}. Rastgele atış filoyu eninde sonunda batırır, ama çoğu zaman ancak ateş edilecek su tükenmek üzereyken.
 
 ## Av ve hedef
 
-İnsan bir oyuncu hiçbir teori bilmeden de şanstan çok daha iyi oynar. Bir isabetten sonra gemi batana kadar çevresine ateş eder; peşine düşeceği bir isabet yokken de atışlarını tahtaya yayar. Normal seviye ikisini de yapar; her birine ayrı ayrı bakmaya değer.
+Bir insan, hiçbir teori bilmeden de şanstan çok daha iyi oynar. Bir isabetten sonra gemi batana kadar çevresine ateş eder; peşine düşeceği bir isabet yokken de atışlarını tahtaya yayar. Normal seviye ikisini birden yapar; bu iki parçanın her biri ayrı ayrı incelenmeye değer.
 
 ### Hedef modu: bir gemiyi bitirmek
 
-Bir isabet, o hücrede bir gemi olduğunu söyler. Gemiler düz olduğu için geminin geri kalanı aynı satırda ya da aynı sütundadır. Bu yüzden bilgisayar isabetin dört komşusunu dener. İkinci bir isabet birincisiyle aynı hizaya geldiğinde geminin yönü belli olur ve bilgisayar isabet dizisini iki uçtan uzatır. Uçlardan biri bir ıskaya ya da tahtanın kenarına dayandığında öbür uçtan devam eder.
+Bir isabet, o hücrede bir gemi olduğunu söyler. Gemiler düz olduğu için geminin geri kalanı aynı satırda ya da aynı sütundadır; bilgisayar bu yüzden isabetin dört komşusunu dener. İkinci bir isabet birincisiyle aynı hizaya geldiğinde geminin yönü belli olur ve bilgisayar isabet dizisini iki ucundan uzatır. Uçlardan biri bir ıskaya ya da tahtanın kenarına dayanınca öbür uçtan devam eder.
 
-<TargetReplay lang="tr">Normal seviye bir kruvazörü bitiriyor (tohum değeri: {n.target.seed}). E5’teki isabetten sonra E4 ve E6’yı deniyor, ikisini de ıskalıyor; F5 isabet ediyor ve geminin yönünü belirliyor; G5 çizgiyi uzatıyor ama ıskalıyor; öbür uçtaki D5 gemiyi batırıyor. Açık isabet kalmayınca bilgisayar yeniden ava çıkıyor.</TargetReplay>
+<TargetReplay lang="tr">Normal seviye bir kruvazörü bitiriyor (tohum değeri: {n.target.seed}). E5’teki isabetten sonra E4 ve E6’yı deniyor, ikisini de ıskalıyor. F5 isabet ediyor ve geminin yönünü belirliyor; G5 çizgiyi uzatıyor ama ıska çıkıyor; öbür uçtaki D5 gemiyi batırıyor. Açık isabet kalmayınca bilgisayar yeniden ava çıkıyor.</TargetReplay>
 
-İki ayrıntı bu yöntemi sağlamlaştırır. Birincisi, bilgisayar bir gemiyi kovalarken başka bir gemiyi de vurabilir; örneğin iki gemi yan yana durduğunda ve çizgi ikisinin üzerinden geçtiğinde. Bu yüzden “kovaladığım gemi” diye bir değişken tutmaz; bütün *açık* isabetlere, yani henüz batmamış gemilere ait isabetlere bakar. İkincisi, bir gemi battığında oyun onun hangi hücrelerde durduğunu gösterir. Bu isabetler kapanır; geriye kalan isabetler başka bir gemiye aittir ve bilgisayar o gemiyi hedeflemeye devam eder. Ava ancak hiç açık isabet kalmadığında döner.
+İki ayrıntı yöntemi sağlamlaştırır. Birincisi, bilgisayar bir gemiyi kovalarken başka bir gemiyi de vurabilir; örneğin iki gemi yan yana durduğunda ve çizgi ikisinin üzerinden birden geçtiğinde. Bu yüzden “kovaladığım gemi” diye bir değişken tutmaz; bütün *açık* isabetlere, yani henüz batmamış gemilere ait isabetlere bakar. İkincisi, bir gemi battığında oyun onun hangi hücrelerde durduğunu gösterir. Bu hücrelerdeki isabetler kapanır; geriye kalan isabetler başka bir gemiye aittir ve bilgisayar bu kez o gemiyi hedef alır. Ava ancak hiç açık isabet kalmadığında döner.
 
 ### Av modu: parite
 
-Av sırasında daha önceki bir ıskanın hemen yanına yapılan atış kısmen boşa gider: iki hücre aynı gemiye ait olabileceği için birbiriyle örtüşen sorular sorarlar. Tahtayı dama tahtası gibi boyayalım. Komşu hücreler farklı renktedir ve her gemi en az iki komşu hücreyi kaplar; dolayısıyla her gemi en az bir siyah hücreyi kaplar. Yalnızca siyah hücrelere, yani satır ve sütun numaralarının toplamı çift olanlara ateş etmek her gemiyi yine bulur; üstelik taranacak hücre sayısı 100 yerine {n.lattice[2]} olur.
+Av sırasında önceki bir ıskanın hemen yanına yapılan atış kısmen boşa gider: İki hücre aynı gemiye ait olabileceğinden bu iki atış birbiriyle örtüşen sorular sorar. Tahtayı dama tahtası gibi boyayalım. Komşu hücreler farklı renktedir ve her gemi en az iki komşu hücre kaplar; öyleyse her gemi en az bir siyah hücreyi de kaplar. Yalnızca siyah hücrelere, yani satır ve sütun numaralarının toplamı çift olanlara ateş etmek yine her gemiyi bulur; üstelik taranacak hücre sayısı 100 yerine {n.lattice[2]} olur.
 
-Daha küçük bir küme işe yaramaz. Tahta, komşu hücre çiftlerinden oluşan 50 ayrık dominoyla döşenebilir ve muhrip bu dominoların herhangi birinin altında saklanıyor olabilir. Muhribi nerede olursa olsun yakalayan bir hücre kümesi her dominodan en az bir hücre içermek zorundadır; dolayısıyla en az 50 hücresi vardır.
+Daha küçük bir küme işe yaramaz. Tahta, komşu hücre çiftlerinden oluşan 50 ayrık dominoyla döşenebilir ve muhrip bu dominolardan herhangi birinin altında saklanıyor olabilir. Muhribi nerede olursa olsun yakalayan bir hücre kümesi her dominodan en az bir hücre içermek zorundadır; dolayısıyla en az 50 hücresi vardır.
 
-Fikir genelleşir. Bir hücrenin sıfırdan başlayarak sayılan satırına ve sütununa $r$ ve $c$ diyelim. $L$ uzunluğundaki yatay bir gemi $r + c$ toplamının ardışık $L$ değerini kapsar; dikey bir gemi de öyle. $L \ge m$ ise bu değerlerden biri $m$’nin katıdır. Demek ki en az $m$ uzunluğundaki her gemi
+Fikir genelleştirilebilir. Satırı ve sütunu yine sıfırdan başlayarak $r$ ve $c$ ile gösterelim. $L$ uzunluğundaki yatay bir gemi $r + c$ toplamının ardışık $L$ değerini kapsar; dikey bir gemi de öyle. $L \ge m$ ise bu değerlerden biri mutlaka $m$ ile bölünür. Demek ki uzunluğu en az $m$ olan her gemi
 
 $$
 \Lambda_m = \lbrace\, (r, c) : r + c \equiv 0 \pmod{m} \,\rbrace
 $$
 
-kümesinin bir hücresini kaplar. Matematikte bu tür kümelere kafes denir; burada ona kısaca tarama deseni diyeceğim.
+kümesinin bir hücresini kaplar. Matematikte bu tür kümelere kafes denir; ben burada bunlara kısaca tarama deseni diyeceğim.
 
-Normal seviye, $m$ su üstündeki en kısa geminin uzunluğu olmak üzere $\Lambda_m$ üzerinde avlanır. Muhrip su üstündeyken bu desen dama tahtasıdır, $m = 2$; muhrip battığında desen seyrelir ve her üç köşegenden birinin üzerindeki {n.lattice[3]} hücreye iner.
+Normal seviye, $m$ su üstündeki en kısa geminin uzunluğu olmak üzere $\Lambda_m$ üzerinde avlanır. Muhrip su üstünde kaldıkça bu desen dama tahtasıdır ($m = 2$); muhrip battığında desen seyrelir ve her üç köşegenden birinin üzerindeki {n.lattice[3]} hücreye iner.
 
-<ParityFigure lang="tr">$m = 2$ ve $m = 3$ için tarama desenleri. En az $m$ hücre uzunluğundaki her gemi, buradaki muhrip ve kruvazör gibi, desenin bir hücresini kaplar; derleme bunu bu uzunluktaki gemilerin bütün konumları için denetliyor. 3’ten kısa olan muhrip ise $\Lambda_3$’ün köşegenleri arasından sıyrılabilir; desenin su üstündeki en kısa gemiye göre seçilmesinin nedeni bu.</ParityFigure>
+<ParityFigure lang="tr">$m = 2$ ve $m = 3$ için tarama desenleri. Uzunluğu en az $m$ hücre olan her gemi, buradaki muhrip ve kruvazör gibi, desenin bir hücresini kaplar; derleme bunu, uzunluğu en az $m$ olan her geminin bütün konumları için tek tek denetliyor. Üç hücreden kısa olan muhrip ise $\Lambda_3$ köşegenlerinin arasından sıyrılabilir; desenin su üstündeki en kısa gemiye göre seçilmesinin nedeni de bu.</ParityFigure>
 
-Yazının sonundaki simülasyonda parite, oyun başına yaklaşık {n.saved.parity} atış kazandırıyor: av ve hedef, tarama deseni olmadan ortalama {n.mean['no-parity']}, desenle {n.mean.parity} atış gerektiriyor. Kazanç oyunun yarısına yaklaşmıyor bile, çünkü desenden yalnızca av atışları yararlanıyor; gemileri bitiren atışlar iki durumda da aşağı yukarı aynı. Desen en kötü durumu da sınırlıyor: {n.games} oyunun en uzunu desenle {n.worst.parity}, desensiz {n.worst['no-parity']} atış sürdü.
+Yazının sonundaki simülasyonda parite oyun başına yaklaşık {n.saved.parity} atış kazandırıyor: Av ve hedef, tarama deseni olmadan ortalama {n.mean['no-parity']}, desenle {n.mean.parity} atış gerektiriyor. Kazanç oyunun yarısına yaklaşmıyor bile, çünkü desenden yalnızca av atışları yararlanıyor; gemileri bitiren atışlar desenle de desensiz de hemen hemen aynı. Desen en kötü durumu da sınırlıyor: {n.games} oyunun en uzunu desenle {n.worst.parity}, desensiz {n.worst['no-parity']} atış sürdü.
 
 ### Durum makinesi
 
-Parçalar bir araya geldiğinde Normal seviye küçük bir durum makinesidir.
+Parçalar bir araya geldiğinde Normal seviye küçük bir durum makinesine dönüşür.
 
-<StateMachine lang="tr">Av ve hedefin durum diyagramı. Hedef ve Çizgi birlikte Hedefleme durumunu oluşturur; her batış, filoyu (ve onunla birlikte tarama desenini) güncelleyen ve sonraki adımı belirleyen kayıt adımından geçer.</StateMachine>
+<StateMachine lang="tr">Av ve hedefin durum diyagramı. Hedef ve Çizgi birlikte Hedefleme durumunu oluşturur; her batış, filoyu (ve onunla birlikte tarama desenini) güncelleyip bir sonraki adımı belirleyen kayıt adımından geçer.</StateMachine>
 
-Kodda durumu tutan bir değişken yok: durum, bilgisayarın bildiklerinin bir fonksiyonu. Açık isabet yoksa bilgisayar *avlanıyordur*; iki açık isabet yan yanaysa ve dizilerini sürdüren, henüz atış yapılmamış bir hücre varsa *çizgiyi izliyordur*; bunların dışında *hedefliyordur*. Durumu saklamak yerine her seferinde yeniden türetmek, durumun tahtayla uyumsuz hâle gelmesini imkânsız kılar. Elle yazılmış sürümlerin klasik hatası da tam budur: bir kruvazör kovalanırken bulunan bir muhrip, geride başıboş bir isabet bırakan bir batış, artık hiçbir anlam taşımayan kayıtlı bir yön.
+Kodda durumu tutan bir değişken yok; durum, bilgisayarın bildiklerinin bir fonksiyonu. Açık isabet yoksa bilgisayar *avlanıyordur*. İki açık isabet yan yanaysa ve dizilerini sürdüren, henüz atış yapılmamış bir hücre varsa *çizgiyi izliyordur*. Geri kalan bütün hâllerde *hedefliyordur*. Durum saklanmayıp her seferinde yeniden türetildiği için tahtayla asla çelişemez. Durumu bir değişkende tutan sürümler ise klasik tuzaklara düşer: bir kruvazör kovalanırken bulunan bir muhrip, geride başıboş bir isabet bırakan bir batış, artık hiçbir anlam taşımayan kayıtlı bir yön.
 
-Battı adımı, bilgisayarın ıska ve isabetten fazlasını öğrendiği tek andır. Geminin hücrelerini batmış olarak işaretlemek o geminin isabetlerini kapatır. Gemiyi filodan çıkarmak $m$’yi, dolayısıyla tarama desenini değiştirebilir; bir sonraki bölümdeki $w$ ağırlığını ise her zaman değiştirir.
+Battı adımı, bilgisayarın ıska ve isabetten fazlasını öğrendiği tek andır. Geminin hücrelerini batmış olarak işaretlemek o geminin isabetlerini kapatır. Gemiyi filodan çıkarmak $m$ değerini, dolayısıyla tarama desenini değiştirebilir; bir sonraki bölümdeki $w$ ağırlığını ise her zaman değiştirir.
 
 ## Olasılık yoğunluğu
 
-Av ve hedef, filo hakkında yalnızca en kısa geminin uzunluğunu kullanır. Zor seviye ise filonun tamamını kullanır. Her atıştan önce her hücre için şunu sorar: şimdiye kadar görülenlerle çelişmeden, kalan gemiler bu hücreyi kaç farklı biçimde kaplayabilir?
+Av ve hedef, filo hakkında yalnızca en kısa geminin uzunluğunu kullanır. Zor seviye ise filonun tamamından yararlanır. Her atıştan önce her hücre için şunu sorar: Şimdiye kadar görülenlerle çelişmeden, kalan gemiler bu hücreyi kaç farklı biçimde kaplayabilir?
 
 ### Konumları saymak
 
-Su üstündeki her $s$ gemisi için $P_s$, geminin *tutarlı* konumlarının kümesi olsun: düz, tahtanın içinde ve hiçbir ıskaya ya da batmış bir geminin hiçbir hücresine değmeyen konumlar. Yalnızca isabetlerden oluşan bir konum da dışarıda kalır, çünkü bütün hücreleri vurulmuş bir gemi zaten batmış olurdu. Henüz atış yapılmamış bir $c$ hücresinin yoğunluğu
+Su üstündeki her $s$ gemisi için $P_s$, o geminin *tutarlı* konumlarının kümesi olsun: düz, tahtanın içinde, hiçbir ıskayı ve batmış gemilerin hiçbir hücresini kapsamayan konumlar. Yalnızca isabetlerden oluşan bir konum da dışarıda kalır, çünkü bütün hücreleri vurulmuş bir gemi çoktan batmış olurdu. Henüz atış yapılmamış bir $c$ hücresinin yoğunluğu
 
 $$
 d(c) = \sum_{s} \; \sum_{p \in P_s,\; c \in p} w^{h(p)}
 $$
 
-olarak tanımlanır. Burada $h(p)$, $p$ konumunun kapsadığı açık isabet sayısı; $w$ ise birazdan ele alacağımız bir ağırlık. İsabet yokken her terim $w^0 = 1$ olur ve $d(c)$ yalnızca konumları sayar. Bilgisayar $d$’nin en büyük olduğu hücreye ateş eder; birden fazla hücre eşitse aralarından rastgele birini seçer.
+olarak tanımlanır. Burada $h(p)$, $p$ konumunun kapsadığı açık isabetlerin sayısıdır; $w$ ise birazdan ele alacağımız bir ağırlık. İsabet yokken her terim $w^0 = 1$ olur ve $d(c)$ yalnızca konumları sayar. Bilgisayar $d$ değerinin en büyük olduğu hücreye ateş eder; birden fazla hücre eşitse aralarından rastgele birini seçer.
 
-<InitialDensity lang="tr">İlk atıştan önceki yoğunluk: beş geminin her hücreyi kapsayan konumlarının sayısı. Köşelerde {n.emptyMin}, ortadaki dört hücrede {n.emptyMax}; Zor seviyenin ilk atışı da bu dört hücreden birine gider.</InitialDensity>
+<InitialDensity lang="tr">İlk atıştan önceki yoğunluk. Her hücredeki sayı, beş geminin o hücreyi kaplayan konumlarının sayısı: köşelerde {n.emptyMin}, ortadaki dört hücrede {n.emptyMax}. Zor seviye ilk atışını bu dört hücreden birine yapar.</InitialDensity>
 
-Kenarlar ve köşeler daha az konum tarafından kapsanır, çünkü oradaki bir gemi yalnızca içeriye doğru uzanabilir. Bir hücre, $L$ uzunluğundaki bir geminin en fazla $L$ yatay ve $L$ dikey konumunun üzerinde bulunur; bu yüzden tam filo için bir hücrenin sayısı en fazla $2 \cdot 17 = 34$ olabilir ve ortadaki dört hücre bu sınıra ulaşır. Toplam konum sayısına ({n.placements}) bölündüğünde $d(c)$, bütün konumlar arasından rastgele seçilen bir konumun $c$ hücresini kapsama olasılığı olur; adı da buradan gelir.
+Kenar ve köşe hücrelerini daha az konum kaplar, çünkü oradaki bir gemi yalnızca içeriye doğru uzanabilir. Bir hücrenin üzerinden $L$ uzunluğundaki bir geminin en fazla $L$ yatay ve $L$ dikey konumu geçer; bu yüzden tam filoda bir hücrenin değeri en fazla $2 \cdot 17 = 34$ olabilir ve ortadaki dört hücre bu sınıra ulaşır. Satırı $r$, sütunu $c$ olan hücrenin bu tahtadaki değeri de, yazının başındaki $f_L(c) + f_L(r)$ sayılarının beş gemi üzerinden toplamıdır. Toplam konum sayısına ({n.placements}) bölündüğünde $d(c)$, bütün konumlar arasından rastgele seçilen bir konumun $c$ hücresini kaplama olasılığına dönüşür; yöntemin adı da buradan gelir.
 
-Iskalar konumları eler ve yoğunluk çevrelerinde düşer:
+Iskalar konumları eler ve yoğunluk onların çevresinde düşer:
 
-<HuntSnapshot lang="tr">Zor seviyedeki bir oyunun (tohum değeri: {n.hunt.seed}) hepsi ıskayla sonuçlanan ilk {n.hunt.shots} atışı ve {n.hunt.next}. atış için hesaplanan yoğunluk. Kodda pariteden hiç söz edilmiyor; yine de bu atışların hiçbiri bir başkasının yanında değil. En yüksek yoğunluk artık ıskaların henüz ulaşmadığı köşede, {n.hunt.peaks} hücrelerinde.</HuntSnapshot>
+<HuntSnapshot lang="tr">Zor seviyede oynanan bir oyunun (tohum değeri: {n.hunt.seed}) hepsi ıskayla sonuçlanan ilk {n.hunt.shots} atışı ve {n.hunt.next}. atış için hesaplanan yoğunluk. Kodda parite sözü bile geçmiyor; yine de bu atışların hiçbiri bir diğerinin yanında değil. En yüksek yoğunluk artık ıskaların henüz uğramadığı köşede, {n.hunt.peaks} hücrelerinde.</HuntSnapshot>
 
-Bir ıska, üzerinden geçen bütün konumları eler; bu da en çok komşularının sayısını düşürür. Bu yüzden bir sonraki tepe noktası genellikle biraz uzakta çıkar. Bu, paritenin temel ilkelerden yola çıkılarak yeniden keşfedilmesi demek, hatta biraz fazlası: yoğunluk, kenarların avlanmak için verimsiz olduğunu ve kalan gemilere bir yönde dar gelen bir boşluğun onları ancak öbür yönde barındırabileceğini de bilir.
+Bir ıska, üzerinden geçen bütün konumları eler; bu da en çok komşularının değerini düşürür. Bir sonraki tepe noktası bu yüzden genellikle biraz ötede belirir. Parite böylece temel ilkelerden yola çıkılarak yeniden keşfedilmiş olur, hatta fazlasıyla: Yoğunluk, kenarların av için verimsiz olduğunu ve kalan gemilere bir yönde dar gelen bir boşluğun onları ancak öbür yönde barındırabileceğini de bilir.
 
 ### İsabetleri ağırlıklandırmak
 
-Şimdi bilgisayarın E5’i vurduğunu düşünelim. Her konum 1 sayılsaydı hiçbir şey değişmezdi: bir isabetin üzerinden geçen konumlar eskisi gibi geçerlidir, yani diğer bütün hücreler isabetten önceki sayılarını korur. İsabet, bilgisayarın bildiği en değerli şeydir ve düz bir sayım onu göremez. Ağırlık bunun için var.
+Şimdi bilgisayarın E5’i vurduğunu düşünelim. Her konum 1 sayılsaydı hiçbir şey değişmezdi: Bir isabeti kapsayan konumlar da tıpkı önceden olduğu gibi geçerlidir, dolayısıyla öbür bütün hücreler isabetten önceki değerlerini korur. İsabet, bilgisayarın elindeki en değerli bilgidir ve düz bir sayım onu göremez. Ağırlık tam da bunun için var.
 
-Oyun, toplamı su üstündeki gemiler üzerinden almak üzere $w = 1 + 2\sum_s L_s$ kullanır; tam filo için bu {n.weight} eder. Bu seçim keyfî değil. $c$ hücresinden geçen konumları kapsadıkları açık isabet sayısına göre gruplayalım ve tam $k$ açık isabet kapsayanların sayısına $N_k(c)$ diyelim. O zaman
+Oyun $w = 1 + 2\sum_s L_s$ ağırlığını kullanır; toplama yalnızca su üstündeki gemiler girer ve tam filo için $w$ değeri {n.weight} olur. Bu seçim keyfî değil. $c$ hücresinden geçen konumları kapsadıkları açık isabet sayısına göre gruplayalım ve tam $k$ açık isabet kapsayanların sayısına $N_k(c)$ diyelim. O zaman
 
 $$
 d(c) = N_0(c) + N_1(c)\,w + N_2(c)\,w^2 + \cdots
 $$
 
-olur. Hiçbir hücre $2\sum_s L_s = w - 1$ konumdan fazlasının üzerinde bulunmadığı için her $N_k(c)$, $0$ ile $w - 1$ arasındadır. Başka bir deyişle $N_k(c)$ sayıları *$d(c)$ sayısının $w$ tabanındaki basamaklarıdır*. İki yoğunluğu karşılaştırmak, basamaklarını en yüksekten başlayarak karşılaştırmak demektir: bilgisayar önce hücreden geçen bir konumun kapsayabileceği açık isabet sayısını en büyük yapar; konum sayımı ancak bu bakımdan eşit kalan hücreler arasında devreye girer.
+olur. Hiçbir hücrenin üzerinden $2\sum_s L_s = w - 1$ konumdan fazlası geçmediği için her $N_k(c)$, $0$ ile $w - 1$ arasında kalır. Başka bir deyişle $N_k(c)$ sayıları *$d(c)$ sayısının $w$ tabanındaki basamaklarıdır*. İki yoğunluğu karşılaştırmak, basamaklarını en yüksekten başlayarak karşılaştırmak demektir: Bilgisayar önce, hücreden geçen bir konumun kapsayabileceği açık isabet sayısını en büyük yapar; konumları saymak ancak bu bakımdan eşit kalan hücreler arasında devreye girer.
 
 <HitDensity lang="tr">E5’teki tek isabetten ve F5’teki ikinci isabetten sonraki yoğunluk. Her tahtanın altında tepe değeri $w$ tabanında (burada {n.weight}) yazılı; en yüksek basamak, tepeden geçen ve en çok isabeti kapsayan konumları sayar.</HitDensity>
 
-E5’teki tek isabetten sonra tepe noktası {n.oneHit.peaks} hücrelerinde; değer {n.oneHit.through} · {n.weight} + {n.oneHit.none} = {n.oneHit.value}. Yani bu hücrelerin her birinden geçen {n.oneHit.through} konum E5’i de kapsıyor, {n.oneHit.none} konum ise kapsamıyor. Diğer komşular olan {n.oneHit.others} hücreleri {n.oneHit.othersValue} değerinde kalıyor: E5 tam ortada değil, üstünde ve solunda biraz daha az yer var. İkinci isabetten sonra *iki* isabetten birden geçen konumların üzerinde yalnızca çizgiyi sürdüren hücreler, yani {n.twoHits.peaks} bulunuyor; bu yüzden onların en yüksek basamağı $w^2$ basamağına çıkıyor: {n.twoHits.both} · {n.weight}² + {n.twoHits.one} · {n.weight} + {n.twoHits.none} = {n.twoHits.value}.
+E5’teki tek isabetten sonra tepe noktası {n.oneHit.peaks} hücrelerinde; değeri {n.oneHit.through} · {n.weight} + {n.oneHit.none} = {n.oneHit.value}. Yani bu hücrelerin her birinden geçen konumlardan {n.oneHit.through} tanesi E5’i de kapsıyor, {n.oneHit.none} tanesi kapsamıyor. E5’in öbür komşuları olan {n.oneHit.others} hücrelerinin değeri ise {n.oneHit.othersValue}: E5 tam ortada durmuyor; üstünde ve solunda biraz daha az yer var. İkinci isabetten sonra *iki* isabeti birden kapsayan konumlar yalnızca çizgiyi sürdüren hücrelerden geçiyor; bu yüzden bu hücrelerin en yüksek basamağı $w^2$ basamağına çıkıyor. Tepe noktası artık çizginin iki ucundaki {n.twoHits.peaks} hücrelerinde; değeri {n.twoHits.both} · {n.weight}² + {n.twoHits.one} · {n.weight} + {n.twoHits.none} = {n.twoHits.value}.
 
-Zor seviyeye kimse çizgiyi uzatma kuralını yazmadı; kural aritmetiğin içinden kendiliğinden çıkıyor. Yukarıdaki durum makinesinin büyük kısmı da öyle: en büyük yoğunluğun en yüksek basamağının konumu olan $k$, durumun yerini tutuyor. $k = 0$ iken bilgisayar avlanıyor, $k = 1$ iken hedefliyor, $k \ge 2$ iken bir isabet dizisi üzerinde çalışıyor. İki isabetin arasında kalan tek bir hücreyi, örneğin E5 ile G5 arasındaki F5’i, doğrudan hedef alıyor bile; Normal seviye için bu hücre komşulardan yalnızca biri. Bir batışla filodan bir gemi eksilir, $w$ ağırlığı küçülür ve o geminin isabetleri kapanır; basamaklar da kendiliğinden yeniden düzenlenir.
+Zor seviyeye çizgiyi uzatma kuralını kimse yazmadı; kural aritmetiğin içinden kendiliğinden çıkıyor. Yukarıdaki durum makinesinin büyük bölümü de öyle. En büyük yoğunluğun en yüksek basamağı $w^k$ basamağı olsun; bu $k$ sayısı durumun yerini tutuyor: $k = 0$ iken bilgisayar avlanıyor, $k = 1$ iken hedefliyor, $k \ge 2$ iken bir isabet dizisi boyunca ilerliyor. İki isabetin arasında kalan, henüz atış yapılmamış tek bir hücreye, örneğin E5 ile G5 arasındaki F5’e, doğrudan yöneliyor bile; Normal seviye için bu hücre komşulardan yalnızca biridir. Bir batış filodan bir gemiyi eksiltir, $w$ ağırlığını küçültür ve o geminin isabetlerini kapatır; basamaklar da kendiliğinden yeniden düzenlenir.
 
 ### Kendiniz deneyin
 
-Aşağıdaki laboratuvar, oyunun yoğunluk fonksiyonunu tarayıcınızda çalıştırır. Iskaları ve isabetleri işaretleyin, tepe noktasının nasıl yer değiştirdiğini izleyin. Kafanızdaki oyunda bir gemi battığında hücrelerini “Battı” olarak işaretleyin ve gemiyi listeden kaldırın: $w$ ağırlığı küçülür ve yoğunluk kalan gemiler üzerinde yeniden dağılır.
+Aşağıdaki laboratuvar, oyunun yoğunluk fonksiyonunu tarayıcınızda çalıştırır. Iskaları ve isabetleri işaretleyin, tepe noktasının nasıl yer değiştirdiğini izleyin. Kafanızdaki oyunda bir gemi batınca hücrelerini “Battı” olarak işaretleyin ve gemiyi listeden kaldırın: $w$ ağırlığı küçülür, yoğunluk da kalan gemiler üzerinde yeniden dağılır.
 
-<DensityLab lang="tr">Yoğunluk laboratuvarı. Renk tonu $d$ değerini en büyük değere göre gösteriyor; kesikli kareler Zor seviyenin ateş edeceği hücreler. Panelde işaretçinin ya da klavye odağının bulunduğu hücrenin yoğunluğu yer alıyor; işin içine bir isabet girdiğinde değer $w$ tabanında yazılıyor.</DensityLab>
+<DensityLab lang="tr">Yoğunluk laboratuvarı. Renk tonu, $d$ değerini en büyük değere oranla gösteriyor; kesikli kareler Zor seviyenin ateş edeceği hücreler. Panelde işaretçinin ya da klavye odağının bulunduğu hücrenin yoğunluğu yer alıyor; işin içine bir isabet girdiğinde bu değer $w$ tabanında yazılıyor.</DensityLab>
 
-Denemeye değer iki şey: iki isabeti yan yana koyup tepe noktalarının çizginin uçlarına sıçramasını izleyin, sonra uçlardan birine bir ıska ekleyin. Ya da tahtayı boş bırakıp uçak gemisi dışındaki bütün gemileri listeden kaldırın ve yalnızca uzun gemiler kaldığında yoğunluğun kenarlardan ne kadar kaçındığına bakın.
+Denemeye değer iki şey var. İki isabeti yan yana koyun ve tepe noktalarının çizginin uçlarına sıçramasını izleyin; ardından uçlardan birine bir ıska ekleyin. Ya da tahtayı boş bırakıp uçak gemisi dışındaki bütün gemileri listeden kaldırın ve yalnızca uzun gemiler kaldığında yoğunluğun kenarlardan ne kadar kaçındığına bakın.
 
 ### Sayımın dışarıda bıraktıkları
 
-Yoğunluk her gemiyi tek başına ele aldığı için olamayacak birleşimleri de sayar; örneğin aynı hücrelerde duran bir uçak gemisiyle bir zırhlıyı. Kesin cevap, şimdiye kadarki atışlarla tutarlı her filoyu tartmayı gerektirir; ilk atıştan önce bu filolardan yaklaşık $3 \times 10^{10}$ tane vardır ve bu cevap bile ancak rakip gemilerini tümüyle rastgele yerleştiriyorsa doğrudur. Tutarlı filolardan rastgele örnekler çekmek, yani aynı yoğunluğun Monte Carlo tahmini, doğal bir sonraki adım olurdu. Gemi başına sayım ise ucuz, üzerine düşünmesi kolay ve bir sonraki bölümün gösterdiği gibi şimdiden iyi. (Bilgisayarın nasıl düşündüğünü bilen bir insan, gemilerini yoğunluğun en son taradığı kenarlara saklamayı seçebilir.)
+Yoğunluk her gemiyi tek başına ele aldığı için hiçbir filoda bir arada bulunamayacak konumları da sayar; aynı hücrelerde duran bir uçak gemisiyle bir zırhlı gibi. Kesin yanıt, şimdiye kadarki atışlarla tutarlı her filoyu tartmayı gerektirirdi. İlk atıştan önce bu filolardan yaklaşık $3 \times 10^{10}$ tane vardır ve bu yanıt bile ancak rakip gemilerini tümüyle rastgele, her filoya eşit olasılık vererek yerleştirseydi doğru olurdu. Tutarlı filolardan rastgele örnekler çekmek, yani aynı yoğunluğu Monte Carlo yöntemiyle tahmin etmek, atılacak doğal adım olurdu. Gemi başına sayım ise ucuzdur, üzerinde akıl yürütmek kolaydır ve bir sonraki bölümün gösterdiği gibi şimdiden iyi sonuç verir. (Bilgisayarın nasıl düşündüğünü bilen biri, gemilerini yoğunluğun en son taradığı kenarlara saklamayı seçebilir.)
 
 ## Kaç atış?
 
-Stratejileri karşılaştırmak için her birine aynı {n.games} filoyu batırttım. $i$ numaralı oyun, filoyu oyunun kendi rastgele yerleştirme fonksiyonuyla ve $i$ tohum değeriyle kurar; bilgisayara da tohum değeri $7919\,i + 17$ olan bir üreteç verir (oyunun testlerinde olduğu gibi mulberry32). Böylece her oyun birebir yeniden oynatılabilir. Dördüncü strateji olan paritesiz av ve hedef, tarama deseni kapatılmış Normal seviyedir: rastgele avlanır, Normal seviye gibi hedefler.
+Stratejileri karşılaştırmak için her birine aynı {n.games} filoyu batırttım. $i$ numaralı oyunda filo, oyunun kendi rastgele yerleştirme fonksiyonuyla ve $i$ tohum değeriyle kurulur; bilgisayar da tohum değeri $7919\,i + 17$ olan bir rastgele sayı üreteciyle oynar (testlerdeki gibi mulberry32). Böylece her oyun birebir yeniden oynatılabilir. Dördüncü strateji olan paritesiz av ve hedef, tarama deseni kapatılmış Normal seviyedir: Rastgele avlanır, Normal seviye gibi hedefler.
 
 <SimulationTable lang="tr" />
 
-<ShotsChart lang="tr">{n.games} oyundan belirli bir atış sayısına kadar bitenlerin oranı. Noktalı eğri, yukarıda türettiğimiz rastgele atışın kesin dağılımı; simüle edilen Kolay oyunlar bu eğriyi yakından izliyor.</ShotsChart>
+<ShotsChart lang="tr">Belirli bir atış sayısına kadar biten oyunların oranı ({n.games} oyun üzerinden). Noktalı eğri, yukarıda türettiğimiz rastgele atışın kesin dağılımı; simülasyondaki Kolay oyunlar bu eğriyi yakından izliyor.</ShotsChart>
 
-Rastgele atış formülle örtüşüyor: simülasyondaki ortalama {n.mean.random} atış, beklenen değer {n.random.expected}. En büyük sıçrama hedeflemeyle geliyor: ortalama {n.mean.random} atıştan {n.mean['no-parity']} atışa. Parite {n.saved.parity} atış, yoğunluk da {n.saved.density} atış daha kazandırıyor. 50 atış içinde biten oyunların oranı Zor seviyede {n.within50.density}, Normal seviyede {n.within50.parity}. Zor seviyenin hiçbir oyunu {n.worst.density} atıştan uzun sürmedi. Strateji başına {n.games} oyunla her ortalama yaklaşık ±{n.margin} atışlık bir hata payıyla (iki standart hata) doğru; bu pay, stratejiler arasındaki farklardan çok daha küçük.
+Rastgele atış formülle örtüşüyor: Simülasyondaki ortalama {n.mean.random} atış, beklenen değer ise {n.random.expected}. En büyük adım hedeflemeyle atılıyor: ortalama {n.mean.random} atıştan {n.mean['no-parity']} atışa. Parite {n.saved.parity}, yoğunluk da {n.saved.density} atış daha kazandırıyor. Oyunların 50 atış içinde bitme oranı Zor seviyede {n.within50.density}, Normal seviyede {n.within50.parity}; Zor seviyenin hiçbir oyunu {n.worst.density} atıştan uzun sürmedi. Strateji başına {n.games} oyunla her ortalama yaklaşık ±{n.margin} atışlık bir hata payıyla (iki standart hata) doğru; bu pay, stratejiler arasındaki farklardan çok daha küçük.
 
 ## Üç fikir
 
-Ayrıntılardan arındırıldığında av ve hedef algoritması, her biri bir öncekinden daha genel üç fikirden ibaret. Bir isabet, komşuları hakkında bilgi verir; onun peşine düşün: hedef modu budur. Aynı gemiyle açıklanabilecek atışlar israftır; atışları hiçbir geminin kaçamayacağı bir desene yayın: parite budur. Bu kuralların hiçbirini yazmak yerine hâlâ mümkün olan her şeyi sayın ve kararı ağırlıklara bırakın: olasılık yoğunluğu da budur. Kurallar onun içinden basamaklar olarak geri çıkar.
+Ayrıntılarından arındırıldığında av ve hedef algoritması, her biri bir öncekinden daha genel üç fikre indirgenir. Bir isabet komşuları hakkında bilgi taşır, öyleyse peşine düşün: Hedef modu budur. Aynı gemiyle açıklanabilecek atışlar israftır, öyleyse atışlarınızı hiçbir geminin kaçamayacağı bir desene yayın: Parite budur. Bu kuralların hiçbirini yazmak yerine hâlâ mümkün olan her şeyi sayın ve kararı ağırlıklara bırakın: Olasılık yoğunluğu da budur; kurallar onun içinden basamaklar olarak geri döner.
 
-Üç seviyeyi de <a href={gameHref}>Amiral Battı oyununda</a> oynayabilirsiniz. Zor seviyede savaş sırasında ısı haritasını açın ve bilgisayar hedefine yaklaşırken $d$ değerinin kendi filonuzun üzerinde nasıl dağıldığını izleyin.
+Üç seviyeyi de <a href={gameHref}>Amiral Battı oyununda</a> oynayabilirsiniz. Zor seviyede, savaş sürerken ısı haritasını açın ve bilgisayar hedefine yaklaştıkça $d$ değerinin kendi filonuzun üzerinde nasıl yayıldığını izleyin.
 
 ## Okuma önerileri
 

@@ -458,7 +458,7 @@ test('the crowd.inc figure is a schematic picture, and the odd-number square sta
   const { en, tr } = aboutMessages;
   // The network is not crowd.inc's data: both captions say so first…
   assert.match(en.journey.chapters.work.caption, /^A schematic picture of crowd\.inc: /);
-  assert.match(tr.journey.chapters.work.caption, /^Şematik bir resim: crowd\.inc’te /);
+  assert.match(tr.journey.chapters.work.caption, /^Şematik bir çizim: crowd\.inc’te /);
   for (const locale of LOCALES) {
     const { caption, figureLabels } = aboutMessages[locale].journey.chapters.work;
     // …and give no counts that could be read as real figures.

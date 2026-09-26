@@ -131,7 +131,7 @@ const en = {
          * counts (the site had hundreds of users; the figure draws a few dozen dots).
          */
         caption:
-          'A schematic picture of crowd.inc: people shared their ideas there, and others helped with them. Large circles are ideas and small dots are users; each line shows who helped with which idea, and the highlighted idea has the most helpers. Inside the dashed boundary on the right are the private ideas we turned to in the end, open only to their own members.',
+          'A schematic picture of crowd.inc: people shared their ideas there, and others helped with them. Large circles are ideas and small dots are users; each line shows who helped with which idea, and the highlighted idea has the most helpers. Inside the dashed boundary on the right are the private ideas we turned to in the end.',
         /** Labels over the public side and over the private region, in small mono capitals. */
         figureLabels: { public: 'PUBLIC', private: 'PRIVATE' },
       },
@@ -261,7 +261,7 @@ const tr: AboutMessages = {
         title: 'crowd.inc’te yazılım geliştirici',
         // "Fikirler için yardım", in the words the chapter opens with ("bu fikirler için yardım bulduğu").
         caption:
-          'Şematik bir resim: crowd.inc’te insanlar fikirlerini paylaşıyor, başkaları da bu fikirler için yardım ediyordu. Büyük daireler fikirler, küçük noktalar kullanıcılar; çizgiler kimin hangi fikir için yardım ettiğini gösteriyor. Vurgulu daire, en çok yardım alan fikir. Sağdaki kesikli sınırın içinde, son dönemde yöneldiğimiz özel fikirler var; bunlar yalnızca kendi üyelerine açık.',
+          'Şematik bir çizim: crowd.inc’te insanlar fikirlerini paylaşıyor, başkaları da bu fikirler için yardım ediyordu. Büyük daireler fikirler, küçük noktalar kullanıcılar; çizgiler kimin hangi fikir için yardım ettiğini gösteriyor. Vurgulu daire, en çok yardım alan fikir. Sağdaki kesikli sınırın içinde de son dönemde yöneldiğimiz, herkese açık olmayan özel fikirler var.',
         figureLabels: { public: 'HERKESE AÇIK', private: 'ÖZEL' },
       },
       community: {

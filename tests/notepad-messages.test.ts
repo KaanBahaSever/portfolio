@@ -64,7 +64,10 @@ test('interpolated names and numbers need no Turkish case suffix', () => {
     [tr.files.readError('a.txt'), '“a.txt” okunamadı.'],
     [tr.files.opened('notlar.md'), '“notlar.md” açıldı'],
     [tr.files.downloaded('x.json'), '“x.json” indirildi'],
-    [tr.files.tooLarge('büyük.log', '25,0 MB', '20 MB'), '“büyük.log” çok büyük (25,0 MB). Açılabilecek en büyük boyut: 20 MB.'],
+    [
+      tr.files.tooLarge('büyük.log', '25,0 MB', '20 MB'),
+      '“büyük.log” çok büyük (25,0 MB). Not defteri en fazla 20 MB boyutundaki dosyaları açabilir.',
+    ],
     [tr.replace.replacedLeft(2, '2'), 'Değiştirildi. Kalan eşleşme: 2.'],
     [tr.search.positionSpoken('3', '12'), 'Eşleşme 3, toplam 12'],
   ];

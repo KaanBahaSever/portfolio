@@ -50,38 +50,40 @@ const strong = 'font-medium text-zinc-900 dark:text-zinc-100';
       locale === 'tr' ? (
         <ul class="flex list-disc flex-col gap-3 px-4 pb-5 pl-9 text-sm leading-relaxed text-zinc-600 sm:px-5 sm:pl-10 dark:text-zinc-400">
           <li>
-            <strong class={strong}>Sayfa seçmek:</strong> sayfalara tıklayın ya da dokunun. <kbd class={ui.kbd}>Shift</kbd>{' '}
-            tuşu basılıyken tıklarsanız aradaki tüm sayfalar da seçilir. Klavyeyle ok tuşlarıyla gezinip{' '}
-            <kbd class={ui.kbd}>Boşluk</kbd> tuşuna basın; <kbd class={ui.kbd}>Shift</kbd>+<kbd class={ui.kbd}>Boşluk</kbd>{' '}
-            bir aralık seçer, <kbd class={ui.kbd}>Ctrl</kbd>+<kbd class={ui.kbd}>A</kbd> (Mac’te{' '}
-            <kbd class={ui.kbd}>⌘</kbd>+<kbd class={ui.kbd}>A</kbd>) tüm sayfaları seçer.
+            <strong class={strong}>Sayfa seçme:</strong> sayfalara tıklayın ya da dokunun. <kbd class={ui.kbd}>Shift</kbd>{' '}
+            tuşunu basılı tutup tıklarsanız aradaki bütün sayfalar da seçilir. Klavye kullanıyorsanız ok tuşlarıyla
+            gezinip <kbd class={ui.kbd}>Boşluk</kbd> tuşuna basın.{' '}
+            <kbd class={ui.kbd}>Shift</kbd>+<kbd class={ui.kbd}>Boşluk</kbd> bir aralık seçer,{' '}
+            <kbd class={ui.kbd}>Ctrl</kbd>+<kbd class={ui.kbd}>A</kbd> (Mac’te{' '}
+            <kbd class={ui.kbd}>⌘</kbd>+<kbd class={ui.kbd}>A</kbd>) bütün sayfaları seçer.
           </li>
           <li>
-            <strong class={strong}>Sayfa yazmak:</strong> sayfaları ve aralıkları virgülle ayırın, ör.{' '}
-            <code class={ui.code}>1-3, 5, 8-</code>. “8-” son sayfaya kadar gider, “-4” ilk sayfadan başlar; “son” (ya da
-            “end”) son sayfa demektir. Yazdıklarınız seçimi günceller; sayfalara tıkladığınızda da alan yeniden yazılır.
+            <strong class={strong}>Sayfa yazma:</strong> sayfaları ve aralıkları virgülle ayırın, örneğin{' '}
+            <code class={ui.code}>1-3, 5, 8-</code>. “8-” son sayfaya kadar gider, “-4” ise ilk sayfadan başlar. Son
+            sayfa için “son” (ya da “end”) yazabilirsiniz. Alana yazdıklarınız seçimi değiştirir; sayfalara
+            tıkladığınızda da alandaki yazı güncellenir.
           </li>
           <li>
-            <strong class={strong}>Sıralama:</strong> “Sayfaları çıkar” yazdığınız sırayı korur: “3, 1, 2” yazarsanız 3.
-            sayfa başa geçer, “10-1” ise sayfaları ters sıraya dizer. Sayfalara tıkladığınızda bu sıra korunur ve yeni
-            seçtikleriniz sona eklenir.
+            <strong class={strong}>Sıralama:</strong> “Sayfaları çıkar” yöntemi yazdığınız sırayı korur. “3, 1, 2”
+            yazarsanız 3. sayfa başa geçer; “10-1” ise sayfaları tersine çevirir. Sayfalara tıkladığınızda bu sıra
+            bozulmaz, yeni seçtiğiniz sayfalar sona eklenir.
           </li>
           <li>
-            <strong class={strong}>Birden çok dosya</strong> tek bir ZIP olarak indirilir. Çoğu telefon ve bilgisayar ZIP
-            dosyalarını ek bir uygulamaya gerek kalmadan açar.
+            <strong class={strong}>Birden fazla dosya</strong> tek bir ZIP olarak iner. Çoğu telefon ve bilgisayar ZIP
+            dosyalarını ek bir uygulama olmadan açar.
           </li>
           <li>
             <strong class={strong}>Neler korunmaz:</strong> yer imleri, doldurulabilir form alanları ve başka sayfalara
-            götüren bağlantılar. Sayfaların görünümü aynı kalır; web bağlantıları da çalışmaya devam eder.
+            götüren bağlantılar. Sayfalar yine aynı görünür, web bağlantıları da çalışmaya devam eder.
           </li>
           <li>
-            <strong class={strong}>Parola korumalı PDF’ler</strong> desteklenmez; yalnızca düzenlemeyi ya da yazdırmayı
-            kısıtlayan dosyalar da buna dahildir. Dosyayı bir PDF uygulamasında açıp korumasız bir kopyasını kaydedin ve o
-            kopyayı bölün.
+            <strong class={strong}>Parola korumalı PDF’ler</strong> desteklenmez. Yalnızca düzenlemeyi ya da yazdırmayı
+            kısıtlayan dosyalar da bu gruba girer. Dosyayı bir PDF uygulamasında açın, korumasız bir kopyasını kaydedin ve
+            o kopyayı bölün.
           </li>
           <li>
-            <strong class={strong}>Çok büyük PDF’ler</strong> çok bellek gerektirir. Uzun belgelerde önizlemeler siz
-            isteyene kadar kapalı kalır; telefonda sayfa yeniden yüklenirse bir bilgisayarda deneyin.
+            <strong class={strong}>Çok büyük PDF’ler</strong> için bol bellek gerekir. Uzun belgelerde önizlemeler siz
+            isteyene kadar kapalı kalır. Telefonda sayfa yeniden yüklenirse bilgisayardan deneyin.
           </li>
         </ul>
       ) : (

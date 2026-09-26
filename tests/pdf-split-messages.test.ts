@@ -140,7 +140,7 @@ test('results, progress and errors', () => {
   assert.equal(en.progress.creatingMany(2, 5), 'Creating file 2 of 5…');
   assert.equal(tr.progress.creatingMany(2, 5), 'Dosya oluşturuluyor: 2 / 5…');
   assert.equal(en.errors.notPdf('a.docx'), '“a.docx” isn’t a PDF. Choose a PDF file.');
-  assert.equal(tr.errors.notPdf('a.docx'), '“a.docx” bir PDF dosyası değil. Lütfen bir PDF seçin.');
+  assert.equal(tr.errors.notPdf('a.docx'), '“a.docx” bir PDF değil. Bir PDF dosyası seçin.');
   assert.equal(
     en.errors.zip('too-many-entries', 70_000, 65_534),
     'Too many files for one ZIP (70,000; the limit is 65,534). Create fewer files at once.',

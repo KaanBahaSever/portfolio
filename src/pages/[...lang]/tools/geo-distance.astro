@@ -1,0 +1,251 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import GeoDistance from '../../../components/tools/GeoDistance.astro';
+import ToolTips from '../../../components/tools-index/ToolTips.astro';
+import type { ToolTip } from '../../../components/tools-index/types';
+import Icon from '../../../components/ui/Icon.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import Section from '../../../components/ui/Section.astro';
+import { localizePath, type Localized } from '../../../i18n/config';
+import { formatters } from '../../../i18n/format';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { geoDistanceMessages } from '../../../i18n/tools/geo-distance';
+import { MEAN_EARTH_RADIUS_KM } from '../../../lib/geo/sphere';
+import { WGS84 } from '../../../lib/geo/vincenty';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = geoDistanceMessages[locale];
+const t = common[locale];
+const f = formatters(locale);
+
+// Constants as the engine uses them, in the page's number format.
+const radius = f.number(MEAN_EARTH_RADIUS_KM, { maximumFractionDigits: 4 });
+const semiMajorAxis = f.number(WGS84.a);
+const inverseFlattening = f.number(1 / WGS84.f, { maximumFractionDigits: 9 });
+
+const h3 = 'font-serif text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100';
+const body = 'mt-3 space-y-3 leading-relaxed text-zinc-700 dark:text-zinc-300';
+/**
+ * Display formulas in HTML (as in the Battleship guide; KaTeX's stylesheet is not loaded on
+ * tool pages). Each term group is an inline-block, so a long formula breaks between terms on a
+ * phone instead of overflowing. role="math" with a spoken aria-label per language.
+ */
+const formula =
+  'my-5 rounded-lg border border-zinc-200 bg-white px-4 py-4 text-center font-serif text-lg leading-relaxed text-zinc-900 sm:text-xl dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 [&_sub]:text-[0.65em] [&_sup]:text-[0.65em] [&>span]:inline-block';
+const root = 'border-t border-current pt-px';
+
+const speech: Localized<{ haversine: string; distance: string; bearing: string }> = {
+  en: {
+    haversine:
+      'haversine of delta equals sine squared of delta phi over 2, plus cosine phi 1 times cosine phi 2 times sine squared of delta lambda over 2',
+    distance: 'd equals R delta, which equals 2 R times the arcsine of the square root of haversine delta',
+    bearing:
+      'theta 1 equals atan2 of: sine delta lambda times cosine phi 2, and cosine phi 1 times sine phi 2 minus sine phi 1 times cosine phi 2 times cosine delta lambda',
+  },
+  tr: {
+    haversine:
+      'hav delta eşittir sinüs kare delta fi bölü iki, artı kosinüs fi bir çarpı kosinüs fi iki çarpı sinüs kare delta lambda bölü iki',
+    distance: 'd eşittir R delta, bu da iki R çarpı karekök hav deltanın arksinüsüne eşittir',
+    bearing:
+      'teta bir eşittir atan2; birinci bileşen sinüs delta lambda çarpı kosinüs fi iki, ikinci bileşen kosinüs fi bir çarpı sinüs fi iki eksi sinüs fi bir çarpı kosinüs fi iki çarpı kosinüs delta lambda',
+  },
+};
+const say = speech[locale];
+
+// Page-only prose: kept here rather than in the catalogue, which also ships to the browser.
+const tips: Localized<ToolTip[]> = {
+  en: [
+    {
+      lead: 'Many ways to write a coordinate.',
+      body: 'Decimal degrees (41.0082 or −33.8688), with a hemisphere letter before or after (41.0082 N, N 41.0082), degrees and decimal minutes (41°0.492′N) or full degrees, minutes and seconds (41°00′29.5″N). Plain \' and " work as minute and second marks. South and west take a minus sign or S and W; the Turkish letters K, G, D and B work too.',
+    },
+    {
+      lead: 'Paste from a map.',
+      body: 'Map apps copy a location as “latitude, longitude”. Paste it into either field of a point and both fields are filled in. You can also pick a city from the menu.',
+    },
+    {
+      lead: 'Why the route curves.',
+      body: 'A great circle is where a plane through the center of the Earth cuts its surface, and its arcs are the shortest paths on a sphere. Flat maps stretch them, which is why long flights seem to bend toward the poles.',
+    },
+    {
+      lead: 'The bearing changes on the way.',
+      body: 'Unless you travel along a meridian or the equator, a great-circle route does not keep one compass heading, so the final bearing differs from the initial one. A route that keeps one heading, a rhumb line, is longer.',
+    },
+    {
+      lead: 'How accurate is the sphere?',
+      body: 'The Earth is slightly flattened at the poles, so distances on a sphere with the mean radius differ from those on the WGS-84 ellipsoid, the one GPS uses, by up to about 0.6%. The ellipsoid figure comes from Vincenty’s method, accurate to about half a millimeter.',
+    },
+    {
+      lead: 'Precision.',
+      body: 'The fourth decimal of a degree is about 11 m on the ground, and one second of arc is about 31 m of latitude, so four decimals or tenths of a second are plenty for cities.',
+    },
+  ],
+  tr: [
+    {
+      lead: 'Koordinatı birçok biçimde yazabilirsiniz.',
+      body: 'Ondalık derece (41,0082 ya da −33,8688), önünde veya arkasında yarım küre harfiyle (41,0082 K, K 41,0082), derece ve ondalık dakika (41°0,492′K) ya da tam derece, dakika, saniye (41°00′29,5″K). Dakika ve saniye işareti olarak düz \' ve " de kullanılabilir. Güney ve batı için eksi işareti ya da G ve B harfleri yeterlidir; İngilizce N, S, E, W harfleri de geçerlidir. Ondalık ayırıcı virgül de olabilir, nokta da.',
+    },
+    {
+      lead: 'Haritadan yapıştırın.',
+      body: 'Harita uygulamaları bir konumu “enlem, boylam” biçiminde kopyalar. Bunu bir noktanın alanlarından birine yapıştırdığınızda iki alan birden dolar. Menüden bir şehir de seçebilirsiniz.',
+    },
+    {
+      lead: 'Rota neden kıvrılıyor?',
+      body: 'Büyük daire, Dünya’nın merkezinden geçen bir düzlemin yüzeyi kestiği çemberdir; yayları küre üzerindeki en kısa yollardır. Düz haritalar bu yayları çarpıttığı için uzun uçuşlar haritada kutuplara doğru kıvrılıyormuş gibi görünür.',
+    },
+    {
+      lead: 'Yön yol boyunca değişir.',
+      body: 'Bir meridyen ya da ekvator boyunca gitmediğiniz sürece büyük daire rotası tek bir pusula yönünü korumaz; bu yüzden varış yönü başlangıç yönünden farklıdır. Hep aynı yönü koruyan rota (loksodrom) ise daha uzundur.',
+    },
+    {
+      lead: 'Küre ne kadar doğru?',
+      body: 'Dünya kutuplardan hafifçe basıktır. Bu yüzden ortalama yarıçaplı bir küre üzerindeki mesafeler, GPS’in kullandığı WGS-84 elipsoidi üzerindekilerden en fazla yaklaşık %0,6 farklıdır. Elipsoit değeri, yaklaşık yarım milimetre doğrulukla çalışan Vincenty yönteminden gelir.',
+    },
+    {
+      lead: 'Hassasiyet.',
+      body: 'Derecenin dördüncü ondalık basamağı yerde yaklaşık 11 metreye, bir yay saniyesi ise enlemde yaklaşık 31 metreye karşılık gelir. Şehirler için dört ondalık basamak ya da saniyenin onda biri fazlasıyla yeterlidir.',
+    },
+  ],
+};
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    eyebrow={m.header.eyebrow}
+    title={m.meta.title}
+    lead={m.header.lead}
+    back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+  />
+
+  <GeoDistance />
+
+  <aside
+    aria-label={m.privacy.label}
+    class="mt-6 flex gap-3 rounded-xl border border-accent-600/20 bg-accent-50 p-4 text-sm leading-relaxed text-accent-950 sm:p-5 dark:border-accent-500/25 dark:bg-accent-500/10 dark:text-accent-100"
+  >
+    <Icon name="lock" class="mt-0.5 size-5 shrink-0 text-accent-700 dark:text-accent-400" />
+    <p><strong class="font-semibold">{m.privacy.title}</strong> {m.privacy.body}</p>
+  </aside>
+
+  <Section id="formula" title={m.formulaTitle}>
+    <div class="grid gap-x-12 gap-y-10 lg:grid-cols-2">
+      <div class="min-w-0">
+        {
+          locale === 'tr' ? (
+            <>
+              <h3 class={h3}>Haversine formülü</h3>
+              <p class={body}>
+                Dünya, yarıçapı <var>R</var> = {radius} km olan bir küre olarak alınır: Uluslararası Jeodezi ve Jeofizik
+                Birliği’nin (IUGG) benimsediği ortalama yarıçap. Enlemler <var>φ</var>
+                <sub>1</sub>, <var>φ</var>
+                <sub>2</sub> ve boylamlar <var>λ</var>
+                <sub>1</sub>, <var>λ</var>
+                <sub>2</sub> radyan cinsinden olmak üzere, iki nokta arasındaki merkez açı <var>δ</var> şöyle bulunur:
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 class={h3}>The haversine formula</h3>
+              <p class={body}>
+                The Earth is taken as a sphere of radius <var>R</var> = {radius} km, the mean radius adopted by the
+                International Union of Geodesy and Geophysics (IUGG). With latitudes <var>φ</var>
+                <sub>1</sub>, <var>φ</var>
+                <sub>2</sub> and longitudes <var>λ</var>
+                <sub>1</sub>, <var>λ</var>
+                <sub>2</sub> in radians, the central angle <var>δ</var> between the points follows from
+              </p>
+            </>
+          )
+        }
+        {
+          /*
+           * One line per term group on purpose: whitespace inside <sub> and <sup> would show as
+           * gaps. The HTML compressor drops line breaks between tags, so the space between the
+           * groups is written out ({' '}); it is also where a phone breaks the line.
+           */
+        }
+        <p class={formula} role="math" aria-label={say.haversine}>
+          <span>hav <var>δ</var> = sin<sup>2</sup>(Δ<var>φ</var>/2)</span>{' '}
+          <span>+ cos <var>φ</var><sub>1</sub> cos <var>φ</var><sub>2</sub> sin<sup>2</sup>(Δ<var>λ</var>/2)</span>
+        </p>
+        <p class={formula} role="math" aria-label={say.distance}>
+          <span><var>d</var> = <var>R</var><var>δ</var></span>{' '}
+          <span>= 2<var>R</var> arcsin √<span class={root}>hav <var>δ</var></span></span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <p class={body}>
+              Burada hav <var>θ</var> = sin<sup>2</sup>(<var>θ</var>/2), haversine fonksiyonudur. Formül bu biçimde
+              yazıldığında kısa mesafelerde de doğru kalır; küresel kosinüs teoremi ise bu mesafelerde yuvarlama
+              hataları yüzünden hassasiyet kaybeder.
+            </p>
+          ) : (
+            <p class={body}>
+              Here hav <var>θ</var> = sin<sup>2</sup>(<var>θ</var>/2) is the haversine. Written this way the formula
+              stays accurate for short distances, where the spherical law of cosines loses its digits to rounding.
+            </p>
+          )
+        }
+      </div>
+
+      <div class="min-w-0">
+        {
+          locale === 'tr' ? (
+            <>
+              <h3 class={h3}>Yönler ve orta nokta</h3>
+              <p class={body}>
+                Kuzeyden saat yönünde ölçülen başlangıç yönü <var>θ</var>
+                <sub>1</sub> şöyle hesaplanır:
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 class={h3}>Bearings and the midpoint</h3>
+              <p class={body}>
+                The initial bearing <var>θ</var>
+                <sub>1</sub>, measured clockwise from north, is
+              </p>
+            </>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.bearing}>
+          <span><var>θ</var><sub>1</sub> = atan2(sin Δ<var>λ</var> cos <var>φ</var><sub>2</sub>,</span>{' '}
+          <span>cos <var>φ</var><sub>1</sub> sin <var>φ</var><sub>2</sub></span>{' '}
+          <span>− sin <var>φ</var><sub>1</sub> cos <var>φ</var><sub>2</sub> cos Δ<var>λ</var>)</span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <div class={body}>
+              <p>
+                Varış yönü, B noktasından A noktasına olan başlangıç yönünün 180° döndürülmüş hâlidir. Orta nokta ise
+                Dünya’nın merkezinden çizilen iki konum vektörünün toplamının yüzeyi kestiği noktadır.
+              </p>
+              <p>
+                Elipsoit satırı aynı problemi WGS-84 üzerinde (<var>a</var> = {semiMajorAxis} m, <var>f</var> =
+                1/{inverseFlattening}), Dünya’nın basıklığını hesaba katan Vincenty yöntemiyle (1975) yinelemeli olarak
+                çözer.
+              </p>
+            </div>
+          ) : (
+            <div class={body}>
+              <p>
+                The final bearing is the initial bearing from B back to A, turned by 180°. The midpoint is where the sum
+                of the two position vectors, drawn from the center of the Earth, meets the surface.
+              </p>
+              <p>
+                The ellipsoid line solves the same problem on WGS-84 (<var>a</var> = {semiMajorAxis} m, <var>f</var> =
+                1/{inverseFlattening}) with Vincenty’s iterative method (1975), which accounts for the flattening of the
+                Earth.
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </Section>
+
+  <ToolTips title={m.tips} tips={tips[locale]} columns={3} />
+</BaseLayout>

@@ -1,0 +1,393 @@
+---
+/**
+ * Great-circle distance calculator UI. Behaviour lives in
+ * src/scripts/tools/geo-distance/controller.ts; every hook is a data-* attribute scoped to the
+ * root section. Text comes from src/i18n/tools/geo-distance.ts through the presenter
+ * (src/scripts/tools/geo-distance/present.ts), which the controller uses too.
+ *
+ * The first result and the first frame of the globe are computed here at build time for the
+ * default route, so the page opens complete (and still shows a worked example without
+ * JavaScript); the controller then recomputes from the fields and takes over.
+ */
+import { ui } from '../ui/styles';
+import { getLocale } from '../../i18n/server';
+import { geoDistanceMessages } from '../../i18n/tools/geo-distance';
+import { globeScene, viewCenter } from '../../lib/geo/globe';
+import { CITIES, CITY_IDS, DEFAULT_ROUTE } from '../../lib/geo/presets';
+import { DISTANCE_UNITS, greatCircle } from '../../lib/geo/sphere';
+import { vincentyInverse } from '../../lib/geo/vincenty';
+import { GLOBE, GLOBE_VIEW_BOX } from '../../scripts/tools/geo-distance/figure';
+import { presenter } from '../../scripts/tools/geo-distance/present';
+
+const locale = getLocale(Astro);
+const m = geoDistanceMessages[locale];
+const present = presenter(locale);
+
+const start = { a: CITIES[DEFAULT_ROUTE.a], b: CITIES[DEFAULT_ROUTE.b] };
+const view = present.result(greatCircle(start.a, start.b), vincentyInverse(start.a, start.b), 'km');
+const scene = globeScene(start.a, start.b, viewCenter(start.a, start.b), GLOBE);
+const R = GLOBE.radius;
+
+const points = [
+  { id: 'a', legend: m.points.legend.a, city: DEFAULT_ROUTE.a },
+  { id: 'b', legend: m.points.legend.b, city: DEFAULT_ROUTE.b },
+] as const;
+const axes = [
+  { axis: 'lat', label: m.points.latitude },
+  { axis: 'lon', label: m.points.longitude },
+] as const;
+
+const labelClass = 'text-sm font-medium text-zinc-700 dark:text-zinc-300';
+/**
+ * Coordinates in mono, so digits and the ° ′ ″ marks line up. An invalid field turns rose
+ * (≥ 3:1 against the card in both themes) and its message says why, so colour is not the only cue.
+ */
+const inputClass = `${ui.field} font-mono tabular-nums aria-invalid:border-rose-600 dark:aria-invalid:border-rose-400`;
+/** One option of a segmented control (as in the Image compressor): a visually hidden radio inside its label. */
+const segment =
+  'relative flex min-h-11 min-w-12 cursor-pointer items-center justify-center rounded-md px-3 text-sm font-medium text-zinc-600 transition-colors select-none hover:text-zinc-900 has-checked:bg-white has-checked:text-zinc-900 has-checked:shadow-sm has-checked:ring-1 has-checked:ring-accent-600 has-focus-visible:outline-2 has-focus-visible:outline-offset-1 has-focus-visible:outline-accent-700 dark:text-zinc-400 dark:hover:text-zinc-100 dark:has-checked:bg-zinc-800 dark:has-checked:text-zinc-50 dark:has-checked:ring-accent-500 dark:has-focus-visible:outline-accent-400';
+const segmentGroup =
+  'flex rounded-lg border border-zinc-200 bg-zinc-100/80 p-0.5 dark:border-zinc-800 dark:bg-zinc-950';
+const dt = 'label-mono text-zinc-600 dark:text-zinc-400';
+/**
+ * While a value is half-typed, the last result stays on screen but visibly out of date: its
+ * figures turn grey instead of fading, so they keep WCAG AA contrast (zinc-500 is 4.8:1 on
+ * white, zinc-400 about 7:1 on zinc-900). The labels and notes are grey already.
+ */
+const stale =
+  'transition-colors duration-200 group-data-[state=stale]/result:text-zinc-500 dark:group-data-[state=stale]/result:text-zinc-400';
+const valueClass = `font-mono text-base text-zinc-900 tabular-nums dark:text-zinc-100 ${stale}`;
+const noteClass = 'text-sm text-zinc-600 dark:text-zinc-400';
+/**
+ * The compass abbreviation is for the eye; screen readers get the spelled-out name instead.
+ * Spaced with a margin: the HTML compressor drops the line break between the spans.
+ */
+const abbrClass = `ml-1.5 font-mono text-sm font-medium text-accent-700 dark:text-accent-400 ${stale}`;
+const spokenName = present.spokenCompassName;
+---
+
+<section data-geo-distance aria-label={m.toolLabel} class="mt-8 sm:mt-10">
+  <p data-announcer class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
+
+  <noscript>
+    <p
+      class="mb-4 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
+    >
+      {m.noscript}
+    </p>
+  </noscript>
+
+  {
+    /*
+     * Phones and tablets: points, result, figure. From lg: points and result on the left, the
+     * figure beside them, sticky. The single column is minmax(0, 1fr) so nothing wide can push
+     * the cards past the viewport.
+     */
+  }
+  <div class="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
+    <!-- 1. Points -->
+    <form
+      data-points
+      novalidate
+      autocomplete="off"
+      aria-labelledby="geo-points-heading"
+      class:list={[ui.card, 'min-w-0 p-4 sm:p-6']}
+    >
+      <h2 id="geo-points-heading" class="label-mono text-zinc-600 dark:text-zinc-400">{m.points.heading}</h2>
+      <p id="geo-hint" class="mt-2 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{m.points.hint}</p>
+
+      {
+        points.map((point, index) => (
+          <>
+            {index === 1 && (
+              <div class="relative mt-5 flex justify-center">
+                <span
+                  aria-hidden="true"
+                  class="absolute inset-x-0 top-1/2 border-t border-dashed border-zinc-300 dark:border-zinc-700"
+                />
+                <button type="button" data-swap class:list={[ui.buttonSecondary, 'group relative rounded-full px-5']}>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="size-4 shrink-0 transition-transform duration-300 group-active:rotate-180"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M8 20V4" />
+                    <path d="m4 8 4-4 4 4" />
+                    <path d="M16 4v16" />
+                    <path d="m12 16 4 4 4-4" />
+                  </svg>
+                  {m.points.swap}
+                </button>
+              </div>
+            )}
+            <fieldset data-point={point.id} class="mt-5 min-w-0">
+              <legend class="float-left flex w-full items-center gap-2.5 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                <span
+                  aria-hidden="true"
+                  class="flex size-6 shrink-0 items-center justify-center rounded-full border border-zinc-400 bg-white font-mono text-xs font-medium dark:border-zinc-500 dark:bg-zinc-900"
+                >
+                  {point.id.toUpperCase()}
+                </span>
+                {point.legend}
+              </legend>
+              <div class="clear-both grid grid-cols-1 gap-x-3 gap-y-4 pt-3 min-[22rem]:grid-cols-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]">
+                {axes.map(({ axis, label }) => {
+                  const id = `geo-${point.id}-${axis}`;
+                  return (
+                    <div class="flex min-w-0 flex-col gap-1.5">
+                      <label for={id} class={labelClass}>
+                        {label}
+                      </label>
+                      <input
+                        id={id}
+                        data-field={`${point.id}-${axis}`}
+                        type="text"
+                        value={present.inputValue(CITIES[point.city][axis])}
+                        autocomplete="off"
+                        autocapitalize="off"
+                        autocorrect="off"
+                        spellcheck="false"
+                        enterkeyhint="done"
+                        aria-describedby={`geo-hint ${id}-error`}
+                        class={inputClass}
+                      />
+                      <p id={`${id}-error`} data-error-for={`${point.id}-${axis}`} hidden class="text-sm text-rose-700 dark:text-rose-400" />
+                    </div>
+                  );
+                })}
+                <div class="flex min-w-0 flex-col gap-1.5 min-[22rem]:col-span-2 sm:col-span-1">
+                  <label for={`geo-${point.id}-city`} class={labelClass}>
+                    {m.points.city}
+                  </label>
+                  <select id={`geo-${point.id}-city`} data-city={point.id} class:list={[ui.field, 'cursor-pointer']}>
+                    <option value="">{m.points.cityPrompt}</option>
+                    {CITY_IDS.map((city) => (
+                      <option value={city} selected={city === point.city}>
+                        {m.cities[city]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+          </>
+        ))
+      }
+    </form>
+
+    <!-- 2. Result -->
+    <section
+      data-result
+      data-state="ready"
+      aria-labelledby="geo-result-heading"
+      class:list={[ui.card, 'group/result min-w-0 p-4 sm:p-6']}
+    >
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <h2 id="geo-result-heading" class="label-mono text-zinc-600 dark:text-zinc-400">{m.result.heading}</h2>
+        <fieldset>
+          <legend class="sr-only">{m.result.unitLegend}</legend>
+          <div class={segmentGroup}>
+            {
+              DISTANCE_UNITS.map((unit) => (
+                <label class={segment}>
+                  <input type="radio" name="geo-unit" value={unit} data-unit class="sr-only" checked={unit === 'km'} />
+                  <span class="font-mono">{m.result.units[unit].abbr}</span>
+                  <span class="sr-only"> ({m.result.units[unit].name})</span>
+                </label>
+              ))
+            }
+          </div>
+        </fieldset>
+      </div>
+
+      <p
+        data-result-status
+        hidden
+        class="mt-4 border-l-2 border-zinc-300 pl-3 text-sm leading-relaxed text-zinc-700 dark:border-zinc-600 dark:text-zinc-300"
+      >
+      </p>
+      {/* While a value is half-typed, the last result stays readable but visibly out of date (see `stale`). */}
+      <div>
+        <p
+          class:list={[
+            'mt-4 flex flex-wrap items-baseline gap-x-2 font-serif text-4xl leading-tight font-medium tracking-tight text-zinc-900 tabular-nums group-data-[state=empty]/result:text-zinc-500 sm:text-5xl dark:text-zinc-50 dark:group-data-[state=empty]/result:text-zinc-400',
+            stale,
+          ]}
+        >
+          <span data-distance-value>{view.distance.value}</span>
+          <span
+            data-distance-unit
+            class="font-sans text-xl font-normal tracking-normal text-zinc-600 group-data-[state=empty]/result:hidden sm:text-2xl dark:text-zinc-400"
+            >{view.distance.unit}</span
+          >
+        </p>
+        <p data-distance-others class="mt-1 min-h-5 font-mono text-sm text-zinc-600 tabular-nums dark:text-zinc-400">
+          {view.others}
+        </p>
+
+        <dl class="mt-5 grid grid-cols-1 gap-x-6 gap-y-5 border-t border-zinc-200 pt-5 min-[22rem]:grid-cols-2 dark:border-zinc-800">
+          <div class="min-w-0">
+            <dt class={dt}>{m.result.initialBearing}</dt>
+            <dd class="mt-1">
+              <span data-initial-degrees class={valueClass}>{view.initialBearing?.degrees ?? m.result.none}</span>
+              <span data-initial-abbr aria-hidden="true" class={abbrClass}>{view.initialBearing?.abbr}</span>
+              <span data-initial-name class="sr-only">{spokenName(view.initialBearing)}</span>
+              <span class:list={[noteClass, 'block']}>{m.result.initialBearingNote}</span>
+            </dd>
+          </div>
+          <div class="min-w-0">
+            <dt class={dt}>{m.result.finalBearing}</dt>
+            <dd class="mt-1">
+              <span data-final-degrees class={valueClass}>{view.finalBearing?.degrees ?? m.result.none}</span>
+              <span data-final-abbr aria-hidden="true" class={abbrClass}>{view.finalBearing?.abbr}</span>
+              <span data-final-name class="sr-only">{spokenName(view.finalBearing)}</span>
+              <span class:list={[noteClass, 'block']}>{m.result.finalBearingNote}</span>
+            </dd>
+          </div>
+          <div class="min-w-0 min-[22rem]:col-span-2">
+            <dt class={dt}>{m.result.midpoint}</dt>
+            <dd class="mt-1">
+              <span class:list={[valueClass, 'flex flex-wrap gap-x-4']}>
+                <span data-midpoint-decimal>{view.midpoint?.decimal[0] ?? m.result.none}</span>
+                <span data-midpoint-decimal>{view.midpoint?.decimal[1]}</span>
+              </span>
+              <span class:list={[noteClass, 'flex flex-wrap gap-x-4 font-mono tabular-nums']}>
+                <span data-midpoint-dms>{view.midpoint?.dms[0]}</span>
+                <span data-midpoint-dms>{view.midpoint?.dms[1]}</span>
+              </span>
+            </dd>
+          </div>
+          <div class="min-w-0">
+            <dt class={dt}>{m.result.centralAngle}</dt>
+            <dd class="mt-1">
+              <span data-angle-degrees class={valueClass}>{view.angle.degrees}</span>
+              <span data-angle-radians class:list={[noteClass, 'block font-mono tabular-nums']}>{view.angle.radians}</span>
+            </dd>
+          </div>
+          <div class="min-w-0">
+            <dt class={dt}>{m.result.ellipsoid}</dt>
+            <dd class="mt-1">
+              <span data-ellipsoid-distance class={valueClass}>{view.ellipsoid?.distance ?? m.result.none}</span>
+              <span data-ellipsoid-comparison class:list={[noteClass, 'block']}>{view.ellipsoid?.comparison}</span>
+              <span class:list={[noteClass, 'block']}>{m.result.ellipsoidNote}</span>
+            </dd>
+          </div>
+        </dl>
+
+        <ul
+          data-notes
+          class="mt-5 space-y-2 text-sm leading-relaxed text-zinc-700 empty:hidden dark:text-zinc-300 [&>li]:border-l-2 [&>li]:border-amber-500 [&>li]:pl-3 dark:[&>li]:border-amber-400"
+        >
+          {view.notes.map((note) => <li>{note}</li>)}
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. Figure -->
+    <figure
+      data-globe
+      class:list={[
+        ui.card,
+        'group/figure relative isolate min-w-0 overflow-hidden p-4 sm:p-6 lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1',
+      ]}
+    >
+      <div class="bg-graph-fine mask-fade-radial pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+      <div class="flex items-center justify-between gap-3" aria-hidden="true">
+        <span class="label-mono text-accent-700 dark:text-accent-400">{m.figure.label} · {m.figure.projection}</span>
+        <span data-figure-angle class="font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400">δ = {view.angle.degrees}</span>
+      </div>
+      <svg
+        data-globe-svg
+        viewBox={GLOBE_VIEW_BOX}
+        class="mx-auto mt-3 block w-full max-w-[28rem] text-zinc-900 transition-opacity duration-300 group-data-[stale]/figure:opacity-40 dark:text-zinc-100"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <defs>
+          <!-- A faint shade towards the far rim, lit from the upper left, so the disc reads as a sphere. -->
+          <radialGradient id="geo-globe-shade" cx="0.4" cy="0.34" r="0.72">
+            <stop offset="0.55" stop-color="currentColor" stop-opacity="0"></stop>
+            <stop offset="1" stop-color="currentColor" stop-opacity="0.07"></stop>
+          </radialGradient>
+        </defs>
+        <circle r={R} class="fill-white dark:fill-zinc-900"></circle>
+        <circle r={R} fill="url(#geo-globe-shade)"></circle>
+        <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path data-graticule d={scene.graticule} stroke-opacity="0.16" stroke-width="0.75" vector-effect="non-scaling-stroke"></path>
+          <path data-equator d={scene.equator} stroke-opacity="0.4" stroke-width="1" vector-effect="non-scaling-stroke"></path>
+          <path
+            data-circle-back
+            d={scene.circleBack}
+            stroke-opacity="0.25"
+            stroke-width="1"
+            stroke-dasharray="1 4"
+            vector-effect="non-scaling-stroke"></path>
+          <circle r={R} stroke-opacity="0.6" stroke-width="1" vector-effect="non-scaling-stroke"></circle>
+          <path
+            data-circle-front
+            d={scene.circleFront}
+            stroke-opacity="0.6"
+            stroke-width="1"
+            stroke-dasharray="4 4"
+            vector-effect="non-scaling-stroke"></path>
+        </g>
+        <g fill="none" stroke-linecap="round" stroke-linejoin="round" class="stroke-accent-700 dark:stroke-accent-400">
+          <path
+            data-route-hidden
+            d={scene.routeHidden}
+            stroke-opacity="0.4"
+            stroke-width="1.25"
+            stroke-dasharray="1 4"
+            vector-effect="non-scaling-stroke"></path>
+          <path data-route d={scene.route} stroke-width="2.5" vector-effect="non-scaling-stroke"></path>
+        </g>
+        <circle
+          data-midpoint
+          cx={scene.midpoint?.x.toFixed(1) ?? 0}
+          cy={scene.midpoint?.y.toFixed(1) ?? 0}
+          r="3.5"
+          visibility={scene.midpoint?.visible ? 'visible' : 'hidden'}
+          class="fill-accent-700 stroke-white dark:fill-accent-400 dark:stroke-zinc-900"
+          stroke-width="1.5"></circle>
+        {
+          points.map((point) => {
+            const placed = scene[point.id];
+            return (
+              <>
+                <g data-marker={point.id} transform={`translate(${placed.x.toFixed(1)} ${placed.y.toFixed(1)})`}>
+                  <circle r="5.5" stroke="currentColor" stroke-width="1.5" class="fill-white dark:fill-zinc-900" />
+                  <circle r="1.75" fill="currentColor" />
+                </g>
+                <text
+                  data-label={point.id}
+                  x={placed.labelX.toFixed(1)}
+                  y={placed.labelY.toFixed(1)}
+                  text-anchor="middle"
+                  dominant-baseline="central"
+                  class="fill-current font-mono text-[14px] font-semibold"
+                >
+                  {point.id.toUpperCase()}
+                </text>
+              </>
+            );
+          })
+        }
+      </svg>
+      <figcaption class="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <span data-figure-view>{view.view}</span>{' '}{m.figure.legend}
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<script>
+  import { initGeoDistance } from '../../scripts/tools/geo-distance/controller.ts';
+
+  document.querySelectorAll<HTMLElement>('[data-geo-distance]').forEach(initGeoDistance);
+</script>

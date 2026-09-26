@@ -4,6 +4,8 @@
  * and the desktop games of the graduation projects, with links to the browser versions.
  * Keep the order of events: the Battleship opponent's Hunt & Target algorithm came LATER than
  * the high-school game, so do not credit the desktop version with it.
+ * Why Battleship: it was the game the owner played with his father as a child, so he wanted to
+ * design his own. That is all he told; do not add details to it.
  */
 import { ui } from '../../ui/styles';
 import { localizePath } from '../../../i18n/config';
@@ -48,10 +50,11 @@ const battleshipSource = 'https://github.com/KaanBahaSever/BattleShips';
         Server (MSSQL).
       </p>
       <p>
-        My graduation projects were desktop versions of tic-tac-toe and Battleship; the{' '}
-        <a href={battleshipSource} class={ui.inlineLink}>C# source of Battleship</a> is on GitHub. The Hunt &amp; Target
-        algorithm that now aims the computer’s Battleship shots came later: it hunts for ships across the board, then
-        closes in on every hit.
+        My graduation projects were desktop versions of tic-tac-toe and Battleship. Battleship was the game I played
+        with my father as a child, which is why I wanted to design my own; the{' '}
+        <a href={battleshipSource} class={ui.inlineLink}>C# source of that first version</a> is on GitHub. The Hunt
+        &amp; Target algorithm that now aims the computer’s Battleship shots came later: it hunts for ships across the
+        board, then closes in on every hit.
       </p>
       <p>
         Both games now have browser versions on this site, with algorithmic opponents: Hunt &amp; Target for

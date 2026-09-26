@@ -21,7 +21,7 @@ export const SITE = {
   } satisfies Localized<string>,
   description: {
     en: 'Kaan Baha Sever is a software developer in Istanbul who brings a mathematics background to systems work in C++ and Go: projects, writing, games and privacy-friendly browser tools.',
-    tr: 'Kaan Baha Sever, matematik altyapısını C++ ve Go ile sistem yazılımına taşıyan İstanbullu bir yazılım geliştirici. Projeler, yazılar, oyunlar ve gizliliğe saygılı tarayıcı araçları.',
+    tr: 'Kaan Baha Sever, İstanbul’da yaşayan bir yazılım geliştirici. C++ ve Go ile yazdığı sistem yazılımlarında matematik altyapısından yararlanıyor. Sitede projeleri, yazıları, oyunları ve verilerinizi dışarı göndermeyen tarayıcı araçları var.',
   } satisfies Localized<string>,
   // Keep in sync with `site` in astro.config.mjs.
   url: 'https://kaanbahasever.com',

@@ -18,7 +18,7 @@ interface Element {
 }
 
 const Fragment = Symbol('Fragment');
-const jsx = (type: unknown, props: Element['props']): Element => ({ type, props });
+const jsx = (type: unknown, props: unknown): Element => ({ type, props: props as Element['props'] });
 
 function isElement(node: unknown): node is Element {
   return typeof node === 'object' && node !== null && 'props' in node;

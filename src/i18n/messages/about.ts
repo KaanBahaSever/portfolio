@@ -200,7 +200,7 @@ const tr: AboutMessages = {
   journey: {
     title: 'Bugüne nasıl geldim',
     intro:
-      'Bölümler kabaca zaman sırasıyla ilerliyor: uzay uçuşlarına duyduğum ilk meraktan bugün geliştirdiğim yazılımlara kadar. Şekiller her bölümün ana fikrini basitçe gösteriyor. Çoğunu elle çizmedim, o fikrin küçük bir modelinden hesapladım.',
+      'Bölümler kabaca zaman sırasıyla ilerliyor: uzay uçuşlarına duyduğum ilk meraktan bugün geliştirdiğim yazılımlara kadar. Şekiller her bölümün ana fikrini basitçe gösteriyor. Çoğunu elle çizmedim, anlattıkları fikrin küçük bir modelinden hesapladım.',
     contents: 'Bölümler',
     figure: (n) => `Şekil ${n}`,
     chapters: {
@@ -220,7 +220,7 @@ const tr: AboutMessages = {
         title: 'Programlamanın temelleri',
         // "Hücre" and "ıska", as the Battleship game itself says.
         caption:
-          'Oyunların tarayıcı sürümlerindeki algoritmalar. Solda Amiral Battı’daki bilgisayar rakip gemi arıyor: Beş ıskadan sonra her hücrenin rengi, kalan gemilerin o hücreyi kaç farklı yerleşimle kapladığını gösteriyor. Sıradaki atış en koyu hücreye yapılıyor. Sağda minimax, en kötü durumda bile en iyi sonucu veren hamleyi seçiyor.',
+          'Oyunların tarayıcı sürümlerindeki algoritmalar. Solda Amiral Battı’daki bilgisayar rakip gemi arıyor: Beş ıskadan sonra her hücrenin rengi, kalan gemilerin o hücreyi kaç farklı yerleşimle kapladığını gösteriyor. Sıradaki atış en koyu hücreye yapılıyor. Sağda minimax, en kötü durumda en iyi sonucu veren hamleyi seçiyor.',
       },
       research: {
         short: 'TÜBİTAK projesi',
@@ -262,7 +262,7 @@ const tr: AboutMessages = {
         title: 'crowd.inc’te Yazılım Geliştirici',
         // "Rol tabanlı erişim denetimi", as the chapter's prose says.
         caption:
-          'Şematik bir örnek: rol tabanlı erişim denetimi (RBAC). Dört rol var; en az yetkili olan en altta. Her rol, bir altındaki rolün bütün izinlerini devralıyor ve bunlara yenilerini ekliyor. Bu yüzden izin verilen hücreler bir merdiven oluşturuyor. Kesikli çizgi herkese açık verileri özel verilerden ayırıyor; en alttaki rol özel verilerin hiçbirine erişemiyor.',
+          'Şematik bir örnek: rol tabanlı erişim denetimi (RBAC). Dört rol var; en az yetkili olan en altta. Her rol, bir altındaki rolün bütün izinlerini devralıyor ve bunlara yenilerini ekliyor. Bu yüzden verilen izinler, yani dolu hücreler, bir merdiven oluşturuyor. Kesikli çizgi herkese açık verileri özel verilerden ayırıyor; en alttaki rol özel verilerin hiçbirine erişemiyor.',
         figureLabels: {
           roles: { guest: 'MİSAFİR', member: 'ÜYE', editor: 'EDİTÖR', admin: 'YÖNETİCİ' },
           actions: { read: 'OKUMA', write: 'YAZMA', delete: 'SİLME' },
@@ -274,12 +274,12 @@ const tr: AboutMessages = {
         label: 'GDSC · Matematik Kulübü',
         title: 'Topluluk: atölyeler, canlı yayınlar ve yarışmalar',
         caption:
-          `Sözsüz bir ispat: Matematik Kulübünün seminerlerine ve yarışmalarına yakışacak türden bir bulmaca. Tek sayıları sırayla toplayınca hep bir tam kare çıkar. L biçimindeki her parça sıradaki tek sayıyı ekler ve karenin kenarını bir birim uzatır: ${ODD_SUM}.`,
+          `Sözsüz bir ispat: Matematik Kulübünün seminerlerine ve yarışmalarına yakışacak türden bir bulmaca. Tek sayıları sırayla toplayınca hep bir tam kare çıkar. L biçimindeki her parça sıradaki tek sayıyı ekler ve karenin kenarını bir birim uzatır. Böylece ${ODD_SUM} olur.`,
       },
       core: {
         short: 'C++ ve Go',
         label: 'Bugün',
-        title: 'Bugün en çok yazdığım diller: modern C++ ve Go',
+        title: 'Bugün en çok kullandığım diller: modern C++ ve Go',
         caption: 'Yayıncı/abone (pub/sub) modeli: Mesajlar tek bir aracıdan (broker) birçok aboneye dağılır.',
         figureLabels: { publisher: 'YAYINCI', broker: 'ARACI', subscriber: 'ABONE' },
       },
@@ -296,12 +296,12 @@ const tr: AboutMessages = {
   },
   milestones: {
     title: 'Kilometre taşları',
-    intro: 'Önemli tarihleri eskiden yeniye doğru sıraladım.',
+    intro: 'Önemli tarihleri eskiden yeniye sıraladım.',
   },
   resume: {
     title: 'Özgeçmiş',
-    // "becerilerimin" contains the home page's skills heading ("Beceriler") this sentence points to.
-    text: 'Deneyimimin, eğitimimin ve becerilerimin özeti ana sayfada.',
+    // "becerilerimi" contains the home page's skills heading ("Beceriler") this sentence points to.
+    text: 'Deneyimimi, eğitimimi ve becerilerimi ana sayfada özetledim.',
     experienceLink: 'Ana sayfadaki deneyim bölümü',
     cvFormat: '(PDF)',
   },

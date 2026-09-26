@@ -55,7 +55,7 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
               <ul class={list}>
                 <li>
                   <strong class={strong}>Otomatik kayıt</strong>, siz yazmayı bıraktıktan kısa bir süre sonra metni, dosya
-                  adını ve satır sonu seçimini bu tarayıcının yerel depolamasına kaydeder. Sayfayı yenileseniz de, daha
+                  adını ve satır sonu seçimini bu tarayıcının yerel depolama alanında saklar. Sayfayı yenileseniz de, daha
                   sonra geri gelseniz de metniniz yerinde durur. Hiçbir şey yüklenmez, hiçbir yere gönderilmez.
                 </li>
                 <li>
@@ -89,8 +89,8 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   seçilir.
                 </li>
                 <li>
-                  <strong class={strong}>Aç</strong> ile en fazla 20 MB boyutundaki UTF-8 ya da UTF-16 metin dosyalarını
-                  açabilirsiniz. Dosyayı düzenleyicinin üzerine sürükleyip de bırakabilirsiniz.
+                  <strong class={strong}>Aç</strong> düğmesi en fazla 20 MB boyutundaki UTF-8 ve UTF-16 metin dosyalarını
+                  açar. Dosyayı düzenleyicinin üzerine sürükleyip bırakarak da açabilirsiniz.
                 </li>
                 <li>
                   <strong class={strong}>Temizle</strong> ile baştan başlarsınız: metin, dosya adı ve kayıtlı kopya silinir.
@@ -112,8 +112,8 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Enter</kbd> (Mac’te{' '}
                   <kbd class={kbd}>⌘</kbd> + <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Return</kbd>) ile odak
                   modunu sayfanın her yerinden açıp kapatabilirsiniz. Tarayıcılar ve ekran okuyucular bu tuş birleşimini
-                  kullanmaz, hiçbir klavye düzeninde de karakter yazmaz. <kbd class={kbd}>F11</kbd> ise yine tarayıcınızın
-                  kendi tam ekran tuşu olarak kalır.
+                  kullanmaz. Bu birleşim hiçbir klavye düzeninde karakter de yazmaz. <kbd class={kbd}>F11</kbd> ise yine
+                  tarayıcınızın kendi tam ekran tuşu olarak kalır.
                 </li>
                 <li>
                   <kbd class={kbd}>Esc</kbd> ile odak modundan çıkarsınız. Bul paneli açıksa ilk{' '}
@@ -146,10 +146,10 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   <kbd class={kbd}>Esc</kbd> paneli kapatır ve sizi metne geri götürür.
                 </li>
                 <li>
-                  Panel açıkken <kbd class={kbd}>Alt</kbd> + <kbd class={kbd}>C</kbd>, <kbd class={kbd}>W</kbd> ve{' '}
+                  Bul panelindeyken <kbd class={kbd}>Alt</kbd> + <kbd class={kbd}>C</kbd>, <kbd class={kbd}>W</kbd> ve{' '}
                   <kbd class={kbd}>R</kbd> sırasıyla büyük/küçük harf duyarlılığını, tam kelime aramayı ve düzenli ifadeyi
-                  açıp kapatır. Mac’te <kbd class={kbd}>⌥</kbd> + harf yalnızca paneldeki düğmelerden biri seçiliyken
-                  çalışır. Böylece arama alanlarına ç gibi harfleri rahatça yazabilirsiniz.
+                  açıp kapatır. Mac’te <kbd class={kbd}>⌥</kbd> + harf, arama alanlarında değil, yalnızca paneldeki
+                  düğmelerde çalışır. Böylece arama alanlarına ç gibi harfleri rahatça yazabilirsiniz.
                 </li>
                 <li>
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>S</kbd>: indir. <kbd class={kbd}>Ctrl</kbd> +{' '}
@@ -196,7 +196,7 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
 
             <section>
               <h2 class={heading}>Değiştirme kalıpları</h2>
-              <p class="mt-2">Düzenli ifade açıkken yeni metinde, bulunan metni şu kalıplarla kullanabilirsiniz:</p>
+              <p class="mt-2">Düzenli ifade açıkken, bulunan metni yeni metinde şu kalıplarla kullanabilirsiniz:</p>
               <ul class={list}>
                 <li>
                   <code class={code}>$&amp;</code> — bulunan metnin tamamı. Örneğin <code class={code}>"$&amp;"</code>{' '}

@@ -8,7 +8,7 @@
  * (formatters(locale).bytes); counts are formatted here.
  *
  * Turkish messages are phrased so that interpolated values stand alone and never need a
- * case suffix ("“a.jpg” işlenemedi", "3 görsel kaldı").
+ * case suffix ("“a.jpg” işlenemedi", "Geriye 3 görsel kaldı").
  */
 import type { Localized } from '../config.ts';
 import { formatters } from '../format.ts';
@@ -209,7 +209,7 @@ const tr: ImagesToPdfMessages = {
     legend: 'PDF seçenekleri',
     pageSize: 'Sayfa boyutu',
     pageSizes: { a4: 'A4', letter: 'Letter (ABD)', fit: 'Görsel boyutunda' },
-    orientation: 'Yönlendirme',
+    orientation: 'Sayfa yönü',
     orientations: {
       auto: 'Otomatik (her görsele göre)',
       portrait: 'Dikey',
@@ -247,7 +247,7 @@ const tr: ImagesToPdfMessages = {
     saving: 'PDF kaydediliyor…',
     cancelled: 'İptal edildi',
     moved: (name, position, total) => `“${name}” ${position}. sıraya taşındı (toplam ${total})`,
-    removed: (name, left) => `“${name}” kaldırıldı. ${imagesTr(left)} kaldı.`,
+    removed: (name, left) => `“${name}” kaldırıldı. Geriye ${imagesTr(left)} kaldı.`,
     removedAll: 'Tüm görseller kaldırıldı',
     sorted: 'Dosya adına göre A’dan Z’ye sıralandı',
     reversed: 'Sıra ters çevrildi',
@@ -260,7 +260,7 @@ const tr: ImagesToPdfMessages = {
     rejection: (name, reason) => `${name} — ${reason}`,
     more: (count) => `ve ${ft.number(count)} dosya daha`,
     largeSelection: (size) =>
-      `Seçtiğiniz görseller toplam ${size}. PDF oluşturmak için bunun yaklaşık 2–3 katı bellek gerekir. Telefonda sayfa yeniden yüklenebilir ve görselleriniz kaybolabilir. PDF’yi oluşturmadan önce kalite olarak “Daha küçük dosya” seçeneğini işaretleyin.`,
+      `Seçtiğiniz görsellerin toplam boyutu büyük (${size}). PDF’yi oluşturmak için bunun yaklaşık 2–3 katı bellek gerekir. Telefonda sayfa yeniden yüklenebilir ve görselleriniz kaybolabilir. PDF’yi oluşturmadan önce kaliteyi “Daha küçük dosya” yapın.`,
     inAppBrowser: 'Bu uygulamanın içinde indirme çalışmayabilir. Sorun yaşamamak için sayfayı tarayıcınızda açın.',
   },
   reasons: {
@@ -281,17 +281,17 @@ const tr: ImagesToPdfMessages = {
     clearAll: (count) => (count === 1 ? 'Görsel kaldırılsın mı?' : `${ft.number(count)} görselin tümü kaldırılsın mı?`),
   },
   result: {
-    ready: (pages, size) => `PDF dosyanız hazır: ${ft.number(pages)} sayfa · ${size}`,
+    ready: (pages, size) => `PDF’niz hazır: ${ft.number(pages)} sayfa · ${size}`,
     inAppHint: 'İndirme başlamazsa “Paylaş” düğmesini kullanın ya da bu sayfayı Safari’de veya Chrome’da açın.',
   },
   errors: {
     engine:
       'PDF motoru yüklenemedi. İnternet bağlantınızı kontrol edip yeniden deneyin; görselleriniz yerinde duruyor. Sorun sürerse sayfayı yenileyin.',
     memory:
-      'PDF oluşturulurken cihazın belleği yetmedi. Kalite olarak “Daha küçük dosya” seçeneğini işaretleyin ya da daha az görsel ekleyip yeniden deneyin.',
-    item: (name) => `“${name}” işlenemedi. Bu görseli kaldırın ya da kalite olarak “Daha küçük dosya” seçeneğini deneyin.`,
+      'PDF oluşturulurken cihazın belleği yetmedi. Kaliteyi “Daha küçük dosya” yapın ya da daha az görsel ekleyip yeniden deneyin.',
+    item: (name) => `“${name}” işlenemedi. Bu görseli kaldırın ya da kaliteyi “Daha küçük dosya” yapıp yeniden deneyin.`,
     generic:
-      'PDF oluşturulurken bir sorun çıktı. Kalite olarak “Daha küçük dosya” seçeneğini işaretleyin ya da daha az görsel ekleyip yeniden deneyin.',
+      'PDF oluşturulurken bir sorun çıktı. Kaliteyi “Daha küçük dosya” yapın ya da daha az görsel ekleyip yeniden deneyin.',
     share: 'Paylaşılamadı. Bunun yerine “Yeniden indir” düğmesini kullanın.',
   },
 };

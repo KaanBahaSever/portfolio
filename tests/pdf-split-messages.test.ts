@@ -83,7 +83,7 @@ test('page-selection errors in English', () => {
 
 test('page-selection errors in Turkish keep values free of suffixes', () => {
   const t = tr.rangeError;
-  assert.equal(t({ code: 'page-out-of-range', page: '12', pageCount: 10 }), 'Sayfa 12 yok: bu belgede 10 sayfa var');
+  assert.equal(t({ code: 'page-out-of-range', page: '12', pageCount: 10 }), 'Sayfa 12 yok: bu PDF’de 10 sayfa var');
   assert.equal(t({ code: 'unexpected', text: 'x', position: 5 }), 'Anlaşılamayan ifade: “x” (5. karakter)');
   assert.equal(
     t({ code: 'too-many-pages', total: 25_000, limit: 20_000 }),
@@ -136,7 +136,7 @@ test('grid counts and tile names use each language’s number format', () => {
 
 test('results, progress and errors', () => {
   assert.equal(en.result.pdf(4, '120.0 KB'), 'Your PDF is ready: 4 pages · 120.0 KB');
-  assert.equal(tr.result.pdf(4, '120,0 KB'), 'Dosyanız hazır: 4 sayfa · 120,0 KB');
+  assert.equal(tr.result.pdf(4, '120,0 KB'), 'PDF’niz hazır: 4 sayfa · 120,0 KB');
   assert.equal(en.progress.creatingMany(2, 5), 'Creating file 2 of 5…');
   assert.equal(tr.progress.creatingMany(2, 5), 'Dosya oluşturuluyor: 2 / 5…');
   assert.equal(en.errors.notPdf('a.docx'), '“a.docx” isn’t a PDF. Choose a PDF file.');

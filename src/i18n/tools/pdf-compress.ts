@@ -172,7 +172,7 @@ const tr: PdfCompressMessages = {
   title: 'PDF sıkıştırma',
   description:
     'PDF’deki görselleri yeniden sıkıştırarak dosyayı doğrudan tarayıcınızda küçültün. Araç en iyi sonucu taranmış belgelerde ve fotoğrafı bol dosyalarda verir. Hiçbir şey yüklenmez.',
-  lead: 'PDF’nizi, içindeki görselleri yeniden sıkıştırarak küçültün. Her şey cihazınızda olur, hiçbir şey yüklenmez. En çok taranmış belgeler ve fotoğrafı bol PDF’ler küçülür. Yalnızca metin olan belgeler genellikle çok az küçülür.',
+  lead: 'PDF’nizi, içindeki görselleri yeniden sıkıştırarak küçültün. Her şey cihazınızda olur, hiçbir şey yüklenmez. En çok taranmış belgeler ve fotoğrafı bol PDF’ler küçülür. Yalnızca metinden oluşan belgeler genellikle çok az küçülür.',
   tipsTitle: 'İpuçları',
 
   regionLabel: 'PDF sıkıştırıcı',
@@ -216,7 +216,7 @@ const tr: PdfCompressMessages = {
   outlook: {
     recompressible: (count, level) => `${trLevels[level]} düzeyde ${trNumber(count)} görsel yeniden sıkıştırılabilir`,
     losslessOnly: (count) =>
-      `${trLevels.light} düzeyde yeniden sıkıştırılacak JPEG fotoğraf yok; ${trLevels.balanced} düzey ${trNumber(count)} görseli dönüştürebilir`,
+      `${trLevels.light} düzeyde yeniden sıkıştırılacak JPEG fotoğraf yok; ${trLevels.balanced} düzeyde ${trNumber(count)} görsel dönüştürülebilir`,
     none: 'Büyük görsel bulunamadı; dosya yalnızca biraz küçülebilir',
   },
   removed: 'PDF kaldırıldı',
@@ -255,9 +255,9 @@ const tr: PdfCompressMessages = {
     metadataRemoved: 'meta veriler kaldırıldı',
   },
   downloadStarted: 'İndirme başladı.',
-  inAppDownloadHint: 'Başlamazsa bu sayfayı Safari’de ya da Chrome’da açın.',
+  inAppDownloadHint: 'İndirme başlamadıysa bu sayfayı Safari’de ya da Chrome’da açın.',
   smallerAnnouncement: (original, result, percent) =>
-    `Sıkıştırma bitti. Dosya ${original} boyutundan ${result} boyutuna indi, yani ${percent} küçüldü. İndirme başladı.`,
+    `Sıkıştırma bitti. Dosya ${percent} küçüldü: eski boyutu ${original}, yeni boyutu ${result}. İndirme başladı.`,
   notSmaller: {
     'light-skipped': {
       title: `${trLevels.light} düzey bu PDF’yi küçültemiyor — ${trLevels.balanced} düzeyi deneyin`,
@@ -283,9 +283,9 @@ const tr: PdfCompressMessages = {
     unreadable: (name) => `“${name}” okunamadı. Dosyayı yeniden seçin.`,
     unreadableAgain: (name) => `“${name}” yeniden okunamadı. Dosyayı yeniden seçin.`,
     memoryOpening: (name) =>
-      `“${name}” okunurken cihazın belleği yetmedi. Diğer sekmeleri ya da uygulamaları kapatın veya daha küçük bir dosya deneyin.`,
+      `“${name}” okunurken cihazın belleği yetmedi. Diğer sekmeleri ve uygulamaları kapatın ya da daha küçük bir dosya deneyin.`,
     memoryCompressing:
-      'Sıkıştırma sırasında cihazın belleği yetmedi. Diğer sekmeleri ya da uygulamaları kapatın veya daha küçük bir dosyayla yeniden deneyin.',
+      'Sıkıştırma sırasında cihazın belleği yetmedi. Diğer sekmeleri ve uygulamaları kapatın ya da daha küçük bir dosyayla yeniden deneyin.',
     unknownOpening: (name) => `“${name}” okunurken bir sorun oluştu. Sayfayı yenileyip yeniden deneyin.`,
     unknownCompressing: 'PDF sıkıştırılırken bir sorun oluştu. Başka bir düzey deneyin ya da sayfayı yenileyip yeniden deneyin.',
   },

@@ -231,7 +231,7 @@ const tr: NotepadMessages = {
   page: {
     title: 'Not defteri',
     description:
-      'Tarayıcınızda çalışan, dikkat dağıtmayan bir düz metin düzenleyici. İçinde odak modu, bu tarayıcıya otomatik kayıt, düzenli ifadelerle bul ve değiştir, anlık satır ve kelime sayacı var. Metniniz hiçbir yere yüklenmez.',
+      'Tarayıcınızda çalışan, dikkat dağıtmayan bir düz metin düzenleyici. İçinde odak modu, bu tarayıcıya otomatik kayıt, düzenli ifadelerle bulup değiştirme, anlık satır ve kelime sayacı var. Metniniz hiçbir yere yüklenmez.',
     lead: 'Düz metin notlarınız bu tarayıcıda kalır, hiçbir yere yüklenmez.',
     tips: 'İpuçları',
   },
@@ -254,7 +254,7 @@ const tr: NotepadMessages = {
   },
 
   titles: {
-    fileName: 'Dosya adı (uzantıyı siz seçin)',
+    fileName: 'Dosya adı (istediğiniz uzantıyla)',
     open: 'Metin dosyası aç',
     clear: 'Metni temizle, baştan başla',
     find: 'Bul',

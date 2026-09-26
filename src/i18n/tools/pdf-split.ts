@@ -228,15 +228,15 @@ const tr: PdfSplitMessages = {
   modes: {
     extract: { title: 'Sayfaları çıkar', description: 'Seçtiğiniz sayfalar tek bir yeni PDF olur.' },
     ranges: { title: 'Aralıklara böl', description: 'Her aralık ayrı bir PDF olur. Birden fazla dosya tek bir ZIP olarak kaydedilir.' },
-    every: { title: 'N sayfada bir böl', description: 'Dosya, örneğin 2’şer sayfalık eşit parçalara bölünür ve tek bir ZIP olarak kaydedilir.' },
+    every: { title: 'N sayfada bir böl', description: 'Dosya, örneğin 2’şer sayfalık eşit parçalara bölünür. Parçalar tek bir ZIP olarak kaydedilir.' },
     single: { title: 'Her sayfa ayrı dosya', description: 'Her sayfa ayrı bir PDF olur, hepsi tek bir ZIP olarak kaydedilir.' },
   },
   pages: {
     labelExtract: 'Çıkarılacak sayfalar',
     labelRanges: 'Sayfa aralıkları',
-    hintExtract: 'İstediğiniz sırayla yazın, ör. 1-3, 5, 8- (8- yazarsanız 8. sayfadan sona kadar alınır).',
-    hintRanges: 'Her aralık ayrı bir PDF olur, ör. 1-4, 5-8, 9-son.',
-    placeholder: 'ör. 1-3, 5, 8-',
+    hintExtract: 'İstediğiniz sırayla yazın, örneğin 1-3, 5, 8- (8- yazarsanız 8. sayfadan sona kadar alınır).',
+    hintRanges: 'Her aralık ayrı bir PDF olur, örneğin 1-4, 5-8, 9-son.',
+    placeholder: 'örn. 1-3, 5, 8-',
     prompt: 'Sayfaları seçin ya da yukarıdaki alana yazın.',
   },
   every: {
@@ -268,7 +268,7 @@ const tr: PdfSplitMessages = {
     hintTouch: 'Seçmek için sayfalara dokunun.',
     hintKeyboard: 'Klavyeyle: ok tuşlarıyla gezinin, Boşluk ile seçin, Shift+Boşluk ile aralık seçin.',
     hintRanges: 'Art arda seçilen sayfalar tek bir dosya olur.',
-    hintReadOnly: 'Etiketler, her sayfanın hangi dosyaya gireceğini gösterir.',
+    hintReadOnly: 'Etiketler her sayfanın hangi dosyaya gireceğini gösterir.',
     customOrder: 'Özel sıra: sayfalar yukarıda yazdığınız sırayla kaydedilir; yeni seçtiğiniz sayfalar sona eklenir.',
     countNone: 'Seçili sayfa yok',
     // Not "4 / 14": speech output reads the slash as "bölü" (divided by), and this is announced.
@@ -314,7 +314,7 @@ const tr: PdfSplitMessages = {
     starting: (files) => (files > 1 ? `${ft.number(files)} dosya oluşturuluyor…` : 'PDF oluşturuluyor…'),
   },
   result: {
-    pdf: (pages, size) => `Dosyanız hazır: ${pagesTr(pages)} · ${size}`,
+    pdf: (pages, size) => `PDF’niz hazır: ${pagesTr(pages)} · ${size}`,
     zip: (files, size) => `ZIP dosyanız hazır: ${ft.number(files)} PDF · ${size}`,
     fileMeta: (pages, size) => `${pagesTr(pages)} · ${size}`,
     moreFiles: (files) => `ve ZIP içinde ${ft.number(files)} dosya daha`,
@@ -355,13 +355,13 @@ const tr: PdfSplitMessages = {
       case 'page-zero':
         return 'Sayfa numaraları 1’den başlar';
       case 'page-out-of-range':
-        return `Sayfa ${error.page} yok: bu belgede ${pagesTr(error.pageCount)} var`;
+        return `Sayfa ${error.page} yok: bu PDF’de ${pagesTr(error.pageCount)} var`;
       case 'unexpected':
         return `Anlaşılamayan ifade: “${error.text}” (${error.position}. karakter)`;
       case 'missing-page':
         return `“${error.dash}” işaretinin önüne ya da arkasına bir sayfa numarası yazın (${error.position}. karakter)`;
       case 'invalid-every':
-        return 'Dosya başına sayfa sayısı olarak 1 ya da daha büyük bir tam sayı girin';
+        return 'Sayfa sayısı için 1 ya da daha büyük bir tam sayı yazın';
       case 'invalid-mode':
         return 'Bölme yöntemini seçin';
       case 'too-many-pages':

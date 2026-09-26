@@ -42,7 +42,7 @@ test('counts are formatted per locale, and Turkish keeps the noun singular', () 
   assert.equal(en.toolbar.count(1234), '1,234 images');
   assert.equal(tr.toolbar.count(1234), '1.234 görsel');
   assert.equal(en.result.ready(1, '2.0 MB'), 'Your PDF is ready: 1 page · 2.0 MB');
-  assert.equal(tr.result.ready(3, '2,0 MB'), 'PDF dosyanız hazır: 3 sayfa · 2,0 MB');
+  assert.equal(tr.result.ready(3, '2,0 MB'), 'PDF’niz hazır: 3 sayfa · 2,0 MB');
 });
 
 test('margin labels show the widths the layout uses', () => {

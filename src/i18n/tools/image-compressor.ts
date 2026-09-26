@@ -181,7 +181,7 @@ const tr: ImageCompressorMessages = {
     svg: (name) =>
       `“${name}” bir SVG, yani vektörel bir çizim. Bu araç fotoğrafları ve piksel tabanlı diğer görselleri sıkıştırır.`,
     undecodable: (name, format) => `“${name}” bu tarayıcıda açılamıyor (${format}).`,
-    heicHint: 'HEIC fotoğraflar Safari’de açılır. Diğer tarayıcılarda önce JPEG biçimine dönüştürün.',
+    heicHint: 'HEIC fotoğraflar Safari’de açılır. Diğer tarayıcılarda önce fotoğrafı JPEG biçimine dönüştürün.',
     unreadable: (name) => `“${name}” okunamadı. Taşınmış ya da silinmiş olabilir.`,
     tooManyPixels: (name, megapixels, limit) =>
       `“${name}” bu cihazda açılamayacak kadar çok piksel içeriyor (${megapixels}; sınır: ${limit}). Görseli önce başka bir uygulamada küçültün.`,
@@ -196,7 +196,7 @@ const tr: ImageCompressorMessages = {
     dismiss: 'Kapat',
   },
   notices: {
-    multiple: (name) => `Aynı anda tek görsel açılabilir: “${name}” açıldı.`,
+    multiple: (name) => `Tek seferde yalnızca bir görsel açılabilir: “${name}” açıldı.`,
   },
   status: {
     opening: (name) => `“${name}” açılıyor…`,
@@ -262,7 +262,7 @@ const tr: ImageCompressorMessages = {
     sizes: (original, compressed) => `${original} → ${compressed}`,
     summary: (headline, original, compressed) => `${headline} — ${original} → ${compressed}`,
     notSmallerAdvice:
-      'Yeniden kodlamak bu görseli küçültmedi, çünkü görsel zaten iyi sıkıştırılmış. WebP ya da daha düşük bir kalite deneyin veya orijinal dosyayı kullanın.',
+      'Yeniden kodlanınca görsel küçülmedi, çünkü zaten iyi sıkıştırılmış. WebP biçimini ya da daha düşük bir kaliteyi deneyin. İsterseniz orijinal dosyayı olduğu gibi kullanın.',
     quality: (percent) => `kalite ${percent}`,
     lossless: 'kayıpsız',
     download: 'İndir',
@@ -279,7 +279,7 @@ const tr: ImageCompressorMessages = {
   privacy: {
     label: 'Gizlilik',
     title: 'Hiçbir şey cihazınızdan çıkmaz.',
-    body: 'Görseli tarayıcınız kendisi açar ve yeniden kodlar; görsel hiçbir yere yüklenmez. Yeniden kodlama sırasında kamera bilgileri ve GPS konumu gibi meta veriler de silinir. Bu yüzden sıkıştırılmış kopyayı paylaşmak daha güvenlidir.',
+    body: 'Görseli doğrudan tarayıcınız açar ve yeniden kodlar; görsel hiçbir yere yüklenmez. Yeniden kodlama sırasında kamera bilgileri ve GPS konumu gibi meta veriler de silinir. Bu yüzden sıkıştırılmış kopyayı paylaşmak daha güvenlidir.',
   },
   tips: 'İpuçları',
 };

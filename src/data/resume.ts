@@ -249,49 +249,48 @@ export const FOCUS: Localized<string> = {
   tr: 'Günlük işimde modern C++ ve Go kullanıyorum: sistem araçları, telemetri ve mesajlaşma platformları, algoritma odaklı uygulamalar. Hepsinin temelinde saf matematik var. Bunun yanında, özellikle Asion ekosistemi için, GitHub Actions ile tek tıkla test eden, paketleyen, çok platformlu derleme çıktıları üreten ve dağıtım yapan pipeline’lar kuruyorum.',
 };
 
-/** Curated for the current focus: systems languages first. */
+/**
+ * The owner's own list (2026-09-26): systems languages first, tools rather than task
+ * descriptions, no duplicates. Shared by the home page and both CVs.
+ */
 export const SKILLS: readonly SkillGroup[] = [
   {
-    label: { en: 'Programming', tr: 'Programlama' },
-    items: ['C++ (C++23)', 'Go', 'C', 'Python', 'C#', 'Objective-C', 'TypeScript / JavaScript', 'SQL'],
+    label: { en: 'Programming languages', tr: 'Programlama Dilleri' },
+    items: ['C++ (C++23)', 'Go', 'C', 'Python', 'C#', 'TypeScript / JavaScript'],
   },
   {
-    label: { en: 'Systems & networking', tr: 'Sistem ve ağ' },
+    label: { en: 'Systems & network programming', tr: 'Sistem & Ağ Programlama' },
     items: [
       'gRPC',
       'Protobuf',
       'MQTT',
-      { en: 'OS event hooks', tr: 'İşletim sistemi olay kancaları' },
-      { en: 'Linux servers', tr: 'Linux sunucuları' },
+      { en: 'OS event hooks', tr: 'OS Event Hooks' },
+      { en: 'Linux systems', tr: 'Linux Sistemleri' },
     ],
   },
   {
-    label: { en: 'DevOps & automation', tr: 'DevOps ve otomasyon' },
+    label: { en: 'DevOps & tools', tr: 'DevOps & Araçlar' },
     items: [
+      'Git',
+      'GitHub',
       'GitHub Actions',
-      { en: 'Multi-platform CI/CD', tr: 'Çok platformlu CI/CD' },
-      { en: 'Cross-compilation runners', tr: 'Çapraz derleme runner’ları' },
-      { en: 'One-click test, package & deploy', tr: 'Tek tıkla test, paketleme ve dağıtım' },
+      { en: 'CI/CD pipelines', tr: 'CI/CD Süreçleri' },
+      'Cross-compilation',
       'Bash',
       'Batch',
-      { en: 'Python scripting', tr: 'Python betikleri' },
     ],
   },
   {
-    label: { en: 'Databases', tr: 'Veritabanları' },
-    items: ['PostgreSQL', 'SQLite / SQLCipher', 'MySQL', 'MS SQL'],
+    label: { en: 'Databases', tr: 'Veri Tabanları' },
+    items: ['PostgreSQL', 'SQLite (SQLCipher)', 'MySQL', 'MS SQL'],
   },
   {
-    label: { en: 'Web', tr: 'Web' },
-    items: ['React', 'Astro', 'HTML / CSS', 'Flask', 'jQuery', { en: 'REST APIs', tr: 'REST API' }],
+    label: { en: 'Web technologies', tr: 'Web Teknolojileri' },
+    items: ['React', 'Astro', 'Flask', { en: 'REST APIs', tr: 'REST API' }, 'HTML/CSS'],
   },
   {
-    label: { en: 'Scientific computing', tr: 'Bilimsel hesaplama' },
+    label: { en: 'Scientific computing', tr: 'Bilimsel Hesaplama' },
     items: ['MATLAB', 'Mathematica', 'R'],
-  },
-  {
-    label: { en: 'Version control', tr: 'Sürüm kontrolü' },
-    items: ['Git', 'GitHub'],
   },
 ];
 

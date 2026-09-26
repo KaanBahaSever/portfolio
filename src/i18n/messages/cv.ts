@@ -43,11 +43,11 @@ const tr: CvMessages = {
   keywords: 'özgeçmiş, yazılım geliştirici, C++, Go, matematik, sistem yazılımı',
   sections: {
     experience: 'Deneyim',
-    projects: 'Seçili projeler',
+    projects: 'Seçilmiş projeler',
     education: 'Eğitim',
     leadership: 'Liderlik ve gönüllülük',
     research: 'Araştırma',
-    skills: 'Beceriler',
+    skills: 'Yetkinlikler',
     other: 'Sertifikalar ve etkinlikler',
     languages: 'Diller',
   },

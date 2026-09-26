@@ -307,7 +307,7 @@ li { margin-top: 0.3mm; }
 li::marker { content: "– "; color: var(--faint); }
 .stack { font-family: "JetBrains Mono", monospace; font-size: 7.5pt; color: var(--faint) !important; letter-spacing: 0.01em; }
 
-.skills { display: grid; grid-template-columns: 36mm 1fr; row-gap: 0.8mm; column-gap: 3mm; }
+.skills { display: grid; grid-template-columns: max-content 1fr; row-gap: 0.8mm; column-gap: 5mm; }
 .skills > div { display: contents; }
 dt { font-weight: 600; }
 dd { margin: 0; color: var(--body); }
@@ -327,11 +327,11 @@ dd { margin: 0; color: var(--body); }
 </header>
 <p class="summary">${escapeHtml(cv.summary)}</p>
 ${section('experience', m.sections.experience, experience)}
-${section('projects', m.sections.projects, projects)}
 ${section('education', m.sections.education, education)}
+${section('projects', m.sections.projects, projects)}
+${section('skills', m.sections.skills, skills)}
 ${section('leadership', m.sections.leadership, VOLUNTEERING.map(activity).join(''))}
 ${section('research', m.sections.research, research)}
-${section('skills', m.sections.skills, skills)}
 ${section('other', m.sections.other, other)}
 ${section('languages', m.sections.languages, languages)}
 </body>

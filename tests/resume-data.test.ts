@@ -93,12 +93,23 @@ test('volunteering carries the current facts', () => {
   assert.match(maths.highlights.en.join(' '), /seminars and logic and mathematics competitions/);
 });
 
-test('skills feature DevOps and automation, and the focus mentions the Asion pipelines', () => {
-  const devops = SKILLS.find((group) => group.label.en === 'DevOps & automation');
-  assert.ok(devops, 'a DevOps & automation group');
-  const items = devops.items.map((item) => resumeText(item, 'en'));
-  for (const skill of ['GitHub Actions', 'Bash', 'Batch', 'Python scripting', 'Cross-compilation runners']) {
-    assert.ok(items.includes(skill), skill);
+test('skills are the owner’s list: six groups, tools rather than tasks, no duplicates', () => {
+  assert.deepEqual(
+    SKILLS.map((group) => group.label.tr),
+    ['Programlama Dilleri', 'Sistem & Ağ Programlama', 'DevOps & Araçlar', 'Veri Tabanları', 'Web Teknolojileri', 'Bilimsel Hesaplama'],
+  );
+  const devops = SKILLS.find((group) => group.label.en === 'DevOps & tools');
+  assert.ok(devops, 'a DevOps & tools group');
+  assert.deepEqual(
+    devops.items.map((item) => resumeText(item, 'tr')),
+    ['Git', 'GitHub', 'GitHub Actions', 'CI/CD Süreçleri', 'Cross-compilation', 'Bash', 'Batch'],
+  );
+  for (const locale of LOCALES) {
+    const items = SKILLS.flatMap((group) => group.items.map((item) => resumeText(item, locale)));
+    assert.equal(new Set(items).size, items.length, `${locale}: duplicate skill`);
+    // Task descriptions and the old "Version control" row are gone.
+    assert.doesNotMatch(items.join(' | '), /one-click|tek tıkla|multi-platform|çok platformlu|python scripting|python betik/i);
+    assert.ok(!SKILLS.some((group) => /version control|sürüm kontrol/i.test(group.label[locale])));
   }
   for (const locale of LOCALES) assert.match(FOCUS[locale], /Asion/);
 });

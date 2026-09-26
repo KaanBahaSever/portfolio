@@ -104,16 +104,22 @@ test('the Turkish CV is written with Turkish typography', () => {
     assert.doesNotMatch(text, /[\p{L}\d]'\p{L}/u, text);
   }
   const joined = turkish.join(' ');
-  for (const word of ['İstanbul Üniversitesi', 'geliştiriyorum', 'Özgeçmiş', 'Eğitim', 'Beceriler']) {
+  for (const word of ['İstanbul Üniversitesi', 'geliştiriyorum', 'Özgeçmiş', 'Eğitim', 'Seçilmiş projeler', 'Yetkinlikler']) {
     assert.ok(joined.includes(word), `expected "${word}" in the Turkish CV`);
   }
-  // The site's Turkish terms: "lineer cebir", the games' Turkish names, "büyük daire".
+  // The site's Turkish terms: "lineer cebir", never "doğrusal cebir".
   assert.match(joined, /lineer cebir/i);
   assert.doesNotMatch(joined, /doğrusal cebir/i);
-  assert.match(joined, /Amiral Battı/);
-  assert.match(joined, /büyük daire/);
-  // (The BattleShips repository keeps its name in the link.)
-  for (const project of CV.tr.projects) assert.doesNotMatch(project.text, /Battleship|tic-tac-toe/i, project.name);
+});
+
+test('the CVs list only the four selected projects, in the owner’s order', () => {
+  for (const locale of LOCALES) {
+    assert.deepEqual(
+      CV[locale].projects.map((project) => project.name),
+      ['Asion', 'Novacast', 'Karecik', 'Açık Matematik'],
+      locale,
+    );
+  }
 });
 
 test('the words around the CV compose titles the way each language does', () => {

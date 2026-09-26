@@ -1,7 +1,8 @@
 /**
  * Résumé data: the single source of truth for experience, education, volunteering,
  * certifications, activities, skills and languages. Used by the home page (and anything else
- * that summarises the CV). Keep it factual and in sync with public/cv/kaan-cv.pdf.
+ * that summarises the CV) and by `npm run cv`, which builds public/cv/kaan-cv.pdf from it. Keep it
+ * factual; re-run `npm run cv` after changing it.
  *
  * Prose is Localized (read it with pick(value, locale)); dates and technology names are shared
  * by both languages. Fields typed ResumeText (names, titles kept in the original, URLs) may be
@@ -27,7 +28,7 @@ export interface DatedPeriod {
 }
 
 /**
- * A period known only in words, e.g. "Upper years" for something done in the last years of a
+ * A period known only in words, e.g. "Later university years" for something done in the last years of a
  * degree whose exact dates are not on record. Shown where the dates would be; sorted before the
  * dated entries (see sortNewestFirst), so use it only for the recent past.
  */
@@ -145,7 +146,7 @@ export const EDUCATION: readonly EducationItem[] = [
     highlights: {
       en: [
         'Preparing to graduate, with a grounding in pure mathematics: real analysis, abstract algebra and topology.',
-        "Planning a Master's degree in Computer Science next.",
+        'Planning a Master’s degree in Computer Science next.',
       ],
       tr: [
         'Mezuniyete hazırlanıyorum; reel analiz, soyut cebir ve topoloji ağırlıklı bir saf matematik altyapım var.',
@@ -165,8 +166,8 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
     highlights: {
       en: [
         'With the club’s team, designed and built one low-altitude rocket (5,000 ft) and two high-altitude rockets (10,000 ft).',
-        'Sole author of the flight avionics firmware and the parachute deployment control system, driven by onboard sensor fusion of orientation, gyroscope and altimeter data.',
-        'Designed the SD-card telemetry logging protocol, alongside RF telemetry, and built a desktop dashboard that parses flight data and plots post-flight trajectories.',
+        'Solely developed the flight avionics firmware and the parachute deployment control system, both driven by onboard sensor fusion of orientation, gyroscope and altimeter data.',
+        'Designed the SD-card telemetry logging protocol that worked alongside the RF telemetry modules, and built a desktop dashboard that parses flight data and plots post-flight trajectories.',
       ],
       tr: [
         // Turkish groups thousands with a dot: 5.000 ft.
@@ -197,9 +198,9 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
     kind: 'volunteering',
     title: { en: 'Mathematics Club', tr: 'Matematik Kulübü' },
     // No dates on record, only "during my upperclassman years": said in words, not guessed.
-    periodLabel: { en: 'Upper years', tr: 'Son sınıflar' },
+    periodLabel: { en: 'Later university years', tr: 'Son sınıflar' },
     highlights: {
-      en: ['Organised and facilitated academic events, seminars and logic and mathematics competitions.'],
+      en: ['Organised and ran academic events, including seminars and logic and mathematics competitions.'],
       tr: ['Akademik etkinlikler, seminerler ve mantık-matematik yarışmaları düzenleyip yürüttüm.'],
     },
   },
@@ -219,7 +220,8 @@ export const ACTIVITIES: readonly ActivityItem[] = [
   {
     kind: 'activity',
     title: { en: 'High school research project', tr: 'Lise araştırma projesi' },
-    organization: 'TÜBİTAK',
+    // Glossed in English for readers outside Türkiye.
+    organization: { en: 'TÜBİTAK (Scientific and Technological Research Council of Türkiye)', tr: 'TÜBİTAK' },
     start: '2019',
     highlights: {
       en: [
@@ -280,7 +282,7 @@ export const SKILLS: readonly SkillGroup[] = [
   },
   {
     label: { en: 'Web', tr: 'Web' },
-    items: ['Flask', 'jQuery', { en: 'REST APIs', tr: 'REST API' }],
+    items: ['React', 'Astro', 'HTML / CSS', 'Flask', 'jQuery', { en: 'REST APIs', tr: 'REST API' }],
   },
   {
     label: { en: 'Scientific computing', tr: 'Bilimsel hesaplama' },

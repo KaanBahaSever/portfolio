@@ -8,7 +8,7 @@
  * Screen readers get full month names instead ('monthYearLong'): Turkish abbreviations are
  * ordinary words ("Kas" is "muscle", "Ara" is "search"), and speech engines read them as such.
  *
- * A period may also be known only in words ("Upper years"); it is shown as written.
+ * A period may also be known only in words ("Later university years"); it is shown as written.
  */
 
 import type { DatedPeriod, ResumeDate, ResumePeriod } from '../data/resume.ts';
@@ -31,13 +31,13 @@ export interface DateLabel {
 }
 
 export interface PeriodLabels {
-  /** null when the period is described in words ("Upper years"): then only `text` applies. */
+  /** null when the period is described in words ("Later university years"): then only `text` applies. */
   start: DateLabel | null;
   /** null for single dates (e.g. "2024") and undated periods, 'present' for ongoing periods. */
   end: DateLabel | 'present' | null;
   /** What to show for the end: the formatted date, "Present" / "Günümüz", or null for a single date. */
   endLabel: string | null;
-  /** The visible period, e.g. "Jul 2021 – Mar 2024", "2020" or "Upper years". */
+  /** The visible period, e.g. "Jul 2021 – Mar 2024", "2020" or "Later university years". */
   text: string;
   /** The period as a screen reader should hear it, e.g. "July 2021 to March 2024". */
   spoken: string;

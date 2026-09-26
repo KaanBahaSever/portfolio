@@ -6,6 +6,9 @@ dist/
 # PDF.js data files, copied from node_modules by integrations/pdfjs-assets.mjs
 public/vendor/
 
+# Optional layout preview written by npm run cv -- --keep-html
+public/cv/kaan-cv.html
+
 # dependencies
 node_modules/
 

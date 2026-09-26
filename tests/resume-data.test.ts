@@ -89,7 +89,7 @@ test('volunteering carries the current facts', () => {
   // No dates on record: a period in words, never a made-up year.
   assert.ok(!isDated(maths));
   assert.equal(maths.start, undefined);
-  assert.deepEqual(maths.periodLabel, { en: 'Upper years', tr: 'Son sınıflar' });
+  assert.deepEqual(maths.periodLabel, { en: 'Later university years', tr: 'Son sınıflar' });
   assert.match(maths.highlights.en.join(' '), /seminars and logic and mathematics competitions/);
 });
 

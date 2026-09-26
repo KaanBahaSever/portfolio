@@ -27,7 +27,7 @@ export const SITE = {
   url: 'https://kaanbahasever.com',
   email: 'kaanbahasever@gmail.com',
   location: { en: 'Istanbul, Turkey', tr: 'İstanbul, Türkiye' } satisfies Localized<string>,
-  // Served from public/cv/kaan-cv.pdf (English) — replace that file to update the CV.
+  // public/cv/kaan-cv.pdf (English), generated from the résumé data by `npm run cv`.
   cvPath: '/cv/kaan-cv.pdf',
   repositoryUrl: 'https://github.com/KaanBahaSever/portfolio',
   socials: [

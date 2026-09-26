@@ -31,10 +31,11 @@ Adding old photos:
        - src: ../../assets/timeline/my-first-pc.jpg
          alt: Describe what the photo shows   # required
          caption: Optional caption            # optional
-3. Split the story over several entries if you like (e.g. 00-childhood.md,
-   00-first-program.md); entries are sorted by `date`, oldest first.
+3. Split the story over several entries if you like (e.g. 2005-childhood.md,
+   2010-first-computer.md); entries are sorted by `date`, oldest first. File names start
+   with the year only so the folder lists in roughly the same order.
 
-Turkish version: src/content/tr/timeline/00-childhood.md (same file name) holds the Turkish
+Turkish version: src/content/tr/timeline/2005-childhood.md (same file name) holds the Turkish
 title, dateLabel, photo alt/caption (same order as above) and body. Write it too, and remove
 `draft: true` there as well when publishing.
 

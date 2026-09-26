@@ -1,24 +1,41 @@
 ---
 /**
- * "Engineering journey" (section #journey, linked from the home page as /about/#journey):
- * five chapters in rough chronological order, each with a small figure of the idea behind it.
- * Chapter text lives in ./prose/* (per locale); headings, labels and captions in about.ts.
+ * "The journey so far" (section #journey, linked from the home page as /about/#journey): a
+ * list of chapters, then the chapters themselves in rough chronological order, most with a
+ * small figure of the idea behind them. Chapter text lives in ./prose/* (per locale); names,
+ * labels and captions in about.ts. JOURNEY_CHAPTERS gives the chapter numbers and the list at
+ * the top; a chapter has a figure exactly when its catalogue entry has a caption, which numbers
+ * the figures. The chapters below are written out by hand, and tests/about-journey.test.ts
+ * checks that they follow JOURNEY_CHAPTERS and use their own number and figure.
+ *
+ * Fragment ids are `journey-<key>`. The home page links to #journey and the timeline to
+ * #journey-avionics, so keep existing keys when chapters are added or reordered.
  */
 import Chapter from './Chapter.astro';
 import Figure from './Figure.astro';
+import AltitudeClasses from './figures/AltitudeClasses.astro';
 import BrokerGraph from './figures/BrokerGraph.astro';
+import CipherFlowchart from './figures/CipherFlowchart.astro';
 import DensityGrid from './figures/DensityGrid.astro';
 import DescentField from './figures/DescentField.astro';
-import FlightProfile from './figures/FlightProfile.astro';
+import HohmannTransfer from './figures/HohmannTransfer.astro';
 import MinimaxTree from './figures/MinimaxTree.astro';
+import Pipeline from './figures/Pipeline.astro';
 import Trajectory3d from './figures/Trajectory3d.astro';
+import { EARTH_MU, EARTH_RADIUS, MOON_ORBIT_RADIUS, PARKING_ALTITUDE, hohmannTransfer } from './geometry';
 import Algorithms from './prose/Algorithms.astro';
+import Automation from './prose/Automation.astro';
 import Avionics from './prose/Avionics.astro';
+import Community from './prose/Community.astro';
 import CurrentCore from './prose/CurrentCore.astro';
 import Guidance from './prose/Guidance.astro';
+import Research from './prose/Research.astro';
 import Simulation from './prose/Simulation.astro';
+import Space from './prose/Space.astro';
+import Work from './prose/Work.astro';
 import Section from '../ui/Section.astro';
-import { aboutMessages } from '../../i18n/messages/about';
+import { formatters } from '../../i18n/format';
+import { JOURNEY_CHAPTERS, aboutMessages, type JourneyChapter } from '../../i18n/messages/about';
 import { getLocale } from '../../i18n/server';
 
 interface Props {
@@ -27,18 +44,72 @@ interface Props {
 }
 
 const { index } = Astro.props;
-const m = aboutMessages[getLocale(Astro)].journey;
-const { algorithms, avionics, guidance, simulation, core } = m.chapters;
+const locale = getLocale(Astro);
+const fmt = formatters(locale);
+const m = aboutMessages[locale].journey;
+const c = m.chapters;
+
+/** Two-digit chapter number, from the reading order. */
+const number = (key: JourneyChapter) => String(JOURNEY_CHAPTERS.indexOf(key) + 1).padStart(2, '0');
+/** Figures are numbered in reading order among the chapters that have one (a caption). */
+const FIGURES: readonly JourneyChapter[] = JOURNEY_CHAPTERS.filter((key) => 'caption' in c[key]);
+const figure = (key: JourneyChapter) => FIGURES.indexOf(key) + 1;
+
+// Fig. 1's numbers come from the same transfer model as its drawing, with real constants:
+// about 3.1 km/s at perigee and about five days to the Moon's distance.
+const transfer = hohmannTransfer(EARTH_MU, EARTH_RADIUS + PARKING_ALTITUDE, MOON_ORBIT_RADIUS);
+const spaceCaption = c.space.caption(
+  fmt.number(transfer.dv1, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+  fmt.number(transfer.time / 86_400, { maximumFractionDigits: 0 }),
+);
+
+const item = 'py-10 first:pt-8 last:pb-0 sm:py-14 sm:first:pt-10';
 ---
 
 <Section id="journey" title={m.title} index={index}>
   <p class="max-w-2xl text-base leading-7 text-zinc-600 dark:text-zinc-400">{m.intro}</p>
 
-  <ol class="mt-4 divide-y divide-zinc-200 dark:divide-zinc-800">
-    <li class="py-10 sm:py-14">
-      <Chapter id="journey-algorithms" number="01" label={algorithms.label} title={algorithms.title}>
+  {/* A table of contents in the notebook's own hand: numbers in mono, names in sans. */}
+  <nav aria-label={m.contents} class="mt-6 border-y border-zinc-200 py-2 dark:border-zinc-800">
+    <ol class="grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-5 lg:gap-x-6">
+      {
+        JOURNEY_CHAPTERS.map((key) => (
+          <li class="min-w-0">
+            <a
+              href={`#journey-${key}`}
+              class="group -mx-2 flex min-h-11 items-center gap-2.5 rounded-lg px-2 py-1.5 text-sm leading-5 text-zinc-700 transition-colors hover:text-accent-700 dark:text-zinc-300 dark:hover:text-accent-400"
+            >
+              <span
+                class="label-mono shrink-0 text-zinc-500 tabular-nums transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-accent-700 dark:text-zinc-400 dark:group-hover:text-accent-400"
+                aria-hidden="true">{number(key)}</span
+              >
+              <span class="min-w-0">{c[key].short}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ol>
+  </nav>
+
+  <ol class="divide-y divide-zinc-200 dark:divide-zinc-800">
+    <li class={item}>
+      <Chapter id="journey-space" number={number('space')} label={c.space.label} title={c.space.title}>
+        <Space />
+        <Figure slot="figure" number={figure('space')} caption={spaceCaption}>
+          <HohmannTransfer />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class={item}>
+      <Chapter
+        id="journey-algorithms"
+        number={number('algorithms')}
+        period={{ start: '2016', end: '2019' }}
+        label={c.algorithms.label}
+        title={c.algorithms.title}
+      >
         <Algorithms />
-        <Figure slot="figure" number={1} caption={algorithms.caption}>
+        <Figure slot="figure" number={figure('algorithms')} caption={c.algorithms.caption}>
           <div class="grid grid-cols-2 items-center gap-3 sm:gap-5">
             <DensityGrid />
             <MinimaxTree />
@@ -46,41 +117,83 @@ const { algorithms, avionics, guidance, simulation, core } = m.chapters;
         </Figure>
       </Chapter>
     </li>
-    <li class="py-10 sm:py-14">
-      <Chapter
-        id="journey-avionics"
-        number="02"
-        period={{ start: '2019', end: '2022' }}
-        label={avionics.label}
-        title={avionics.title}
-      >
-        <Avionics />
-        <Figure slot="figure" number={2} caption={avionics.caption}>
-          <FlightProfile />
+    <li class={item}>
+      <Chapter id="journey-research" number={number('research')} label={c.research.label} title={c.research.title}>
+        <Research />
+        <Figure slot="figure" number={figure('research')} caption={c.research.caption}>
+          <CipherFlowchart labels={c.research.figureLabels} />
         </Figure>
       </Chapter>
     </li>
-    <li class="py-10 sm:py-14">
-      <Chapter id="journey-guidance" number="03" label={guidance.label} title={guidance.title}>
+    <li class={item}>
+      <Chapter
+        id="journey-avionics"
+        number={number('avionics')}
+        period={{ start: '2019', end: '2022' }}
+        label={c.avionics.label}
+        title={c.avionics.title}
+      >
+        <Avionics />
+        <Figure slot="figure" number={figure('avionics')} caption={c.avionics.caption}>
+          <AltitudeClasses />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class={item}>
+      <Chapter id="journey-guidance" number={number('guidance')} label={c.guidance.label} title={c.guidance.title}>
         <Guidance />
-        <Figure slot="figure" number={3} caption={guidance.caption}>
+        <Figure slot="figure" number={figure('guidance')} caption={c.guidance.caption}>
           <DescentField />
         </Figure>
       </Chapter>
     </li>
-    <li class="py-10 sm:py-14">
-      <Chapter id="journey-simulation" number="04" label={simulation.label} title={simulation.title}>
+    <li class={item}>
+      <Chapter
+        id="journey-simulation"
+        number={number('simulation')}
+        label={c.simulation.label}
+        title={c.simulation.title}
+      >
         <Simulation />
-        <Figure slot="figure" number={4} caption={simulation.caption}>
+        <Figure slot="figure" number={figure('simulation')} caption={c.simulation.caption}>
           <Trajectory3d />
         </Figure>
       </Chapter>
     </li>
-    <li class="pt-10 sm:pt-14">
-      <Chapter id="journey-core" number="05" label={core.label} title={core.title}>
+    <li class={item}>
+      <Chapter
+        id="journey-work"
+        number={number('work')}
+        period={{ start: '2021', end: '2024' }}
+        label={c.work.label}
+        title={c.work.title}
+      >
+        <Work />
+      </Chapter>
+    </li>
+    <li class={item}>
+      <Chapter id="journey-community" number={number('community')} label={c.community.label} title={c.community.title}>
+        <Community />
+      </Chapter>
+    </li>
+    <li class={item}>
+      <Chapter id="journey-core" number={number('core')} label={c.core.label} title={c.core.title}>
         <CurrentCore />
-        <Figure slot="figure" number={5} caption={core.caption}>
-          <BrokerGraph labels={core.figureLabels} />
+        <Figure slot="figure" number={figure('core')} caption={c.core.caption}>
+          <BrokerGraph labels={c.core.figureLabels} />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class={item}>
+      <Chapter
+        id="journey-automation"
+        number={number('automation')}
+        label={c.automation.label}
+        title={c.automation.title}
+      >
+        <Automation />
+        <Figure slot="figure" number={figure('automation')} caption={c.automation.caption}>
+          <Pipeline labels={c.automation.figureLabels} />
         </Figure>
       </Chapter>
     </li>

@@ -1,6 +1,6 @@
 ---
 # TASLAK: yalnızca `npm run dev` ile görünür, üretim derlemelerine hiçbir zaman girmez.
-# İngilizce karşılığı: src/content/timeline/00-childhood.md. Yayına alırken iki dosyadan da
+# İngilizce karşılığı: src/content/timeline/2005-childhood.md. Yayına alırken iki dosyadan da
 # `draft: true` satırını kaldırın.
 title: 'TODO: Her şey nasıl başladı'
 dateLabel: Çocukluk

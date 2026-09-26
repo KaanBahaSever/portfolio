@@ -1,0 +1,40 @@
+---
+/**
+ * Journey chapter 7: Software Developer at crowd.inc (July 2021 – March 2024) and what the role
+ * owned. The title is "Software Developer"; the home page's experience section has the same
+ * facts as a résumé entry.
+ */
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Temmuz 2021’den Mart 2024’e kadar crowd.inc bünyesinde yazılım geliştirici olarak çalıştım. Yazılım
+        geliştirme yaşam döngüsünü uçtan uca üstlendim: PostgreSQL ile ilişkisel şema tasarımı, Python/Flask ve
+        jQuery ile RESTful API’ler, Linux sunucularının hazırlanması (provisioning) ve otomatik testler.
+      </p>
+      <p>
+        Kamuya açık ve özel veriler arasında katı sınırlar çizen, ayrıntılı bir rol tabanlı erişim denetimi (RBAC)
+        tasarladım. Ölçeklenebilir akış (feed) sayfalaması ile dinamik veri yükleme geliştirdim ve platformun
+        güvenilirliğini kapsamlı birim ve entegrasyon testleriyle sağladım.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        From July 2021 to March 2024 I was a Software Developer at crowd.inc, where I owned the software development
+        lifecycle end to end: relational schema design in PostgreSQL, RESTful APIs with Python/Flask and jQuery, Linux
+        server provisioning and automated testing.
+      </p>
+      <p>
+        I designed granular role-based access control (RBAC) with strict boundaries between public and private data,
+        built scalable feed pagination and dynamic data loading, and kept the platform reliable with rigorous unit and
+        integration testing.
+      </p>
+    </>
+  )
+}

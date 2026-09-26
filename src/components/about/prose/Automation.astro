@@ -1,0 +1,44 @@
+---
+/**
+ * Journey chapter 10: CI/CD and automation. Facts: multi-platform pipelines with GitHub Actions
+ * workflows, cross-compilation runners, custom scripts in Bash, Batch and Python; one-click
+ * testing, packaging, multi-platform artifact generation and deployment, built for the Asion
+ * ecosystem.
+ */
+import { ui } from '../../ui/styles';
+import { localizePath } from '../../../i18n/config';
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+const asion = localizePath('/projects/asion/', locale);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Yerel (native) yazılımı üç işletim sistemine birden sunmak, ancak rutin adımlar kendiliğinden işlediğinde
+        mümkün oluyor. GitHub Actions iş akışları ve çapraz derleme (cross-compilation) çalıştırıcılarıyla çok
+        platformlu <span lang="en">pipeline</span>’lar kuruyor, adımları Bash, Batch ve Python ile yazdığım betiklerle
+        birbirine bağlıyorum.
+      </p>
+      <p>
+        <a href={asion} class={ui.inlineLink}>Asion</a> ekosistemi için bu çalışma tek tıkla işleyen{' '}
+        <span lang="en">pipeline</span>’lara dönüştü: Tek bir tetikleme kodu test ediyor, paketliyor, her platform için
+        çıktıları (artifact) üretiyor ve dağıtıyor.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        Shipping native software to three operating systems is only practical when the routine steps run themselves. I
+        build multi-platform pipelines from GitHub Actions workflows and cross-compilation runners, tied together with
+        my own scripts in Bash, Batch and Python.
+      </p>
+      <p>
+        For the <a href={asion} class={ui.inlineLink}>Asion</a> ecosystem this became one-click pipelines: a single
+        trigger tests the code, packages it, generates the artifacts for every platform and deploys them.
+      </p>
+    </>
+  )
+}

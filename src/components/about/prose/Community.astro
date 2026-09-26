@@ -1,0 +1,38 @@
+---
+/**
+ * Journey chapter 8: Google Developer Student Clubs (2023) and the Mathematics Club. The club
+ * work has no recorded years beyond "the later years at university", so none are given.
+ * The CCIE-certified guest keeps his own title ("network security engineer").
+ */
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        2023’te Google Developer Student Clubs (GDSC) çekirdek ekibindeydim. Flask, HTML ve Git/GitHub üzerine teknik
+        atölyelere ve canlı yayınlara ev sahipliği yaptım. Ayrıca Siber Güvenlik Haftası etkinliğini düzenledim;
+        programda CCIE sertifikalı bir ağ güvenliği mühendisiyle canlı yayında yapılan teknik bir söyleşi de yer aldı.
+      </p>
+      <p>
+        Üniversitedeki son yıllarımda Matematik Kulübünde seminerler, mantık ve matematik yarışmaları gibi akademik
+        etkinlikler düzenleyip yürüttüm.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        In 2023 I was on the Google Developer Student Clubs (GDSC) core team. I hosted technical workshops and live
+        streams on Flask, HTML and Git/GitHub, and organised Cyber Security Week, which included a live-streamed
+        technical interview with a CCIE-certified network security engineer.
+      </p>
+      <p>
+        In my later years at university I also organised and ran academic events for the Mathematics Club: seminars,
+        and logic and mathematics competitions.
+      </p>
+    </>
+  )
+}

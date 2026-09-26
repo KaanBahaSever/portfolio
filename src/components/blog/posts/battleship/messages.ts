@@ -126,15 +126,20 @@ const en = {
       `${coordinate}, ${state}${value ? `, density ${value}` : ''}${peak ? ', highest' : ''}`,
     best: 'Hard fires at',
     bestValue: (cells: string, value: string) => `${cells} · d = ${value}`,
+    /** Every ship is unticked. */
     none: 'No ship left to find.',
+    /** Ships are ticked, but the marked board leaves no room for any of them. */
+    noRoom: 'No position fits the ships afloat.',
     inspect: 'Cell',
     inspectValue: (coordinate: string, value: string) => `${coordinate} · d = ${value}`,
     inspectFired: (coordinate: string, state: string) => `${coordinate} · ${state}`,
     weight: 'Weight of a hit',
     announce: (coordinate: string, state: string, cells: string, value: string) =>
       `${coordinate}: ${state}. Hard fires at ${cells}, density ${value}.`,
-    announceNone: (coordinate: string, state: string) => `${coordinate}: ${state}. No ship left to find.`,
+    /** `reason` is `none` or `noRoom`. */
+    announceNone: (coordinate: string, state: string, reason: string) => `${coordinate}: ${state}. ${reason}`,
     announceFleet: (cells: string, value: string) => `Fleet changed. Hard fires at ${cells}, density ${value}.`,
+    announceFleetNone: (reason: string) => `Fleet changed. ${reason}`,
     announceReset: 'Board reset.',
     more: (n: number) => `${n} more`,
   },
@@ -183,7 +188,7 @@ const tr: BattleshipPostMessages = {
     next: 'Sonra',
     sunk: 'isabet, battı',
     aria: (steps) => `Tahtanın B3–H7 arasındaki bölümü ve Normal seviyenin sırasıyla yaptığı atışlar: ${steps}.`,
-    step: (n, cell, result) => `${n}. atış ${cell}, ${result}`,
+    step: (n, cell, result) => `${n}. atış: ${cell}, ${result}`,
   },
   parity: {
     cells: (n) => `${n} hücre`,
@@ -201,12 +206,12 @@ const tr: BattleshipPostMessages = {
       `İki tahta. E5’teki tek isabetten sonra yoğunluk en çok komşu hücrelerde yükseliyor: ${one}, değer ${oneValue}. F5’teki ikinci isabetten sonra en yüksek değer çizginin iki ucunda: ${two}, değer ${twoValue}.`,
   },
   machine: {
-    aria: 'Bir durum diyagramı. Bilgisayar Av durumunda başlar; ıskada bu durumda kalır, isabette Hedef durumuna geçer. Hedef ve Çizgi birlikte Hedefleme durumunu oluşturur. Hedef ıskada kendinde kalır, ikinci isabet aynı hizaya gelince Çizgi durumuna geçer; Çizgi isabet dizisini uzattıkça kendinde kalır, iki ucu da kapanınca Hedef durumuna döner. Bir gemi batınca Battı adımı geminin hücrelerini işaretler ve onu filodan düşer; açıkta isabet kaldıysa Hedefleme durumuna, kalmadıysa Av durumuna döner.',
+    aria: 'Bir durum diyagramı. Bilgisayar Av durumunda başlar; ıskada bu durumda kalır, isabette Hedef durumuna geçer. Hedef ve Çizgi birlikte Hedefleme durumunu oluşturur. Hedef, ıskada aynı durumda kalır, ikinci isabet aynı hizaya gelince Çizgi durumuna geçer; Çizgi, isabet dizisini uzattıkça aynı durumda kalır, iki ucu da kapanınca Hedef durumuna döner. Bir gemi batınca Battı adımı geminin hücrelerini işaretler ve gemiyi filodan çıkarır; açıkta isabet kaldıysa Hedefleme durumuna, kalmadıysa Av durumuna döner.',
     targeting: 'Hedefleme',
     hunt: { title: 'Av', lines: ['parite deseni', 'üzerine ateş et'] },
     target: { title: 'Hedef', lines: ['açık isabetlerin', 'komşularını dene'] },
     line: { title: 'Çizgi', lines: ['isabet dizisini', 'uçlarından uzat'] },
-    sunk: { title: 'Battı', lines: ['hücrelerini işaretle,', 'gemiyi filodan düş'] },
+    sunk: { title: 'Battı', lines: ['hücrelerini işaretle,', 'gemiyi filodan çıkar'] },
     edges: {
       miss: 'ıska',
       hit: 'isabet',
@@ -223,7 +228,7 @@ const tr: BattleshipPostMessages = {
     yAxis: 'Biten oyunlar',
     theory: 'Rastgele atış, kesin',
     aria: (lines) =>
-      `Her strateji için belirli bir atış sayısına kadar biten oyunların oranını gösteren, strateji başına bir eğriden oluşan grafik. ${lines}`,
+      `Belirli bir atış sayısına kadar biten oyunların oranını gösteren grafik; her strateji için bir eğri. ${lines}`,
     line: (name, median, p90) => `${name}: oyunların yarısı ${median}. atışa, onda dokuzu ${p90}. atışa kadar bitiyor.`,
   },
   strategy: {
@@ -255,14 +260,16 @@ const tr: BattleshipPostMessages = {
     best: 'Zor seviyenin hedefi',
     bestValue: (cells, value) => `${cells} · d = ${value}`,
     none: 'Bulunacak gemi kalmadı.',
+    noRoom: 'Su üstündeki gemilerin sığabileceği bir konum kalmadı.',
     inspect: 'Hücre',
     inspectValue: (coordinate, value) => `${coordinate} · d = ${value}`,
     inspectFired: (coordinate, state) => `${coordinate} · ${state}`,
     weight: 'Bir isabetin ağırlığı',
     announce: (coordinate, state, cells, value) =>
       `${coordinate}: ${state}. Zor seviyenin hedefi: ${cells}; yoğunluk ${value}.`,
-    announceNone: (coordinate, state) => `${coordinate}: ${state}. Bulunacak gemi kalmadı.`,
+    announceNone: (coordinate, state, reason) => `${coordinate}: ${state}. ${reason}`,
     announceFleet: (cells, value) => `Filo değişti. Zor seviyenin hedefi: ${cells}; yoğunluk ${value}.`,
+    announceFleetNone: (reason) => `Filo değişti. ${reason}`,
     announceReset: 'Tahta sıfırlandı.',
     more: (n) => `${n} hücre daha`,
   },

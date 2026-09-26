@@ -78,10 +78,14 @@ export function initDensityLab(root: HTMLElement): void {
     return f.list([...names.slice(0, PEAKS_LISTED), m.lab.more(names.length - PEAKS_LISTED)]);
   };
 
-  /** The Hard computer's targets and their density, or null when there is nothing to find. */
-  const best = (): { cells: string; value: string } | null => {
+  /**
+   * The Hard computer's targets and their density, or why there are none: every ship is unticked
+   * (`none`), or ships are ticked but the marked board leaves no placement for any of them (`noRoom`).
+   */
+  const best = (): { cells: string; value: string } | { reason: string } => {
+    if (knowledge.remaining.length === 0) return { reason: m.lab.none };
     const max = peaks.length > 0 ? (density[peaks[0] ?? 0] ?? 0) : 0;
-    if (knowledge.remaining.length === 0 || max === 0) return null;
+    if (max === 0) return { reason: m.lab.noRoom };
     return { cells: listPeaks(peaks), value: f.number(max) };
   };
 
@@ -121,7 +125,7 @@ export function initDensityLab(root: HTMLElement): void {
     });
 
     const target = best();
-    out.best.textContent = target ? m.lab.bestValue(target.cells, target.value) : m.lab.none;
+    out.best.textContent = 'reason' in target ? target.reason : m.lab.bestValue(target.cells, target.value);
     out.inspect.textContent = inspectText(inspected);
     out.weight.textContent = `w = ${f.number(targetWeight(knowledge.remaining))}`;
   }
@@ -147,9 +151,9 @@ export function initDensityLab(root: HTMLElement): void {
     const target = best();
     const coordinate = coordinateLabel(index);
     announce(
-      target
-        ? m.lab.announce(coordinate, stateName(index), target.cells, target.value)
-        : m.lab.announceNone(coordinate, stateName(index)),
+      'reason' in target
+        ? m.lab.announceNone(coordinate, stateName(index), target.reason)
+        : m.lab.announce(coordinate, stateName(index), target.cells, target.value),
     );
   }
 
@@ -195,7 +199,9 @@ export function initDensityLab(root: HTMLElement): void {
     input.addEventListener('change', () => {
       render();
       const target = best();
-      announce(target ? m.lab.announceFleet(target.cells, target.value) : m.lab.none);
+      announce(
+        'reason' in target ? m.lab.announceFleetNone(target.reason) : m.lab.announceFleet(target.cells, target.value),
+      );
     });
   }
 

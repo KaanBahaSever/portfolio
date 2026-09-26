@@ -1,6 +1,6 @@
 ---
 title: 'Amiral Battı: Av ve Hedef Algoritması'
-description: Amiral Battı’da bilgisayar parite deseniyle nasıl avlanır, isabetleri nasıl kıstırır, olası gemi konumlarını nasıl tartar? Şekiller oyunun kendi kodundan.
+description: Amiral Battı’da bilgisayar parite deseniyle nasıl avlanır, vurduğu gemiyi nasıl sıkıştırır, olası gemi konumlarını nasıl tartar? Şekiller oyunun kendi kodundan.
 pubDate: 2026-09-26
 lang: tr
 translationKey: battleship-hunt-target
@@ -31,7 +31,7 @@ export const gameHref = localizePath('/games/battleship/', 'tr');
 
 Amiral Battı ilk bakışta bir şans oyunu gibi görünür. İki oyuncu 10 × 10’luk bir ızgaraya beşer gemi saklar, sırayla hücre söyler ve ortada su sıçramaları ile isabetlerden başka görünen bir şey yoktur. Oysa rakibi hakkında hiçbir şey bilmeyen bir bilgisayar, kör şansın gerektirdiği atışların yarısından azıyla bütün filoyu batırabilir. Bunun ardında kombinatorik, olasılık ve küçük bir durum makinesinden oluşan hoş bir karışım var.
 
-Bu yazıda <a href={gameHref}>sitedeki Amiral Battı oyununun</a> bilgisayar rakibini zorluk seviyelerine göre adım adım inceliyorum: rastgele atış, parite deseniyle *av ve hedef* ve kalan gemilerin hâlâ alabileceği her konumu sayan *olasılık yoğunluğu*. Aşağıdaki bütün tahtalar, grafikler ve simülasyon sonuçları, site derlenirken oyunu çalıştıran TypeScript koduyla hesaplanıyor: bir şekil bilgisayarın E5’e ateş ettiğini gösteriyorsa, oyunun kodu gerçekten o hücreyi seçmiştir.
+Bu yazıda <a href={gameHref}>sitedeki Amiral Battı oyununun</a> bilgisayar rakibini zorluk seviyelerine göre adım adım inceliyorum: rastgele atış, parite deseniyle *av ve hedef* ve son olarak kalan gemilerin hâlâ alabileceği her konumu sayan *olasılık yoğunluğu*. Aşağıdaki bütün tahtalar, grafikler ve simülasyon sonuçları, site derlenirken oyunu çalıştıran TypeScript koduyla hesaplanıyor: bir şekil bilgisayarın E5’e ateş ettiğini gösteriyorsa, oyunun kodu gerçekten o hücreyi seçmiştir.
 
 Oyunun bu siteden daha eski bir geçmişi var. Lise bitirme projem için C# ile masaüstünde çalışan bir Amiral Battı yazmıştım; [özgün kodu GitHub’da](https://github.com/KaanBahaSever/BattleShips) duruyor. O sürüm sade bir masaüstü oyunuydu. Burada anlatılan av ve hedef algoritmasını daha sonra geliştirdim; tarayıcınızdaki sürüm de onu oynuyor.
 
@@ -69,17 +69,17 @@ $$
 P(T \le t) = \binom{t}{17} \bigg/ \binom{100}{17} .
 $$
 
-Oyunların medyan uzunluğu {n.random.median} atış; 85 atışta biten oyunların oranı ise yalnızca {n.random.within85}. Rastgele atış filoyu eninde sonunda batırır ama çoğunlukla ancak ateş edilecek su tükenmek üzereyken.
+Oyunların medyan uzunluğu {n.random.median} atış; en geç 85 atışta biten oyunların oranı ise yalnızca {n.random.within85}. Rastgele atış filoyu eninde sonunda batırır ama çoğunlukla ancak ateş edilecek su tükenmek üzereyken.
 
 ## Av ve hedef
 
-İnsan bir oyuncu hiçbir teori bilmeden de şanstan çok daha iyi oynar. Bir isabetten sonra gemi batana kadar çevresine ateş eder; peşine düşeceği bir isabet yokken de atışlarını tahtaya yayar. Normal seviye ikisini de yapar ve her iki yarıya ayrı ayrı bakmaya değer.
+İnsan bir oyuncu hiçbir teori bilmeden de şanstan çok daha iyi oynar. Bir isabetten sonra gemi batana kadar çevresine ateş eder; peşine düşeceği bir isabet yokken de atışlarını tahtaya yayar. Normal seviye ikisini de yapar; her birine ayrı ayrı bakmaya değer.
 
 ### Hedef modu: bir gemiyi bitirmek
 
 Bir isabet, o hücrede bir gemi olduğunu söyler. Gemiler düz olduğu için geminin geri kalanı aynı satırda ya da aynı sütundadır. Bu yüzden bilgisayar isabetin dört komşusunu dener. İkinci bir isabet birincisiyle aynı hizaya geldiğinde geminin yönü belli olur ve bilgisayar isabet dizisini iki uçtan uzatır. Uçlardan biri bir ıskaya ya da tahtanın kenarına dayandığında öbür uçtan devam eder.
 
-<TargetReplay lang="tr">Normal seviyenin bir kruvazörü bitirişi, {n.target.seed} tohum değeriyle yeniden oynatıldı. E5’teki isabetten sonra E4 ve E6’yı dener, ikisini de ıskalar; F5 isabet eder ve geminin yönünü belirler; G5 çizgiyi uzatır ama ıskalar; öbür uçtaki D5 gemiyi batırır. Açık isabet kalmayınca bilgisayar yeniden ava çıkar.</TargetReplay>
+<TargetReplay lang="tr">Normal seviye bir kruvazörü bitiriyor (tohum değeri: {n.target.seed}). E5’teki isabetten sonra E4 ve E6’yı deniyor, ikisini de ıskalıyor; F5 isabet ediyor ve geminin yönünü belirliyor; G5 çizgiyi uzatıyor ama ıskalıyor; öbür uçtaki D5 gemiyi batırıyor. Açık isabet kalmayınca bilgisayar yeniden ava çıkıyor.</TargetReplay>
 
 İki ayrıntı bu yöntemi sağlamlaştırır. Birincisi, bilgisayar bir gemiyi kovalarken başka bir gemiyi de vurabilir; örneğin iki gemi yan yana durduğunda ve çizgi ikisinin üzerinden geçtiğinde. Bu yüzden “kovaladığım gemi” diye bir değişken tutmaz; bütün *açık* isabetlere, yani henüz batmamış gemilere ait isabetlere bakar. İkincisi, bir gemi battığında oyun onun hangi hücrelerde durduğunu gösterir. Bu isabetler kapanır; geriye kalan isabetler başka bir gemiye aittir ve bilgisayar o gemiyi hedeflemeye devam eder. Ava ancak hiç açık isabet kalmadığında döner.
 
@@ -111,7 +111,7 @@ Parçalar bir araya geldiğinde Normal seviye küçük bir durum makinesidir.
 
 Kodda durumu tutan bir değişken yok: durum, bilgisayarın bildiklerinin bir fonksiyonu. Açık isabet yoksa bilgisayar *avlanıyordur*; iki açık isabet yan yanaysa ve dizilerini sürdüren, henüz atış yapılmamış bir hücre varsa *çizgiyi izliyordur*; bunların dışında *hedefliyordur*. Durumu saklamak yerine her seferinde yeniden türetmek, durumun tahtayla uyumsuz hâle gelmesini imkânsız kılar. Elle yazılmış sürümlerin klasik hatası da tam budur: bir kruvazör kovalanırken bulunan bir muhrip, geride başıboş bir isabet bırakan bir batış, artık hiçbir anlam taşımayan kayıtlı bir yön.
 
-Battı adımı, bilgisayarın ıska ve isabetten fazlasını öğrendiği tek andır. Geminin hücrelerini batmış olarak işaretlemek o geminin isabetlerini kapatır. Gemiyi filodan düşmek $m$’yi, dolayısıyla tarama desenini değiştirebilir; bir sonraki bölümdeki $w$ ağırlığını ise her zaman değiştirir.
+Battı adımı, bilgisayarın ıska ve isabetten fazlasını öğrendiği tek andır. Geminin hücrelerini batmış olarak işaretlemek o geminin isabetlerini kapatır. Gemiyi filodan çıkarmak $m$’yi, dolayısıyla tarama desenini değiştirebilir; bir sonraki bölümdeki $w$ ağırlığını ise her zaman değiştirir.
 
 ## Olasılık yoğunluğu
 
@@ -133,7 +133,7 @@ Kenarlar ve köşeler daha az konum tarafından kapsanır, çünkü oradaki bir 
 
 Iskalar konumları eler ve yoğunluk çevrelerinde düşer:
 
-<HuntSnapshot lang="tr">Zor seviyedeki bir oyunun ({n.hunt.seed} tohum değeri) hepsi ıskayla sonuçlanan ilk {n.hunt.shots} atışı ve {n.hunt.next}. atış için hesaplanan yoğunluk. Kodda pariteden hiç söz edilmiyor; yine de bu atışların hiçbiri bir başkasının yanında değil. En yüksek yoğunluk artık ıskaların henüz ulaşmadığı köşede, {n.hunt.peaks} hücrelerinde.</HuntSnapshot>
+<HuntSnapshot lang="tr">Zor seviyedeki bir oyunun (tohum değeri: {n.hunt.seed}) hepsi ıskayla sonuçlanan ilk {n.hunt.shots} atışı ve {n.hunt.next}. atış için hesaplanan yoğunluk. Kodda pariteden hiç söz edilmiyor; yine de bu atışların hiçbiri bir başkasının yanında değil. En yüksek yoğunluk artık ıskaların henüz ulaşmadığı köşede, {n.hunt.peaks} hücrelerinde.</HuntSnapshot>
 
 Bir ıska, üzerinden geçen bütün konumları eler; bu da en çok komşularının sayısını düşürür. Bu yüzden bir sonraki tepe noktası genellikle biraz uzakta çıkar. Bu, paritenin temel ilkelerden yola çıkılarak yeniden keşfedilmesi demek, hatta biraz fazlası: yoğunluk, kenarların avlanmak için verimsiz olduğunu ve kalan gemilere bir yönde dar gelen bir boşluğun onları ancak öbür yönde barındırabileceğini de bilir.
 
@@ -153,7 +153,7 @@ olur. Hiçbir hücre $2\sum_s L_s = w - 1$ konumdan fazlasının üzerinde bulun
 
 E5’teki tek isabetten sonra tepe noktası {n.oneHit.peaks} hücrelerinde; değer {n.oneHit.through} · {n.weight} + {n.oneHit.none} = {n.oneHit.value}. Yani bu hücrelerin her birinden geçen {n.oneHit.through} konum E5’i de kapsıyor, {n.oneHit.none} konum ise kapsamıyor. Diğer komşular olan {n.oneHit.others} hücreleri {n.oneHit.othersValue} değerinde kalıyor: E5 tam ortada değil, üstünde ve solunda biraz daha az yer var. İkinci isabetten sonra *iki* isabetten birden geçen konumların üzerinde yalnızca çizgiyi sürdüren hücreler, yani {n.twoHits.peaks} bulunuyor; bu yüzden onların en yüksek basamağı $w^2$ basamağına çıkıyor: {n.twoHits.both} · {n.weight}² + {n.twoHits.one} · {n.weight} + {n.twoHits.none} = {n.twoHits.value}.
 
-Zor seviyeye kimse çizgiyi uzatma kuralını yazmadı; kural aritmetiğin içinden kendiliğinden çıkıyor. Yukarıdaki durum makinesinin tamamı için de aynısı geçerli: en büyük yoğunluğun en yüksek basamağının konumu olan $k$, *durumun ta kendisi*. $k = 0$ iken bilgisayar avlanıyor, $k = 1$ iken hedefliyor, $k \ge 2$ iken çizgiyi izliyor. Bir batış filodan bir gemiyi düşer, $w$ ağırlığını küçültür ve o geminin isabetlerini kapatır; basamaklar da kendiliğinden yeniden düzenlenir.
+Zor seviyeye kimse çizgiyi uzatma kuralını yazmadı; kural aritmetiğin içinden kendiliğinden çıkıyor. Yukarıdaki durum makinesinin büyük kısmı da öyle: en büyük yoğunluğun en yüksek basamağının konumu olan $k$, durumun yerini tutuyor. $k = 0$ iken bilgisayar avlanıyor, $k = 1$ iken hedefliyor, $k \ge 2$ iken bir isabet dizisi üzerinde çalışıyor. İki isabetin arasında kalan tek bir hücreyi, örneğin E5 ile G5 arasındaki F5’i, doğrudan hedef alıyor bile; Normal seviye için bu hücre komşulardan yalnızca biri. Bir batışla filodan bir gemi eksilir, $w$ ağırlığı küçülür ve o geminin isabetleri kapanır; basamaklar da kendiliğinden yeniden düzenlenir.
 
 ### Kendiniz deneyin
 
@@ -175,7 +175,7 @@ Stratejileri karşılaştırmak için her birine aynı {n.games} filoyu batırtt
 
 <ShotsChart lang="tr">{n.games} oyundan belirli bir atış sayısına kadar bitenlerin oranı. Noktalı eğri, yukarıda türettiğimiz rastgele atışın kesin dağılımı; simüle edilen Kolay oyunlar bu eğriyi yakından izliyor.</ShotsChart>
 
-Rastgele atış formülle örtüşüyor: simülasyondaki ortalama {n.mean.random} atış, beklenen değer {n.random.expected}. En büyük sıçrama hedeflemeyle geliyor: ortalama {n.mean.random} atıştan {n.mean['no-parity']} atışa. Parite {n.saved.parity} atış, yoğunluk da {n.saved.density} atış daha kazandırıyor. Zor seviye oyunlarının {n.within50.density} kadarını 50 atış içinde bitiriyor; Normal seviyede bu oran {n.within50.parity}. Zor seviyenin hiçbir oyunu {n.worst.density} atıştan uzun sürmedi. Strateji başına {n.games} oyunla her ortalama yaklaşık ±{n.margin} atışlık bir hata payıyla (iki standart hata) doğru; bu pay, stratejiler arasındaki farklardan çok daha küçük.
+Rastgele atış formülle örtüşüyor: simülasyondaki ortalama {n.mean.random} atış, beklenen değer {n.random.expected}. En büyük sıçrama hedeflemeyle geliyor: ortalama {n.mean.random} atıştan {n.mean['no-parity']} atışa. Parite {n.saved.parity} atış, yoğunluk da {n.saved.density} atış daha kazandırıyor. 50 atış içinde biten oyunların oranı Zor seviyede {n.within50.density}, Normal seviyede {n.within50.parity}. Zor seviyenin hiçbir oyunu {n.worst.density} atıştan uzun sürmedi. Strateji başına {n.games} oyunla her ortalama yaklaşık ±{n.margin} atışlık bir hata payıyla (iki standart hata) doğru; bu pay, stratejiler arasındaki farklardan çok daha küçük.
 
 ## Üç fikir
 

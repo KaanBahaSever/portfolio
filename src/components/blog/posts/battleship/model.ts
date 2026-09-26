@@ -140,6 +140,10 @@ export type Mode = 'hunt' | 'target' | 'line';
  * The Normal computer's mode in a position, derived the way ai.ts derives it (it keeps no mode
  * variable): hunting without unresolved hits, following a line when two unresolved hits are
  * adjacent and an unknown cell continues their run, otherwise probing neighbours.
+ *
+ * 'line' mirrors the private lineExtensions() of ai.ts (non-empty exactly when this returns
+ * 'line'). If that rule changes, update this too: TargetReplay.astro fails the build when the
+ * replayed modes differ from the ones its caption narrates.
  */
 export function modeOf(knowledge: Knowledge): Mode {
   const { size, cells } = knowledge;

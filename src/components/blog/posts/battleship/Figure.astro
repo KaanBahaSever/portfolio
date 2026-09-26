@@ -11,14 +11,22 @@ interface Props {
   /** Extra classes for the drawing area (e.g. a max width for small diagrams). */
   class?: string;
   id?: string;
+  /**
+   * Nearly no side padding on phones, for text-heavy drawings that would otherwise shrink below
+   * a legible size at 320 px (the drawing keeps its own margin inside its viewBox).
+   */
+  bleed?: boolean;
 }
 
-const { class: className, id } = Astro.props;
+const { class: className, id, bleed = false } = Astro.props;
 ---
 
 <figure id={id} class="bs-figure not-prose my-10">
   <div
-    class="relative overflow-hidden rounded-xl border border-zinc-200 bg-white px-2 py-5 sm:px-6 sm:py-6 dark:border-zinc-800 dark:bg-zinc-900"
+    class:list={[
+      'relative overflow-hidden rounded-xl border border-zinc-200 bg-white py-5 sm:px-6 sm:py-6 dark:border-zinc-800 dark:bg-zinc-900',
+      bleed ? 'px-1' : 'px-2',
+    ]}
   >
     <div aria-hidden="true" class="bg-graph mask-fade-b pointer-events-none absolute inset-0"></div>
     <div class:list={['relative mx-auto', className]}>

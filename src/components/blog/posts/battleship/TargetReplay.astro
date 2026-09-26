@@ -21,12 +21,13 @@ const m = battleshipPostMessages[lang];
 
 /**
  * The seed was chosen because it shows every move of target mode: two probes, a second hit, the
- * line, a miss past one end, the other end. The captions narrate this sequence, so the build fails
- * if the game's code ever plays it differently.
+ * line, a miss past one end, the other end. The captions narrate this sequence and the table names
+ * the mode after each shot, so the build fails if the game's code ever plays it differently or
+ * model.ts's modeOf stops agreeing with it.
  */
 const shots = replayTarget(TARGET_EXAMPLE.firstHit, TARGET_EXAMPLE.seed);
-const EXPECTED = 'E5:hit E4:miss E6:miss F5:hit G5:miss D5:sunk';
-const played = shots.map((shot) => `${coordinateLabel(shot.index)}:${shot.result}`).join(' ');
+const EXPECTED = 'E5:hit:target E4:miss:target E6:miss:target F5:hit:line G5:miss:line D5:sunk:hunt';
+const played = shots.map((shot) => `${coordinateLabel(shot.index)}:${shot.result}:${shot.after}`).join(' ');
 if (played !== EXPECTED) throw new Error(`TargetReplay: expected ${EXPECTED}, the game played ${played}`);
 const cruiser = EXAMPLE_FLEET.find((placement) => placement.ship === 'cruiser');
 const sunkCells = cruiser ? placementCells(cruiser) : [];

@@ -43,21 +43,21 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
           <h3 class={h3}>Hazırlık</h3>
           <div class={body}>
             <p>
-              Listeden bir gemi seçin, ardından geminin başlayacağı hücreyi seçin: gemi, yönüne göre bu hücreden sağa ya
-              da aşağı doğru uzanır. Yönü düğmeyle ya da <kbd class={ui.kbd}>R</kbd> tuşuyla değiştirin. Gemiler
-              birbirine değebilir ama üst üste binemez.
+              Listeden bir gemi seçin, sonra geminin başlayacağı hücreyi seçin. Gemi, yönüne göre bu hücreden sağa ya da
+              aşağı doğru uzanır. Yönünü düğmeyle ya da <kbd class={ui.kbd}>R</kbd> tuşuyla değiştirebilirsiniz.
+              Gemiler birbirine değebilir ama üst üste binemez.
             </p>
             <p>
-              Bir gemiyi taşımak için onu tahtada ya da listede seçip yeni bir hücre seçin. <em>Rastgele</em> düğmesi
-              tüm filoyu tek seferde yerleştirir.
+              Bir gemiyi taşımak için onu tahtada ya da listede seçin, sonra yeni bir hücre seçin. <em>Rastgele</em>{' '}
+              düğmesi bütün filoyu tek seferde yerleştirir.
             </p>
           </div>
           <h3 class:list={[h3, 'mt-8']}>Savaş</h3>
           <div class={body}>
             <p>
-              Siz ve bilgisayar sırayla birer atış yaparsınız; ilk atış sizindir. Nokta ıskayı, çarpı isabeti gösterir.
-              Bir geminin bütün hücreleri vurulunca gemi batar, hangi gemi olduğu duyurulur ve ana hatları görünür.
-              Kazanmak için beş gemiyi de batırın.
+              Bilgisayarla sırayla birer atış yaparsınız, ilk atış sizindir. Nokta ıskayı, çarpı isabeti gösterir. Bir
+              geminin bütün hücreleri vurulunca gemi batar. Oyun hangi geminin battığını söyler ve geminin ana hatlarını
+              gösterir. Kazanmak için beş gemiyi de batırın.
             </p>
           </div>
         </div>
@@ -65,24 +65,25 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
           <h3 class={h3}>Klavye</h3>
           <ul class={list}>
             <li>
-              <kbd class={ui.kbd}>Tab</kbd> tahtalar ve düğmeler arasında gezinir; her tahta tek bir duraktır.
+              <kbd class={ui.kbd}>Tab</kbd> tuşuyla tahtalar ve düğmeler arasında geçiş yaparsınız. Tab her tahtada
+              yalnızca bir kez durur.
             </li>
             <li>
-              Ok tuşları bir hücre ilerler. <kbd class={ui.kbd}>Home</kbd> ve <kbd class={ui.kbd}>End</kbd> satırın
-              başına ve sonuna, <kbd class={ui.kbd}>Page Up</kbd> ve <kbd class={ui.kbd}>Page Down</kbd> sütunun başına
-              ve sonuna gider.
+              Ok tuşlarıyla birer hücre ilerlersiniz. <kbd class={ui.kbd}>Home</kbd> ve <kbd class={ui.kbd}>End</kbd>{' '}
+              satırın başına ve sonuna, <kbd class={ui.kbd}>Page Up</kbd> ve <kbd class={ui.kbd}>Page Down</kbd> ise
+              sütunun başına ve sonuna atlar.
             </li>
             <li>
-              <kbd class={ui.kbd}>Enter</kbd> ya da <kbd class={ui.kbd}>Boşluk</kbd> hazırlıkta seçili gemiyi
+              <kbd class={ui.kbd}>Enter</kbd> ya da <kbd class={ui.kbd}>Boşluk</kbd> tuşu hazırlıkta seçili gemiyi
               yerleştirir, savaşta ateş eder.
             </li>
             <li>
-              <kbd class={ui.kbd}>R</kbd> hazırlıkta gemiyi döndürür.
+              <kbd class={ui.kbd}>R</kbd> tuşu hazırlıkta gemiyi döndürür.
             </li>
           </ul>
           <p class={body}>
-            Ekran okuyucular her hücrenin koordinatını ve durumunu (“C7, isabet”), her atışı da savaş günlüğünden
-            duyurur.
+            Ekran okuyucu kullanıyorsanız her hücrenin koordinatını ve durumunu (“C7, isabet” gibi) duyarsınız. Her atış
+            da savaş günlüğünden okunur.
           </p>
         </div>
       </div>
@@ -143,47 +144,48 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
     locale === 'tr' ? (
       <div class="max-w-3xl">
         <p class={body}>
-          Üç seviye de yalnızca sizin göreceğinizi görür: nereye ateş ettiğini, neyi vurduğunu ve hangi gemilerin
-          battığını.
+          Üç seviye de ancak sizin görebileceğiniz kadarını görür: nereye ateş ettiğini, neyi vurduğunu ve hangi
+          gemilerin battığını.
         </p>
         <ul class={list}>
           <li>
             <strong class={strong}>Kolay</strong>, henüz denemediği hücrelerden rastgele birine ateş eder.
           </li>
           <li>
-            <strong class={strong}>Normal</strong>, av ve hedef stratejisini izler. Av sırasında yalnızca satır ve sütun
-            numaralarının toplamı, su üstündeki en kısa geminin uzunluğunun katı olan hücrelere ateş eder; böylece o
-            gemi atışların arasına saklanamaz. İsabetten sonra dört komşu hücreyi dener, iki isabet aynı hizaya gelince
-            de o çizgiyi izler.
+            <strong class={strong}>Normal</strong>, av ve hedef yöntemiyle oynar. Av sırasında yalnızca satır ve sütun
+            numaralarının toplamı su üstündeki en kısa geminin boyuna tam bölünen hücrelere ateş eder. Böylece o gemi
+            atışların arasında saklanamaz. Bir isabetten sonra dört komşu hücreyi dener. İki isabet aynı hizaya gelince
+            de o çizgiyi takip eder.
           </li>
           <li>
-            <strong class={strong}>Zor</strong>, gemilerin nerede olabileceğini hesaplar. Her atıştan önce kalan her
-            geminin hâlâ alabileceği bütün konumları (düz, tahtanın içinde, ıskaların ve batmış gemilerin üzerine denk
-            gelmeyen) tek tek dolaşır ve her hücre için bu konumlardan kaçının onu kapsadığını sayar:
+            <strong class={strong}>Zor</strong>, gemilerin nerede olabileceğini tahmin eder. Her atıştan önce, batmamış
+            her geminin hâlâ durabileceği bütün konumları tek tek dolaşır. Bunlar düz duran, tahtadan taşmayan, ıskaların
+            ve batmış gemilerin üzerinden geçmeyen konumlardır. Sonra her hücre için bu konumlardan kaçının o hücreden
+            geçtiğini sayar:
           </li>
         </ul>
         <p
           class={formula}
           role="math"
-          aria-label="d(c), tüm s gemileri ve s gemisinin c hücresini içeren tüm p konumları üzerinden, w üzeri h(p) değerlerinin toplamıdır."
+          aria-label="d(c), bütün s gemileri ve s gemisinin c hücresinden geçen bütün p konumları üzerinden alınan w üzeri h(p) değerlerinin toplamıdır."
         >
           {/* One line on purpose: whitespace inside <sub> would show as gaps. */}
           <var>d</var>(<var>c</var>) = <span class={sum}>∑</span><sub><var>s</var></sub> <span class={sum}>∑</span><sub><var>p</var> ∈ <var>P</var><sub><var>s</var></sub>, <var>c</var> ∈ <var>p</var></sub> <var>w</var><sup><var>h</var>(<var>p</var>)</sup>
         </p>
         <div class={body}>
           <p>
-            Burada <var>P</var><sub><var>s</var></sub>, <var>s</var> gemisi için kalan konumların kümesi;{' '}
-            <var>h</var>(<var>p</var>), bir konumun kapsadığı ve henüz batmamış gemilere ait isabet sayısı;{' '}
-            <var>w</var> ise isabet içermeyen hiçbir sayımın ulaşamayacağı kadar büyük bir ağırlıktır (tam filo için
-            35). Böylece bir isabetten sonra sayım o gemi üzerinde yoğunlaşır. Bilgisayar en yüksek değerli hücreye ateş
-            eder; birden fazla hücre eşitse aralarından rastgele birini seçer. Savaş sırasında ısı haritasını açarak
-            kendi tahtanızdaki <var>d</var> değerlerini izleyebilirsiniz.
+            Burada <var>P</var><sub><var>s</var></sub>, <var>s</var> gemisi için geriye kalan konumların kümesi;{' '}
+            <var>h</var>(<var>p</var>), <var>p</var> konumunun üzerinden geçtiği ve henüz batmamış gemilere ait
+            isabetlerin sayısı; <var>w</var> ise isabetsiz hiçbir sayımın ulaşamayacağı kadar büyük bir ağırlık (tam
+            filoda 35). Böylece bir isabetten sonra sayım vurulan gemiye yoğunlaşır. Bilgisayar değeri en yüksek
+            hücreye ateş eder; birden çok hücre eşitse aralarından rastgele birini seçer. Savaş sırasında ısı haritasını
+            açıp kendi tahtanızdaki <var>d</var> değerlerini izleyebilirsiniz.
           </p>
           <p>
-            Her gemiyi ayrı saymak, gemilerin birbirinin üstüne binemeyeceğini göz ardı eder; bütün filoları tam olarak
-            saymak ise çok büyük sayıda dizilimi dolaşmayı gerektirir. Bu yüzden yaygın olarak kullanılan yaklaşıklık,
-            gemi başına yapılan bu sayımdır. Rastgele filolarla oynanan 300 simülasyon oyununda filoyu batırmak için
-            Kolay ortalama yaklaşık 95, Normal 51, Zor ise 44 atış kullandı.
+            Her gemiyi ayrı saymak, gemilerin üst üste binemeyeceğini hesaba katmaz. Bütün filoları tam olarak saymaksa
+            çok fazla dizilimi tek tek dolaşmayı gerektirir. Bu yüzden genelde her gemiyi ayrı sayan bu yaklaşık yöntem
+            kullanılır. Rastgele filolarla oynanan 300 simülasyon oyununda filoyu batırmak için ortalama olarak Kolay
+            seviye 95, Normal 51, Zor ise 44 civarında atış yaptı.
           </p>
         </div>
       </div>
@@ -241,10 +243,10 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
       <div class="max-w-3xl">
         <div class={body}>
           <p>
-            Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu. İlk
-            sürümü, lise bitirme projelerimden biri olarak C# ile yazdığım bir masaüstü oyunuydu
-            (<a href={desktopSource} class={ui.inlineLink}>kaynak kodu GitHub’da</a>); Normal seviyedeki av ve hedef
-            algoritması ise sonradan geldi.
+            Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu. İlk sürüm,
+            lise bitirme projelerimden biri olarak C#’la yazdığım bir masaüstü oyunuydu
+            (<a href={desktopSource} class={ui.inlineLink}>kaynak kodu GitHub’da</a>). Normal seviyenin kullandığı av ve
+            hedef algoritması sonradan geldi.
           </p>
           <p>
             Bilgisayarın nasıl nişan aldığını <a href={post} class={ui.inlineLink}>bir blog yazısında</a> adım adım

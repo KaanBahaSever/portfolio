@@ -90,12 +90,12 @@ const tr: TicTacToeMessages = {
   meta: {
     title: 'XOX',
     description:
-      'Alfa–beta budamalı minimax ile oynayan bir rakibe ya da aynı cihazda bir arkadaşınıza karşı XOX. Değerlendirmeyi açarak her karenin puanını görün.',
+      'Alfa–beta budamalı minimax kullanan bilgisayara ya da aynı cihazdaki bir arkadaşınıza karşı XOX oynayın. Değerlendirmeyi açın, her karenin puanını görün.',
   },
-  lead: 'Üç işareti yan yana, alt alta ya da çapraz dizen kazanır. Bilgisayar oyun ağacını minimax ve alfa–beta budamayla tarar; Yenilmez seviyede alabileceğiniz en iyi sonuç beraberliktir. Değerlendirmeyi açarak her kareyi nasıl puanladığını görün.',
+  lead: 'Üç işaretini yan yana, alt alta ya da çapraz dizen kazanır. Bilgisayar, minimax ve alfa–beta budamayla oyun ağacını tarar. Yenilmez seviyede en iyi ihtimalle berabere kalabilirsiniz. Bilgisayarın her kareye kaç puan verdiğini görmek için değerlendirmeyi açın.',
   region: 'XOX oyunu',
   board: 'XOX tahtası',
-  boardHelp: 'Ok tuşlarıyla gezinin, Enter ya da Boşluk ile oynayın. 1–9 rakam tuşlarıyla doğrudan bir kareye oynayabilirsiniz.',
+  boardHelp: 'Ok tuşlarıyla gezinin, Enter ya da Boşluk tuşuyla oynayın. 1–9 arası rakam tuşlarıyla bir kareye doğrudan oynayabilirsiniz.',
   squares: ['Sol üst', 'Üst orta', 'Sağ üst', 'Sol orta', 'Merkez', 'Sağ orta', 'Sol alt', 'Alt orta', 'Sağ alt'],
   squaresInline: ['sol üst', 'üst orta', 'sağ üst', 'sol orta', 'merkez', 'sağ orta', 'sol alt', 'alt orta', 'sağ alt'],
   lines: [
@@ -117,8 +117,8 @@ const tr: TicTacToeMessages = {
   difficulties: { easy: 'Kolay', medium: 'Orta', unbeatable: 'Yenilmez' },
   difficultyHints: {
     easy: 'Boş karelerden herhangi birine oynar.',
-    medium: 'İki hamle ileriyi görür: kazanabiliyorsa kazanır, sizin kazanmanızı engeller ama çatal tuzaklarını görmez.',
-    unbeatable: 'Her olası oyunu sonuna kadar tarar. Asla kaybetmez.',
+    medium: 'İki hamle ilerisini görür. Kazanabiliyorsa kazanır, sizin kazanmanızı da engeller ama çatal tuzağına düşer.',
+    unbeatable: 'Olası bütün hamle dizilerini oyunun sonuna kadar tarar. Hiç kaybetmez.',
   },
   yourMark: 'İşaretiniz',
   firstMove: 'İlk hamle',
@@ -126,15 +126,15 @@ const tr: TicTacToeMessages = {
   keypad: 'Rakam tuşları',
   keypads: { phone: '1 sol üstte', numpad: '7 sol üstte' },
   keypadHints: {
-    phone: 'Telefon düzeni: üst sırada 1 2 3.',
-    numpad: 'Sayısal tuş takımı düzeni: üst sırada 7 8 9.',
+    phone: 'Telefondaki gibi: üst sırada 1 2 3.',
+    numpad: 'Klavyedeki sayısal tuş takımı gibi: üst sırada 7 8 9.',
   },
   showEvaluation: 'Değerlendirmeyi göster',
   evaluationHint:
-    'Her boş kare, o andan sonra iki taraf da kusursuz oynarsa sıradaki oyuncunun alacağı minimax puanını gösterir: +9 hemen kazanır, daha küçük artı puanlar daha geç kazanır, 0 beraberliktir, eksi puanlar kaybeder.',
+    'Her boş karede, sıradaki oyuncunun oraya oynadığında alacağı minimax puanı yazar; iki tarafın da bundan sonra kusursuz oynayacağı varsayılır. +9 hemen kazanmak, daha küçük artı puanlar daha geç kazanmak, 0 beraberlik, eksi puanlar kaybetmek demektir.',
   evaluationFor: (mark) => `${mark} için puanlar`,
   evaluation: (score, result) =>
-    `puan ${score}, ${result === 'win' ? 'kazandırır' : result === 'loss' ? 'kaybettirir' : 'beraberlik'}`,
+    `puan ${score}, ${result === 'win' ? 'kazandırır' : result === 'loss' ? 'kaybettirir' : 'berabere'}`,
   newRound: 'Yeni tur',
   resetScore: 'Skoru sıfırla',
   score: 'Skor',

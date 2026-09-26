@@ -1,7 +1,7 @@
 ---
-title: C# ile ilk programlar
+title: C# ile ilk programlarım
 dateLabel: '2016'
 ---
 
-Meslek lisesinde C# ile programlamaya başladım: önce temeller, ardından veri yapıları ve
-algoritmik problem çözme.
+Meslek lisesinde C# ile programlamaya başladım. Önce temelleri öğrendim, sonra veri yapılarına ve
+algoritmik problem çözmeye geçtim.

@@ -1,10 +1,11 @@
 ---
-title: Karecik’i ürün olarak yayına aldım
+title: Karecik’i yayına aldım
 dateLabel: '2026'
 ---
 
-[Karecik](/projects/karecik/) canlıya çıktı: yerel kafe ve restoranların müşteri etkileşimi,
-menü ve sipariş yönetimi için kullandığı çok kiracılı (multi-tenant) bir QR menü platformu.
-İlk deneysel prototipleri 2021’de, farklı çalışma adları altında başlamıştı. Go ile yazıldı
-ve PostgreSQL kullanıyor; kesintisiz hizmet ve düşük gecikme gözetilerek tasarlandı. Kaynak
-kodu GPL-3.0 lisansıyla açık.
+[Karecik](/projects/karecik/) artık canlıda çalışan bir ürün: çok kiracılı
+(<span lang="en">multi-tenant</span>) bir QR menü platformu. Yerel kafe ve restoranlar onu
+müşterileriyle etkileşim kurmak, menülerini ve siparişlerini yönetmek için kullanıyor. 2021’de
+başka çalışma adlarıyla başlayan deneysel prototiplerden doğdu. Go ile yazıldı ve PostgreSQL
+kullanıyor. Kesintisiz hizmet ve düşük gecikme düşünülerek tasarlandı. Kaynak kodu GPL-3.0
+lisansıyla açık.

@@ -1,8 +1,8 @@
 ---
-title: Kriptografi ve görsel programlama üzerine TÜBİTAK araştırması
+title: Kriptografi ve görsel programlama üzerine bir TÜBİTAK projesi
 dateLabel: '2019'
 ---
 
-Kriptografi ve görsel programlama mantığı üzerine bir TÜBİTAK lise araştırma projesi
-yürüttüm. Proje, akış şemasına dayalı görsel bir kodlama aracının erken bir prototipini de
-içeriyordu.
+Lisedeyken bir TÜBİTAK araştırma projesi yaptım. Projede kriptografiyi ve görsel programlamanın
+mantığını inceledim. Akış şemalarıyla çalışan görsel bir kodlama aracının erken bir prototipi de
+projenin parçasıydı.

@@ -1,13 +1,15 @@
 ---
-# "bünyesinde" keeps the suffix off the dotted company name, as on the home page.
-title: crowd.inc bünyesinde yazılım geliştirici
+# The suffix goes on the name with the typographic apostrophe (crowd.inc’te, read "ink"), not
+# the stiff "bünyesinde"; tests/about-copy.test.ts checks it.
+title: crowd.inc’te yazılım geliştirici
 dateLabel: Temmuz 2021 – Mart 2024
 ---
 
-Yazılım geliştirme yaşam döngüsünü uçtan uca üstlendim: PostgreSQL ile ilişkisel şema
-tasarımı, Python/Flask ve jQuery ile RESTful API geliştirme, Linux sunucularının
-hazırlanması (provisioning) ve otomatik testler.
+Geliştirme sürecinin her aşamasını ben üstlendim: PostgreSQL’de ilişkisel veritabanı şemalarını
+tasarladım, Python/Flask ve jQuery ile RESTful API’ler geliştirdim, Linux sunucularını kurup
+yapılandırdım ve otomatik testler yazdım.
 
-Kamuya açık ve özel veriler arasında katı sınırlar çizen, ayrıntılı bir rol tabanlı erişim
-denetimi (RBAC) tasarladım. Ölçeklenebilir akış (feed) sayfalaması ile dinamik veri yükleme
-geliştirdim ve platformun güvenilirliğini kapsamlı birim ve entegrasyon testleriyle sağladım.
+Rol tabanlı erişim kontrolünü (RBAC) ayrıntılı yetkilerle tasarladım ve herkese açık verilerle
+özel veriler arasında net bir sınır çizdim. Akış için ölçeklenebilir bir sayfalama yapısı ve
+dinamik veri yükleme geliştirdim. Platformun güvenilir çalışması için de kapsamlı birim ve
+entegrasyon testleri yazdım.

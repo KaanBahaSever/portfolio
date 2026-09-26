@@ -3,6 +3,7 @@ title: Python ile bir uçuş simülasyonu prototipi
 dateLabel: '2020'
 ---
 
-Roket yörüngeleri için üç boyutlu bir simülasyonun dar kapsamlı, tek amaca yönelik bir
-prototipini Python ile yazdım. Şimdi aynı projeyi, modern C++ ile açık kaynaklı bir aerodinamik
-simülasyon motoru olan [Rocket-Up](/projects/rocket-up/) olarak sıfırdan yeniden yazıyorum.
+Roket yörüngelerini üç boyutta hesaplayan bir simülasyonun prototipini Python ile yazdım. Kapsamı
+dardı ve tek bir amaç için tasarlanmıştı. Şimdi aynı projeyi [Rocket-Up](/projects/rocket-up/)
+adıyla, modern C++ ile sıfırdan yeniden yazıyorum. Rocket-Up açık kaynaklı bir aerodinamik
+simülasyon motoru.

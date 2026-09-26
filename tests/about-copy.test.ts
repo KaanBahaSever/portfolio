@@ -123,13 +123,48 @@ test('every English timeline entry has a Turkish overlay with the same file name
 
 test('English terms inside the Turkish timeline are marked lang="en"', () => {
   const english = LOCALE_META.en.htmlLang;
-  for (const term of ['Hunt &amp; Target', 'pipeline']) {
+  for (const term of ['Hunt &amp; Target', 'pipeline', 'multi-tenant', 'header-only', 'zero-copy', 'Solver']) {
     for (const { path, text } of filesIn('src/content/tr/timeline/', '.md')) {
       const body = visibleText(text).replace(/^---[\s\S]*?\n---/, '');
       const bare = body.replaceAll(`<span lang="${english}">${term}</span>`, '');
       assert.ok(!bare.includes(term), `${path}: wrap "${term}" in <span lang="${english}">`);
     }
   }
+});
+
+/**
+ * The Turkish the owner writes himself: the Turkish timeline and the Turkish branch of every
+ * prose partial (the text between `locale === 'tr' ? (` and `) : (`).
+ */
+const ownTurkish = [
+  ...filesIn('src/content/tr/timeline/', '.md').map(({ path, text }) => ({ path, text: visibleText(text) })),
+  ...filesIn('src/components/about/prose/', '.astro').map(({ path, text }) => {
+    const open = text.indexOf("locale === 'tr' ? (");
+    const split = text.indexOf(') : (', open);
+    assert.ok(open >= 0 && split > open, `${path}: the Turkish branch was found`);
+    return { path, text: visibleText(text.slice(open, split)) };
+  }),
+];
+
+test('the Turkish About text is plain Turkish, not translated officialese', () => {
+  // The owner asked for simple, everyday sentences. These words are the calques and filler of a
+  // literal translation ("crowd.inc bünyesinde", "yaşam döngüsünü uçtan uca üstlendim").
+  const stiff =
+    /bünyesinde|uçtan uca|ortaya koy|gerçekleştir|söz konusu|itibar[ıi]yla|kapsamında|yönelik|yaşam döngüsü|sahip oldu/iu;
+  for (const { path, text } of ownTurkish) {
+    const match = stiff.exec(text);
+    assert.equal(match, null, `${path}: "${match?.[0]}" reads as a translation; say it plainly`);
+  }
+});
+
+test('suffixes in the Turkish About text take the typographic apostrophe', () => {
+  // 2019’da, GitHub’da, crowd.inc’te: never a typewriter apostrophe before a suffix.
+  for (const { path, text } of ownTurkish) {
+    const match = /[\p{L}\d)]'\p{Ll}/u.exec(text);
+    assert.equal(match, null, `${path}: "${match?.[0]}" should use ’`);
+  }
+  const entry = ownTurkish.find(({ path }) => path.endsWith('2021-crowd-inc.md'));
+  assert.match(entry?.text ?? '', /^title: crowd\.inc’te yazılım geliştirici\r?$/m);
 });
 
 test('the résumé card names the home page skills section the way its heading does', () => {

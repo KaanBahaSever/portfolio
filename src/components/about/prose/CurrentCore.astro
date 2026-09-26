@@ -19,26 +19,27 @@ const novacast = localizePath('/projects/novacast/', locale);
   locale === 'tr' ? (
     <>
       <p>
-        Bugün zamanımın büyük kısmını, ağırlıklı olarak modern C++ ve Go ile yazdığım üç tür yazılıma ayırıyorum:
-        sistem araçları, telemetri ve mesajlaşma platformları ile algoritma odaklı uygulamalar. Tam liste{' '}
-        <a href={projects} class={ui.inlineLink}>projeler sayfasında</a>; aşağıda iki örnek var.
+        Bugün zamanımın çoğunu üç tür yazılıma ayırıyorum: sistem araçları; telemetri ve mesajlaşma platformları;
+        algoritmaya dayalı uygulamalar. Bunları çoğunlukla modern C++ ve Go ile yazıyorum. Tam listeyi{' '}
+        <a href={projects} class={ui.inlineLink}>projeler sayfasında</a> bulabilirsiniz. Aşağıda iki örnek var.
       </p>
       <p>
-        2024’te başladığım <a href={asion} class={ui.inlineLink}>Asion</a>, macOS, Linux ve Windows için gizliliği
-        öncelikli bir üretkenlik ve etkinlik takip sistemi; kendi sunucunuzda barındırılabilecek şekilde tasarlandı.
-        Yerel işletim sistemi olay kancalarına (OS event hooks), hafif bir daemon mimarisine ve bileşenleri arasındaki
-        gRPC iletişimine dayanıyor; şu an erken erişimde.
+        2024’te geliştirmeye başladığım <a href={asion} class={ui.inlineLink}>Asion</a>, macOS, Linux ve Windows’ta
+        çalışan bir üretkenlik ve etkinlik takip sistemi. Gizliliği ön plana alıyor. Kendi sunucunuza kurabilmeniz
+        düşünülerek tasarlandı. Temelinde işletim sisteminin yerel olay kancaları
+        (<span lang="en">OS event hooks</span>), arka planda çalışan hafif bir daemon ve bileşenleri arasındaki gRPC
+        iletişimi var. Şu an erken erişimde.
       </p>
       <p>
-        <a href={novacast} class={ui.inlineLink}>Novacast</a>’i 2025’te, çalıştığım bir bilgisayar firmasında kullanılan
-        yetersiz eski yazılımın yerini alsın diye geliştirmeye başladım. Önce Python ile bir prototip yazdım; 2025’in
-        sonlarında onu düşük gecikmeli mesaj yayını ve cihaz orkestrasyonu için Go ve MQTT tabanlı bir mikroservis olarak
-        baştan tasarladım. Bugün canlıda çalışıyor.
+        <a href={novacast} class={ui.inlineLink}>Novacast</a>’i 2025’te, çalıştığım bir bilgisayar firmasındaki yetersiz
+        eski yazılımın yerine geçsin diye geliştirmeye başladım. Önce Python ile bir prototip yazdım. 2025’in
+        sonlarında onu, mesajları düşük gecikmeyle yayınlayan ve cihazları yöneten, Go ve MQTT tabanlı bir mikroservis
+        olarak baştan tasarladım. Bugün canlıda çalışıyor.
       </p>
       <p>
-        Bunlarla birlikte İstanbul Üniversitesindeki matematik eğitimimi tamamlıyorum. Reel analiz, soyut cebir ve
-        topoloji koduma doğrudan pek yansımıyor; ama öğrettikleri alışkanlıklar, yani kavramları kesin tanımlamak ve her
-        adımı denetlemek, olduğu gibi yazılıma taşınıyor.
+        Bunlarla birlikte İstanbul Üniversitesindeki matematik eğitimimi de tamamlıyorum. Kodumda reel analizi, soyut
+        cebiri ya da topolojiyi doğrudan pek görmezsiniz. Ama bu derslerin kazandırdığı alışkanlıkları, yani kavramları
+        net tanımlamayı ve her adımı kontrol etmeyi, olduğu gibi yazılıma taşıyorum.
       </p>
     </>
   ) : (

@@ -3,7 +3,8 @@ title: NeoSMBIOS’u yayımladım
 dateLabel: Ağustos 2026
 ---
 
-[NeoSMBIOS](/projects/neosmbios/) projesini MIT Lisansı ile yayımladım: C++23 için yalnızca
-başlık dosyasından oluşan (header-only), sıfır kopyalı (zero-copy) bir SMBIOS/DMI
-ayrıştırıcısı. Firmware tablolarını WMI ya da herhangi bir işletim sistemi başlık dosyası
-gerektirmeden okur.
+[NeoSMBIOS](/projects/neosmbios/) projesini MIT Lisansıyla yayımladım. Bu, C++23 için yazılmış
+bir SMBIOS/DMI ayrıştırıcısı. Yalnızca başlık dosyalarından oluşuyor
+(<span lang="en">header-only</span>) ve veriyi kopyalamadan okuyor
+(<span lang="en">zero-copy</span>). Firmware tablolarını okumak için WMI’ya ya da işletim
+sisteminin başlık dosyalarına ihtiyaç duymuyor.

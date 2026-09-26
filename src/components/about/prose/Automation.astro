@@ -17,15 +17,15 @@ const asion = localizePath('/projects/asion/', locale);
   locale === 'tr' ? (
     <>
       <p>
-        Yerel (native) yazılımı üç işletim sistemine birden sunmak, ancak rutin adımlar kendiliğinden işlediğinde
-        mümkün oluyor. GitHub Actions iş akışları ve çapraz derleme (cross-compilation) çalıştırıcılarıyla çok
-        platformlu <span lang="en">pipeline</span>’lar kuruyor, adımları Bash, Batch ve Python ile yazdığım betiklerle
-        birbirine bağlıyorum.
+        <span lang="en">Native</span> bir yazılımı üç işletim sistemi için birden yayımlamak, tekrarlanan adımlar kendi
+        kendine çalışmazsa pek pratik değil. Bu yüzden GitHub Actions iş akışlarıyla ve çapraz derleme yapan
+        çalıştırıcılarla (<span lang="en">runner</span>) çok platformlu <span lang="en">pipeline</span>’lar kuruyorum.
+        Adımları da Bash, Batch ve Python ile yazdığım betiklerle birbirine bağlıyorum.
       </p>
       <p>
-        <a href={asion} class={ui.inlineLink}>Asion</a> ekosistemi için bu çalışma tek tıkla işleyen{' '}
+        <a href={asion} class={ui.inlineLink}>Asion</a> ekosisteminde bu düzen, tek tıkla çalışan{' '}
         <span lang="en">pipeline</span>’lara dönüştü: Tek bir tetikleme kodu test ediyor, paketliyor, her platform için
-        çıktıları (artifact) üretiyor ve dağıtıyor.
+        derleme çıktılarını üretiyor ve dağıtıyor.
       </p>
     </>
   ) : (

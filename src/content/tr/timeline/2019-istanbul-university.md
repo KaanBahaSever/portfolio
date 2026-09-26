@@ -4,7 +4,7 @@ dateLabel: Kasım 2019
 ---
 
 [İstanbul Üniversitesi](https://www.istanbul.edu.tr/) Fen Fakültesinde matematik lisansına
-başladım. Eğitimim saf matematik ağırlıklı: reel analiz, soyut cebir ve topoloji. Son
-yıllarımda Matematik Kulübünde akademik etkinlikler, seminerler ile mantık ve matematik
-yarışmaları düzenledim. Şimdi mezuniyete hazırlanıyorum; ardından bilgisayar bilimleri
-alanında yüksek lisans yapmayı planlıyorum.
+başladım. Ağırlıklı olarak saf matematik okuyorum: reel analiz, soyut cebir ve topoloji.
+Üniversitenin ilerleyen yıllarında Matematik Kulübü için akademik etkinlikler düzenledim:
+seminerler ile mantık ve matematik yarışmaları. Şimdi mezun olmaya hazırlanıyorum. Sonra
+bilgisayar bilimlerinde yüksek lisans yapmayı planlıyorum.

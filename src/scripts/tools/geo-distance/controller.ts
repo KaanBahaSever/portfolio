@@ -5,12 +5,12 @@
  *
  * Validation follows "reward early, punish late": a field's error appears when you leave the
  * field, press Enter or paste, and disappears as soon as the value is valid. While you type,
- * half-written values ("45.", "-") raise no error: the last result stays on screen, dimmed,
+ * half-written values ("45.", "-") raise no error: the last result stays on screen, greyed,
  * until all four values are valid again. Results update on every keystroke that makes them so.
  */
 import { getPageLocale } from '../../../i18n/client.ts';
 import { geoDistanceMessages } from '../../../i18n/tools/geo-distance.ts';
-import { parseCoordinate, parsePair, type Axis, type ParseResult } from '../../../lib/geo/parse.ts';
+import { pairInField, parseCoordinate, type Axis, type ParseResult } from '../../../lib/geo/parse.ts';
 import { CITIES, cityAt, isCityId } from '../../../lib/geo/presets.ts';
 import { greatCircle, isDistanceUnit, type DistanceUnit, type LatLon } from '../../../lib/geo/sphere.ts';
 import { vincentyInverse } from '../../../lib/geo/vincenty.ts';
@@ -170,7 +170,7 @@ export function initGeoDistance(root: HTMLElement): void {
     target.name.textContent = present.spokenCompassName(bearing);
   }
 
-  /** Mid-typing: the last result stays, dimmed (an empty result keeps its message). */
+  /** Mid-typing: the last result stays, greyed (an empty result keeps its message). */
   function renderStale(): void {
     if (el.result.dataset.state === 'empty') return;
     el.result.dataset.state = 'stale';
@@ -282,16 +282,16 @@ export function initGeoDistance(root: HTMLElement): void {
   /**
    * A whole "latitude, longitude" in one field (pasted, or typed and committed) is spread over
    * the point's two fields, keeping each value as written. A value that reads as a single
-   * coordinate is left alone ("41 30" is 41°30′ in a latitude field, not a pair).
+   * coordinate is left alone ("41 30" is 41°30′ in a latitude field, not a pair), and so is one
+   * value with a mistake ("41,5°30′"): it keeps its text and shows its own error.
    */
   function splitPair(field: Field): boolean {
-    if (parse(field).ok) return false;
-    const pair = parsePair(field.input.value);
-    if (!pair.ok) return false;
+    const pair = pairInField(field.input.value, field.axis);
+    if (!pair) return false;
     const lat = fields[fieldId(field.point, 'lat')];
     const lon = fields[fieldId(field.point, 'lon')];
-    lat.input.value = pair.value.latText;
-    lon.input.value = pair.value.lonText;
+    lat.input.value = pair.latText;
+    lon.input.value = pair.lonText;
     return true;
   }
 

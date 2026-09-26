@@ -144,6 +144,13 @@ test('antipodal points sit on opposite edges, with no route', () => {
   assert.ok(Math.abs(s.a.x + s.b.x) < 1e-6 && Math.abs(s.a.y + s.b.y) < 1e-6, 'diametrically opposite');
 });
 
+test('nearly antipodal points within the tolerance get no route and no midpoint marker', () => {
+  const s = scene({ lat: 0, lon: 0 }, { lat: 0, lon: 180 - 1e-9 });
+  assert.equal(s.route, '');
+  assert.equal(s.circleFront, '');
+  assert.equal(s.midpoint, null);
+});
+
 test('coincident points: one marker above the centre, letters on either side', () => {
   const s = scene(CITIES.ankara, CITIES.ankara);
   assert.equal(s.route, '');

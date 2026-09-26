@@ -49,13 +49,20 @@ const segment =
 const segmentGroup =
   'flex rounded-lg border border-zinc-200 bg-zinc-100/80 p-0.5 dark:border-zinc-800 dark:bg-zinc-950';
 const dt = 'label-mono text-zinc-600 dark:text-zinc-400';
-const valueClass = 'font-mono text-base text-zinc-900 tabular-nums dark:text-zinc-100';
+/**
+ * While a value is half-typed, the last result stays on screen but visibly out of date: its
+ * figures turn grey instead of fading, so they keep WCAG AA contrast (zinc-500 is 4.8:1 on
+ * white, zinc-400 about 7:1 on zinc-900). The labels and notes are grey already.
+ */
+const stale =
+  'transition-colors duration-200 group-data-[state=stale]/result:text-zinc-500 dark:group-data-[state=stale]/result:text-zinc-400';
+const valueClass = `font-mono text-base text-zinc-900 tabular-nums dark:text-zinc-100 ${stale}`;
 const noteClass = 'text-sm text-zinc-600 dark:text-zinc-400';
 /**
  * The compass abbreviation is for the eye; screen readers get the spelled-out name instead.
  * Spaced with a margin: the HTML compressor drops the line break between the spans.
  */
-const abbrClass = 'ml-1.5 font-mono text-sm font-medium text-accent-700 dark:text-accent-400';
+const abbrClass = `ml-1.5 font-mono text-sm font-medium text-accent-700 dark:text-accent-400 ${stale}`;
 const spokenName = present.spokenCompassName;
 ---
 
@@ -205,10 +212,13 @@ const spokenName = present.spokenCompassName;
         class="mt-4 border-l-2 border-zinc-300 pl-3 text-sm leading-relaxed text-zinc-700 dark:border-zinc-600 dark:text-zinc-300"
       >
       </p>
-      {/* While a value is half-typed, the last result stays readable but visibly out of date. */}
-      <div class="transition-opacity duration-200 group-data-[state=stale]/result:opacity-45">
+      {/* While a value is half-typed, the last result stays readable but visibly out of date (see `stale`). */}
+      <div>
         <p
-          class="mt-4 flex flex-wrap items-baseline gap-x-2 font-serif text-4xl leading-tight font-medium tracking-tight text-zinc-900 tabular-nums group-data-[state=empty]/result:text-zinc-500 sm:text-5xl dark:text-zinc-50 dark:group-data-[state=empty]/result:text-zinc-400"
+          class:list={[
+            'mt-4 flex flex-wrap items-baseline gap-x-2 font-serif text-4xl leading-tight font-medium tracking-tight text-zinc-900 tabular-nums group-data-[state=empty]/result:text-zinc-500 sm:text-5xl dark:text-zinc-50 dark:group-data-[state=empty]/result:text-zinc-400',
+            stale,
+          ]}
         >
           <span data-distance-value>{view.distance.value}</span>
           <span

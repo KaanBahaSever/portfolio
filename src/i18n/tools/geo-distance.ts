@@ -168,7 +168,7 @@ const tr: GeoDistanceMessages = {
     longitude: 'Boylam',
     city: 'Şehir',
     cityPrompt: 'Şehir seçin',
-    swap: 'A ile B’yi değiştir',
+    swap: 'A ile B’nin yerini değiştir',
   },
   cities: {
     istanbul: 'İstanbul',

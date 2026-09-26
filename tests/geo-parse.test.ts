@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseCoordinate, parsePair, type Axis, type ParseErrorCode } from '../src/lib/geo/parse.ts';
+import { pairInField, parseCoordinate, parsePair, type Axis, type ParseErrorCode } from '../src/lib/geo/parse.ts';
 import { hemisphereOf, toDms } from '../src/lib/geo/dms.ts';
 
 const EPSILON = 1e-12;
@@ -240,6 +240,59 @@ test('pair errors', () => {
   assert.equal(pairError('41, 190'), 'lon-range');
   assert.equal(pairError('41.5°30′, 28'), 'fraction');
   assert.equal(pairError('41.0082, x'), 'syntax');
+});
+
+test('a whole pair in one field is split, in either field of a point', () => {
+  const cases: Array<[string, Axis, { lat: number; lon: number; latText: string; lonText: string }]> = [
+    ['41.0082, 28.9784', 'lat', { lat: 41.0082, lon: 28.9784, latText: '41.0082', lonText: '28.9784' }],
+    ['41.0082 28.9784', 'lon', { lat: 41.0082, lon: 28.9784, latText: '41.0082', lonText: '28.9784' }],
+    ['41,0082, 28,9784', 'lat', { lat: 41.0082, lon: 28.9784, latText: '41,0082', lonText: '28,9784' }],
+    ['41,0082 28,9784', 'lon', { lat: 41.0082, lon: 28.9784, latText: '41,0082', lonText: '28,9784' }],
+    ['41,0082; 28,9784', 'lat', { lat: 41.0082, lon: 28.9784, latText: '41,0082', lonText: '28,9784' }],
+    ['41 N 28', 'lat', { lat: 41, lon: 28, latText: '41 N', lonText: '28' }],
+    ['28.9784 E, 41.0082 N', 'lon', { lat: 41.0082, lon: 28.9784, latText: '41.0082 N', lonText: '28.9784 E' }],
+    ['41 100', 'lat', { lat: 41, lon: 100, latText: '41', lonText: '100' }],
+  ];
+  for (const [text, axis, expected] of cases) {
+    assert.deepEqual(pairInField(text, axis), expected, `${JSON.stringify(text)} in ${axis}`);
+  }
+  const dms = pairInField('41°00′29.5″N 28°58′42.2″E', 'lat');
+  assert.ok(dms);
+  assert.equal(dms.latText, '41°00′29.5″N');
+  assert.equal(dms.lonText, '28°58′42.2″E');
+  const turkish = pairInField('41°00′29,5″K 28°58′42,2″D', 'lon');
+  assert.ok(turkish);
+  near(turkish.lat, ISTANBUL_DMS_LAT);
+  near(turkish.lon, ISTANBUL_DMS_LON);
+});
+
+test('a single value stays in its field, valid or not', () => {
+  // Valid values are never split: "41,29" is 41.29 and "41 30" is 41°30′ in one field.
+  for (const [text, axis] of [['41,29', 'lat'], ['41,29', 'lon'], ['41 30', 'lat'], ['41.0082', 'lat']] as const) {
+    assert.equal(pairInField(text, axis), null, `${JSON.stringify(text)} in ${axis}`);
+  }
+  assert.equal(pairInField('', 'lat'), null);
+  assert.equal(pairInField('abc', 'lat'), null);
+  // One value with a mistake keeps its text and its own error: a decimal comma is never
+  // re-read as the separator between two values.
+  const mistakes: Array<[string, Axis, ParseErrorCode]> = [
+    ['41,0082 K', 'lon', 'wrong-axis'],
+    ['41°00′29,5″K', 'lon', 'wrong-axis'],
+    ['28°58′42,2″K', 'lon', 'wrong-axis'],
+    ['45,5 E', 'lat', 'wrong-axis'],
+    ['41,5°30′', 'lat', 'fraction'],
+    ['-41,0082 G', 'lat', 'sign-and-hemisphere'],
+    ['41.0082 K', 'lon', 'wrong-axis'],
+    ['41.5°30′', 'lat', 'fraction'],
+    ['-41.0082 S', 'lat', 'sign-and-hemisphere'],
+  ];
+  for (const [text, axis, code] of mistakes) {
+    assert.equal(pairInField(text, axis), null, `${JSON.stringify(text)} in ${axis} should not split`);
+    assert.equal(error(text, axis), code, JSON.stringify(text));
+  }
+  // An invalid pair is not spread over the fields either.
+  assert.equal(pairInField('95, 28', 'lat'), null);
+  assert.equal(pairInField('41 N 42 S', 'lat'), null);
 });
 
 test('toDms splits and rounds with carries', () => {

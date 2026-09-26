@@ -120,6 +120,25 @@ test('antipodes: half the circumference, and no route, bearings or midpoint', ()
   close(halfCircumference, 20015.114, 0.001);
 });
 
+test('within the antipodal tolerance there is no midpoint either', () => {
+  // 1e-9° is about 1.7e-11 rad: inside POINT_TOLERANCE, yet the vector sum is not quite zero.
+  for (const [a, b] of [
+    [{ lat: 0, lon: 0 }, { lat: 0, lon: 180 - 1e-9 }],
+    [{ lat: 0, lon: 0 }, { lat: 0, lon: 180 - 5e-9 }],
+    [{ lat: 10, lon: 0 }, { lat: -10, lon: 180 - 1e-9 }],
+  ] as const) {
+    const summary = greatCircle(a, b);
+    assert.equal(summary.relation, 'antipodal', `${JSON.stringify(a)} ↔ ${JSON.stringify(b)}`);
+    assert.equal(summary.midpoint, null);
+    assert.equal(midpoint(a, b), null);
+    assert.equal(interpolate(a, b, 0.5), null);
+  }
+  // Just outside the tolerance the points are distinct and have a midpoint.
+  const outside = greatCircle({ lat: 0, lon: 0 }, { lat: 0, lon: 180 - 1e-7 });
+  assert.equal(outside.relation, 'distinct');
+  assert.ok(outside.midpoint);
+});
+
 test('points a few metres short of antipodal are still distinct', () => {
   // 0.001° of latitude is about 111 m.
   const summary = greatCircle({ lat: 0, lon: 0 }, { lat: 0.001, lon: 180 });

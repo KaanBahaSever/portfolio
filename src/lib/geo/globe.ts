@@ -244,9 +244,11 @@ export function globeScene(a: LatLon, b: LatLon, center: LatLon, options: GlobeO
   const va = toVector(a);
   const vb = toVector(b);
   const δ = vectorAngle(a, b);
+  // Neither coincident nor antipodal (the tests greatCircle() uses): only then is there one route.
+  const distinct = δ >= POINT_TOLERANCE && Math.PI - δ >= POINT_TOLERANCE;
   const normal = cross(va, vb);
   const normalLength = norm(normal);
-  if (δ >= POINT_TOLERANCE && Math.PI - δ >= POINT_TOLERANCE && normalLength > 0) {
+  if (distinct && normalLength > 0) {
     const n: Vec3 = [normal[0] / normalLength, normal[1] / normalLength, normal[2] / normalLength];
     const w = cross(n, va);
     route.curve(arc(va, w, 0, δ, step).map(toScreen));
@@ -255,7 +257,7 @@ export function globeScene(a: LatLon, b: LatLon, center: LatLon, options: GlobeO
 
   const markerA = marker(toScreen(va), radius);
   const markerB = marker(toScreen(vb), radius);
-  const middle = midpoint(a, b);
+  const middle = distinct ? midpoint(a, b) : null;
 
   return {
     graticule: graticule.data('front'),
@@ -266,6 +268,6 @@ export function globeScene(a: LatLon, b: LatLon, center: LatLon, options: GlobeO
     routeHidden: route.data('back'),
     a: label(markerA, markerB, -1, radius),
     b: label(markerB, markerA, 1, radius),
-    midpoint: middle && δ >= POINT_TOLERANCE ? marker(project(middle, frame), radius) : null,
+    midpoint: middle ? marker(project(middle, frame), radius) : null,
   };
 }

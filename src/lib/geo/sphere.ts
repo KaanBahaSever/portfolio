@@ -153,13 +153,16 @@ export function finalBearing(a: LatLon, b: LatLon): number {
 /**
  * The point halfway along the great-circle route: the normalised sum of the two position
  * vectors. Null for antipodal points, where every great circle through one passes through the
- * other and no midpoint is singled out.
+ * other and no midpoint is singled out. "Antipodal" is the same test greatCircle() and
+ * interpolate() use (within POINT_TOLERANCE of π), so no pair is antipodal to one and has a
+ * midpoint in another.
  */
 export function midpoint(a: LatLon, b: LatLon): LatLon | null {
+  if (Math.PI - vectorAngle(a, b) < POINT_TOLERANCE) return null;
   const va = toVector(a);
   const vb = toVector(b);
   const sum: Vec3 = [va[0] + vb[0], va[1] + vb[1], va[2] + vb[2]];
-  if (norm(sum) < 1e-12) return null;
+  if (norm(sum) === 0) return null;
   return fromVector(sum);
 }
 
@@ -257,7 +260,12 @@ export function greatCircle(a: LatLon, b: LatLon, radiusKm: number = MEAN_EARTH_
     distanceKm: radiusKm * angle,
     initialBearing: distinct ? initialBearing(a, b) : null,
     finalBearing: distinct ? finalBearing(a, b) : null,
-    midpoint: relation === 'coincident' ? { lat: a.lat, lon: normalizeLongitude(a.lon) } : midpoint(a, b),
+    midpoint:
+      relation === 'coincident'
+        ? { lat: a.lat, lon: normalizeLongitude(a.lon) }
+        : relation === 'antipodal'
+          ? null
+          : midpoint(a, b),
     atPole: { a: distinct && isPole(a), b: distinct && isPole(b) },
   };
 }

@@ -2,7 +2,8 @@
  * Reads latitude and longitude as people write them, and says precisely what is wrong when it
  * cannot. Returns numbers or error codes, never prose (the page words the codes per language).
  *
- * Accepted, for one value (parseCoordinate) or a pair (parsePair):
+ * Accepted, for one value (parseCoordinate) or a pair (parsePair; pairInField for a pair typed
+ * into one coordinate field):
  * - decimal degrees, signed or with a hemisphere letter before or after: 41.0082, -33.8688,
  *   41.0082 N, N41.0082, 41.0082°N;
  * - degrees and minutes, or degrees, minutes and seconds, with typographic or ASCII marks, or
@@ -300,14 +301,18 @@ function prepare(text: string): string {
   return text.replace(MINUS_SIGNS, '-');
 }
 
+/** Without a decimal point, "41,0082" is a Turkish decimal number, not two values. */
+function readsDecimalComma(source: string): boolean {
+  return !source.includes('.');
+}
+
 // ------------------------------------------------------------------ public API
 
 /** Parses one latitude or longitude (degrees, south and west negative). */
 export function parseCoordinate(text: string, axis: Axis): ParseResult<number> {
   const source = prepare(text);
   if (source.trim() === '') return { ok: false, code: 'empty' };
-  // Without a decimal point, "41,0082" is a Turkish decimal number, not two values.
-  const tokens = tokenize(source, !source.includes('.'));
+  const tokens = tokenize(source, readsDecimalComma(source));
   const groups = tokens && collect(tokens, 'single');
   if (!groups) return { ok: false, code: 'syntax' };
   const [group] = groups;
@@ -362,4 +367,23 @@ export function parsePair(text: string): ParseResult<ParsedPair> {
     firstError ??= result;
   }
   return firstError ?? { ok: false, code: 'syntax' };
+}
+
+/**
+ * A whole pair typed or pasted into one coordinate field ("41.0082, 28.9784", "41,0082
+ * 28,9784"), to be spread over the point's two fields. Null when the text should stay where it
+ * is: it is a valid value, or one value with a mistake, which the field's own error explains.
+ *
+ * The pair must read numbers the way the field does. When the field takes "41,0082" as a
+ * decimal comma, the pair may not turn that comma into a separator, or a single value with a
+ * mistake ("41,0082 K" in a longitude field, "41,5°30′") would be cut at the comma into two
+ * meaningless halves. parsePair's other reading ("41,29" as 41 and 29) is never needed here:
+ * in one field, "41,29" is a valid value.
+ */
+export function pairInField(text: string, axis: Axis): ParsedPair | null {
+  if (parseCoordinate(text, axis).ok) return null;
+  const source = prepare(text);
+  if (source.trim() === '') return null;
+  const pair = parsePairWith(source, text, readsDecimalComma(source));
+  return pair.ok ? pair.value : null;
 }

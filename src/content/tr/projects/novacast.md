@@ -1,45 +1,46 @@
 ---
 title: Novacast
-shortDescription: Go ile yazılmış, düşük gecikmeli MQTT publish/subscribe boru hatları (pipeline) üzerine kurulu, gerçek zamanlı bir mesaj yayını ve cihaz orkestrasyonu platformu.
+shortDescription: Mesajları gerçek zamanlı olarak yayınlayan ve bu mesajları alan cihazları tek yerden yöneten bir platform. Go ile yazıldı ve düşük gecikmeli MQTT publish/subscribe hatları üzerine kuruldu.
 ---
 
 ## Nedir?
 
-Novacast, mesajları gerçek zamanlı olarak yayınlamak ve bu mesajları alan cihazları yönetmek
-(orkestrasyon) için tasarlanmış, yüksek hacimli (high-throughput) bir platform. Düşük
-gecikmeli publish/subscribe boru hatları üzerine kuruldu: bir kez yayımlanan mesaj, ona
-ihtiyaç duyan her cihaza hızla ulaşmalı; bir cihaz filosu da tek bir yerden yönetilebilmeli.
-Ayrıntılar: [novacast.app](https://novacast.app).
+Novacast, yoğun mesaj trafiğini kaldırabilen bir platform. Mesajları gerçek zamanlı olarak
+yayınlıyor ve bu mesajları alan cihazları yönetiyor. Temelinde düşük gecikmeli
+publish/subscribe hatları var. Hedef şu: Bir kez gönderilen mesaj, ona ihtiyacı olan her cihaza
+hızla ulaşmalı. Bir cihaz filosu da tek bir yerden yönetilebilmeli. Ayrıntılar
+[novacast.app](https://novacast.app) adresinde.
 
 ## Nasıl ortaya çıktı?
 
-Novacast'i 2025'te, çalıştığım bir bilgisayar firmasında kullanılan ve ihtiyacı karşılamayan
-eski bir yazılımın yerini alması için geliştirdim. İlk sürüm Python ile yazılmış bir
-prototipti. 2025'in sonlarında projeyi baştan tasarlayarak Go ile yazılmış, MQTT üzerine kurulu,
-yüksek performanslı bir mikroservise dönüştürdüm; bugün canlıda çalışan sürüm bu.
+Çalıştığım bir bilgisayar firmasında eski bir yazılım kullanılıyordu ve bu yazılım ihtiyaçları
+karşılamıyordu. Novacast’i 2025’te onun yerini alsın diye geliştirdim. İlk sürüm Python ile
+yazılmış bir prototipti. 2025’in sonlarında projeyi baştan tasarlayıp Go ile yeniden
+yazdım. Yeni sürüm, MQTT üzerine kurulu, yüksek performanslı bir mikroservis. Bugün canlıda
+çalışan da bu sürüm.
 
 ## Neden publish/subscribe, neden MQTT?
 
-Publish/subscribe (pub/sub) sisteminde gönderenler alıcıları doğrudan adreslemez. Yayıncı
-mesajını bir **konuya** (topic) gönderir; broker, hangi konuya kimin abone olduğunu takip eder
-ve mesajı her birine iletir. Dolayısıyla yeni bir cihaz eklemek için göndericilere dokunmak
-gerekmez; yeni bir abonelik yeterlidir. Yayın ve cihaz orkestrasyonunun ihtiyaç duyduğu da tam
-olarak bu ayrışmadır: tek bir komut çok sayıda alıcıya dağılır, cihaz grupları da dinledikleri
-konular üzerinden adreslenebilir.
+Publish/subscribe düzeninde gönderen, mesajı doğrudan alıcılara yollamaz. Yayıncı mesajını bir
+**konuya** (topic) gönderir. Arada duran broker, hangi konuya kimin abone olduğunu takip eder ve
+mesajı her birine iletir. Bu yüzden yeni bir cihaz eklendiğinde gönderenlerin hiçbirini
+değiştirmek gerekmez; yalnızca yeni bir abonelik eklenir. Mesaj yayınında ve cihaz yönetiminde
+de tam olarak bu bağımsızlık gerekir. Tek bir komut birçok alıcıya dağılır. Bir cihaz grubuna
+ulaşmak için de o grubun dinlediği konuya mesaj göndermek yeter.
 
-**MQTT**, tam da bu durum için tasarlanmış bir pub/sub protokolü. İstemciler broker ile uzun
-ömürlü bir bağlantıyı açık tutar ve her mesaj yalnızca küçük, ikili (binary) bir başlık taşır;
-böylece her teslimatta yeni bir bağlantının ya da hantal bir zarfın bedeli ödenmez. Protokol
-ayrıca her mesajın kendi teslim garantisini seçmesine izin verir; seçenekler “en fazla bir
-kez” ile “tam olarak bir kez” arasında değişir. Bir boru hattı, hızlı yolları hızlı, güvenilir
-yolları güvenilir tutmayı böyle başarır.
+**MQTT**, tam da bu iş için tasarlanmış bir publish/subscribe protokolü. İstemciler broker’la
+bağlantılarını uzun süre açık tutar ve her mesaj yalnızca küçük bir ikili (binary) başlık
+taşır. Böylece her gönderimde ne yeni bir bağlantı açmak gerekir ne de mesajı hantal bir zarfa
+sarmak. Protokol ayrıca teslim garantisini her mesaj için ayrı seçmeye izin verir. Seçenekler
+“en fazla bir kez” ile “tam olarak bir kez” arasında değişir. Bu sayede hızlı gitmesi gereken
+mesajlar hızlı, mutlaka ulaşması gereken mesajlar da güvenle gider.
 
 ## Neden Go?
 
 Broker merkezli bir sistem, zamanının çoğunu aynı anda birçok bağlantıyı bekleyerek geçirir.
-Go'nun goroutine'leri, her bağlantıya ve boru hattının her aşamasına kendi akışını verecek kadar
-ucuzdur; channel'lar da mesajları, koda dağılmış kilitlere gerek kalmadan bir aşamadan
-ötekine aktarabilir. Eşzamanlı kod sıralı kod gibi okunmaya devam eder; Go da bu kodu
-dağıtımı kolay, tek bir çalıştırılabilir dosyaya derler.
+Go’da goroutine’ler o kadar ucuz ki her bağlantıya ve hattın her aşamasına ayrı bir akış
+verilebilir. Channel’lar da mesajları bir aşamadan ötekine aktarır. Bunun için kodun dört bir
+yanına kilit koymak gerekmez. Eşzamanlı kod bile sıralı kod gibi rahat okunur. Go bu kodu
+dağıtması kolay, tek bir çalıştırılabilir dosyaya derler.
 
 Kaynak kodu kapalı.

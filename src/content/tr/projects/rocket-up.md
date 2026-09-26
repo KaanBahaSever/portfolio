@@ -1,53 +1,53 @@
 ---
 title: Rocket-Up — Yüksek Güçlü Roket Simülasyonu
-shortDescription: 2020’de dar kapsamlı bir Python prototipi olarak başlayan, şimdi modern C++ ile açık kaynak bir aerodinamik simülasyon motoru olarak baştan yazılan yüksek güçlü roket uçuş simülasyonu.
+shortDescription: Yüksek güçlü roketler için bir uçuş simülasyonu. 2020’de dar kapsamlı bir Python prototipi olarak başladı; şimdi onu modern C++ ile, açık kaynak bir aerodinamik simülasyon motoru olarak baştan yazıyorum.
 ---
 
 ## Nedir?
 
-Rocket-Up, yüksek güçlü roketler için geliştirdiğim uçuş simülasyonu. İki ayrı proje değil,
-zaman içinde biçim değiştiren tek bir proje: 2020'de bir Python prototipi olarak başladı; şimdi
-onu dinamik ve modern bir C++ aerodinamik simülasyon motoru olarak baştan yazıyorum. Yeni
-simülasyon motoru açık kaynak ve MIT Lisansı ile yayımlanıyor.
+Rocket-Up, yüksek güçlü roketler için yazdığım uçuş simülasyonu. Ortada iki ayrı proje yok;
+zaman içinde şekil değiştiren tek bir proje var. 2020’de bir Python prototipi olarak başladı.
+Şimdi onu modern C++ ile, dinamik bir aerodinamik simülasyon motoru olarak tamamen yeniden
+yazıyorum. Yeni motor açık kaynak. MIT Lisansı ile yayımlanıyor.
 
 ## Prototipten simülasyon motoruna
 
-2020'deki prototip dar kapsamlı ve tek bir amaca yönelikti: genel bir araç olarak değil, belirli
-bir iş için yazılmıştı.
+2020’deki prototip dar kapsamlıydı: Genel bir araç olarak değil, tek bir iş için yazılmıştı.
 
-Yeniden yazımda yaklaşım bunun tam tersi: tek ve sabit bir model yerine simülasyon parçalardan
-kuruluyor. Roket bileşenlerden oluşuyor, bir gezegenin ortamında uçuyor; uçuşun kendisi de koda
-gömülmek yerine parametrelerle tanımlanıyor. C++, fizik döngüsünün ihtiyaç duyduğu performansı
-sağlıyor; temiz bir mimari de fiziğin her parçasını kendi yerinde tutuyor. Böylece her parça,
-geri kalanına dokunmadan sınanabiliyor, geliştirilebiliyor ya da değiştirilebiliyor.
+Yeniden yazarken işe tam tersinden başladım. Artık tek ve sabit bir model yok; simülasyon
+parçalardan kuruluyor: Roket bileşenlerden oluşuyor ve bir gezegenin ortamında uçuyor. Uçuşun
+kendisi de koda gömülmüyor, parametrelerle tanımlanıyor. Fizik döngüsünün ihtiyaç duyduğu
+performansı C++ veriyor. Temiz bir mimari de fizik hesaplarının her parçasını kendi yerinde
+tutuyor. Böylece her parça, geri kalanına dokunmadan test edilebiliyor, geliştirilebiliyor ya
+da değiştirilebiliyor.
 
 ## Depoda neler var?
 
-Yeniden yazım henüz erken aşamada. Açık depoda şimdiden şunlar var:
+Yeni sürüm henüz başlangıç aşamasında. Yine de herkese açık depoda şunlar şimdiden var:
 
-- **Modüler roket bileşenleri**: roket, motoru ve paraşüt gibi kurtarma donanımı için ayrı
+- **Modüler roket bileşenleri**: roket, motoru ve paraşüt gibi kurtarma donanımları için ayrı
   sınıflar.
-- **Motor modeli**: özgül itki, yakıt kütlesi, ayarlanabilir bir itki eğrisi, kısma
-  (throttling) ve atmosfer basıncına göre düzeltilmiş itki.
-- **Ortamlar ve gezegenler**: Dünya modeli, 1976 ABD Standart Atmosferi'nin katmanlarını
-  kullanarak irtifaya göre sıcaklığı ve basıncı hesaplar; gezegen sınıfları da
-  genişletilebilecek şekilde tasarlandı.
-- **Ayarlanabilir uçuş parametreleri**, ayrıca küçük vektör ve matris hesaplama yardımcıları.
+- **Motor modeli**: özgül itki, yakıt kütlesi, ayarlanabilir bir itki eğrisi, itkiyi kısma ve
+  atmosfer basıncına göre düzeltilen itki.
+- **Ortamlar ve gezegenler**: Dünya modeli, sıcaklığı ve basıncı irtifaya göre hesaplıyor.
+  Bunun için 1976 ABD Standart Atmosfer modelinin katmanlarını kullanıyor. Gezegen sınıfları
+  da genişletilebilecek şekilde yazıldı.
+- **Ayarlanabilir uçuş parametreleri**, bir de küçük vektör ve matris hesap yardımcıları.
 
 Proje CMake ile derleniyor.
 
 ## Yol haritası
 
 - Daha fazla roket bileşeni: kanatçıklar, gövde tüpleri ve burun konileri.
-- Daha isabetli simülasyonlar için fizik kütüphaneleriyle entegrasyon.
+- Daha doğru simülasyonlar için fizik kütüphaneleriyle entegrasyon.
 - Birden çok gezegen ortamı.
-- GPU hızlandırma da dahil olmak üzere daha iyi performans.
+- Daha iyi performans, GPU hızlandırma da dâhil.
 
 ## Arka plan
 
-Bu simülasyon, roketçilik çalışmalarımla aynı yolun parçası. 2019–2022 yılları arasında
-İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım; ekibimizle üç roket tasarlayıp
-ürettik: bir alçak irtifa roketi (5.000 ft) ve iki yüksek irtifa roketi (10.000 ft). Bu
-roketlerin uçuş aviyoniği yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma
-yazdım. Aviyonikten bu simülasyona uzanan hikâyeyi [Hakkımda sayfasında](/about/#journey)
+Bu simülasyon, roketçilik çalışmalarımın devamı. 2019–2022 yılları arasında İstanbul
+Üniversitesi Roket Kulübünün başkan yardımcısıydım. Ekibimizle üç roket tasarlayıp ürettik:
+bir alçak irtifa roketi (5.000 ft) ve iki yüksek irtifa roketi (10.000 ft). Bu roketlerin uçuş
+aviyoniği yazılımını (firmware) ve paraşüt açma kontrol sistemini tek başıma geliştirdim.
+Aviyonikten bu simülasyona uzanan hikâyeyi [Hakkımda sayfasında](/about/#journey)
 anlatıyorum.

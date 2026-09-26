@@ -132,9 +132,10 @@ export type HomeMessages = typeof en;
 
 const tr: HomeMessages = {
   hero: {
-    // Short sentences, one idea each. "crowd.inc’te": the name is read "kraud ink", so -te.
+    // Warm and everyday, as the owner asked: a greeting, then short sentences. "crowd.inc’te": the
+    // name is read "kraud ink", so -te.
     intro:
-      'İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Geliştirdiğim şeylerin çoğunda da öğrendiğim matematiği kullanıyorum: roket aviyoniği ve uçuş simülasyonu, mesajlaşma platformları, oyun oynayan algoritmalar. Her gün modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te üç yıla yakın yazılım geliştirici olarak çalıştım. Canlıda çalışan bir web platformunun her şeyinden ben sorumluydum: PostgreSQL şemasından Linux sunucularına kadar.',
+      'Merhaba, ben Kaan. İstanbul Üniversitesinde matematik okuyorum, mezun olmama az kaldı. Yaptığım projelerin çoğunda matematiği kullanıyorum: roket yazılımlarında, uçuş simülasyonlarında, mesajlaşma sistemlerinde ve bilgisayara karşı oynanan oyunlarda. En çok modern C++ ve Go ile kod yazıyorum. Daha önce crowd.inc’te üç yıla yakın bir süre yazılım geliştirici olarak çalıştım; oradaki web platformunun PostgreSQL veritabanından Linux sunucularına kadar her şeyiyle ben ilgileniyordum.',
     selectedWork: 'Seçili işler',
     // The button downloads the Turkish CV; the English one is a small link beside it.
     cvFormat: 'PDF',

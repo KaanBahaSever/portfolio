@@ -186,13 +186,13 @@ const tr: AboutMessages = {
   },
   header: {
     eyebrow: 'Hakkımda',
-    title: 'Sistem yazılımına matematikçi gözüyle bakıyorum',
+    title: 'Kod yazarken matematikle düşünüyorum',
   },
   glance: {
     heading: 'Kısaca',
     location: 'Yaşadığım yer',
-    study: 'Eğitim',
-    studyValue: 'Matematik lisansı, İstanbul Üniversitesi',
+    study: 'Okuduğum bölüm',
+    studyValue: 'Matematik, İstanbul Üniversitesi',
     languages: 'Her gün kullandığım diller',
     languagesValue: 'Modern C++ ve Go',
     building: 'Şu an geliştirdiğim proje',

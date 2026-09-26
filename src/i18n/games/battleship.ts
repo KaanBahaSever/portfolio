@@ -57,7 +57,7 @@ const en = {
     difficulties: { easy: 'Easy', normal: 'Normal', hard: 'Hard' } satisfies Record<Difficulty, string>,
     difficultyHints: {
       easy: 'Fires at random cells.',
-      normal: 'Hunts on a checkerboard pattern, then closes in on every hit.',
+      normal: 'Hunts on a chequerboard pattern, then closes in on every hit.',
       hard: 'Fires where the most possible ship positions overlap: a probability density.',
     } satisfies Record<Difficulty, string>,
     fleet: 'Your fleet',

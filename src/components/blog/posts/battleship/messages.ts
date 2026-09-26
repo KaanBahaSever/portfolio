@@ -32,10 +32,10 @@ const en = {
     peak: 'Highest density',
     sunk: 'Sunk ship',
     ghost: 'A destroyer that slips through',
-    lattice: 'Lattice cell',
-    highlight: 'Lattice cell the ship covers',
+    lattice: 'Pattern cell',
+    highlight: 'Pattern cell the ship covers',
     latest: 'Latest shot',
-    hidden: 'Hidden ship',
+    hidden: 'Ship afloat',
     huntShots: 'Hunt shots',
     targetShots: 'Target shots',
   },
@@ -63,7 +63,7 @@ const en = {
     /** Follows "m = 2 · " in the panel title. */
     cells: (n: number) => `${n} cells`,
     aria: (m2: number, m3: number) =>
-      `Two boards. Left: the ${m2} cells whose row and column add up to an even number, a checkerboard; a destroyer at H2 to H3 covers one of them, H2. Right: the ${m3} cells whose row and column add up to a multiple of 3, on diagonals; a cruiser at B7 to D7 covers one of them, D7, while a destroyer at G2 to H2 covers none.`,
+      `Two boards. Left: the ${m2} cells whose row and column add up to an even number, a chequerboard; a destroyer at H2 to H3 covers one of them, H2. Right: the ${m3} cells whose row and column add up to a multiple of 3, on diagonals; a cruiser at B7 to D7 covers one of them, D7, while a destroyer at G2 to H2 covers none.`,
   },
   hunt: {
     aria: (shots: number, cells: string, peaks: string) =>
@@ -78,7 +78,7 @@ const en = {
   machine: {
     aria: 'A state diagram. The computer starts in Hunt, which it keeps after a miss and leaves for Target after a hit. Target and Line form the Targeting state. Target stays after a miss and moves to Line when a second hit lines up; Line stays while it extends the run and goes back to Target when both ends are blocked. When a ship sinks, the Sunk step marks its cells and removes it from the fleet, then returns to Targeting if hits are left over, and to Hunt if none are.',
     targeting: 'Targeting',
-    hunt: { title: 'Hunt', lines: ['fire on the', 'parity lattice'] },
+    hunt: { title: 'Hunt', lines: ['fire on the', 'search pattern'] },
     target: { title: 'Target', lines: ['try the neighbours', 'of the open hits'] },
     line: { title: 'Line', lines: ['extend the run', 'at either end'] },
     sunk: { title: 'Sunk', lines: ['mark its cells, drop', 'it from the fleet'] },
@@ -162,15 +162,13 @@ const en = {
     next: 'Next shot',
     last: 'Go to the end',
     slider: 'Shot',
-    valueText: (shot: number, total: number) =>
-      shot === 0 ? `Before the first shot, ${total} in all` : `Shot ${shot} of ${total}`,
     readout: {
       shot: 'Shot',
       shotValue: (shot: number, total: number) => `${shot} of ${total}`,
-      last: 'Last shot',
+      last: 'Latest shot',
       none: 'None yet',
       kind: 'Shot type',
-      lattice: 'Lattice',
+      lattice: 'Search pattern',
       /** Without parity: the computer hunts on every cell. */
       noLattice: 'None (any cell)',
       huntShots: 'Hunt shots',
@@ -189,20 +187,20 @@ const en = {
         shot === 0
           ? `Game ${seed}, ${game}: the board before the first shot (${total} in all). `
           : `Game ${seed}, ${game}: the board after shot ${shot} of ${total}. `,
-      lattice: (m: number, cells: number) => `The shaded cells are the lattice for m = ${m}: ${cells} cells. `,
-      noLattice: 'There is no lattice: the computer hunts at random. ',
+      lattice: (m: number, cells: number) => `The shaded cells are the search pattern for m = ${m}: ${cells} cells. `,
+      noLattice: 'There is no pattern: the computer hunts at random. ',
       last: (shot: number, cell: string, result: string, kind: string) => `Shot ${shot}, ${cell}: ${result} (${kind}). `,
       counts: (hunt: number, target: number, sunk: string) =>
         `So far ${hunt} ${hunt === 1 ? 'hunt shot' : 'hunt shots'} and ${target} ${target === 1 ? 'target shot' : 'target shots'}; ships sunk: ${sunk}. `,
       noneSunk: 'none',
-      fleet: (ships: string) => `Dashed outlines show the hidden ships: ${ships}.`,
+      fleet: (ships: string) => `Where the ships are: ${ships}.`,
       ship: (name: string, from: string, to: string) => `${name} ${from} to ${to}`,
     },
     announce: {
       step: (shot: number, total: number, cell: string, result: string, kind: string) =>
         `Shot ${shot} of ${total}: ${cell}, ${result}, ${kind}.`,
       start: 'Before the first shot.',
-      latticeNow: (m: number) => ` The lattice is now m = ${m}.`,
+      latticeNow: (m: number) => ` The pattern is now m = ${m}.`,
       paused: (step: string) => `Paused. ${step}`,
       ended: (total: number, hunt: number, target: number) =>
         `Game over after ${total} shots: ${hunt} hunt shots and ${target} target shots.`,
@@ -241,7 +239,7 @@ const tr: BattleshipPostMessages = {
     lattice: 'Desen hücresi',
     highlight: 'Geminin kapsadığı desen hücresi',
     latest: 'Son atış',
-    hidden: 'Gizli gemi',
+    hidden: 'Batmamış gemi',
     huntShots: 'Av atışları',
     targetShots: 'Hedef atışları',
   },
@@ -283,7 +281,7 @@ const tr: BattleshipPostMessages = {
   machine: {
     aria: 'Bir durum diyagramı. Bilgisayar Av durumunda başlar; ıskada bu durumda kalır, isabette Hedef durumuna geçer. Hedef ve Çizgi birlikte Hedefleme durumunu oluşturur. Hedef, ıskada aynı durumda kalır, ikinci isabet aynı hizaya gelince Çizgi durumuna geçer; Çizgi, isabet dizisini uzattıkça aynı durumda kalır, iki ucu da kapanınca Hedef durumuna döner. Bir gemi batınca Battı adımı geminin hücrelerini işaretler ve gemiyi filodan çıkarır; açıkta isabet kaldıysa Hedefleme durumuna, kalmadıysa Av durumuna döner.',
     targeting: 'Hedefleme',
-    hunt: { title: 'Av', lines: ['parite deseni', 'üzerine ateş et'] },
+    hunt: { title: 'Av', lines: ['tarama deseni', 'üzerine ateş et'] },
     target: { title: 'Hedef', lines: ['açık isabetlerin', 'komşularını dene'] },
     line: { title: 'Çizgi', lines: ['isabet dizisini', 'uçlarından uzat'] },
     sunk: { title: 'Battı', lines: ['hücrelerini işaretle,', 'gemiyi filodan çıkar'] },
@@ -308,7 +306,7 @@ const tr: BattleshipPostMessages = {
   },
   strategy: {
     random: 'Rastgele (Kolay)',
-    'no-parity': 'Paritesiz av ve hedef',
+    'no-parity': 'Desensiz av ve hedef',
     parity: 'Av ve hedef (Normal)',
     density: 'Olasılık yoğunluğu (Zor)',
   },
@@ -350,25 +348,24 @@ const tr: BattleshipPostMessages = {
   },
   replay: {
     mode: 'Av biçimi',
-    games: { parity: 'Parite ile', 'no-parity': 'Paritesiz' },
-    gamesInline: { parity: 'parite ile', 'no-parity': 'paritesiz' },
+    games: { parity: 'Desen açık', 'no-parity': 'Desen kapalı' },
+    gamesInline: { parity: 'desen açık', 'no-parity': 'desen kapalı' },
     controls: 'Oynatma düğmeleri',
     first: 'Başa dön',
-    previous: 'Geri',
+    previous: 'Önceki atış',
     play: 'Oynat',
     pause: 'Duraklat',
-    next: 'İleri',
+    next: 'Sonraki atış',
     last: 'Sona git',
     slider: 'Atış',
-    valueText: (shot, total) => (shot === 0 ? `İlk atıştan önce, toplam ${total}` : `${shot}. atış, toplam ${total}`),
     readout: {
       shot: 'Atış',
       shotValue: (shot, total) => `${shot} / ${total}`,
       last: 'Son atış',
       none: 'Henüz yok',
       kind: 'Atış türü',
-      lattice: 'Parite deseni',
-      noLattice: 'Yok (her hücre)',
+      lattice: 'Tarama deseni',
+      noLattice: 'Yok (bütün tahta)',
       huntShots: 'Av atışları',
       targetShots: 'Hedef atışları',
       sunk: 'Batan gemiler',
@@ -383,12 +380,12 @@ const tr: BattleshipPostMessages = {
         shot === 0
           ? `${seed} numaralı oyun, ${game}: tahtanın ilk atıştan önceki hâli (toplam ${total} atış). `
           : `${seed} numaralı oyun, ${game}: tahtanın ${shot}. atıştan sonraki hâli (toplam ${total} atış). `,
-      lattice: (m, cells) => `Gölgeli hücreler, m = ${m} için parite deseni: ${cells} hücre. `,
+      lattice: (m, cells) => `Gölgeli hücreler, m = ${m} için tarama deseni: ${cells} hücre. `,
       noLattice: 'Desen yok: bilgisayar av atışlarını rastgele yapıyor. ',
       last: (shot, cell, result, kind) => `${shot}. atış, ${cell}: ${result} (${kind}). `,
       counts: (hunt, target, sunk) => `Şimdiye kadar ${hunt} av atışı ve ${target} hedef atışı; batan gemiler: ${sunk}. `,
       noneSunk: 'yok',
-      fleet: (ships) => `Kesik çizgiler gizli gemileri gösteriyor: ${ships}.`,
+      fleet: (ships) => `Gemilerin yerleri: ${ships}.`,
       ship: (name, from, to) => `${name} ${from}–${to}`,
     },
     announce: {

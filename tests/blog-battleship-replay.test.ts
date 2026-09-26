@@ -139,8 +139,9 @@ test('frame text in both languages', () => {
   const start = frameAt(data, 'parity', REPLAY_EXAMPLE.start);
   const en = frameText(data, start, 'en');
   const tr = frameText(data, start, 'tr');
-  assert.equal(en.valueText, 'Shot 21 of 49');
-  assert.equal(tr.valueText, '21. atış, toplam 49');
+  // The step is both what a button press announces and the slider's aria-valuetext.
+  assert.equal(en.step, 'Shot 21 of 49: E7, hit, hunt shot.');
+  assert.equal(tr.step, '21. atış (toplam 49): E7, isabet; av atışı.');
   assert.equal(en.shot, '21 of 49');
   assert.equal(en.last, 'E7 · hit');
   assert.equal(tr.last, 'E7 · isabet');
@@ -151,21 +152,23 @@ test('frame text in both languages', () => {
   assert.deepEqual([en.hunt, en.target, en.sunk], ['17', '4', '1 of 5']);
   assert.equal(tr.sunk, '1 / 5');
   assert.match(en.board, /^Game 743, with parity: the board after shot 21 of 49\./);
-  assert.match(en.board, /Carrier F2 to F6/);
-  assert.match(tr.board, /^743 numaralı oyun, parite ile: tahtanın 21\. atıştan sonraki hâli/);
+  // Ship names are common nouns inside the sentences; sunk ships are not called hidden.
+  assert.match(en.board, /ships sunk: carrier\. Where the ships are: carrier F2 to F6/);
+  assert.match(tr.board, /^743 numaralı oyun, desen açık: tahtanın 21\. atıştan sonraki hâli/);
+  assert.match(tr.board, /batan gemiler: uçak gemisi\. Gemilerin yerleri: uçak gemisi F2–F6/);
 
   const sunk = frameText(data, frameAt(data, 'parity', 22), 'tr');
-  assert.equal(sunk.last, 'E6 · Muhrip battı');
-  assert.equal(sunk.step, '22. atış (toplam 49): E6, Muhrip battı; hedef atışı. Desen artık m = 3.');
+  assert.equal(sunk.last, 'E6 · muhrip battı');
+  assert.equal(sunk.step, '22. atış (toplam 49): E6, muhrip battı; hedef atışı. Desen artık m = 3.');
   assert.equal(
     frameText(data, frameAt(data, 'parity', 22), 'en').step,
-    'Shot 22 of 49: E6, Destroyer sunk, target shot. The lattice is now m = 3.',
+    'Shot 22 of 49: E6, destroyer sunk, target shot. The pattern is now m = 3.',
   );
-  // Without parity there is no lattice to name.
+  // Without parity there is no search pattern to name.
   const noParity = frameText(data, frameAt(data, 'no-parity', 22), 'en');
   assert.equal(noParity.lattice, null);
-  assert.doesNotMatch(noParity.step, /lattice/);
-  assert.equal(frameText(data, frameAt(data, 'parity', 0), 'en').valueText, 'Before the first shot, 49 in all');
+  assert.doesNotMatch(noParity.step, /pattern/);
+  assert.equal(frameText(data, frameAt(data, 'parity', 0), 'en').step, 'Before the first shot.');
   assert.equal(latticeSize(2), 50);
   assert.equal(latticeSize(3), 34);
 });

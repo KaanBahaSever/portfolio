@@ -97,11 +97,12 @@ export interface FrameText {
   hunt: string;
   target: string;
   sunk: string;
-  /** The slider's aria-valuetext. */
-  valueText: string;
   /** The board's accessible description. */
   board: string;
-  /** What a step to this frame announces. */
+  /**
+   * What a step to this frame announces; also the slider's aria-valuetext, so a screen reader
+   * hears a slider move once, from the slider itself.
+   */
   step: string;
 }
 
@@ -111,10 +112,12 @@ export function frameText(data: ReplayData, frame: Frame, lang: Locale): FrameTe
   const f = formatters(lang);
   const n = (x: number) => f.number(x);
   const { last } = frame;
+  // Ship names are capitalised labels; inside a sentence they are common nouns ("destroyer sunk").
+  const shipName = (ship: ShipId) => m.ships[ship].toLocaleLowerCase(lang);
   const kindKey = last ? (last.hunt ? 'hunt' : 'target') : null;
   const result = last
     ? last.sunk
-      ? r.result.sunk(m.ships[last.sunk.ship])
+      ? r.result.sunk(shipName(last.sunk.ship))
       : last.result === 'hit'
         ? r.result.hit
         : r.result.miss
@@ -128,10 +131,10 @@ export function frameText(data: ReplayData, frame: Frame, lang: Locale): FrameTe
       (parity && frame.latticeChanged ? r.announce.latticeNow(frame.modulus) : '')
     : r.announce.start;
 
-  const sunkNames = frame.sunk.map((ship) => m.ships[ship]);
+  const sunkNames = frame.sunk.map(shipName);
   const fleet = f.list(
     data.fleet.map(({ ship, cells: shipCells }) =>
-      r.board.ship(m.ships[ship], coordinateLabel(shipCells[0] ?? 0), coordinateLabel(shipCells.at(-1) ?? 0)),
+      r.board.ship(shipName(ship), coordinateLabel(shipCells[0] ?? 0), coordinateLabel(shipCells.at(-1) ?? 0)),
     ),
   );
   const board =
@@ -149,7 +152,6 @@ export function frameText(data: ReplayData, frame: Frame, lang: Locale): FrameTe
     hunt: n(frame.hunt),
     target: n(frame.target),
     sunk: r.readout.sunkValue(frame.sunk.length, data.fleet.length),
-    valueText: r.valueText(frame.shot, frame.total),
     board,
     step,
   };
@@ -265,7 +267,7 @@ export function initParityReplay(root: HTMLElement): void {
     // The controls.
     ui.slider.max = String(frame.total);
     ui.slider.value = String(shot);
-    ui.slider.setAttribute('aria-valuetext', text.valueText);
+    ui.slider.setAttribute('aria-valuetext', text.step);
     for (const button of steps) {
       const back = button.dataset.step === 'first' || button.dataset.step === 'previous';
       button.setAttribute('aria-disabled', String(back ? shot === 0 : shot === frame.total));
@@ -277,8 +279,7 @@ export function initParityReplay(root: HTMLElement): void {
   let pending = 0;
   function announce(text: string, delay = 60): void {
     // Clear first, then write after a short pause, so the same sentence twice in a row is still
-    // read out; a newer announcement replaces one that has not been written yet (a slider drag
-    // only announces where it stops).
+    // read out; a newer announcement replaces one that has not been written yet.
     ui.status.textContent = '';
     window.clearTimeout(pending);
     pending = window.setTimeout(() => {
@@ -304,10 +305,10 @@ export function initParityReplay(root: HTMLElement): void {
   }
 
   /** A manual move: stop playing, go to `next`, and say where the replay is. */
-  function goTo(next: number, delay?: number): void {
+  function goTo(next: number): void {
     stop();
     shot = next;
-    announce(render().text.step, delay);
+    announce(render().text.step);
   }
 
   function play(): void {
@@ -342,8 +343,13 @@ export function initParityReplay(root: HTMLElement): void {
     else play();
   });
 
-  // A drag fires many input events: announce only once it settles.
-  ui.slider.addEventListener('input', () => goTo(Number(ui.slider.value), 400));
+  // No announcement here: the focused slider reads out its own aria-valuetext (the step), so a
+  // live-region message would say the same thing twice.
+  ui.slider.addEventListener('input', () => {
+    stop();
+    shot = Number(ui.slider.value);
+    render();
+  });
 
   for (const radio of radios) {
     radio.addEventListener('change', () => {

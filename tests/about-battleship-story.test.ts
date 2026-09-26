@@ -1,10 +1,11 @@
 /**
  * Why the owner made Battleship, in his own words: it was the game he played with his father as a
  * child, which is why he wanted to design his own. These checks keep that story in both languages
- * wherever the site tells how his Battleship came about (the About chapter, the timeline entry and
- * the game page), and keep the order of events there: the desktop game came first, the Hunt &
- * Target algorithm later. The console and the home page's teaser are checked with the rest of
- * their copy (tests/console-data.test.ts, tests/resume-copy.test.ts).
+ * wherever the site tells how his Battleship came about (the About chapter, the game page and both
+ * blog posts), and keep the order of events there: the desktop game came first, the Hunt & Target
+ * algorithm later. The 2019 timeline entry sits on the About page under the chapter, so it keeps
+ * the order of events but does not repeat the story. The console and the home page's teaser are
+ * checked with the rest of their copy (tests/console-data.test.ts, tests/resume-copy.test.ts).
  */
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
@@ -58,16 +59,34 @@ test('the About chapter tells why Battleship, in both languages', () => {
   }
 });
 
-test('the 2019 timeline entry tells why Battleship, in both languages', () => {
+test('the 2019 timeline entry keeps the order of events and leaves the story to the chapter above it', () => {
+  // The About page shows the journey chapter and then this timeline: the story is told once.
   const entry: Record<Locale, string> = {
     en: body('src/content/timeline/2019-graduation-projects.md'),
     tr: body('src/content/tr/timeline/2019-graduation-projects.md'),
   };
   for (const locale of ['en', 'tr'] as const) {
-    assert.match(entry[locale], STORY[locale], locale);
     assert.match(entry[locale], LATER[locale], locale);
+    assert.doesNotMatch(entry[locale], STORY[locale], locale);
+    assert.doesNotMatch(entry[locale], /father|babam/, locale);
+  }
+});
+
+test('both Battleship posts open with why, before the algorithm', () => {
+  const post: Record<Locale, string> = {
+    en: body('src/content/blog/battleship-hunt-and-target.mdx'),
+    tr: body('src/content/blog/amiral-batti-av-ve-hedef.mdx'),
+  };
+  const after: Record<Locale, RegExp> = {
+    en: /hunt & target algorithm[^.]* came later/,
+    tr: /av ve hedef algoritması[^.]* sonradan geldi/,
+  };
+  for (const locale of ['en', 'tr'] as const) {
+    assert.match(post[locale], STORY[locale], locale);
+    assert.match(post[locale], /github\.com\/KaanBahaSever\/BattleShips/, locale);
+    assert.match(post[locale], after[locale], locale);
     // The story comes before the algorithm, as the events did.
-    assert.ok(entry[locale].search(STORY[locale]) < entry[locale].search(LATER[locale]), locale);
+    assert.ok(post[locale].search(STORY[locale]) < post[locale].search(after[locale]), locale);
   }
 });
 

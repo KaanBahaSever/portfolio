@@ -192,8 +192,8 @@ test('the journey teaser follows the About page and tells the current story', ()
   assert.match(chapters.simulation.text, /2020/);
   assert.match(chapters.simulation.text, /Rocket-Up/);
   // Turkish uses the site's name for the algorithm (as on the Playground card), English in parentheses.
-  assert.match(homeMessages.tr.journey.chapters.foundations.text, /[Aa]v ve hedef \(hunt & target\) algoritmasını/);
-  assert.match(homeMessages.tr.journey.chapters.foundations.text, /Amiral Battı’yı çocukken babamla oynardım/);
+  assert.match(homeMessages.tr.journey.chapters.foundations.text, /av ve hedef \(hunt & target\) algoritmasını/);
+  assert.match(homeMessages.tr.journey.chapters.foundations.text, /çocukken babamla oynadığım Amiral Battı/);
   assert.doesNotMatch(homeMessages.tr.journey.chapters.foundations.text, /Hunt & Target/);
   assert.match(homeMessages.tr.journey.chapters.avionics.text, /5\.000 ft/);
   assert.match(homeMessages.tr.journey.chapters.simulation.text, /Rocket-Up/);

@@ -6,12 +6,12 @@ dateLabel: '2019'
 # Keep the order of events: the Battleship opponent's Hunt & Target algorithm came later
 # than this desktop game. Only Battleship's language is on record (C#, from the repository,
 # checked against the GitHub API), so do not name one for tic-tac-toe.
-# Why Battleship: the owner played it with his father as a child. Add no details to that.
+# Why Battleship (the game the owner played with his father as a child) is told once on the
+# About page, in the journey chapter above this timeline (Algorithms.astro); do not repeat it here.
 ---
 
 Built complete database applications backed by Microsoft SQL Server (MSSQL). My high-school
-graduation projects were desktop versions of tic-tac-toe and Battleship. Battleship was the
-game I played with my father as a child, which is why I wanted to design my own; the
-[C# source of that first version](https://github.com/KaanBahaSever/BattleShips) is on GitHub.
-The Hunt & Target algorithm for the Battleship opponent came later, and both games are now
+graduation projects were desktop versions of tic-tac-toe and Battleship; the
+[C# source of Battleship](https://github.com/KaanBahaSever/BattleShips) is on GitHub. The
+Hunt & Target algorithm for the Battleship opponent came later, and both games are now
 [playable in the browser](/games/).

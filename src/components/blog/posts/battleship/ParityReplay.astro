@@ -134,23 +134,26 @@ const stepButton =
   'inline-flex size-11 shrink-0 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-800 transition-colors hover:bg-zinc-100 disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-40 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800';
 const playButton =
   'inline-flex size-11 shrink-0 items-center justify-center rounded-lg bg-accent-700 text-white shadow-sm transition-colors hover:bg-accent-800 disabled:opacity-50 dark:bg-accent-500 dark:text-zinc-950 dark:hover:bg-accent-400';
-const icon = {
-  class: 'size-5',
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  'stroke-width': '1.75',
-  'stroke-linecap': 'round',
-  'stroke-linejoin': 'round',
-  'aria-hidden': 'true',
-  focusable: 'false',
-} as const;
+// A fresh object per icon: Astro appends its scope class to a spread `class` in place, so a shared
+// object would collect one more copy with every use.
+const icon = () =>
+  ({
+    class: 'size-5',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '1.75',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  }) as const;
 const dt = 'text-xs leading-snug text-zinc-600 dark:text-zinc-400';
 const dd = 'mt-0.5 text-sm text-zinc-900 dark:text-zinc-100';
 const num = 'font-mono tabular-nums';
 ---
 
-<Figure bleed>
+<Figure>
   <div
     slot="graphic"
     class="replay"
@@ -248,7 +251,7 @@ const num = 'font-mono tabular-nums';
       <div class="area-controls needs-js flex flex-wrap items-center gap-x-4 gap-y-2" role="group" aria-label={r.controls}>
         <div class="flex items-center gap-1.5">
           <button type="button" class={stepButton} aria-label={r.first} title={r.first} disabled data-control data-step="first">
-            <svg {...icon}><path d="M6.5 5.5v13M17.5 6.5 10 12l7.5 5.5z" /></svg>
+            <svg {...icon()}><path d="M6.5 5.5v13M17.5 6.5 10 12l7.5 5.5z" /></svg>
           </button>
           <button
             type="button"
@@ -259,19 +262,19 @@ const num = 'font-mono tabular-nums';
             data-control
             data-step="previous"
           >
-            <svg {...icon}><path d="m14.5 6-6 6 6 6" /></svg>
+            <svg {...icon()}><path d="m14.5 6-6 6 6 6" /></svg>
           </button>
           <button type="button" class={playButton} aria-label={r.play} title={r.play} disabled data-control data-play>
-            <span data-icon="play"><svg {...icon}><path d="M8 5.5v13l10-6.5z" fill="currentColor" /></svg></span>
+            <span data-icon="play"><svg {...icon()}><path d="M8 5.5v13l10-6.5z" fill="currentColor" /></svg></span>
             <span data-icon="pause" hidden
-              ><svg {...icon}><path d="M9 6v12M15 6v12" stroke-width="2.5" /></svg></span
+              ><svg {...icon()}><path d="M9 6v12M15 6v12" stroke-width="2.5" /></svg></span
             >
           </button>
           <button type="button" class={stepButton} aria-label={r.next} title={r.next} disabled data-control data-step="next">
-            <svg {...icon}><path d="m9.5 6 6 6-6 6" /></svg>
+            <svg {...icon()}><path d="m9.5 6 6 6-6 6" /></svg>
           </button>
           <button type="button" class={stepButton} aria-label={r.last} title={r.last} disabled data-control data-step="last">
-            <svg {...icon}><path d="M17.5 5.5v13M6.5 6.5 14 12l-7.5 5.5z" /></svg>
+            <svg {...icon()}><path d="M17.5 5.5v13M6.5 6.5 14 12l-7.5 5.5z" /></svg>
           </button>
         </div>
         <input
@@ -282,7 +285,7 @@ const num = 'font-mono tabular-nums';
           step="1"
           value={frame.shot}
           aria-label={r.slider}
-          aria-valuetext={text.valueText}
+          aria-valuetext={text.step}
           autocomplete="off"
           disabled
           data-control

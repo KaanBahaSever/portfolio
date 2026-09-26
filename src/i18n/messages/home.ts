@@ -163,7 +163,7 @@ const tr: HomeMessages = {
       foundations: {
         title: 'Algoritmik temeller',
         meta: '2016 – 2019 · C# · MS SQL',
-        text: 'Her şey 2016’da bir meslek lisesinde C# ile başladı: veri yapıları ve algoritmik problem çözme, ardından MS SQL tabanlı veritabanı uygulamaları. Bitirme projelerim masaüstü XOX ve Amiral Battı oyunlarıydı; Amiral Battı’yı çocukken babamla oynardım. Av ve hedef (hunt & target) algoritmasını ise sonradan geliştirdim.',
+        text: 'Her şey 2016’da bir meslek lisesinde C# ile başladı: veri yapıları ve algoritmik problem çözme, ardından MS SQL tabanlı veritabanı uygulamaları. Bitirme projelerim masaüstü XOX ve çocukken babamla oynadığım Amiral Battı’ydı; av ve hedef (hunt & target) algoritmasını ise sonradan geliştirdim.',
       },
       avionics: {
         title: 'Roket aviyoniği',

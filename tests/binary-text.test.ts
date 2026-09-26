@@ -13,6 +13,7 @@ import {
   formatBinary,
   formatCodePoint,
   invisibleName,
+  mapCaret,
   parseBinary,
   reformatBinary,
   utf8Bytes,
@@ -280,14 +281,26 @@ test('groups that are not whole bytes are reported with their number and span', 
   assert.ok(long.code === 'group-length');
   if (long.code === 'group-length') assert.equal(long.bits, 9);
 
-  const bare = decodeError('0b 01001000');
-  assert.ok(bare.code === 'group-length');
-  if (bare.code === 'group-length') assert.deepEqual([bare.group, bare.bits], [1, 0]);
-
   // Strict mode: an unfinished last group is an error too.
   const last = decodeError('01001000 0110');
   assert.ok(last.code === 'group-length');
   if (last.code === 'group-length') assert.deepEqual([last.group, last.bits], [2, 4]);
+});
+
+test('a group that is only a 0b prefix has its own error (zero is a multiple of 8)', () => {
+  const bare = decodeError('0b 01001000');
+  assert.equal(bare.code, 'empty-prefix');
+  if (bare.code !== 'empty-prefix') return;
+  assert.equal(bare.group, 1);
+  assert.deepEqual(bare.span, { start: 0, end: 2, line: 1, column: 1 });
+
+  const partial = decodeError('0b 01000001', { partial: true });
+  assert.ok(partial.code === 'empty-prefix');
+
+  // Strict mode: a bare prefix at the end too.
+  const last = decodeError('01001000,0B');
+  assert.ok(last.code === 'empty-prefix');
+  if (last.code === 'empty-prefix') assert.deepEqual([last.group, last.span.start, last.span.end], [2, 9, 11]);
 });
 
 test('parseBinary reports groups with and without prefixes', () => {
@@ -426,6 +439,62 @@ test('partial mode: a character missing its last bytes is pending', () => {
   assert.ok(!bad.ok && bad.error.code === 'invalid-utf8');
 });
 
+test('partial mode: typed bits that no continuation byte can start with are an error at once', () => {
+  const cases: Array<[string, string, number, number]> = [
+    // [input, problem, first byte of the sequence, the unfinished byte]
+    ['11000011 0', 'missing-continuation', 0, 1],
+    ['01001000 11000011 00', 'missing-continuation', 1, 2],
+    ['11000011 11', 'missing-continuation', 0, 1],
+    ['11110000 10011111 0', 'missing-continuation', 0, 2],
+    // Narrowed second bytes: E0 needs A0–BF, ED 80–9F, F0 90–BF, F4 80–8F.
+    ['11100000 100', 'overlong', 0, 1],
+    ['11101101 101', 'surrogate', 0, 1],
+    ['11110000 1000', 'overlong', 0, 1],
+    ['11110100 1001', 'too-large', 0, 1],
+  ];
+  for (const [input, problem, byte, at] of cases) {
+    const error = decodeError(input, { partial: true });
+    assert.equal(error.code, 'invalid-utf8', input);
+    if (error.code !== 'invalid-utf8') continue;
+    assert.equal(error.issue.problem, problem, input);
+    assert.equal(error.byte, byte, input);
+    assert.equal(error.issue.at, at, input);
+    assert.equal(error.span.start, byte * 9, input);
+    assert.equal(error.span.end, input.length, input);
+  }
+  for (const input of ['11000011 1', '11000011 10', '11100000 101', '11101101 100', '11110100 1000']) {
+    const result = decodeBinary(input, { partial: true });
+    assert.ok(result.ok && result.pending, input);
+  }
+});
+
+test('partial mode flags typed bits exactly when every way of finishing the byte fails', () => {
+  const leads: number[][] = [
+    [0xc2], [0xdf], [0xe0], [0xe1], [0xed], [0xef], [0xf0], [0xf1], [0xf4],
+    [0xe2, 0x82], [0xf0, 0x9f], [0xf4, 0x8f], [0xf0, 0x9f, 0x9a],
+  ];
+  for (const lead of leads) {
+    for (let length = 1; length < 8; length++) {
+      for (let value = 0; value < 1 << length; value++) {
+        const prefix = value.toString(2).padStart(length, '0');
+        const input = `${bits(...lead)} ${prefix}`;
+        const early = decodeBinary(input, { partial: true });
+        let finishes = false;
+        for (let rest = 0; rest < 1 << (8 - length) && !finishes; rest++) {
+          const full = `${input}${rest.toString(2).padStart(8 - length, '0')}`;
+          finishes = decodeBinary(full, { partial: true }).ok;
+        }
+        assert.equal(early.ok, finishes, input);
+        if (!early.ok && early.error.code === 'invalid-utf8') {
+          const smallest = decodeError(`${input}${'0'.repeat(8 - length)}`, { partial: true });
+          assert.ok(smallest.code === 'invalid-utf8', input);
+          if (smallest.code === 'invalid-utf8') assert.equal(early.error.issue.problem, smallest.issue.problem, input);
+        }
+      }
+    }
+  }
+});
+
 test('reformatBinary rewrites valid input in a new layout and keeps an unfinished tail', () => {
   const newline: FormatOptions = { separator: 'newline', grouping: 'byte' };
   assert.equal(reformatBinary('0100100001101001', newline), '01001000\n01101001');
@@ -438,6 +507,26 @@ test('reformatBinary rewrites valid input in a new layout and keeps an unfinishe
   );
   assert.equal(reformatBinary('01001000 2', newline), null);
   assert.equal(reformatBinary('11000011 01000001', newline), null);
+  assert.equal(reformatBinary('11000011 00', newline), null);
+});
+
+test('mapCaret keeps the caret after the same bit in a new layout', () => {
+  const before = '0b01001000 0110100';
+  const after = '01001000\n0110100';
+  // End of input: after all 15 bits.
+  assert.equal(mapCaret(before, after, before.length), after.length);
+  // Inside the second group, after its third bit.
+  assert.equal(mapCaret(before, after, 14), 12);
+  // Right after the first byte, before the space: before the line break.
+  assert.equal(mapCaret(before, after, 10), 8);
+  // After the space: after the line break.
+  assert.equal(mapCaret(before, after, 11), 9);
+  // Inside or right after the 0b prefix: no bits yet.
+  assert.equal(mapCaret(before, after, 1), 0);
+  assert.equal(mapCaret(before, after, 2), 0);
+  // Into a layout without separators.
+  assert.equal(mapCaret('01001000 01101001', '0100100001101001', 9), 8);
+  assert.equal(mapCaret('0100100001101001', '01001000 01101001', 12), 13);
 });
 
 // ------------------------------------------------------------------ breakdown
@@ -488,6 +577,8 @@ test('invisible characters have names; kinds follow Unicode categories', () => {
   assert.equal(invisibleName(0x7f), 'DEL');
   assert.equal(invisibleName(0x85), 'NEL');
   assert.equal(invisibleName(0xfe0f), 'VS16');
+  // The tips promise the byte order mark by that name.
+  assert.equal(invisibleName(0xfeff), 'BOM');
   assert.equal(invisibleName(0xe0100), 'VS17');
   assert.equal(invisibleName(0x41), null);
   assert.equal(charKind(0x0a), 'control');

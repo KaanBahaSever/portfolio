@@ -25,6 +25,7 @@ import {
   invisibleName,
   isGrouping,
   isSeparator,
+  mapCaret,
   reformatBinary,
   type DecodeError,
   type EncodeError,
@@ -113,6 +114,10 @@ export function initBinaryText(root: HTMLElement): void {
   let binaryBits = 0;
   let binaryBytes = 0;
   let pendingNote = '';
+  /** A layout chosen while the input had an error: it is applied once the error is fixed. */
+  let layoutPending = false;
+  /** The fix just applied a pending layout; the "fixed" announcement says so. */
+  let layoutApplied = false;
   /** The problem message last read out (null: none), so a problem is not repeated and a fix is noticed. */
   let announcedProblem: string | null = null;
   let problemTimer = 0;
@@ -134,10 +139,12 @@ export function initBinaryText(root: HTMLElement): void {
   function scheduleProblemAnnouncement(): void {
     window.clearTimeout(problemTimer);
     problemTimer = window.setTimeout(() => {
+      const applied = layoutApplied;
+      layoutApplied = false;
       const message = problem?.message ?? null;
       if (message === announcedProblem) return;
       if (message) speak(message);
-      else speak(m.announce.fixed);
+      else speak(applied ? m.announce.fixedWithLayout : m.announce.fixed);
       announcedProblem = message;
     }, ANNOUNCE_DELAY_MS);
   }
@@ -226,6 +233,13 @@ export function initBinaryText(root: HTMLElement): void {
           side: 'binary',
           message: m.problems.groupLength(where(error.span), error.group, error.bits),
           hint: m.problems.groupLengthHint,
+          span: error.span,
+        };
+      case 'empty-prefix':
+        return {
+          side: 'binary',
+          message: m.problems.emptyPrefix(where(error.span), error.group),
+          hint: m.problems.emptyPrefixHint,
           span: error.span,
         };
       case 'non-ascii':
@@ -368,6 +382,8 @@ export function initBinaryText(root: HTMLElement): void {
       binaryBits = binaryBytes * 8;
       problem = null;
       stale.binary = false;
+      // The binary was just written in the chosen layout.
+      layoutPending = false;
     } else {
       problem = describeEncodeError(result.error, text);
       stale.binary = true;
@@ -406,17 +422,48 @@ export function initBinaryText(root: HTMLElement): void {
     else convertFromBinary();
   }
 
+  /**
+   * Keeps the promise of m.announce.layoutPending: once binary typed by hand decodes again,
+   * rewrites it in the layout chosen meanwhile, with the caret after the same bit. (From the
+   * text side, convertFromText already writes the chosen layout.)
+   */
+  function applyPendingLayout(): void {
+    if (!layoutPending || problem || direction !== 'binary-to-text') return;
+    layoutPending = false;
+    const field = el.field.binary;
+    const before = field.value;
+    const next = reformatBinary(before, readFormat(), { ascii: el.ascii.checked });
+    if (next === null || next === before) return;
+    const focused = document.activeElement === field;
+    const caret = field.selectionEnd ?? before.length;
+    field.value = next;
+    if (focused) {
+      const at = mapCaret(before, next, caret);
+      field.setSelectionRange(at, at);
+    }
+    // Same bytes, new offsets: refresh what depends on the field's text.
+    convertFromBinary();
+  }
+
+  /** Converts from the input side; true when that applied a layout that waited for a fix. */
+  function convertAndApplyLayout(): boolean {
+    const waiting = layoutPending;
+    convert();
+    applyPendingLayout();
+    return waiting && !layoutPending;
+  }
+
   // ---------------------------------------------------------------- editing
 
   el.field.text.addEventListener('input', () => {
     setDirection('text-to-binary');
-    convertFromText();
+    if (convertAndApplyLayout()) layoutApplied = true;
     scheduleProblemAnnouncement();
   });
 
   el.field.binary.addEventListener('input', () => {
     setDirection('binary-to-text');
-    convertFromBinary();
+    if (convertAndApplyLayout()) layoutApplied = true;
     scheduleProblemAnnouncement();
   });
 
@@ -433,16 +480,21 @@ export function initBinaryText(root: HTMLElement): void {
   function onLayoutChange(): void {
     renderGroupingState();
     if (direction === 'text-to-binary') {
+      // Success writes the binary in the new layout; an error leaves it for the fix.
       convertFromText();
+      if (problem) layoutPending = true;
       announceNow(problem ? m.announce.layoutPending : m.announce.reformatted);
       return;
     }
     // Binary typed by hand is rewritten only when it decodes; an unfinished last byte is kept.
+    // Otherwise the layout waits for the fix (applyPendingLayout).
     const next = reformatBinary(el.field.binary.value, readFormat(), { ascii: el.ascii.checked });
     if (next === null) {
+      layoutPending = true;
       announceNow(m.announce.layoutPending);
       return;
     }
+    layoutPending = false;
     el.field.binary.value = next;
     convertFromBinary();
     announceNow(m.announce.reformatted);
@@ -452,10 +504,11 @@ export function initBinaryText(root: HTMLElement): void {
 
   el.ascii.addEventListener('change', () => {
     const before = problem?.message ?? null;
-    convert();
+    const applied = convertAndApplyLayout();
     const after = problem?.message ?? null;
+    const fixed = applied ? m.announce.fixedWithLayout : m.announce.fixed;
     // The checkbox announces its own state; add only what changed because of it.
-    announceNow(after && after !== before ? after : !after && before ? m.announce.fixed : '');
+    announceNow(after && after !== before ? after : !after && before ? fixed : '');
   });
 
   // ---------------------------------------------------------------- actions

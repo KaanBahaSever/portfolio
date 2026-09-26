@@ -113,8 +113,10 @@ const en = {
       `${where}: “${char}” (${codePoint}) is not a binary digit.`,
     invalidCharacterHint: 'Use only 0 and 1, with spaces, line breaks or commas between bytes; a 0b before a group is fine.',
     groupLength: (where: string, group: number, bits: number) =>
-      `${where}: group ${group} has ${plural(bits, 'bit', 'bits')}, which is not a multiple of 8.`,
+      `${where}: group ${enNumber(group)} has ${plural(bits, 'bit', 'bits')}, which is not a multiple of 8.`,
     groupLengthHint: 'A byte has exactly 8 bits. Look for a missing or extra digit, or a space inside a byte.',
+    emptyPrefix: (where: string, group: number) => `${where}: group ${enNumber(group)} is a 0b prefix with no bits after it.`,
+    emptyPrefixHint: 'Write the byte’s 8 bits right after the 0b, or delete the prefix.',
     nonAsciiText: (where: string, char: string, codePoint: string, count: number) =>
       `${where}: “${char}” (${codePoint}) is outside ASCII, which ends at 127.` +
       (count > 1 ? ` The text has ${enNumber(count)} such characters.` : ''),
@@ -157,6 +159,7 @@ const en = {
     fixed: 'Fixed: the two fields match again.',
     reformatted: 'Binary layout updated.',
     layoutPending: 'The new layout applies once the error is fixed.',
+    fixedWithLayout: 'Fixed: the two fields match again, and the new layout is applied.',
   },
   breakdown: {
     heading: 'Character by character',
@@ -199,7 +202,7 @@ const tr: BinaryTextMessages = {
   meta: {
     title: 'İkili ↔ metin dönüştürücü',
     description:
-      'Metni ikili koda, ikili kodu metne tarayıcınızda dönüştürün: 8 bitlik gruplar hâlinde UTF-8 baytları, ASCII denetimi, hataların tam konumu ve karakter karakter döküm.',
+      'Metni ikili koda, ikili kodu metne tarayıcınızda dönüştürün: 8 bitlik gruplar hâlinde UTF-8 baytları, ASCII denetimi, hataların tam konumu ve karakter bazında döküm.',
   },
   header: {
     eyebrow: 'UTF-8 · tarayıcınızda çalışır',
@@ -261,10 +264,10 @@ const tr: BinaryTextMessages = {
     },
     grouping: 'Gruplar',
     groupings: {
-      byte: 'Bayt bayt',
-      character: 'Karakter karakter',
+      byte: 'Bayt başına',
+      character: 'Karakter başına',
     },
-    groupingHint: 'Karakter karakter gruplama, ASCII dışındaki bir karakterin iki ila dört baytını bir arada tutar.',
+    groupingHint: 'Karakter başına gruplama, ASCII dışındaki bir karakterin iki ila dört baytını bir arada tutar.',
     groupingDisabled: 'Bitleri gruplamak için bir ayraç seçin.',
     ascii: {
       label: 'Yalnızca ASCII',
@@ -277,29 +280,34 @@ const tr: BinaryTextMessages = {
     invalidCharacter: (where, char, codePoint) => `${where}: “${char}” (${codePoint}) ikili bir rakam değil.`,
     invalidCharacterHint:
       'Yalnızca 0 ve 1 kullanın; baytları boşluk, satır sonu ya da virgülle ayırın. Grupların başında 0b olabilir.',
-    // "3. grupta": the suffix sits on the noun, never on the number.
-    groupLength: (where, group, bits) => `${where}: ${group}. grupta ${trNumber(bits)} bit var; bu sayı 8’in katı değil.`,
+    // "3. grupta", "1.501. baytta": ordinals keep Turkish number formatting, and the suffix sits
+    // on the noun, never on the number.
+    groupLength: (where, group, bits) =>
+      `${where}: ${trNumber(group)}. grupta ${trNumber(bits)} bit var; bu sayı 8’in katı değil.`,
     groupLengthHint:
       'Bir bayt tam 8 bitten oluşur. Eksik ya da fazla bir rakam veya bir baytın ortasına düşmüş bir boşluk olup olmadığına bakın.',
+    emptyPrefix: (where, group) =>
+      `${where}: ${trNumber(group)}. grup yalnızca 0b ön ekinden oluşuyor; ardından hiç bit gelmiyor.`,
+    emptyPrefixHint: 'Baytın 8 bitini 0b ön ekinin hemen ardından yazın ya da ön eki silin.',
     nonAsciiText: (where, char, codePoint, count) =>
       `${where}: “${char}” (${codePoint}) ASCII’nin dışında; ASCII 127’de biter.` +
       (count > 1 ? ` Metinde bu türden ${trNumber(count)} karakter var.` : ''),
     nonAsciiTextHint: 'UTF-8 olarak kodlamak için “Yalnızca ASCII” seçeneğini kapatın.',
     nonAsciiByte: (where, byte, value, bits, count) =>
-      `${where}: ${byte}. baytın değeri ${trNumber(value)} (${bits}); 127’den büyük olduğu için ASCII değil.` +
+      `${where}: ${trNumber(byte)}. baytın değeri ${trNumber(value)} (${bits}); 127’den büyük olduğu için ASCII değil.` +
       (count > 1 ? ` İkili kodda bu türden ${trNumber(count)} bayt var.` : ''),
     nonAsciiByteHint: 'UTF-8 olarak okumak için “Yalnızca ASCII” seçeneğini kapatın.',
-    invalidUtf8: (where, byte, detail) => `${where}: ${byte}. baytta geçersiz bir UTF-8 dizisi var. ${detail}`,
+    invalidUtf8: (where, byte, detail) => `${where}: ${trNumber(byte)}. baytta geçersiz bir UTF-8 dizisi var. ${detail}`,
     utf8: {
       'unexpected-continuation': () =>
         'Bu bayt 10 ile başlıyor, yani bir devam baytı; ancak öncesinde bir karakteri başlatan bayt yok.',
       'invalid-byte': (detail) => `Bu baytın değeri (${detail.hex}) UTF-8’de hiçbir zaman kullanılmaz.`,
       overlong: () =>
-        'Dizi aşırı uzun bir kodlama: karakterin daha kısa bir kodlaması var ve UTF-8 yalnızca en kısasına izin verir.',
-      surrogate: () => 'Dizi, bir UTF-16 vekil kod noktasını (U+D800–U+DFFF) kodluyor; UTF-8 buna izin vermez.',
-      'too-large': () => 'Dizi, Unicode’un üst sınırı olan U+10FFFF değerini aşan bir değer kodluyor.',
+        'Bu dizi gereğinden uzun bir kodlama: karakterin daha kısa bir kodlaması var ve UTF-8 yalnızca en kısasına izin verir.',
+      surrogate: () => 'Bu dizi, bir UTF-16 vekil kod noktasını (U+D800–U+DFFF) kodluyor; UTF-8 buna izin vermez.',
+      'too-large': () => 'Bu dizi, Unicode’un üst sınırı olan U+10FFFF değerini aşan bir değer kodluyor.',
       'missing-continuation': (detail) =>
-        `Bu bayt ${trNumber(detail.expected)} baytlık bir karakter başlatıyor, ancak ${detail.at}. bayt 10 ile başlamıyor.`,
+        `Bu bayt ${trNumber(detail.expected)} baytlık bir karakter başlatıyor, ancak ${trNumber(detail.at)}. bayt 10 ile başlamıyor.`,
       truncated: (detail) =>
         `Bu bayt ${trNumber(detail.expected)} baytlık bir karakter başlatıyor, ancak bu karakterin yalnızca ${trNumber(detail.present)} baytı var.`,
     },
@@ -319,6 +327,7 @@ const tr: BinaryTextMessages = {
     fixed: 'Düzeltildi: iki alan yeniden eşleşiyor.',
     reformatted: 'İkili kodun düzeni güncellendi.',
     layoutPending: 'Yeni düzen, hata düzeltildiğinde uygulanır.',
+    fixedWithLayout: 'Düzeltildi: iki alan yeniden eşleşiyor ve yeni düzen uygulandı.',
   },
   breakdown: {
     heading: 'Karakter dökümü',
@@ -344,7 +353,7 @@ const tr: BinaryTextMessages = {
       control: 'kontrol karakteri',
       space: 'boşluk',
       format: 'görünmez biçim karakteri',
-      combining: 'birleşen işaret',
+      combining: 'birleştirici işaret',
       surrogate: 'eşi olmayan vekil',
     },
   },

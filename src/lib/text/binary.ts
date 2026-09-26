@@ -95,9 +95,14 @@ export type DecodeError =
   | { code: 'invalid-character'; span: Span; char: string; codePoint: number }
   /** A group whose length is not a multiple of 8; `group` counts from 1. */
   | { code: 'group-length'; span: Span; group: number; bits: number }
+  /** A group that is only a 0b prefix, with no bits after it; `group` counts from 1. */
+  | { code: 'empty-prefix'; span: Span; group: number }
   /** ASCII mode: the first byte above 127 (0-based index), its value, and how many there are in all. */
   | { code: 'non-ascii'; span: Span; byte: number; value: number; count: number }
-  /** `byte` is the 0-based index of the offending sequence's first byte. */
+  /**
+   * `byte` is the 0-based index of the offending sequence's first byte; `value` is the byte at
+   * `issue.at` (for an unfinished byte, the smallest value its typed bits allow).
+   */
   | { code: 'invalid-utf8'; span: Span; byte: number; issue: Utf8Issue; value: number };
 
 export type EncodeResult = { ok: true; bytes: Uint8Array } | { ok: false; error: EncodeError };
@@ -128,7 +133,9 @@ export interface DecodeOptions {
   ascii?: boolean;
   /**
    * Treat an unfinished end (a last group short of a byte, or a character missing its last
-   * bytes) as pending instead of an error, and decode what comes before it.
+   * bytes) as pending instead of an error, and decode what comes before it. The bits already
+   * typed of a character's next byte are still checked: once no way of finishing them can
+   * continue the character, that is an error.
    */
   partial?: boolean;
 }
@@ -327,6 +334,29 @@ export function parseBinary(input: string): ParseResult {
   return { ok: true, groups };
 }
 
+/**
+ * For a character cut short (`sequence`: its lead byte and the continuation bytes so far) and
+ * the first 1–7 bits typed of its next byte: the problem every way of finishing that byte runs
+ * into, with the smallest value the bits allow, or null while some way on is still valid.
+ * The values those bits allow form one aligned block, and each block that holds no valid byte
+ * holds only one kind of problem, so the smallest value stands for all of them.
+ */
+function blockedContinuation(sequence: Uint8Array, prefix: string): { problem: Utf8Problem; value: number } | null {
+  const free = 8 - prefix.length;
+  const low = Number.parseInt(prefix, 2) << free;
+  const high = low | ((1 << free) - 1);
+  const candidate = new Uint8Array(sequence.length + 1);
+  candidate.set(sequence);
+  let first: Utf8Issue | null = null;
+  for (let value = low; value <= high; value++) {
+    candidate[sequence.length] = value;
+    const issue = findUtf8Issue(candidate);
+    if (!issue || issue.problem === 'truncated') return null;
+    first ??= issue;
+  }
+  return first ? { problem: first.problem, value: low } : null;
+}
+
 /** Reads binary input back into text. */
 export function decodeBinary(input: string, options: DecodeOptions = {}): DecodeResult {
   const parsed = parseBinary(input);
@@ -348,9 +378,14 @@ export function decodeBinary(input: string, options: DecodeOptions = {}): Decode
         pendingBits = rest;
         pendingBitsStart = bits === 0 ? group.start : group.end - rest;
       } else {
+        const span = spanAt(input, group.start, group.end);
         return {
           ok: false,
-          error: { code: 'group-length', span: spanAt(input, group.start, group.end), group: index + 1, bits },
+          // Zero is a multiple of 8, so a bare 0b has its own code rather than a length problem.
+          error:
+            bits === 0
+              ? { code: 'empty-prefix', span, group: index + 1 }
+              : { code: 'group-length', span, group: index + 1, bits },
         };
       }
     }
@@ -399,6 +434,30 @@ export function decodeBinary(input: string, options: DecodeOptions = {}): Decode
     if (options.partial && issue.problem === 'truncated') {
       pendingBytes = byteCount - issue.start;
       pendingExpected = issue.expected;
+      // The bits typed so far of the character's next byte may already rule out every way on.
+      if (pendingBits > 0) {
+        const lastGroup = groups[last];
+        const prefix = input.slice(pendingBitsStart, pendingBitsStart + pendingBits);
+        const blocked = blockedContinuation(bytes.subarray(issue.start, byteCount), prefix);
+        if (blocked) {
+          return {
+            ok: false,
+            error: {
+              code: 'invalid-utf8',
+              span: spanAt(input, offsets[issue.start] ?? 0, lastGroup ? lastGroup.end : input.length),
+              byte: issue.start,
+              issue: {
+                problem: blocked.problem,
+                start: issue.start,
+                at: byteCount,
+                end: byteCount + 1,
+                expected: issue.expected,
+              },
+              value: blocked.value,
+            },
+          };
+        }
+      }
     } else {
       return {
         ok: false,
@@ -501,6 +560,37 @@ export function reformatBinary(input: string, options: FormatOptions, decode: De
   return body + JOINERS[options.separator] + tail;
 }
 
+/**
+ * Where a caret at `offset` in `before` belongs in `after`, the same bits in another layout:
+ * after the same number of bits (0b prefixes do not count), and past the separator that follows
+ * when it stood past one.
+ */
+export function mapCaret(before: string, after: string, offset: number): number {
+  const from = parseBinary(before);
+  const to = parseBinary(after);
+  if (!from.ok || !to.ok) return after.length;
+  let bits = 0;
+  for (const group of from.groups) {
+    bits += Math.max(0, Math.min(offset, group.end) - group.bitsStart);
+  }
+  if (bits === 0) return 0;
+  const pastSeparator = offset > 0 && isSeparatorUnit(before.charCodeAt(offset - 1));
+  let remaining = bits;
+  for (const group of to.groups) {
+    const length = group.end - group.bitsStart;
+    if (remaining > length) {
+      remaining -= length;
+      continue;
+    }
+    let position = group.bitsStart + remaining;
+    if (pastSeparator && position === group.end) {
+      while (position < after.length && isSeparatorUnit(after.charCodeAt(position))) position++;
+    }
+    return position;
+  }
+  return after.length;
+}
+
 // ---------------------------------------------------------------------------------------------
 // Per-character breakdown
 
@@ -580,7 +670,8 @@ const NAMED: ReadonlyMap<number, string> = new Map([
   [0x2068, 'FSI'],
   [0x2069, 'PDI'],
   [0x3000, 'IDSP'],
-  [0xfeff, 'ZWNBSP'],
+  // U+FEFF has two abbreviations, BOM and ZWNBSP; at the start of a text it is a byte order mark.
+  [0xfeff, 'BOM'],
 ]);
 
 /** Abbreviation for a code point that has no visible glyph of its own, or null. */

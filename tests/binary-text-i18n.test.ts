@@ -27,6 +27,7 @@ const SAMPLE_ARGS: Record<string, unknown[]> = {
   'problems.where': [2, 17],
   'problems.invalidCharacter': ['«WHERE»', '«CHAR»', '«CP»'],
   'problems.groupLength': ['«WHERE»', 3, 7],
+  'problems.emptyPrefix': ['«WHERE»', 3],
   'problems.nonAsciiText': ['«WHERE»', '«CHAR»', '«CP»', 3],
   'problems.nonAsciiByte': ['«WHERE»', 2, 195, '«BITS»', 2],
   'problems.invalidUtf8': ['«WHERE»', 5, '«DETAIL»'],
@@ -88,6 +89,21 @@ test('Turkish numbers use Turkish formatting and singular nouns', () => {
   assert.equal(binaryTextMessages.en.counts.bytes(1), '1 byte');
   assert.equal(binaryTextMessages.en.counts.bytes(16384), '16,384 bytes');
   assert.equal(m.problems.where(1, 1234), 'Satır 1, sütun 1.234');
+});
+
+test('ordinals in problems are formatted for the page language', () => {
+  const { en: e, tr: t } = binaryTextMessages;
+  const detail: Utf8Detail = { hex: '0xC3', expected: 2, at: 1502, present: 1 };
+  assert.match(e.problems.groupLength('W', 1501, 4), /group 1,501 has 4 bits/u);
+  assert.match(e.problems.emptyPrefix('W', 1501), /group 1,501 is a 0b prefix/u);
+  assert.match(e.problems.nonAsciiByte('W', 1501, 255, '11111111', 1), /byte 1,501 is 255/u);
+  assert.match(e.problems.invalidUtf8('W', 1501, ''), /byte 1,501\./u);
+  assert.match(e.problems.utf8['missing-continuation'](detail), /byte 1,502 does not/u);
+  assert.match(t.problems.groupLength('W', 1501, 4), /1\.501\. grupta 4 bit/u);
+  assert.match(t.problems.emptyPrefix('W', 1501), /1\.501\. grup yalnızca/u);
+  assert.match(t.problems.nonAsciiByte('W', 1501, 255, '11111111', 1), /1\.501\. baytın değeri 255/u);
+  assert.match(t.problems.invalidUtf8('W', 1501, ''), /1\.501\. baytta/u);
+  assert.match(t.problems.utf8['missing-continuation'](detail), /1\.502\. bayt 10/u);
 });
 
 test('English prose avoids exclamation marks and banned words', () => {

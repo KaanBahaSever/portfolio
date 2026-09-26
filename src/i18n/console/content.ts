@@ -243,11 +243,11 @@ const tr: ConsoleContent = {
     text(dim('Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar · İstanbul')),
     blank(),
     text(
-      'Saf matematik altyapısıyla sistem yazılımı geliştiriyorum. İstanbul Üniversitesinde matematik okuyorum. Günlük işimde modern C++ ve Go kullanıyorum; sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar yazıyorum. Kodu tek tıkla test eden, paketleyen ve farklı platformlar için derleyip yayına alan pipeline’lar da kuruyorum.',
+      'Sistem yazılımı geliştiriyorum; temelim saf matematik. İstanbul Üniversitesinde matematik okuyorum. Günlük işimde modern C++ ve Go kullanıyorum; sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar yazıyorum. Kodu tek tıkla test eden, paketleyen ve farklı platformlar için derleyip yayına alan pipeline’lar da kuruyorum.',
     ),
     blank(),
     text(
-      'Daha önce, 2021–2024 arasında crowd.inc’te yazılım geliştirici olarak çalıştım. 2019–2022 arasında İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım. Ekibimiz üç roket yaptı; uçuş aviyoniğinin gömülü yazılımını ben yazdım.',
+      'Daha önce 2021–2024 arasında crowd.inc’te yazılım geliştirici olarak çalıştım. 2019–2022 arasında İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım. Ekibimiz üç roket yaptı; uçuş aviyoniğinin gömülü yazılımını ben yazdım.',
     ),
     blank(),
     text(dim('Sırada: '), run('cat about.txt'), '  ', run('projects'), '  ', run('ls skills')),
@@ -260,11 +260,11 @@ const tr: ConsoleContent = {
     heading('Matematik'),
     indented(
       2,
-      'Kasım 2019’dan beri İstanbul Üniversitesi Fen Fakültesinde matematik lisansı okuyorum. Mezuniyete hazırlanıyorum; sonra bilgisayar bilimlerinde yüksek lisans yapmayı planlıyorum.',
+      'Kasım 2019’dan beri İstanbul Üniversitesi Fen Fakültesi Matematik Bölümünde lisans okuyorum. Mezuniyete hazırlanıyorum; sonra bilgisayar bilimlerinde yüksek lisans yapmayı planlıyorum.',
     ),
     indented(
       2,
-      'Saf matematikte reel analiz, soyut cebir ve topoloji ağırlıklı bir temelim var: Önce varsayımları açıkça koyar, sonra onlardan ne çıktığını kanıtlarım.',
+      'Saf matematikte reel analiz, soyut cebir ve topoloji ağırlıklı bir temelim var: Önce varsayımları açıkça yazarım, sonra onlardan ne çıktığını kanıtlarım.',
     ),
     blank(),
     heading('İş deneyimi'),
@@ -275,7 +275,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Bugün de özellikle Asion ekosistemi için GitHub Actions ile pipeline’lar kuruyorum. Çapraz derleme runner’larıyla çalışan bu pipeline’lar tek tıkla test ediyor, paketliyor, farklı platformlar için derleme çıktıları üretiyor ve dağıtım yapıyor. Devamı: ',
+      'Bugün de özellikle Asion ekosistemi için GitHub Actions ile pipeline’lar kuruyorum. Çapraz derleme runner’larıyla çalışan bu pipeline’lar tek tıkla kodu test ediyor, paketliyor, farklı platformlar için derleme çıktıları üretiyor ve dağıtım yapıyor. Devamı: ',
       run('cat ~/skills/devops.txt'),
     ),
     blank(),
@@ -302,10 +302,10 @@ const tr: ConsoleContent = {
       '.',
     ),
     blank(),
-    heading('Nasıl başladı'),
+    heading('Her şey nasıl başladı'),
     indented(
       2,
-      'Önce uzay vardı. Daha kod yazmadan, uzay keşfi, uzay aracı mimarileri, Ay görevlerinin analizi ve kuramsal görev planlaması uzun zamandır ilgimi çekiyordu.',
+      'Önce uzay vardı. Kod yazmaya başlamadan önce de uzay keşfi, uzay aracı mimarileri, Ay görevlerinin analizi ve kuramsal görev planlaması uzun süredir ilgimi çekiyordu.',
     ),
     indented(
       2,
@@ -325,7 +325,7 @@ const tr: ConsoleContent = {
     ),
     indented(
       2,
-      'Matematik Kulübü, üniversitenin son yıllarında. Akademik etkinlikler, seminerler, mantık ve matematik yarışmaları düzenledim ve yürüttüm.',
+      'Matematik Kulübü, üniversitedeki son yıllarımda. Akademik etkinlikler, seminerler, mantık ve matematik yarışmaları düzenledim ve yürüttüm.',
     ),
     indented(2, 'YetGen “21. Yüzyıl Yetkinlikleri” sertifikası, Mehmet Zorlu Vakfı, 2020.'),
     indented(2, 'Erasmus+ Gençlik Değişimi, Arrecife, İspanya, 2017–2018.'),
@@ -351,7 +351,7 @@ const tr: ConsoleContent = {
       blank(),
       pair('gRPC, Protobuf', 'Asion’da ajan, runner, arayüz ve native host arasındaki iletişim'),
       pair('MQTT', 'Novacast’ın düşük gecikmeli pub/sub hatları'),
-      pair('OS event hooks', 'Asion’da macOS, Linux ve Windows’ta etkinlik takibi; arkada hafif bir daemon çalışır'),
+      pair('OS event hooks', 'Asion’un macOS, Linux ve Windows’taki etkinlik takibi; arkada hafif bir daemon çalışır'),
       pair('Linux sunucular', 'crowd.inc’te sunucu kurulumu ve otomatik testler'),
       pair('Telemetri', 'roket aviyoniği: RF iletimi, SD karta kayıt ve veriler için bir masaüstü paneli'),
     ],

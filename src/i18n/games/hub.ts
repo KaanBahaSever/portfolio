@@ -31,11 +31,11 @@ const tr: GamesHubMessages = {
   meta: {
     title: 'Oyunlar',
     description:
-      'Tarayıcıda bilgisayara karşı Amiral Battı ve XOX oynayın. Bilgisayar, hamlelerini olasılık yoğunluğuna ve minimax aramasına göre seçiyor.',
+      'Tarayıcıda bilgisayara karşı Amiral Battı ve XOX oynayın. Rakiplerden biri olasılık yoğunluğuyla, öteki minimax aramasıyla hamle seçiyor.',
   },
   eyebrow: 'Eğlence matematiği',
   title: 'Oyunlar',
-  lead: 'Buradaki iki klasik oyunu ilk kez programlamayı öğrenirken C#’la yazmıştım. Şimdi onları tarayıcı için baştan yazdım. Bilgisayar rakiplerin her biri küçük bir algoritmayla oynuyor. İki sayfada da rakibin nasıl düşündüğünü izleyebilirsiniz.',
+  lead: 'Bu iki klasik oyunu ilk kez C#’la, programlamayı öğrenirken yazmıştım. Şimdi onları tarayıcı için baştan yazdım. Her oyunda bilgisayar küçük bir algoritmayla oynuyor; iki sayfada da onun nasıl düşündüğünü izleyebilirsiniz.',
   figure: (n) => `Şekil ${n}`,
   play: 'Oyna',
   opponent: 'Rakip:',

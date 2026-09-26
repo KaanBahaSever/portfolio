@@ -70,8 +70,8 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
             </li>
             <li>
               Ok tuşlarıyla birer hücre ilerlersiniz. <kbd class={ui.kbd}>Home</kbd> ve <kbd class={ui.kbd}>End</kbd>{' '}
-              satırın başına ve sonuna, <kbd class={ui.kbd}>Page Up</kbd> ve <kbd class={ui.kbd}>Page Down</kbd> ise
-              sütunun başına ve sonuna atlar.
+              tuşlarıyla satırın iki ucuna, <kbd class={ui.kbd}>Page Up</kbd> ve <kbd class={ui.kbd}>Page Down</kbd>{' '}
+              tuşlarıyla sütunun iki ucuna atlarsınız.
             </li>
             <li>
               <kbd class={ui.kbd}>Enter</kbd> ya da <kbd class={ui.kbd}>Boşluk</kbd> tuşu hazırlıkta seçili gemiyi
@@ -82,8 +82,8 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
             </li>
           </ul>
           <p class={body}>
-            Ekran okuyucu kullanıyorsanız her hücrenin koordinatını ve durumunu (“C7, isabet” gibi) duyarsınız. Her atış
-            da savaş günlüğünden okunur.
+            Ekran okuyucu kullanıyorsanız her hücrenin koordinatını ve durumunu (“C7, isabet” gibi) duyarsınız. Savaş
+            günlüğü de her atışı size bildirir.
           </p>
         </div>
       </div>
@@ -153,7 +153,7 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
           </li>
           <li>
             <strong class={strong}>Normal</strong>, av ve hedef yöntemiyle oynar. Av sırasında yalnızca satır ve sütun
-            numaralarının toplamı su üstündeki en kısa geminin boyuna tam bölünen hücrelere ateş eder. Böylece o gemi
+            numaralarının toplamı henüz batmamış en kısa geminin boyuna tam bölünen hücrelere ateş eder. Böylece o gemi
             atışların arasında saklanamaz. Bir isabetten sonra dört komşu hücreyi dener. İki isabet aynı hizaya gelince
             de o çizgiyi takip eder.
           </li>
@@ -176,16 +176,16 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
           <p>
             Burada <var>P</var><sub><var>s</var></sub>, <var>s</var> gemisi için geriye kalan konumların kümesi;{' '}
             <var>h</var>(<var>p</var>), <var>p</var> konumunun üzerinden geçtiği ve henüz batmamış gemilere ait
-            isabetlerin sayısı; <var>w</var> ise isabetsiz hiçbir sayımın ulaşamayacağı kadar büyük bir ağırlık (tam
-            filoda 35). Böylece bir isabetten sonra sayım vurulan gemiye yoğunlaşır. Bilgisayar değeri en yüksek
-            hücreye ateş eder; birden çok hücre eşitse aralarından rastgele birini seçer. Savaş sırasında ısı haritasını
-            açıp kendi tahtanızdaki <var>d</var> değerlerini izleyebilirsiniz.
+            isabetlerin sayısı; <var>w</var> ise isabetsiz konumlardan gelebilecek her sayıdan büyük bir ağırlık (tam
+            filoda 35). Böylece bir isabetten sonra sayım vurulan geminin üzerinde yoğunlaşır. Bilgisayar değeri en
+            yüksek hücreye ateş eder; birden çok hücre eşitse aralarından rastgele birini seçer. Savaş sırasında ısı
+            haritasını açıp kendi tahtanızdaki <var>d</var> değerlerini izleyebilirsiniz.
           </p>
           <p>
-            Her gemiyi ayrı saymak, gemilerin üst üste binemeyeceğini hesaba katmaz. Bütün filoları tam olarak saymaksa
-            çok fazla dizilimi tek tek dolaşmayı gerektirir. Bu yüzden genelde her gemiyi ayrı sayan bu yaklaşık yöntem
-            kullanılır. Rastgele filolarla oynanan 300 simülasyon oyununda filoyu batırmak için ortalama olarak Kolay
-            seviye 95, Normal 51, Zor ise 44 civarında atış yaptı.
+            Her gemiyi ayrı saymak, gemilerin üst üste binemeyeceğini hesaba katmaz. Bütün filoyu birlikte ve tam olarak
+            saymak ise çok büyük sayıda dizilimi tek tek dolaşmayı gerektirir. Bu yüzden genellikle her gemiyi ayrı sayan
+            bu yaklaşık yöntem kullanılır. Rastgele dizilmiş filolara karşı oynanan 300 simülasyon oyununda Kolay seviye
+            filoyu ortalama 95 civarında atışta batırdı. Normal seviye için bu sayı 51, Zor seviye için 44 civarındaydı.
           </p>
         </div>
       </div>

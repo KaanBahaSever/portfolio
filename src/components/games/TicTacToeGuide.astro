@@ -47,8 +47,8 @@ const cells = Array.from({ length: 9 }, (_, i) => i);
               <li>
                 <kbd class={ui.kbd}>1</kbd>–<kbd class={ui.kbd}>9</kbd> rakam tuşlarıyla bir kareye doğrudan
                 oynayabilirsiniz. Hangi rakamın hangi kareye denk geleceğini “Rakam tuşları” ayarından seçin.{' '}
-                <em>1 sol üstte</em> düzeni, telefon tuş takımındaki gibi okuma sırasını izler. <em>7 sol üstte</em>{' '}
-                düzeni ise klavyedeki sayısal tuş takımıyla aynıdır.
+                <em>1 sol üstte</em> düzeninde rakamlar, telefon tuş takımındaki gibi soldan sağa ve yukarıdan aşağı
+                dizilir. <em>7 sol üstte</em> düzeni ise klavyedeki sayısal tuş takımıyla aynıdır.
               </li>
             </ul>
             <p class={body}>
@@ -112,26 +112,26 @@ const cells = Array.from({ length: 9 }, (_, i) => i);
       <div class="max-w-3xl">
         <div class={body}>
           <p>
-            <strong class={strong}>Minimax.</strong> Bilgisayar, hamlesini seçmek için oyunun olası bütün devamlarını
-            sonuna kadar oynar. Oyun bundan sonraki <var>n</var>. hamlede biterse kazanan taraf 10 − <var>n</var> puan,
-            kaybeden taraf da bunun eksisini alır; beraberlik 0 puandır. İki tarafın da hep kendisi için en iyi hamleyi
-            yapacağı varsayılır. Puandan <var>n</var> çıkarıldığı için bilgisayar çabuk kazanmayı geç kazanmaya tercih
-            eder. Yenilgiden kaçamıyorsa da oyunu olabildiğince uzatan savunmayı seçer.
+            <strong class={strong}>Minimax.</strong> Bilgisayar, hamlesini seçmek için oyunun devam edebileceği bütün
+            yolları sonuna kadar oynar. Oyun bundan sonraki <var>n</var>. hamlede biterse kazanan taraf
+            10 − <var>n</var> puan, kaybeden taraf da bunun eksisini alır; beraberlik 0 puandır. İki tarafın da hep
+            kendisi için en iyi hamleyi yapacağı varsayılır. Puandan <var>n</var> çıkarıldığı için bilgisayar çabuk
+            kazanmayı geç kazanmaya tercih eder. Yenilgiden kaçamıyorsa da oyunu olabildiğince uzatan savunmayı seçer.
           </p>
           <p>
-            <strong class={strong}>Alfa–beta budama.</strong> Devamların çoğuna hiç bakmaya gerek yoktur. Bir yanıt, bir
-            hamlenin daha önce bulunan bir seçenekten kötü olduğunu gösterdiği anda o hamlenin geri kalan yanıtları
-            kararı değiştiremez; bilgisayar onları atlar. Budamasız minimax aramasıyla tam olarak aynı sonuca varılır,
-            yalnızca daha az pozisyona bakılır. Bu sayfanın testleri iki iddiayı da doğrular: İki arama ulaşılabilecek
-            her pozisyonda aynı değeri verir ve Yenilmez seviye, kim başlarsa başlasın, hiçbir hamle dizisine karşı
-            kaybetmez.
+            <strong class={strong}>Alfa–beta budama.</strong> Bu yolların birçoğuna hiç bakmak gerekmez. Bir hamleye
+            verilen yanıtlardan biri, o hamlenin daha önce bulunan bir seçenekten kötü olduğunu gösterirse geri kalan
+            yanıtlar kararı değiştiremez. Bilgisayar da onları atlar. Sonuç, budamasız minimax aramasıyla tamamen
+            aynıdır; yalnızca daha az pozisyona bakılır. Bu sayfanın testleri iki iddiayı da doğrular: İki arama
+            ulaşılabilecek her pozisyonda aynı değeri verir ve Yenilmez seviye, kim başlarsa başlasın, hiçbir hamle
+            dizisine karşı kaybetmez.
           </p>
           <p>
             <strong class={strong}>Seviyeler.</strong> Kolay, boş karelerden herhangi birine oynar. Orta, iki hamle
-            ilerisini görür. Kazanabiliyorsa kazanır, sizin kazanmanızı da engeller ama gelmekte olan bir çatalı, yani
-            aynı anda iki kazanma tehdidi kuran bir hamleyi göremez. Yenilmez, oyunu sonuna kadar tarar ve en iyi
-            hamleler arasından rastgele birini seçer. Bu yüzden oyunlar her seferinde aynı gitmez ama bilgisayar hiç
-            kaybetmez. İki taraf da kusursuz oynarsa XOX berabere biter.
+            ilerisini görür. Kazanabiliyorsa kazanır, sizin kazanmanızı da engeller ama bir çatal kurulacağını
+            önceden göremez. Çatal, aynı anda iki kazanma tehdidi kuran hamledir. Yenilmez, oyunu sonuna kadar tarar ve
+            en iyi hamleler arasından rastgele birini seçer. Bu yüzden oyunlar her seferinde aynı gitmez ama bilgisayar
+            hiç kaybetmez. İki taraf da kusursuz oynarsa XOX berabere biter.
           </p>
           <p>
             <strong class={strong}>Değerlendirme.</strong> “Değerlendirmeyi göster” seçeneği, sıradaki oyuncunun

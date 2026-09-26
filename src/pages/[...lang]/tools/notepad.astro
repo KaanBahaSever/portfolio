@@ -54,25 +54,24 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
               <h2 class={heading}>Metniniz bu tarayıcıda kalır</h2>
               <ul class={list}>
                 <li>
-                  <strong class={strong}>Otomatik kayıt</strong>, yazmayı bıraktıktan kısa bir süre sonra metni, dosya
-                  adını ve satır sonu seçimini bu tarayıcının yerel depolamasına (localStorage) kaydeder. Sayfayı
-                  yenilediğinizde ya da daha sonra döndüğünüzde metniniz yerinde olur. Hiçbir şey yüklenmez, hiçbir yere
-                  gönderilmez.
+                  <strong class={strong}>Otomatik kayıt</strong>, siz yazmayı bıraktıktan kısa bir süre sonra metni, dosya
+                  adını ve satır sonu seçimini bu tarayıcının yerel depolama alanında saklar. Sayfayı yenileseniz de, daha
+                  sonra geri gelseniz de metniniz yerinde durur. Hiçbir şey yüklenmez, hiçbir yere gönderilmez.
                 </li>
                 <li>
-                  Kopya yalnızca bu cihazdaki bu tarayıcıda durur. Gizli pencere kapatıldığında kopyayı unutur; bu sitenin
-                  verilerini temizlemek de kopyayı siler.
+                  Kayıtlı kopya yalnızca bu cihazdaki bu tarayıcıda durur. Gizli pencerede çalışıyorsanız pencereyi
+                  kapattığınızda kopya silinir. Bu sitenin verilerini temizlemek de kopyayı siler.
                 </li>
                 <li>
-                  Ortak kullanılan bir bilgisayarda işiniz bitince <strong class={strong}>Temizle</strong> düğmesine basın
-                  ya da durum çubuğundaki <strong class={strong}>Otomatik kayıt</strong> anahtarını kapatın; ikisi de
-                  kayıtlı kopyayı siler.
+                  Başkalarıyla ortak kullandığınız bir bilgisayarda işiniz bitince <strong class={strong}>Temizle</strong>{' '}
+                  düğmesine basın ya da durum çubuğundaki <strong class={strong}>Otomatik kayıt</strong> anahtarını kapatın.
+                  İkisi de kayıtlı kopyayı siler.
                 </li>
                 <li>
-                  Çok uzun metinler tarayıcının depolama alanına sığmayabilir. Durum çubuğu bunu bildirir;{' '}
-                  <strong class={strong}>İndir</strong> ile metni yine de dosya olarak kaydedebilirsiniz.
+                  Çok uzun metinler tarayıcının depolama alanına sığmayabilir. Böyle olursa durum çubuğunda bir uyarı
+                  görürsünüz; <strong class={strong}>İndir</strong> ile metni yine de dosya olarak kaydedebilirsiniz.
                 </li>
-                <li>Not defteri iki sekmede açıksa, boşta bekleyen sekme diğerinde yazdıklarınızı alır.</li>
+                <li>Not defteri iki sekmede açıksa, kullanmadığınız sekme diğerinde yazdıklarınızı alır.</li>
               </ul>
             </section>
 
@@ -80,22 +79,22 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
               <h2 class={heading}>Dosyalar</h2>
               <ul class={list}>
                 <li>
-                  <strong class={strong}>İndir</strong>, metni dosya adı alanındaki adla ve dilediğiniz uzantıyla kaydeder:{' '}
-                  <code class={code}>notlar.txt</code>, <code class={code}>README.md</code>,{' '}
-                  <code class={code}>veri.json</code>. Uzantısız adlara <code class={code}>.txt</code> eklenir.
+                  <strong class={strong}>İndir</strong>, metni dosya adı alanına yazdığınız adla kaydeder. Uzantıyı siz
+                  seçersiniz: <code class={code}>notlar.txt</code>, <code class={code}>README.md</code>,{' '}
+                  <code class={code}>veri.json</code>. Uzantı yazmazsanız sona <code class={code}>.txt</code> eklenir.
                 </li>
                 <li>
-                  Satır sonu olarak CRLF bekleyen Windows programları için durum çubuğunda{' '}
-                  <strong class={strong}>CRLF</strong>’yi seçin; CRLF kullanan bir dosya açtığınızda bu ayar
-                  kendiliğinden seçilir.
+                  Bazı Windows programları satır sonlarında CRLF bekler. Bu programlar için durum çubuğunda{' '}
+                  <strong class={strong}>CRLF</strong>’yi seçin. CRLF kullanan bir dosya açarsanız bu ayar kendiliğinden
+                  seçilir.
                 </li>
                 <li>
-                  <strong class={strong}>Aç</strong>, en fazla 20 MB boyutundaki UTF-8 ya da UTF-16 metin dosyalarını
-                  okur. Dosyayı düzenleyicinin üzerine sürükleyip bırakabilirsiniz de.
+                  <strong class={strong}>Aç</strong> düğmesi en fazla 20 MB boyutundaki UTF-8 ve UTF-16 metin dosyalarını
+                  açar. Dosyayı düzenleyicinin üzerine sürükleyip bırakarak da açabilirsiniz.
                 </li>
                 <li>
-                  <strong class={strong}>Temizle</strong> metni, dosya adını ve kayıtlı kopyayı silerek baştan başlar.
-                  Önce onayınızı ister; hemen ardından <strong class={strong}>Geri al</strong> ile her şeyi geri
+                  <strong class={strong}>Temizle</strong> ile baştan başlarsınız: metin, dosya adı ve kayıtlı kopya silinir.
+                  Silmeden önce onayınız istenir. Hemen ardından <strong class={strong}>Geri al</strong> ile her şeyi geri
                   getirebilirsiniz.
                 </li>
               </ul>
@@ -105,20 +104,20 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
               <h2 class={heading}>Odak modu</h2>
               <ul class={list}>
                 <li>
-                  <strong class={strong}>Odak modu</strong> ekranı yalnızca metne ayırır: araç çubuğu gizlenir, sade bir
-                  durum satırında satır ve kelime sayısı görünmeye devam eder. Tarayıcı izin veriyorsa tam ekrana da
+                  <strong class={strong}>Odak modunda</strong> ekranda yalnızca metin kalır. Araç çubuğu gizlenir; satır ve
+                  kelime sayısı sade bir durum satırında görünmeye devam eder. Tarayıcı izin veriyorsa sayfa tam ekrana da
                   geçer.
                 </li>
                 <li>
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Enter</kbd> (Mac’te{' '}
-                  <kbd class={kbd}>⌘</kbd> + <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Return</kbd>) odak modunu
-                  sayfanın her yerinden açıp kapatır. Bu birleşimi tarayıcılar ve ekran okuyucular kullanmaz ve hiçbir
-                  klavye düzeninde bir karakter yazmaz; <kbd class={kbd}>F11</kbd> de tarayıcınızın kendi tam ekran tuşu
-                  olarak kalır.
+                  <kbd class={kbd}>⌘</kbd> + <kbd class={kbd}>Shift</kbd> + <kbd class={kbd}>Return</kbd>) ile odak
+                  modunu sayfanın her yerinden açıp kapatabilirsiniz. Tarayıcılar ve ekran okuyucular bu tuş birleşimini
+                  kullanmaz. Bu birleşim hiçbir klavye düzeninde karakter de yazmaz. <kbd class={kbd}>F11</kbd> ise yine
+                  tarayıcınızın kendi tam ekran tuşu olarak kalır.
                 </li>
                 <li>
-                  <kbd class={kbd}>Esc</kbd> tuşu odak modunu kapatır. Bul paneli açıksa ilk <kbd class={kbd}>Esc</kbd>{' '}
-                  paneli, ikincisi odak modunu kapatır.
+                  <kbd class={kbd}>Esc</kbd> ile odak modundan çıkarsınız. Bul paneli açıksa ilk{' '}
+                  <kbd class={kbd}>Esc</kbd> paneli, ikincisi odak modunu kapatır.
                 </li>
               </ul>
             </section>
@@ -128,7 +127,7 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
               <ul class={list}>
                 <li>
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>F</kbd> (Mac’te <kbd class={kbd}>⌘</kbd> +{' '}
-                  <kbd class={kbd}>F</kbd>): bul. Seçili bir kelime aranan metin olur.
+                  <kbd class={kbd}>F</kbd>): bul. Bir kelime seçiliyse arama o kelimeyle başlar.
                 </li>
                 <li>
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>H</kbd> (Mac’te <kbd class={kbd}>⌘</kbd> +{' '}
@@ -142,23 +141,23 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>G</kbd>: sonraki / önceki eşleşme.
                 </li>
                 <li>
-                  Yeni metin alanında <kbd class={kbd}>Enter</kbd> geçerli eşleşmeyi değiştirir,{' '}
-                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Enter</kbd> tümünü değiştirir.{' '}
-                  <kbd class={kbd}>Esc</kbd> paneli kapatıp metne döner.
+                  Yeni metin alanında <kbd class={kbd}>Enter</kbd> o anki eşleşmeyi,{' '}
+                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Enter</kbd> hepsini değiştirir.{' '}
+                  <kbd class={kbd}>Esc</kbd> paneli kapatır ve sizi metne geri götürür.
                 </li>
                 <li>
-                  Panel açıkken <kbd class={kbd}>Alt</kbd> + <kbd class={kbd}>C</kbd>, <kbd class={kbd}>W</kbd>,{' '}
-                  <kbd class={kbd}>R</kbd>: büyük/küçük harf duyarlılığı, tam kelime, düzenli ifade. Mac’te{' '}
-                  <kbd class={kbd}>⌥</kbd> + harf, panel düğmelerinden biri odaktayken çalışır; böylece arama alanlarına ç
-                  gibi karakterler yazılabilir.
+                  Bul panelindeyken <kbd class={kbd}>Alt</kbd> + <kbd class={kbd}>C</kbd>, <kbd class={kbd}>W</kbd> ve{' '}
+                  <kbd class={kbd}>R</kbd> sırasıyla büyük/küçük harf duyarlılığını, tam kelime aramayı ve düzenli ifadeyi
+                  açıp kapatır. Mac’te <kbd class={kbd}>⌥</kbd> + harf, arama alanlarında değil, yalnızca paneldeki
+                  düğmelerde çalışır. Böylece arama alanlarına ç gibi harfleri rahatça yazabilirsiniz.
                 </li>
                 <li>
                   <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>S</kbd>: indir. <kbd class={kbd}>Ctrl</kbd> +{' '}
                   <kbd class={kbd}>O</kbd>: dosya aç.
                 </li>
                 <li>
-                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Z</kbd> yazdıklarınızı, tek tek yapılan değiştirmeleri ve
-                  temizlemeyi (dosya adıyla birlikte) geri alır. Tümünü değiştir ya da Temizle sonrasında hemen beliren{' '}
+                  <kbd class={kbd}>Ctrl</kbd> + <kbd class={kbd}>Z</kbd> yazdıklarınızı, tek tek yaptığınız değiştirmeleri
+                  ve temizlemeyi (dosya adı dahil) geri alır. Tümünü değiştir ya da Temizle’den sonra beliren{' '}
                   <strong class={strong}>Geri al</strong> düğmesi uzun metinlerde de çalışır.
                 </li>
               </ul>
@@ -174,11 +173,11 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   <code class={code}>\d+</code> — art arda gelen rakamlar.
                 </li>
                 <li>
-                  <code class={code}>^[ \t]+$</code> — yalnızca boşluk ya da sekme içeren satırlar (<code class={code}>^$</code>{' '}
+                  <code class={code}>^[ \t]+$</code> — yalnızca boşluk ya da sekme olan satırlar (<code class={code}>^$</code>{' '}
                   açıkken).
                 </li>
                 <li>
-                  <code class={code}>[ \t]+$</code> — satır sonlarındaki boşluk ve sekmeler; silmek için yeni metni boş
+                  <code class={code}>[ \t]+$</code> — satır sonlarındaki boşluk ve sekmeler. Silmek için yeni metni boş
                   bırakın.
                 </li>
                 <li>
@@ -189,19 +188,19 @@ const list = 'mt-2 flex list-disc flex-col gap-2 pl-5 marker:text-zinc-400 dark:
                   başlayan kelimeler (Çağrı, İstanbul).
                 </li>
                 <li>
-                  <code class={code}>^</code> ve yeni metin olarak <code class={code}>&gt; </code> — her satırın başına
-                  bir önek ekler.
+                  <code class={code}>^</code> arayıp yeni metne <code class={code}>&gt; </code> yazarsanız her satırın
+                  başına bu işaret eklenir.
                 </li>
               </ul>
             </section>
 
             <section>
               <h2 class={heading}>Değiştirme kalıpları</h2>
-              <p class="mt-2">Düzenli ifade modunda yeni metin, bulunan metne başvurabilir:</p>
+              <p class="mt-2">Düzenli ifade açıkken, bulunan metni yeni metinde şu kalıplarla kullanabilirsiniz:</p>
               <ul class={list}>
                 <li>
-                  <code class={code}>$&amp;</code> — eşleşmenin tamamı; ör. <code class={code}>"$&amp;"</code> onu
-                  tırnak içine alır.
+                  <code class={code}>$&amp;</code> — bulunan metnin tamamı. Örneğin <code class={code}>"$&amp;"</code>{' '}
+                  onu tırnak içine alır.
                 </li>
                 <li>
                   <code class={code}>$1</code>, <code class={code}>$2</code>… — yakalama grupları.{' '}

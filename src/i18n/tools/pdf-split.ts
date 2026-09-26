@@ -202,17 +202,17 @@ const tr: PdfSplitMessages = {
   meta: {
     title: 'PDF bölme',
     description:
-      'Bir PDF dosyasının her sayfasını önizleyin; sayfaları tıklayarak ya da 1-3, 5 gibi aralıklar yazarak seçip yeni bir PDF olarak kaydedin veya dosyayı parçalara ayırın. Tarayıcınızda çalışır, hiçbir şey yüklenmez.',
+      'Bir PDF’nin bütün sayfalarını önizleyin. Sayfaları tıklayarak ya da 1-3, 5 gibi aralıklar yazarak seçin ve yeni bir PDF olarak kaydedin. İsterseniz dosyayı parçalara da bölebilirsiniz. Araç tarayıcınızda çalışır, hiçbir şey yüklenmez.',
     eyebrow: 'PDF · tarayıcınızda çalışır',
-    lead: 'İhtiyacınız olan sayfaları ayırın ya da bir PDF dosyasını birkaç parçaya bölün. Her şey cihazınızda gerçekleşir; dosya hiçbir yere yüklenmez.',
+    lead: 'İhtiyacınız olan sayfaları ayırın ya da bir PDF’yi birkaç dosyaya bölün. Her şey cihazınızda olur, dosyanız hiçbir yere yüklenmez.',
     tips: 'İpuçları',
   },
   toolLabel: 'PDF bölme aracı',
-  noscript: 'Bu araç JavaScript gerektirir. Tamamen tarayıcınızda çalışır; hiçbir şey yüklenmez.',
+  noscript: 'Bu araç için JavaScript gerekli. Araç tamamen tarayıcınızda çalışır, hiçbir şey yüklenmez.',
   dropzone: {
     choose: 'PDF seçin',
     drop: 'ya da buraya sürükleyip bırakın',
-    note: 'Cihazınızdan çıkmaz · tek seferde bir PDF',
+    note: 'Dosyanız cihazınızda kalır · tek seferde bir PDF',
   },
   file: {
     unnamed: 'Adsız dosya',
@@ -227,21 +227,21 @@ const tr: PdfSplitMessages = {
   },
   modes: {
     extract: { title: 'Sayfaları çıkar', description: 'Seçtiğiniz sayfalar tek bir yeni PDF olur.' },
-    ranges: { title: 'Aralıklara böl', description: 'Her aralık ayrı bir PDF olur. Birden çok dosya tek bir ZIP olarak kaydedilir.' },
-    every: { title: 'N sayfalık parçalar', description: 'Eşit parçalar (ör. 2’şer sayfa), tek bir ZIP olarak kaydedilir.' },
-    single: { title: 'Her sayfa ayrı dosya', description: 'Her sayfa ayrı bir PDF olur ve hepsi tek bir ZIP olarak kaydedilir.' },
+    ranges: { title: 'Aralıklara böl', description: 'Her aralık ayrı bir PDF olur. Birden fazla dosya tek bir ZIP olarak kaydedilir.' },
+    every: { title: 'N sayfada bir böl', description: 'Dosya, örneğin 2’şer sayfalık eşit parçalara bölünür. Parçalar tek bir ZIP olarak kaydedilir.' },
+    single: { title: 'Her sayfa ayrı dosya', description: 'Her sayfa ayrı bir PDF olur, hepsi tek bir ZIP olarak kaydedilir.' },
   },
   pages: {
     labelExtract: 'Çıkarılacak sayfalar',
     labelRanges: 'Sayfa aralıkları',
-    hintExtract: 'İstediğiniz sırayla yazın, ör. 1-3, 5, 8- (8- yazarsanız 8. sayfadan sona kadar alınır).',
-    hintRanges: 'Her aralık ayrı bir PDF olur, ör. 1-4, 5-8, 9-son.',
-    placeholder: 'ör. 1-3, 5, 8-',
+    hintExtract: 'İstediğiniz sırayla yazın, örneğin 1-3, 5, 8- (8- yazarsanız 8. sayfadan sona kadar alınır).',
+    hintRanges: 'Her aralık ayrı bir PDF olur, örneğin 1-4, 5-8, 9-son.',
+    placeholder: 'örn. 1-3, 5, 8-',
     prompt: 'Sayfaları seçin ya da yukarıdaki alana yazın.',
   },
   every: {
     label: 'Dosya başına sayfa',
-    prompt: 'Her dosyada kaç sayfa olacağını girin.',
+    prompt: 'Her dosyada kaç sayfa olacağını yazın.',
   },
   name: {
     label: 'Dosya adı',
@@ -264,11 +264,11 @@ const tr: PdfSplitMessages = {
     clearLabel: 'Seçimi temizle',
     invert: 'Tersine çevir',
     invertLabel: 'Seçimi tersine çevir',
-    hintPointer: 'Seçmek için sayfalara tıklayın; Shift tuşuyla tıklarsanız aradaki tüm sayfalar seçilir.',
+    hintPointer: 'Sayfaları tıklayarak seçin. Shift tuşunu basılı tutup tıklarsanız aradaki sayfalar da seçilir.',
     hintTouch: 'Seçmek için sayfalara dokunun.',
     hintKeyboard: 'Klavyeyle: ok tuşlarıyla gezinin, Boşluk ile seçin, Shift+Boşluk ile aralık seçin.',
     hintRanges: 'Art arda seçilen sayfalar tek bir dosya olur.',
-    hintReadOnly: 'Etiketler, her sayfanın hangi dosyaya gireceğini gösterir.',
+    hintReadOnly: 'Etiketler her sayfanın hangi dosyaya gireceğini gösterir.',
     customOrder: 'Özel sıra: sayfalar yukarıda yazdığınız sırayla kaydedilir; yeni seçtiğiniz sayfalar sona eklenir.',
     countNone: 'Seçili sayfa yok',
     // Not "4 / 14": speech output reads the slash as "bölü" (divided by), and this is announced.
@@ -279,12 +279,12 @@ const tr: PdfSplitMessages = {
     fileTag: (file) => `Dosya ${file}`,
     previewUnavailable: 'Önizleme yok',
     previewsFailed: 'Bu PDF için önizleme gösterilemiyor. Yine de sayfa seçip dosyayı bölebilirsiniz.',
-    previewsOffPages: (pages) => `Bu belge ${pagesTr(pages)}. Önizlemeler ek bellek kullandığından şimdilik kapalı.`,
+    previewsOffPages: (pages) => `Bu PDF ${pagesTr(pages)}. Önizlemeler fazladan bellek kullandığı için şimdilik kapalı.`,
     previewsOffSize: (size) =>
-      `Büyük dosya (${size}). Önizlemeler telefon ve tabletlerde ek bellek kullandığından şimdilik kapalı.`,
+      `Büyük dosya (${size}). Önizlemeler telefon ve tabletlerde fazladan bellek kullandığı için şimdilik kapalı.`,
     showPreviews: 'Önizlemeleri göster',
     tooManyPages: (pages, limit) =>
-      `Bu belge ${pagesTr(pages)}; sayfa görünümü en fazla ${ft.number(limit)} sayfa gösterebilir. İhtiyacınız olan sayfaları yukarıdaki alana yazın.`,
+      `Bu PDF ${pagesTr(pages)}, ama sayfa görünümü en fazla ${ft.number(limit)} sayfa gösterebiliyor. İhtiyacınız olan sayfaları yukarıdaki alana yazın.`,
   },
   plan: {
     summary: ({ files, pages, items, more }) => {
@@ -298,7 +298,7 @@ const tr: PdfSplitMessages = {
   },
   actions: {
     extract: 'Sayfaları çıkar',
-    split: 'Böl ve indir',
+    split: 'PDF’yi böl',
     cancel: 'İptal',
     cancelling: 'İptal ediliyor…',
     cancelled: 'İptal edildi.',
@@ -314,30 +314,30 @@ const tr: PdfSplitMessages = {
     starting: (files) => (files > 1 ? `${ft.number(files)} dosya oluşturuluyor…` : 'PDF oluşturuluyor…'),
   },
   result: {
-    pdf: (pages, size) => `Dosyanız hazır: ${pagesTr(pages)} · ${size}`,
+    pdf: (pages, size) => `PDF’niz hazır: ${pagesTr(pages)} · ${size}`,
     zip: (files, size) => `ZIP dosyanız hazır: ${ft.number(files)} PDF · ${size}`,
     fileMeta: (pages, size) => `${pagesTr(pages)} · ${size}`,
     moreFiles: (files) => `ve ZIP içinde ${ft.number(files)} dosya daha`,
   },
   status: {
     reading: (name) => `“${name}” okunuyor…`,
-    loaded: (name, pages) => `“${name}” yüklendi: ${pagesTr(pages)}.`,
-    oneAtATime: (name) => `Tek seferde bir PDF işlenir: “${name}” kullanılıyor.`,
+    loaded: (name, pages) => `“${name}” açıldı: ${pagesTr(pages)}.`,
+    oneAtATime: (name) => `Tek seferde yalnızca bir PDF işlenebilir: “${name}” kullanılıyor.`,
     chooseFirst: 'Önce bir PDF seçin',
     largeFile: (size) =>
-      `Büyük dosya (${size}). Bölme işlemi çok bellek gerektirir; telefon ya da tablette sayfa yeniden yüklenebilir. Böyle olursa bir bilgisayar kullanın.`,
+      `Büyük dosya (${size}). Bölmek için çok bellek gerekir; telefonda ya da tablette sayfa yeniden yüklenebilir. Böyle olursa bilgisayardan deneyin.`,
   },
   errors: {
-    engine: 'PDF motoru yüklenemedi. Bağlantınızı kontrol edip sayfayı yenileyin.',
-    memory: 'Cihazın belleği yetmedi. Tek seferde daha az dosya oluşturmayı deneyin; çok büyük PDF’ler için bir bilgisayar kullanın.',
-    memoryReading: (name) => `“${name}” okunurken cihazın belleği yetmedi. Bir bilgisayarda deneyin.`,
-    read: (name) => `“${name}” okunamadı. Dosya taşınmış ya da değiştirilmiş olabilir; lütfen yeniden seçin.`,
-    readAgain: (name) => `“${name}” yeniden okunamadı. Dosya taşınmış ya da değiştirilmiş olabilir; lütfen yeniden seçin.`,
+    engine: 'PDF motoru yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.',
+    memory: 'Cihazın belleği yetmedi. Tek seferde daha az dosya oluşturmayı deneyin. Çok büyük PDF’ler için bilgisayar kullanın.',
+    memoryReading: (name) => `“${name}” okunurken cihazın belleği yetmedi. Bilgisayardan deneyin.`,
+    read: (name) => `“${name}” okunamadı. Dosya taşınmış ya da değişmiş olabilir; dosyayı yeniden seçin.`,
+    readAgain: (name) => `“${name}” yeniden okunamadı. Dosya taşınmış ya da değişmiş olabilir; dosyayı yeniden seçin.`,
     damaged: (name) => `“${name}” açılamadı. Dosya bozuk ya da eksik olabilir.`,
-    notPdf: (name) => `“${name}” bir PDF dosyası değil. Lütfen bir PDF seçin.`,
+    notPdf: (name) => `“${name}” bir PDF değil. Bir PDF dosyası seçin.`,
     noPages: (name) => `“${name}” içinde hiç sayfa yok.`,
     password:
-      'Bu PDF parola korumalı ya da düzenleme kısıtlamalı olduğundan burada bölünemiyor. Önce korumasız bir kopyasını kaydedin (ör. Yazdır → PDF olarak kaydet), ardından tekrar deneyin.',
+      'Bu PDF parolayla korunuyor ya da düzenlemeye kapalı, bu yüzden burada bölünemiyor. Önce korumasız bir kopyasını kaydedin (örneğin Yazdır → PDF olarak kaydet), sonra tekrar deneyin.',
     splitFailed: 'PDF bölünürken bir sorun oluştu. Dosya bozuk olabilir.',
     zip: (code, count, limit) =>
       code === 'too-many-entries'
@@ -349,19 +349,19 @@ const tr: PdfSplitMessages = {
   rangeError: (error) => {
     switch (error.code) {
       case 'no-pages':
-        return 'Bu belgede hiç sayfa yok';
+        return 'Bu PDF’de hiç sayfa yok';
       case 'empty':
         return 'En az bir sayfa seçin ya da 1-3, 5 gibi sayfa numaraları yazın';
       case 'page-zero':
         return 'Sayfa numaraları 1’den başlar';
       case 'page-out-of-range':
-        return `Sayfa ${error.page} yok: bu belgede ${pagesTr(error.pageCount)} var`;
+        return `Sayfa ${error.page} yok: bu PDF’de ${pagesTr(error.pageCount)} var`;
       case 'unexpected':
         return `Anlaşılamayan ifade: “${error.text}” (${error.position}. karakter)`;
       case 'missing-page':
         return `“${error.dash}” işaretinin önüne ya da arkasına bir sayfa numarası yazın (${error.position}. karakter)`;
       case 'invalid-every':
-        return 'Dosya başına sayfa sayısı olarak 1 ya da daha büyük bir tam sayı girin';
+        return 'Sayfa sayısı için 1 ya da daha büyük bir tam sayı yazın';
       case 'invalid-mode':
         return 'Bölme yöntemini seçin';
       case 'too-many-pages':

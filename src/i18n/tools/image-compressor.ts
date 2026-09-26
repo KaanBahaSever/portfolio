@@ -157,14 +157,14 @@ const tr: ImageCompressorMessages = {
   meta: {
     title: 'Görsel sıkıştırıcı',
     description:
-      'JPEG, PNG ve WebP görselleri tarayıcınızda sıkıştırın: kaliteyi ve biçimi seçin, öncesini ve sonrasını karşılaştırın, daha küçük dosyayı indirin. Hiçbir şey yüklenmez.',
+      'JPEG, PNG ve WebP görselleri tarayıcınızda sıkıştırın. Kaliteyi ve biçimi seçin, öncesiyle sonrasını karşılaştırın, küçülen dosyayı indirin. Hiçbir şey yüklenmez.',
   },
   header: {
     eyebrow: 'Tarayıcı aracı',
-    lead: 'Görselleri web, e-posta ya da mesajlaşma için küçültün. Kaliteyi ve biçimi ayarlayın, sonucu orijinalle karşılaştırın ve indirin. Her şey cihazınızda çalışır.',
+    lead: 'Görselleri web, e-posta ya da mesajlaşma için küçültün. Kaliteyi ve biçimi ayarlayın, sonucu orijinalle karşılaştırın ve indirin. Her şey cihazınızda olur.',
   },
   toolLabel: 'Görsel sıkıştırıcı',
-  noscript: 'Bu araç JavaScript gerektirir. Tamamen tarayıcınızda çalışır; hiçbir şey yüklenmez.',
+  noscript: 'Bu araç için JavaScript gerekli. Araç tamamen tarayıcınızda çalışır, hiçbir şey yüklenmez.',
   dropzone: {
     title: 'Bir görsel seçin',
     titleLoaded: 'Başka bir görsel seçin',
@@ -181,22 +181,22 @@ const tr: ImageCompressorMessages = {
     svg: (name) =>
       `“${name}” bir SVG, yani vektörel bir çizim. Bu araç fotoğrafları ve piksel tabanlı diğer görselleri sıkıştırır.`,
     undecodable: (name, format) => `“${name}” bu tarayıcıda açılamıyor (${format}).`,
-    heicHint: 'HEIC fotoğraflar Safari’de açılır. Diğer tarayıcılarda önce JPEG biçimine dönüştürün.',
+    heicHint: 'HEIC fotoğraflar Safari’de açılır. Diğer tarayıcılarda önce fotoğrafı JPEG biçimine dönüştürün.',
     unreadable: (name) => `“${name}” okunamadı. Taşınmış ya da silinmiş olabilir.`,
     tooManyPixels: (name, megapixels, limit) =>
-      `“${name}” bu cihazda açılamayacak kadar çok piksel içeriyor (${megapixels}; sınır: ${limit}). Önce başka bir uygulamada küçültün.`,
+      `“${name}” bu cihazda açılamayacak kadar çok piksel içeriyor (${megapixels}; sınır: ${limit}). Görseli önce başka bir uygulamada küçültün.`,
     openMemory: (name) =>
       `“${name}” açılamadı: tarayıcının belleği yetmedi. Diğer sekmeleri kapatıp yeniden deneyin ya da görseli önce başka bir uygulamada küçültün.`,
     memory:
-      'Bu görsel, cihazdaki kullanılabilir bellek için fazla büyük. “En büyük boyut” için daha küçük bir değer seçin ya da bir bilgisayar kullanın.',
+      'Bu görsel, cihazınızın belleğine sığmayacak kadar büyük. “En büyük boyut” için daha küçük bir değer seçin ya da bilgisayar kullanın.',
     memoryDesktop:
-      'Bu görsel, tarayıcının kullanabildiği bellek için fazla büyük. “En büyük boyut” için daha küçük bir değer seçin.',
+      'Bu görsel, tarayıcının kullanabildiği belleğe sığmayacak kadar büyük. “En büyük boyut” için daha küçük bir değer seçin.',
     encodeFailed: 'Görsel sıkıştırılamadı. Başka bir biçim deneyin ya da “En büyük boyut” değerini düşürün.',
     pasteEmpty: 'Panoda görsel yok. Bir görsel kopyalayıp yeniden yapıştırın.',
     dismiss: 'Kapat',
   },
   notices: {
-    multiple: (name) => `Aynı anda tek görsel açılabilir: “${name}” açıldı.`,
+    multiple: (name) => `Tek seferde yalnızca bir görsel açılabilir: “${name}” açıldı.`,
   },
   status: {
     opening: (name) => `“${name}” açılıyor…`,
@@ -216,18 +216,18 @@ const tr: ImageCompressorMessages = {
     formatWebp: 'WebP',
     formatJpeg: 'JPEG',
     size: 'En büyük boyut',
-    sizeHint: 'Uzun kenar. Daha küçük görseller büyütülmez.',
+    sizeHint: 'Uzun kenar için geçerlidir. Daha küçük görseller büyütülmez.',
     sizeOriginal: 'Orijinal boyut',
     sizeOption: (pixels) => `${pixels} px`,
   },
   notes: {
-    pngLossless: 'PNG kayıpsız bir biçimdir; kalite ayarının burada etkisi yoktur. Daha küçük bir dosya için WebP ya da JPEG seçin.',
+    pngLossless: 'PNG kayıpsız bir biçim, bu yüzden kalite ayarı burada işe yaramaz. Daha küçük bir dosya için WebP ya da JPEG seçin.',
     alphaFlattened: 'JPEG saydamlığı saklayamaz: saydam alanlar beyaz olur. WebP saydamlığı korur.',
     alphaFlattenedNoWebp: 'JPEG saydamlığı saklayamaz: saydam alanlar beyaz olur. Saydamlığı korumak için “Orijinal” seçeneğini kullanın.',
     webpUnsupported: (fallback) => `Bu tarayıcı WebP dosyası oluşturamıyor; görsel ${fallback} olarak kaydediliyor.`,
     webpOptionUnavailable: 'WebP kullanılamıyor: bu tarayıcı WebP dosyası oluşturamıyor.',
     originalNotWritable: (source, output) =>
-      `Tarayıcılar ${source} dosyalarını açabilir ama oluşturamaz; bu yüzden “Orijinal” seçeneği ${output} olarak kaydeder.`,
+      `Tarayıcılar ${source} dosyalarını açabilir ama oluşturamaz. Bu yüzden “Orijinal” seçildiğinde görsel ${output} olarak kaydedilir.`,
     canvasLimit: (dimensions) => `Görsel, bu cihazın işleyebileceği en büyük boyuta küçültüldü: ${dimensions}.`,
     encoderLimit: (limit, dimensions) =>
       `WebP görsellerin bir kenarı en fazla ${limit} piksel olabilir; bu yüzden görsel küçültüldü: ${dimensions}.`,
@@ -244,7 +244,7 @@ const tr: ImageCompressorMessages = {
     zoomFit: 'Sığdır',
     zoomActual: '1:1',
     zoomActualLabel: 'Gerçek boyut (1:1)',
-    divider: 'Ayırıcının konumu',
+    divider: 'Ayırıcı konumu',
     dividerValue: (original, compressed) => `Orijinal ${original}, sıkıştırılmış ${compressed}`,
     before: 'Orijinal',
     after: 'Sıkıştırılmış',
@@ -262,14 +262,14 @@ const tr: ImageCompressorMessages = {
     sizes: (original, compressed) => `${original} → ${compressed}`,
     summary: (headline, original, compressed) => `${headline} — ${original} → ${compressed}`,
     notSmallerAdvice:
-      'Yeniden kodlama bu görseli küçültmedi: görsel zaten verimli biçimde sıkıştırılmış. WebP ya da daha düşük bir kalite deneyin veya orijinali koruyun.',
+      'Yeniden kodlanınca görsel küçülmedi, çünkü zaten iyi sıkıştırılmış. WebP biçimini ya da daha düşük bir kaliteyi deneyin. İsterseniz orijinal dosyayı olduğu gibi kullanın.',
     quality: (percent) => `kalite ${percent}`,
     lossless: 'kayıpsız',
     download: 'İndir',
     downloadAnyway: 'Sıkıştırılmış dosyayı yine de indir',
     downloadOriginal: 'Orijinali indir',
-    originalKeepsMetadata: 'Orijinal dosya meta verilerini hâlâ içerir.',
-    metadata: 'Kamera bilgileri, GPS konumu ve diğer meta veriler sıkıştırılmış kopyadan kaldırılır.',
+    originalKeepsMetadata: 'Orijinal dosyadaki meta veriler olduğu gibi durur.',
+    metadata: 'Sıkıştırılmış kopyada kamera bilgileri, GPS konumu ve diğer meta veriler yer almaz.',
     fileSize: 'Dosya boyutu',
   },
   outputNames: {
@@ -279,7 +279,7 @@ const tr: ImageCompressorMessages = {
   privacy: {
     label: 'Gizlilik',
     title: 'Hiçbir şey cihazınızdan çıkmaz.',
-    body: 'Görseli tarayıcınızın kendisi çözer ve yeniden kodlar; hiçbir yere yüklenmez. Yeniden kodlama, kamera bilgileri ve GPS konumu gibi meta verileri de kaldırır; böylece sıkıştırılmış kopyayı paylaşmak daha güvenlidir.',
+    body: 'Görseli doğrudan tarayıcınız açar ve yeniden kodlar; görsel hiçbir yere yüklenmez. Yeniden kodlama sırasında kamera bilgileri ve GPS konumu gibi meta veriler de silinir. Bu yüzden sıkıştırılmış kopyayı paylaşmak daha güvenlidir.',
   },
   tips: 'İpuçları',
 };

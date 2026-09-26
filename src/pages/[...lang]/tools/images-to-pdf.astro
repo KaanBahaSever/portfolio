@@ -52,30 +52,29 @@ const tipList =
       locale === 'tr' ? (
         <ul class={tipList}>
           <li>
-            <strong class={strong}>Telefonda sıralama:</strong> bir kartı kısa bir süre basılı tutun, ardından
-            sürükleyin. Hızlıca kaydırdığınızda sayfa her zamanki gibi kayar. Her karttaki ok düğmeleri kartı bir sıra
-            öne ya da arkaya taşır.
+            <strong class={strong}>Telefonda sıralama:</strong> bir kartı kısa bir süre basılı tutun, sonra sürükleyin.
+            Hızlıca kaydırırsanız sayfa her zamanki gibi kayar. Her karttaki ok düğmeleri kartı bir sıra öne ya da
+            arkaya taşır.
           </li>
           <li>
-            <strong class={strong}>Orijinal kalite</strong> seçeneği, JPEG fotoğrafların görüntü verisini yeniden
-            sıkıştırmadan olduğu gibi korur; konum gibi kamera meta verileri PDF’e aktarılmaz. Diğer biçimler gözle
-            görülür bir kayıp olmadan dönüştürülür.
+            <strong class={strong}>Orijinal kalite</strong> seçildiğinde JPEG fotoğrafların görüntü verisi yeniden
+            sıkıştırılmaz, olduğu gibi PDF’ye konur. Konum gibi kamera bilgileri ise PDF’ye aktarılmaz. Diğer biçimler
+            gözle görülür bir kayıp olmadan dönüştürülür.
           </li>
           <li>
-            <strong class={strong}>Daha küçük dosya</strong> seçeneği, görselleri en fazla 2000 piksele küçültüp
-            sıkıştırır. E-posta ekleri için ya da telefonda çok sayıda büyük fotoğrafla PDF oluşturulamadığında bu
-            seçeneği kullanın.
+            <strong class={strong}>Daha küçük dosya</strong> seçeneği görselleri en fazla 2.000 piksele küçültür ve
+            sıkıştırır. PDF’yi e-postaya ekleyecekseniz ya da telefonda çok sayıda büyük fotoğrafla PDF oluşturamıyorsanız
+            bu seçeneği kullanın.
           </li>
           <li>
-            <strong class={strong}>iPhone fotoğrafları (HEIC):</strong> Safari, Fotoğraflar’dan seçtiğiniz fotoğrafları
-            otomatik olarak JPEG biçimine dönüştürür. Diğer tarayıcılar HEIC dosyalarını okuyamayabilir; bu durumda
-            Ayarlar → Kamera → Formatlar → En Uyumlu seçeneğini işaretleyin ya da fotoğrafları önce JPEG olarak dışa
-            aktarın.
+            <strong class={strong}>iPhone fotoğrafları (HEIC):</strong> Safari, Fotoğraflar uygulamasından seçtiğiniz
+            fotoğrafları kendiliğinden JPEG’e çevirir. Diğer tarayıcılar HEIC dosyalarını okuyamayabilir. Bu durumda Ayarlar → Kamera
+            → Formatlar → En Uyumlu seçeneğini işaretleyin ya da fotoğrafları önce JPEG olarak dışa aktarın.
           </li>
           <li>
-            <strong class={strong}>Görsel boyutunda</strong> seçeneği, her sayfayı görselin boyutuna seçtiğiniz kenar
-            boşluğunu ekleyerek ayarlar (boşluk istemiyorsanız Kenar boşluğu için Yok seçin). A4 ve Letter ise tüm
-            sayfaları aynı boyutta tutar.
+            <strong class={strong}>Görsel boyutunda</strong> seçildiğinde her sayfa kendi görselinin boyutunda olur ve
+            görselin çevresine seçtiğiniz kenar boşluğu eklenir. Boşluk istemiyorsanız kenar boşluğunu “Yok” yapın. A4
+            ve Letter ise bütün sayfaları aynı boyutta tutar.
           </li>
         </ul>
       ) : (

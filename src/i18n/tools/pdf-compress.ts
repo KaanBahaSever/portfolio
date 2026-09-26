@@ -171,18 +171,18 @@ const trLevels = {
 const tr: PdfCompressMessages = {
   title: 'PDF sıkıştırma',
   description:
-    'PDF dosyalarını içindeki görselleri yeniden sıkıştırarak doğrudan tarayıcınızda küçültün. Taranmış belgeler ve fotoğraf ağırlıklı dosyalar için idealdir. Hiçbir şey yüklenmez.',
-  lead: 'PDF dosyanızı içindeki görselleri yeniden sıkıştırarak küçültün. Her şey cihazınızda işlenir; hiçbir şey yüklenmez. En çok taranmış belgeler ve fotoğraf ağırlıklı PDF’ler küçülür; yalnızca metin içeren belgeler genellikle çok az küçülür.',
+    'PDF’deki görselleri yeniden sıkıştırarak dosyayı doğrudan tarayıcınızda küçültün. Araç en iyi sonucu taranmış belgelerde ve fotoğrafı bol dosyalarda verir. Hiçbir şey yüklenmez.',
+  lead: 'PDF’nizi, içindeki görselleri yeniden sıkıştırarak küçültün. Her şey cihazınızda olur, hiçbir şey yüklenmez. En çok taranmış belgeler ve fotoğrafı bol PDF’ler küçülür. Yalnızca metinden oluşan belgeler genellikle çok az küçülür.',
   tipsTitle: 'İpuçları',
 
   regionLabel: 'PDF sıkıştırıcı',
-  noscript: 'Bu araç JavaScript gerektirir. Tamamen tarayıcınızda çalışır; hiçbir şey yüklenmez.',
+  noscript: 'Bu araç için JavaScript gerekli. Araç tamamen tarayıcınızda çalışır, hiçbir şey yüklenmez.',
   chooseFile: 'PDF seçin',
   chooseAnother: 'Başka bir PDF seçin',
   dropHint: 'ya da buraya sürükleyip bırakın',
-  dropNote: 'Dosyanız cihazınızdan hiç çıkmaz. En iyi sonucu taranmış belgelerde ve fotoğraf dolu PDF’lerde verir.',
+  dropNote: 'Dosyanız cihazınızdan çıkmaz. Araç en iyi sonucu taranmış belgelerde ve fotoğrafı bol PDF’lerde verir.',
   dismissNotice: 'Bildirimi kapat',
-  removeFile: 'Dosyayı kaldır',
+  removeFile: 'PDF’yi kaldır',
   optionsLegend: 'Sıkıştırma',
   levelLegend: 'Düzey',
   levelNames: trLevels,
@@ -216,20 +216,20 @@ const tr: PdfCompressMessages = {
   outlook: {
     recompressible: (count, level) => `${trLevels[level]} düzeyde ${trNumber(count)} görsel yeniden sıkıştırılabilir`,
     losslessOnly: (count) =>
-      `${trLevels.light} düzeyde yeniden sıkıştırılacak JPEG fotoğraf yok; ${trLevels.balanced} düzey ${trNumber(count)} görseli dönüştürebilir`,
+      `${trLevels.light} düzeyde yeniden sıkıştırılacak JPEG fotoğraf yok; ${trLevels.balanced} düzeyde ${trNumber(count)} görsel dönüştürülebilir`,
     none: 'Büyük görsel bulunamadı; dosya yalnızca biraz küçülebilir',
   },
   removed: 'PDF kaldırıldı',
-  oneFileAtATime: (name) => `Tek seferde bir PDF işlenir; “${name}” kullanılıyor.`,
+  oneFileAtATime: (name) => `Tek seferde yalnızca bir PDF işlenebilir: “${name}” kullanılıyor.`,
   notPdf: (name) => `“${name}” bir PDF değil. Bir PDF dosyası seçin.`,
   notPdfUnnamed: 'Bu dosya bir PDF değil. Bir PDF dosyası seçin.',
   largeFile: (size) =>
-    `Büyük dosya (${size}). Sıkıştırma bunun birkaç katı bellek gerektirir; telefon ya da tablette sayfa yeniden yüklenebilir. Önce diğer sekmeleri ve uygulamaları kapatın ya da bir bilgisayar kullanın.`,
+    `Büyük dosya (${size}). Sıkıştırmak için dosya boyutunun birkaç katı bellek gerekir; telefonda ya da tablette sayfa yeniden yüklenebilir. Önce diğer sekmeleri ve uygulamaları kapatın ya da bilgisayar kullanın.`,
 
   progress: {
-    starting: 'Başlatılıyor…',
+    starting: 'Başlıyor…',
     reading: 'PDF okunuyor…',
-    cleanup: 'Kullanılmayan veriler kaldırılıyor…',
+    cleanup: 'Kullanılmayan veriler temizleniyor…',
     image: (index, total) => `Görseller optimize ediliyor: ${trNumber(index)}/${trNumber(total)}…`,
     saving: 'Kaydediliyor…',
     cancelling: 'İptal ediliyor…',
@@ -238,8 +238,8 @@ const tr: PdfCompressMessages = {
   cancelledStatus: 'İptal edildi.',
   cancelled: 'İptal edildi',
   canvasBlocked:
-    'Tarayıcınızın gizlilik ayarları canvas öğesinden görüntü verisi okunmasını engellediği için görseller burada yeniden sıkıştırılamıyor. Diğer temizlik adımları yine de uygulanır; daha küçük görseller için başka bir tarayıcı deneyin.',
-  inAppBrowser: 'İndirmeler bu uygulamanın içinde çalışmayabilir. En iyi sonuç için sayfayı tarayıcınızda açın.',
+    'Tarayıcınızın gizlilik ayarları, sayfanın görsel verisini okumasına izin vermiyor. Bu yüzden görseller burada yeniden sıkıştırılamıyor. Diğer temizlik adımları yine de yapılır. Görselleri de küçültmek için başka bir tarayıcı deneyin.',
+  inAppBrowser: 'Bu uygulamanın içinde indirme çalışmayabilir. Sorun yaşamamak için sayfayı tarayıcınızda açın.',
 
   sizes: (original, result) => `Orijinal ${original} → ${result}`,
   sizesSpoken: (original, result) => `Orijinal boyut ${original}, yeni boyut ${result}.`,
@@ -255,9 +255,9 @@ const tr: PdfCompressMessages = {
     metadataRemoved: 'meta veriler kaldırıldı',
   },
   downloadStarted: 'İndirme başladı.',
-  inAppDownloadHint: 'Başlamazsa bu sayfayı Safari ya da Chrome tarayıcısında açın.',
+  inAppDownloadHint: 'İndirme başlamadıysa bu sayfayı Safari’de ya da Chrome’da açın.',
   smallerAnnouncement: (original, result, percent) =>
-    `Sıkıştırma tamamlandı: dosya ${original} boyutundan ${result} boyutuna indi, ${percent} daha küçük. İndirme başladı.`,
+    `Sıkıştırma bitti. Dosya ${percent} küçüldü: eski boyutu ${original}, yeni boyutu ${result}. İndirme başladı.`,
   notSmaller: {
     'light-skipped': {
       title: `${trLevels.light} düzey bu PDF’yi küçültemiyor — ${trLevels.balanced} düzeyi deneyin`,
@@ -271,21 +271,21 @@ const tr: PdfCompressMessages = {
   hints: {
     'convert-lossless': (count) =>
       `${trLevels.balanced} düzey, kayıpsız saklanan ${trNumber(count)} görseli JPEG biçimine dönüştürerek dosyayı küçültebilir.`,
-    'stronger-level': 'Daha güçlü bir düzey, görsel kalitesinden ödün vererek yine de işe yarayabilir.',
-    'text-only': 'Metin ve vektör grafikler zaten az yer kaplayacak biçimde saklanır.',
+    'stronger-level': 'Daha güçlü bir düzey yine de işe yarayabilir, ama görsellerin kalitesi düşer.',
+    'text-only': 'Metin ve vektör grafikler zaten az yer kaplayacak şekilde saklanır.',
   },
 
   errors: {
-    engine: 'PDF motoru yüklenemedi. Bağlantınızı kontrol edip sayfayı yenileyin.',
+    engine: 'PDF motoru yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.',
     encrypted: (name) =>
-      `“${name}” parola korumalı ya da şifreli; bu tür dosyalar desteklenmiyor. Korumayı bir PDF uygulamasında kaldırıp yeniden deneyin.`,
+      `“${name}” parola korumalı ya da şifreli. Bu tür dosyalar desteklenmiyor. Korumayı bir PDF uygulamasında kaldırıp yeniden deneyin.`,
     invalid: (name) => `“${name}” okunamadı. Dosya bozuk olabilir.`,
     unreadable: (name) => `“${name}” okunamadı. Dosyayı yeniden seçin.`,
     unreadableAgain: (name) => `“${name}” yeniden okunamadı. Dosyayı yeniden seçin.`,
     memoryOpening: (name) =>
-      `“${name}” okunurken cihazın belleği yetmedi. Diğer sekmeleri ya da uygulamaları kapatın veya daha küçük bir dosya deneyin.`,
+      `“${name}” okunurken cihazın belleği yetmedi. Diğer sekmeleri ve uygulamaları kapatın ya da daha küçük bir dosya deneyin.`,
     memoryCompressing:
-      'Sıkıştırma sırasında cihazın belleği yetmedi. Diğer sekmeleri ya da uygulamaları kapatın veya daha küçük bir dosyayla yeniden deneyin.',
+      'Sıkıştırma sırasında cihazın belleği yetmedi. Diğer sekmeleri ve uygulamaları kapatın ya da daha küçük bir dosyayla yeniden deneyin.',
     unknownOpening: (name) => `“${name}” okunurken bir sorun oluştu. Sayfayı yenileyip yeniden deneyin.`,
     unknownCompressing: 'PDF sıkıştırılırken bir sorun oluştu. Başka bir düzey deneyin ya da sayfayı yenileyip yeniden deneyin.',
   },

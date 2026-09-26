@@ -52,19 +52,19 @@ const tips: Localized<ToolTip[]> = {
   tr: [
     {
       lead: 'Düzeyler nasıl çalışır?',
-      body: `${names('tr').light} düzey, JPEG fotoğrafları hafifçe yeniden sıkıştırır ve yalnızca ${px('tr', 'light')} pikselden büyük görselleri küçültür. ${names('tr').balanced} düzey, görselleri en fazla ${px('tr', 'balanced')} piksele indirir; sıkıştırılmadan saklanmış taramalar gibi diğer büyük görselleri de JPEG biçimine dönüştürür. ${names('tr').strong} düzey ${px('tr', 'strong')} piksele kadar iner ve daha güçlü sıkıştırır: e-posta için uygundur, ancak taramalardaki küçük yazıların okunması zorlaşabilir.`,
+      body: `${names('tr').light} düzey JPEG fotoğrafları hafifçe yeniden sıkıştırır ve yalnızca ${px('tr', 'light')} pikselden büyük görselleri küçültür. ${names('tr').balanced} düzey görselleri en fazla ${px('tr', 'balanced')} piksele indirir. Sıkıştırılmadan saklanmış taramalar gibi diğer büyük görselleri de JPEG’e çevirir. ${names('tr').strong} düzey görselleri ${px('tr', 'strong')} piksele kadar küçültür ve daha sıkı sıkıştırır. E-posta için uygundur, ama taramalardaki küçük yazılar zor okunabilir.`,
     },
     {
       lead: 'Başka bir düzey deneyin.',
-      body: `Her çalıştırma orijinal dosyanızdan yeniden başlar; böylece dosyayı yeniden seçmeden düzeyleri karşılaştırabilirsiniz. Bir görsel yalnızca en az ${minSaving('tr')} küçülecekse değiştirilir.`,
+      body: `Her sıkıştırma orijinal dosyanızdan başlar. Böylece dosyayı yeniden seçmeden düzeyleri karşılaştırabilirsiniz. Bir görsel ancak en az ${minSaving('tr')} küçülecekse değiştirilir.`,
     },
     {
-      lead: 'Metin ağırlıklı PDF’ler neden az küçülür?',
-      body: 'Metin, yazı tipleri ve vektör çizimler zaten az yer kaplayacak biçimde saklanır ve belge aynı görünsün diye olduğu gibi korunur. Araç yine de kullanılmayan verileri ve kopyaları temizleyebilir, ancak kazancın büyük kısmı görsellerden gelir.',
+      lead: 'Metin ağırlıklı PDF’ler neden pek küçülmez?',
+      body: 'Metin, yazı tipleri ve vektör çizimler zaten az yer kaplar. Belge aynı görünsün diye bunlara hiç dokunulmaz. Araç yine de kullanılmayan verileri ve kopyaları temizleyebilir, ama asıl kazanç görsellerden gelir.',
     },
     {
       lead: 'Formlar ve imzalar.',
-      body: 'Sıkıştırılmış dosya yeni bir dosyadır; bu nedenle dijital imzalar artık geçerli olmaz. Doldurulabilir formlar alanlarını korur, ancak dosyayı göndermeden önce kontrol edin. Orijinal dosyanızı saklayın.',
+      body: 'Sıkıştırılmış dosya yeni bir dosyadır, bu yüzden içindeki dijital imzalar artık geçerli olmaz. Doldurulabilir formların alanları korunur, ama dosyayı göndermeden önce yine de kontrol edin. Orijinal dosyanızı saklayın.',
     },
     {
       lead: 'Parola korumalı PDF’ler desteklenmez.',
@@ -72,7 +72,7 @@ const tips: Localized<ToolTip[]> = {
     },
     {
       lead: 'Telefonda büyük dosyalar.',
-      body: 'Sıkıştırma, dosya boyutunun birkaç katı kadar bellek gerektirir. Sayfa yeniden yüklenirse diğer sekmeleri ve uygulamaları kapatın ya da bir bilgisayar kullanın.',
+      body: 'Sıkıştırmak için dosya boyutunun birkaç katı bellek gerekir. Sayfa yeniden yüklenirse diğer sekmeleri ve uygulamaları kapatın ya da bilgisayar kullanın.',
     },
   ],
 };

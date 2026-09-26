@@ -72,30 +72,29 @@ const tipList =
               diyagramlar için uygundur, ancak yeniden kodlanan bir PNG nadiren orijinalinden küçük olur.
             </li>
             <li>
-              <strong class={strong}>Doğru kaliteyi bulmak.</strong> 75 ile başlayın, 1:1 görünüme geçin ve ayırıcıyı
-              kenarların, gökyüzünün ve yazıların üzerinde gezdirin: bloklanma ve hale gibi bozulmalar ilk orada görünür.
-              Bozulmaları fark edene kadar kaliteyi düşürün, sonra bir kademe geri yükseltin.
+              <strong class={strong}>Doğru kalite nasıl bulunur?</strong> 75 ile başlayın, 1:1 görünüme geçin ve
+              ayırıcıyı kenarların, gökyüzünün ve yazıların üzerinde gezdirin. Kare şeklinde bozulmalar ve haleler ilk
+              orada görünür. Bozulmaları fark edene kadar kaliteyi düşürün, sonra bir adım yükseltin.
             </li>
             <li>
-              <strong class={strong}>Sıkıştırmadan önce boyutlandırın.</strong> Piksel sayısı kenar uzunluğunun karesiyle
-              artar: genişliği ve yüksekliği yarıya indirmek piksellerin yalnızca dörtte birini bırakır. Çoğu ekranda tam
-              ekran bir fotoğraf için 1920 px yeterlidir; e-posta ve mesajlaşma için 1280 px uygundur.
+              <strong class={strong}>Sıkıştırmadan önce görselin boyutunu küçültün.</strong> Piksel sayısı kenar uzunluğunun
+              karesiyle artar. Genişliği ve yüksekliği yarıya indirirseniz piksellerin yalnızca dörtte biri kalır. Çoğu
+              ekranda tam ekran bir fotoğraf için 1920 px yeter; e-posta ve mesajlaşma için 1280 px uygundur.
             </li>
             <li>
-              <strong class={strong}>Klavye.</strong> Bir görseli <kbd class={ui.kbd}>Ctrl</kbd>{' '}
-              <kbd class={ui.kbd}>V</kbd> ile yapıştırın (Mac’te <kbd class={ui.kbd}>⌘</kbd> <kbd class={ui.kbd}>V</kbd>).
-              Ayırıcı ve kalite kaydırıcıları ok tuşlarıyla hareket eder; <kbd class={ui.kbd}>Home</kbd> ve{' '}
-              <kbd class={ui.kbd}>End</kbd> tuşları uçlara atlar.
+              <strong class={strong}>Klavye.</strong> Görseli <kbd class={ui.kbd}>Ctrl</kbd>{' '}
+              <kbd class={ui.kbd}>V</kbd> ile yapıştırabilirsiniz (Mac’te <kbd class={ui.kbd}>⌘</kbd>{' '}
+              <kbd class={ui.kbd}>V</kbd>). Ayırıcıyı ve kalite kaydırıcısını ok tuşlarıyla hareket ettirebilirsiniz;{' '}
+              <kbd class={ui.kbd}>Home</kbd> ve <kbd class={ui.kbd}>End</kbd> ile en başa ya da en sona gidersiniz.
             </li>
             <li>
-              <strong class={strong}>Neler kaldırılır?</strong> Sıkıştırılmış kopyada EXIF verisi bulunmaz: kamera
-              modeli, çekim zamanı ya da GPS konumu yer almaz. Renkler, web’in standart renk uzayı olan sRGB’ye
-              dönüştürülür.
+              <strong class={strong}>Neler silinir?</strong> Sıkıştırılmış kopyada EXIF verisi, yani kamera modeli, çekim
+              zamanı ve GPS konumu yer almaz. Renkler, internette standart olan sRGB renk uzayına dönüştürülür.
             </li>
             <li>
-              <strong class={strong}>Telefon ve tabletlerde büyük fotoğraflar.</strong> Araç bu cihazlarda en fazla{' '}
-              {canvasPixels} piksellik (4096 × 4096) bir tuvalle çalışır; bu, iOS Safari’nin izin verdiği en büyük
-              tuvaldir. Daha büyük fotoğraflar sığacak şekilde küçültülür ve araç bunu size bildirir.
+              <strong class={strong}>Telefon ve tabletlerde büyük fotoğraflar.</strong> Bu cihazlarda araç görselleri en
+              fazla {canvasPixels} piksellik (4096 × 4096) bir alanda işleyebilir. iOS Safari’nin izin verdiği en büyük
+              alan budur. Daha büyük fotoğraflar bu sınıra sığacak şekilde küçültülür ve araç bunu size haber verir.
             </li>
           </ul>
         ) : (

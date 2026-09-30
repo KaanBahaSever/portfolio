@@ -6,11 +6,15 @@
  *   public/cv/kaan-cv-tr.pdf   Turkish
  *
  * The CVs are generated from the same data as the site — src/data/resume.ts for experience,
- * education, volunteering, activities, skills and languages, src/data/cv.ts for the headline,
- * summary and project lines, src/config/site.ts for contact links — so they cannot drift from
- * the site again. One template serves both languages: every word it adds (section titles, the
- * footer, the metadata) comes from src/i18n/messages/cv.ts. Re-run it after changing any of those
- * files and commit the PDFs.
+ * education, activities, skills and languages, src/data/cv.ts for the headline, summary, the
+ * student communities under the university and the project lines, src/config/site.ts for contact
+ * links — so they cannot drift from the site again. One template serves both languages: every
+ * word it adds (section titles, the footer, the metadata) comes from src/i18n/messages/cv.ts.
+ * Re-run it after changing any of those files and commit the PDFs (tests/cv-data.test.ts reads
+ * their text back).
+ *
+ * Sections, in the owner's order: Experience, Education, Selected projects, Skills, then Research,
+ * Certificates & activities and Languages.
  *
  * How: the data is rendered into a print-styled HTML page (A4, the site's typefaces read straight
  * from node_modules), which a local headless Chrome or Edge prints to PDF with real, clickable
@@ -45,7 +49,6 @@ import {
   EXPERIENCE,
   LANGUAGES,
   SKILLS,
-  VOLUNTEERING,
   resumeText,
   type ActivityItem,
   type ResumePeriod,
@@ -206,6 +209,14 @@ function renderHtml(locale: Locale): string {
     )
     .join('');
 
+  // The one school, Istanbul University. Under it, instead of the home page's highlights, the
+  // student communities he was active in there, each led by its name, his role and the years.
+  const communities = `<ul>${cv.communities
+    .map(
+      (community) =>
+        `<li><span class="lead">${escapeHtml(m.community(community.name, community.role, community.period))}</span> ${escapeHtml(community.text)}</li>`,
+    )
+    .join('')}</ul>`;
   const education = EDUCATION.map((school) =>
     entry({
       title: escapeHtml(m.degree(school.degree[locale], school.field[locale])),
@@ -215,7 +226,7 @@ function renderHtml(locale: Locale): string {
           .map(escapeHtml),
       ),
       period: period(school),
-      body: bullets(school.highlights[locale]),
+      body: communities,
     }),
   ).join('');
 
@@ -287,8 +298,8 @@ h1 { font-family: "Newsreader", Georgia, serif; font-weight: 500; font-size: 23p
 
 /* One column: each heading sits on its own line before its content (clean reading order). */
 section { padding-top: 2.6mm; margin-top: 2.8mm; border-top: 0.5pt solid var(--rule); break-inside: avoid; }
-/* Long sections may continue on the next page (entries themselves never split). */
-#projects, #leadership { break-inside: auto; }
+/* A long section may continue on the next page (entries themselves never split). */
+#projects { break-inside: auto; }
 h2 { font-family: "JetBrains Mono", monospace; font-size: 7.5pt; font-weight: 500; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--accent); margin-bottom: 1.4mm; break-after: avoid; }
 .section-body > * + * { margin-top: 2.2mm; }
@@ -305,6 +316,7 @@ h3 { font-size: 9.3pt; font-weight: 600; line-height: 1.3; }
 ul { padding-left: 3.4mm; }
 li { margin-top: 0.3mm; }
 li::marker { content: "– "; color: var(--faint); }
+.lead { font-weight: 600; color: var(--ink); }
 .stack { font-family: "JetBrains Mono", monospace; font-size: 7.5pt; color: var(--faint) !important; letter-spacing: 0.01em; }
 
 .skills { display: grid; grid-template-columns: max-content 1fr; row-gap: 0.8mm; column-gap: 5mm; }
@@ -330,7 +342,6 @@ ${section('experience', m.sections.experience, experience)}
 ${section('education', m.sections.education, education)}
 ${section('projects', m.sections.projects, projects)}
 ${section('skills', m.sections.skills, skills)}
-${section('leadership', m.sections.leadership, VOLUNTEERING.map(activity).join(''))}
 ${section('research', m.sections.research, research)}
 ${section('other', m.sections.other, other)}
 ${section('languages', m.sections.languages, languages)}

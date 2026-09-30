@@ -88,13 +88,13 @@ const en: CvContent = {
       name: 'Rocket Club',
       role: 'Vice President',
       period: '2019–2022',
-      text: 'developed avionics, telemetry, ground-control and flight-simulation software for the one low-altitude (5,000 ft) and two high-altitude (10,000 ft) rockets the team built.',
+      text: 'developed avionics, telemetry, ground-control and flight-simulation software for the team’s three rockets, one low-altitude (5,000 ft) and two high-altitude (10,000 ft).',
     },
     {
-      // "A community for theoretical discussion": the owner's words (2026-09-30).
+      // A community for theoretical discussion: the owner's description (2026-09-30).
       name: 'Mathematics Club',
       period: 'later university years',
-      text: 'organised and ran academic events, such as seminars and logic and mathematics competitions, in a community for theoretical discussion.',
+      text: 'organised and ran academic events, such as seminars and logic and mathematics competitions, for a community built around theoretical discussion.',
     },
     {
       name: 'Google Developer Student Clubs (GDSC)',

@@ -201,9 +201,9 @@ test('the community lines carry the owner’s facts, in both languages', () => {
     en: [
       [
         /avionics, telemetry, ground-control and flight-simulation software/,
-        /one low-altitude \(5,000 ft\) and two high-altitude \(10,000 ft\) rockets/,
+        /three rockets, one low-altitude \(5,000 ft\) and two high-altitude \(10,000 ft\)/,
       ],
-      [/academic events, such as seminars and logic and mathematics competitions/, /community for theoretical discussion/],
+      [/academic events, such as seminars and logic and mathematics competitions/, /community built around theoretical discussion/],
       [/technical workshops and live streams on Flask, HTML and Git\/GitHub/, /organised Cyber Security Week/],
     ],
     tr: [

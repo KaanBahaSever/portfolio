@@ -113,12 +113,12 @@ const CHRONOLOGY: Record<Locale, [step: string, pattern: RegExp][]> = {
     ['the desktop game in C#, a graduation project', /desktop game in C#[^.]* graduation projects/],
     ['its source', /href=\{desktopSource\}/],
     ['the algorithm, later', LATER.en],
-    ['2026, rewritten from scratch', /In 2026 I rewrote it from scratch/],
-    ['in TypeScript, for the browser', /TypeScript, runs in the browser/],
+    ['2026, rewritten from scratch', /In 2026 I rewrote the game from scratch/],
+    ['in TypeScript, for the browser', /Written in TypeScript, it runs in the browser/],
     ['the blog post on how it aims', /href=\{post\}/],
   ],
   tr: [
-    ['2005 civarı, kâğıtta ve ekranda ilk oyunlar', /2005 civarında, Amiral Battı’yla hem kâğıtta hem de ekranda/],
+    ['2005 civarı, kâğıtta ve ekranda ilk oyunlar', /2005 civarında[^.]* Amiral Battı’yla[^.]* hem kâğıtta hem de ekranda/],
     ['babasıyla, çocukken', PAGE_STORY.tr],
     ['2018 civarı, lise yılları', /2018 civarına, lise yıllarıma/],
     ['C#’la masaüstü oyunu, bir bitirme projesi', /C#’la[^.]* masaüstü oyunu[^.]* bitirme projelerimden/],
@@ -145,7 +145,7 @@ test('the Battleship page tells the story in the order it happened and links the
     assert.match(story[locale], /still new to programming|Programlamada henüz acemiyken/, locale);
     assert.doesNotMatch(story[locale], /(?:started|began) programming|programlamaya başla/i, locale);
     // The game on this site is TypeScript in the browser, and its opponent is an algorithm.
-    assert.match(story[locale], /opponent decides where to fire with an algorithm|Bilgisayar rakip, nereye ateş edeceğine bir algoritmayla karar/, locale);
+    assert.match(story[locale], /opponent decides where to fire with an algorithm|Bilgisayar rakip nereye ateş edeceğine bir algoritmayla karar/, locale);
     assert.doesNotMatch(
       story[locale],
       /C\+\+|machine learning|neural|trained|\bAI\b|makine öğrenme|yapay zek|sinir ağı|eğitilmiş/i,

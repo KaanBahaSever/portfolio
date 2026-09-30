@@ -4,9 +4,16 @@
  * comes from. Written once per locale (inline markup such as <kbd> and the density formula do not
  * survive string templates).
  *
- * The story is the owner's own: Battleship was the game he played with his father as a child, so
- * he wanted to design his own. Add no details to it. Keep the order of events: the desktop version
- * (a high-school graduation project) came first, the Hunt & Target algorithm later.
+ * The story is the owner's own, told in the order it happened; add no details to it:
+ * - around 2005, as a child: he met Battleship on paper and on screen. It was the game he played
+ *   with his father, which is why he wanted to design his own;
+ * - around 2018, in high school: the first digital attempt, a plain desktop game in C#, presented
+ *   as one of his graduation projects. (He started programming in 2016; do not date that to 2018.
+ *   The About timeline lists the graduation projects under 2019.)
+ * - 2026: rewritten from scratch as the game on this page, in TypeScript for the browser. The
+ *   Hunt & Target algorithm came after the desktop game, so do not credit that version with it.
+ * The opponent is an algorithm (hunt & target, a probability density map), not a trained model,
+ * and the game is not C++: say neither.
  */
 import Section from '../ui/Section.astro';
 import { ui } from '../ui/styles';
@@ -243,14 +250,21 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
       <div class="max-w-3xl">
         <div class={body}>
           <p>
-            Amiral Battı, çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu. İlk sürüm,
-            lise bitirme projelerimden biri olarak C#’la yazdığım bir masaüstü oyunuydu
+            Hikâye 2005 civarında başlıyor: Amiral Battı’yla o yıllarda hem kâğıtta hem de ekranda oynayarak tanıştım.
+            Çocukken babamla oynadığım oyundu; kendi sürümümü tasarlamak istememin nedeni de bu.
+          </p>
+          <p>
+            İlk dijital denemem 2018 civarına, lise yıllarıma denk geliyor. Programlamada henüz acemiyken C#’la sade bir
+            masaüstü oyunu yazdım ve bitirme projelerimden biri olarak sundum
             (<a href={desktopSource} class={ui.inlineLink}>kaynak kodu GitHub’da</a>). Normal seviyenin kullandığı av ve
             hedef algoritması sonradan geldi.
           </p>
           <p>
-            Bilgisayarın nasıl nişan aldığını <a href={post} class={ui.inlineLink}>bir blog yazısında</a> adım adım
-            anlattım.
+            2026’da oyunu sıfırdan yeniden yazdım; bu sayfada oynadığınız oyun o. TypeScript’le geliştirdiğim bu sürüm
+            tarayıcıda çalışıyor, arayüzü de modern. Bilgisayar rakip nereye ateş edeceğine bir algoritmayla karar
+            veriyor: Normal seviyede tahtayı dama deseniyle tarıyor, bir gemiyi vurunca da çevresini yokluyor; Zor
+            seviyede ise olasılık yoğunluğu haritasında değeri en yüksek hücreye ateş ediyor. Bilgisayarın nasıl nişan
+            aldığını <a href={post} class={ui.inlineLink}>bir blog yazısında</a> adım adım anlattım.
           </p>
         </div>
       </div>
@@ -258,13 +272,21 @@ const sum = 'inline-block align-[-0.12em] text-[1.45em] leading-none';
       <div class="max-w-3xl">
         <div class={body}>
           <p>
-            Battleship was the game I played with my father as a child, which is why I wanted to design my own. The
-            first version was a desktop game in C#, one of my high-school graduation projects
-            (<a href={desktopSource} class={ui.inlineLink}>source on GitHub</a>); the Hunt &amp; Target algorithm behind
+            The story starts around 2005, when I got to know Battleship by playing it on paper and on screen. It was the
+            game I played with my father as a child, which is why I wanted to design my own.
+          </p>
+          <p>
+            My first digital attempt goes back to around 2018, my high-school years. I was still new to programming when
+            I wrote a plain desktop game in C# and presented it as one of my graduation projects
+            (<a href={desktopSource} class={ui.inlineLink}>source on GitHub</a>). The Hunt &amp; Target algorithm behind
             Normal came later.
           </p>
           <p>
-            <a href={post} class={ui.inlineLink}>A blog post</a> explains, step by step, how the computer aims.
+            In 2026 I rewrote the game from scratch, and that is the version on this page. Written in TypeScript, it
+            runs in the browser and has a modern interface. The computer opponent decides where to fire with an
+            algorithm: on Normal it hunts on a chequerboard pattern and closes in on every hit; on Hard it fires where a
+            probability density map is highest. <a href={post} class={ui.inlineLink}>A blog post</a> explains, step by
+            step, how it aims.
           </p>
         </div>
       </div>

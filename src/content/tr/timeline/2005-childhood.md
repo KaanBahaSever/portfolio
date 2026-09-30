@@ -1,14 +1,14 @@
 ---
-# TASLAK: yalnızca `npm run dev` ile görünür, üretim derlemelerine hiçbir zaman girmez.
-# İngilizce karşılığı: src/content/timeline/2005-childhood.md. Yayına alırken iki dosyadan da
-# `draft: true` satırını kaldırın.
-title: 'TODO: Her şey nasıl başladı'
+title: Söktüğüm aletlerden kendi bilgisayarıma
 dateLabel: Çocukluk
-draft: true
-photos:
-  # İngilizce dosyadaki fotoğraflarla aynı sırada: yalnızca alternatif metin ve açıklama.
-  - alt: 'TODO: fotoğrafı ekran okuyucular için betimleyin'
-    caption: 'TODO: isteğe bağlı açıklama (yer tutucu görsel)'
 ---
 
-TODO: çocukluk hikâyesi buraya gelecek.
+Küçüklüğümden beri bir şeylerin nasıl çalıştığını hep merak etmişimdir. Evdeki aletleri söküp
+takar, elektrik ve elektronik parçaları kurcalardım; prizler bile bu meraktan nasibini alırdı.
+
+2005’te kendi bilgisayarım oldu. Ondan önce kuzenlerimin bilgisayarlarını kurcalayarak büyüdüm;
+sistemi de oyunları da o bilgisayarlarda keşfettim.
+
+Donanıma ve bir şeyleri keşfetmeye duyduğum bu merak, zamanla sistem programlama ve yazılım
+geliştirme tutkusuna dönüştü. Bugün genellikle donanıma yakın çalışan programlar geliştirmemin
+nedeni de bu.

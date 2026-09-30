@@ -1,46 +1,23 @@
 ---
-# DRAFT: shown by `npm run dev` only, never in production builds.
-# TODO: set the real title, an approximate date (used only for ordering) and a dateLabel,
-# then remove `draft: true` to publish.
-title: 'TODO: How it started'
+title: From taking things apart to a computer of my own
+# The date only orders entries: a childhood of tinkering, up to his own computer in 2005.
+# Tell only what the owner gave: taking apart and reassembling the devices at home, fiddling
+# with electrical and electronic parts and sockets, his cousins' computers (the system and the
+# games) before his own in 2005, and how that curiosity grew into systems programming and
+# software development. No brands, models, ages or other anecdotes. He was still a small child
+# in 2005, so do not make his own computer sound late ("not until", "ancak"). Where he was born
+# is the 2000 entry.
 date: 2005-01-01
 dateLabel: Childhood
-draft: true
-photos:
-  # TODO: replace this placeholder with real photos (see the body below), then delete
-  # src/assets/timeline/first-computer.png if nothing references it any more.
-  - src: ../../assets/timeline/first-computer.png
-    alt: 'TODO: describe the photo for screen readers'
-    caption: 'TODO: optional caption (placeholder image)'
 ---
 
-<!--
-TODO (Kaan): tell the story of how your interest in technology began in childhood.
-This entry is a draft, so it only appears in `npm run dev`.
+Ever since I was small, I have wanted to know how things work. I took apart the devices around
+the house and put them back together, and I fiddled with electrical and electronic parts; even
+the power sockets did not escape my curiosity.
 
-What to write (a few short paragraphs of Markdown):
-- The first computer, console or device you remember, and roughly when.
-- The first thing you made or took apart: a program, a game mod, a website, a gadget.
-- What kept you interested, and how it led to mathematics and software.
+I got a computer of my own in 2005. Before that, I grew up tinkering with my cousins’ computers
+and exploring the system and the games on them.
 
-Adding old photos:
-1. Scan or copy the photos into src/assets/timeline/ (JPEG or PNG; they are resized
-   and converted to WebP at build time, so large originals are fine).
-2. List them under `photos:` in the frontmatter above, with paths relative to this file:
-     photos:
-       - src: ../../assets/timeline/my-first-pc.jpg
-         alt: Describe what the photo shows   # required
-         caption: Optional caption            # optional
-3. Split the story over several entries if you like (e.g. 2005-childhood.md,
-   2010-first-computer.md); entries are sorted by `date`, oldest first. File names start
-   with the year only so the folder lists in roughly the same order.
-
-Turkish version: src/content/tr/timeline/2005-childhood.md (same file name) holds the Turkish
-title, dateLabel, photo alt/caption (same order as above) and body. Write it too, and remove
-`draft: true` there as well when publishing.
-
-Links to site pages: write locale-free paths such as [Karecik](/projects/karecik/); the About
-page adds /tr/ on Turkish pages.
--->
-
-TODO: the childhood story goes here.
+Over time, my curiosity about hardware and my urge to explore grew into a love of systems
+programming and software development. That is why most of what I build today still sits close
+to the machine.

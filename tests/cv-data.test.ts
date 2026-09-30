@@ -3,20 +3,25 @@
  * the same rules as the site, in both languages: the owner is a software developer, never an
  * engineer; links are https (or tel:/mailto:); project tag lists stay short; none of the removed
  * Swift-era details come back. The English and Turkish CVs carry the same facts: same projects in
- * the same order, same links, stacks, years and status. Last, the PDFs the site links exist,
- * fit on two pages, are set in the site's fonts and declare their language.
+ * the same order, same links, stacks, years and status, and the same student communities under the
+ * university, with the roles and years of the home page's list. Last, the PDFs the site links
+ * exist, fit on two pages, are set in the site's fonts, declare their language and print what the
+ * data says, in the owner's section order.
  */
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { PDFDocument, PDFName, StandardFonts } from 'pdf-lib';
+import { getDocument, VerbosityLevel } from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 import { embeddedFontNames, fontFallbackProblem } from '../scripts/cv-fonts.ts';
 import { SITE } from '../src/config/site.ts';
 import { CV } from '../src/data/cv.ts';
-import { LOCALES } from '../src/i18n/config.ts';
+import { EDUCATION, VOLUNTEERING, resumeText } from '../src/data/resume.ts';
+import { LOCALES, LOCALE_META, type Locale } from '../src/i18n/config.ts';
 import { cvMessages } from '../src/i18n/messages/cv.ts';
+import { isDated } from '../src/utils/resume-dates.ts';
 
 /** Every string in a value, including the results of message functions called with sample arguments. */
 function strings(value: unknown): string[] {
@@ -33,6 +38,7 @@ const all = (locale: (typeof LOCALES)[number]) => [...strings(CV[locale]), ...st
 const years = (text: string) => [...new Set(text.match(/\b(19|20)\d{2}\b/g) ?? [])].sort();
 
 test('neither CV calls the owner an engineer', () => {
+  // Nor his university work: the student-community lines never say "engineering" or "mühendislik".
   for (const locale of LOCALES) {
     for (const text of all(locale)) assert.doesNotMatch(text, /engineer|mühendis/i, `${locale}: ${text}`);
   }
@@ -95,6 +101,16 @@ test('both CVs carry the same facts: projects, links, stacks, years and status',
     assert.equal(other.linkLabel, item.linkLabel);
     assert.equal(other.period, item.period);
   });
+  assert.equal(tr.communities.length, en.communities.length);
+  en.communities.forEach((community, index) => {
+    const other = tr.communities[index]!;
+    const label = `${community.name} / ${other.name}`;
+    assert.equal(other.role === undefined, community.role === undefined, label);
+    assert.deepEqual(years(other.period), years(community.period), label);
+    // The same figures, grouped each language's way: 5,000 ft is 5.000 ft.
+    const figures = (text: string) => (text.match(/\d[\d.,]*\d|\d/g) ?? []).map((n) => n.replace(/[.,]/g, ''));
+    assert.deepEqual(figures(other.text), figures(community.text), label);
+  });
 });
 
 test('the Turkish CV is written with Turkish typography', () => {
@@ -135,11 +151,103 @@ test('the CVs list only the four selected projects, in the owner’s order', () 
   }
 });
 
+/**
+ * The student communities under the university, in the owner's order: the home page's entry for
+ * each (resume.ts VOLUNTEERING, by English title) and the name the CV gives it in each language.
+ */
+const COMMUNITIES = [
+  { record: 'Istanbul University Rocket Club', en: 'Rocket Club', tr: 'Roket Kulübü' },
+  { record: 'Mathematics Club', en: 'Mathematics Club', tr: 'Matematik Kulübü' },
+  {
+    record: 'Google Developer Student Clubs',
+    en: 'Google Developer Student Clubs (GDSC)',
+    tr: 'Google Developer Student Clubs (GDSC)',
+  },
+] as const;
+
+test('under the university the CVs list his three student communities, with the roles and years on record', () => {
+  // One school, Istanbul University: scripts/build-cv.ts prints the communities under it.
+  assert.equal(EDUCATION.length, 1);
+  assert.equal(EDUCATION[0]!.institution.en, 'Istanbul University');
+  for (const locale of LOCALES) {
+    const communities = CV[locale].communities;
+    assert.deepEqual(
+      communities.map((community) => community.name),
+      COMMUNITIES.map((names) => names[locale]),
+      locale,
+    );
+    communities.forEach((community, index) => {
+      const label = `${locale}: ${community.name}`;
+      const record = VOLUNTEERING.find((item) => resumeText(item.title, 'en') === COMMUNITIES[index]!.record);
+      assert.ok(record, label);
+      assert.equal(community.role, record.role?.[locale], label);
+      // "2019–2022" and "2023"; the Mathematics Club has no dates on record, so its period in words.
+      const period = isDated(record)
+        ? [record.start, record.end].filter(Boolean).join('–')
+        : record.periodLabel[locale].toLocaleLowerCase(LOCALE_META[locale].htmlLang);
+      assert.equal(community.period, period, label);
+      // One or two printed lines, lead included (a line holds about 115 characters).
+      const line = `${cvMessages[locale].community(community.name, community.role, community.period)} ${community.text}`;
+      assert.ok(line.length <= 220, `${label}: ${line.length} characters`);
+      // After the lead's colon English goes on in lower case; Turkish starts a sentence (TDK).
+      assert.match(community.text, locale === 'en' ? /^\p{Ll}/u : /^\p{Lu}/u, label);
+      assert.match(community.text, /\.$/, label);
+    });
+  }
+});
+
+test('the community lines carry the owner’s facts, in both languages', () => {
+  const facts: Record<Locale, RegExp[][]> = {
+    en: [
+      [
+        /avionics, telemetry, ground-control and flight-simulation software/,
+        /one low-altitude \(5,000 ft\) and two high-altitude \(10,000 ft\) rockets/,
+      ],
+      [/academic events, such as seminars and logic and mathematics competitions/, /community for theoretical discussion/],
+      [/technical workshops and live streams on Flask, HTML and Git\/GitHub/, /organised Cyber Security Week/],
+    ],
+    tr: [
+      [
+        /aviyonik, telemetri, yer kontrol ve uçuş simülasyonu yazılımları/,
+        /bir alçak irtifa \(5\.000 ft\) ve iki yüksek irtifa \(10\.000 ft\) roketi/,
+      ],
+      [/seminerler, mantık ve matematik yarışmaları gibi akademik etkinlikler/, /Teorik tartışmaların yapıldığı bu toplulukta/],
+      [/Flask, HTML ve Git\/GitHub üzerine teknik atölyeler ve canlı yayınlar/, /Siber Güvenlik Haftası etkinliğini/],
+    ],
+  };
+  for (const locale of LOCALES) {
+    CV[locale].communities.forEach((community, index) => {
+      for (const fact of facts[locale][index]!) assert.match(community.text, fact, `${locale}: ${community.name}`);
+    });
+  }
+});
+
+test('the CVs have no volunteering section: its clubs are listed under the university', () => {
+  for (const locale of LOCALES) {
+    assert.deepEqual(
+      Object.keys(cvMessages[locale].sections),
+      ['experience', 'education', 'projects', 'skills', 'research', 'other', 'languages'],
+      locale,
+    );
+  }
+});
+
 test('the words around the CV compose titles the way each language does', () => {
   assert.equal(cvMessages.en.degree('Bachelor of Science', 'Mathematics'), 'Bachelor of Science in Mathematics');
   assert.equal(cvMessages.tr.degree('Lisans', 'Matematik'), 'Matematik (Lisans)');
   assert.equal(cvMessages.en.role('Vice President', 'Rocket Club'), 'Vice President, Rocket Club');
   assert.equal(cvMessages.tr.role('Başkan Yardımcısı', 'Roket Kulübü'), 'Roket Kulübü Başkan Yardımcısı');
+  // A community line starts with the community, then the role where there is one, then when.
+  assert.equal(cvMessages.en.community('Rocket Club', 'Vice President', '2019–2022'), 'Rocket Club, Vice President (2019–2022):');
+  assert.equal(
+    cvMessages.tr.community('Roket Kulübü', 'Başkan Yardımcısı', '2019–2022'),
+    'Roket Kulübü Başkan Yardımcısı (2019–2022):',
+  );
+  assert.equal(cvMessages.en.community('Mathematics Club', undefined, 'later university years'), 'Mathematics Club (later university years):');
+  assert.equal(
+    cvMessages.tr.community('Matematik Kulübü', undefined, 'üniversitenin son yılları'),
+    'Matematik Kulübü (üniversitenin son yılları):',
+  );
   // Lower case by each language's rules: Turkish "I" is "ı", not "i".
   assert.equal(cvMessages.en.language('Turkish', 'Native'), 'Turkish (native)');
   assert.equal(cvMessages.tr.language('Türkçe', 'Ana dili'), 'Türkçe (ana dili)');
@@ -174,5 +282,49 @@ for (const locale of LOCALES) {
     assert.ok(lang && 'decodeText' in lang, 'no /Lang in the catalog');
     assert.equal((lang as { decodeText(): string }).decodeText(), locale);
     assert.ok(bytes.includes(`<dc:language><rdf:Bag><rdf:li>${locale}</rdf:li></rdf:Bag></dc:language>`), 'XMP language');
+  });
+}
+
+const squash = (text: string) => text.replace(/\s+/g, '');
+
+/** The printed text of a PDF as PDF.js reads it, with all white space removed (lines wrap anywhere). */
+async function printedText(bytes: Uint8Array): Promise<string> {
+  const loading = getDocument({ data: bytes, verbosity: VerbosityLevel.ERRORS });
+  try {
+    const doc = await loading.promise;
+    let text = '';
+    for (let number = 1; number <= doc.numPages; number++) {
+      const content = await (await doc.getPage(number)).getTextContent();
+      for (const item of content.items) if ('str' in item) text += item.str;
+    }
+    return squash(text);
+  } finally {
+    await loading.destroy();
+  }
+}
+
+for (const locale of LOCALES) {
+  test(`the ${locale} CV prints its sections in the owner’s order, with the student communities under the university`, async () => {
+    // A copy: PDF.js takes a plain Uint8Array and may detach it.
+    const text = await printedText(new Uint8Array(readFileSync(new URL(`../public${SITE.cvPath[locale]}`, import.meta.url))));
+    const m = cvMessages[locale];
+    // Section titles are set in capitals by CSS, by the document language's rules ("EĞİTİM").
+    const heading = (title: string) => squash(title.toLocaleUpperCase(LOCALE_META[locale].htmlLang));
+    const at: number[] = [];
+    for (const title of Object.values(m.sections)) {
+      const index = text.indexOf(heading(title), at.at(-1) ?? 0);
+      assert.ok(index >= 0, `${locale}: "${title}" missing or out of order`);
+      at.push(index);
+    }
+    // The former Leadership & volunteering section is gone.
+    assert.doesNotMatch(text, /LEADERSHIP|VOLUNTEERING|LİDERLİK|GÖNÜLLÜLÜK/);
+
+    const education = text.slice(text.indexOf(heading(m.sections.education)), text.indexOf(heading(m.sections.projects)));
+    for (const community of CV[locale].communities) {
+      const line = squash(`${m.community(community.name, community.role, community.period)} ${community.text}`);
+      assert.ok(education.includes(line), `${locale}: ${community.name} is not printed under the university`);
+    }
+    // The CV replaces the home page's highlights for the degree with the communities.
+    for (const highlight of EDUCATION[0]!.highlights[locale]) assert.ok(!text.includes(squash(highlight)), highlight);
   });
 }

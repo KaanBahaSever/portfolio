@@ -69,31 +69,34 @@ test('the childhood entry is published, with no placeholder left', () => {
 test('the childhood story keeps the owner’s facts in both languages, and adds none', () => {
   const facts: Record<Locale, RegExp[]> = {
     en: [
-      /From a young age I wanted to know how things worked\./,
-      /I took apart the devices at home and put them back together/,
+      /Ever since I was small, I have wanted to know how things work\./,
+      /I took apart the devices around the house and put them back together/,
       /electrical and electronic parts/,
       /power sockets/,
-      /I did not have a computer of my own until 2005\./,
+      /I got a computer of my own in 2005\./,
       /I grew up tinkering with my cousins’ computers/,
-      /explored the system and the games/,
-      /curiosity about hardware and about exploring things grew into a love of systems programming and software development/,
+      /exploring the system and the games/,
+      /my curiosity about hardware and my urge to explore grew into a love of systems programming and software development/,
     ],
     tr: [
-      /Küçüklüğümden beri bir şeyin nasıl çalıştığını hep merak etmişimdir\./,
+      /Küçüklüğümden beri bir şeylerin nasıl çalıştığını hep merak etmişimdir\./,
       /Evdeki aletleri söküp takar/,
       /elektrik ve elektronik parçaları kurcalardım/,
       /prizler/,
-      /Kendi bilgisayarım ancak 2005’te oldu\./,
+      /2005’te kendi bilgisayarım oldu\./,
       /kuzenlerimin bilgisayarlarını kurcalayarak büyüdüm/,
       /sistemi de oyunları da/,
       /Donanıma ve bir şeyleri keşfetmeye duyduğum bu merak, zamanla sistem programlama ve yazılım geliştirme tutkusuna dönüştü\./,
     ],
   };
+  // Born in 2000, he was still a small child in 2005: his own computer is not told as late.
+  const late: Record<Locale, RegExp> = { en: /not until|until 2005|only in 2005/i, tr: /ancak|nihayet|sonunda/iu };
   for (const locale of ['en', 'tr'] as const) {
     const text = body(entry[locale]('2005-childhood'));
     for (const fact of facts[locale]) assert.match(text, fact, locale);
     // The only number is the year of his own computer: no ages, models or other dates.
     assert.deepEqual(text.match(/\d+/g), ['2005'], locale);
+    assert.doesNotMatch(text, late[locale], locale);
   }
 });
 

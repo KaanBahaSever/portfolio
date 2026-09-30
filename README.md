@@ -71,7 +71,7 @@ touches the network.
 ├── public/                 # Static files: headers, redirects, icons, cv/
 ├── scripts/                # The cv, sync:medium and favicons scripts
 ├── src/
-│   ├── assets/             # Blog and timeline images, optimized at build time
+│   ├── assets/             # Blog images, optimized at build time
 │   ├── components/         # Astro components, grouped by page and feature
 │   ├── config/site.ts      # Name, contact links, navigation
 │   ├── content/            # Blog posts, projects and timeline; Turkish project and timeline text in tr/

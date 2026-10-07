@@ -8,6 +8,8 @@ tags: [fizik, enerji, bilim]
 ---
 
 import BindingCurve from '../../components/blog/posts/fusion/BindingCurve.astro';
+import Co2Chart from '../../components/blog/posts/fusion/Co2Chart.astro';
+import FuelEnergyChart from '../../components/blog/posts/fusion/FuelEnergyChart.astro';
 import LawsonChart from '../../components/blog/posts/fusion/LawsonChart.astro';
 import ReactionFigure from '../../components/blog/posts/fusion/ReactionFigure.astro';
 import ReactivityChart from '../../components/blog/posts/fusion/ReactivityChart.astro';
@@ -159,7 +161,39 @@ Füzyonun bu kadar heyecan verici olmasının sebebi burada.
 
 **Atığı kısa ömürlü.** Füzyon radyoaktiviteden tamamen arınmış değil. Trityumun kendisi radyoaktiftir (yarı ömrü 12,3 yıl) ve dikkatle ele alınmalıdır. Hızlı nötronlar da reaktörün duvarlarındaki malzemeleri zamanla radyoaktif hâle getirir. Ama bu malzemelerin radyoaktivitesi birkaç on yılda büyük ölçüde azalır; yaklaşık yüz yıl içinde malzemeler yeniden kullanılabilir hâle gelir. Fisyon santrallerinin kullanılmış yakıtı ise on binlerce yıl saklanmak zorunda. Füzyon, uzun ömürlü yüksek seviyeli atık üretmez.
 
-Bütün bunlar yan yana gelince füzyonun neden “dünyanın kurtuluşu” diye anıldığı anlaşılıyor: Temiz, güvenli, yakıtı bol, az yer kaplayan ve gece gündüz, hava nasıl olursa olsun çalışan bir enerji kaynağı. İklim değişikliğiyle mücadelede ve dünyanın büyüyen enerji ihtiyacını karşılamada, temiz ve bol enerji için insanlığın en büyük umutlarından biri. Ama bir umudu gerçeğe çevirmek, bir ateşi yakmaktan zor.
+## Öbür kaynaklarla yan yana
+
+Füzyonun neler vaat ettiğini daha iyi görmek için onu bugün elektrik ürettiğimiz yollarla yan yana koyalım: kömür, doğal gaz, nükleer fisyon, güneş, rüzgâr ve hidroelektrik.
+
+İlk soru yakıt. Kömür ve doğal gaz kimyasal enerji verir: Yanma sırasında atomlar yeni bağlar kurar ve her molekülden birkaç elektronvolt enerji açığa çıkar. Fisyon ve füzyon ise çekirdeğin enerjisini kullanır; tek bir tepkime milyonlarca elektronvolt verir. Bu fark, bir kilogram yakıttan alınan enerjiye doğrudan yansıyor.
+
+<FuelEnergyChart lang="tr">Bir kilogram yakıttan elde edilen enerji. Yatay eksen logaritmik: Kalın çizgilerin her biri bir öncekinin bin katı. Doğal gaz için metanın yanma ısısı, kömür için kilogram başına {n.coalLow}–{n.coalHigh} megajoule alındı. Uranyum-235 için her bölünmede yaklaşık 200 MeV, D–T için her kaynaşmada {n.q} MeV hesaba katıldı. İki nükleer değer de yakıtın tamamı tepkimeye girerse alınabilecek en yüksek değerler.</FuelEnergyChart>
+
+Bir kilogram doğal gaz yaklaşık {n.gasMj} megajoule verir. Bir kilogram uranyum-235’in bütün çekirdekleri bölünseydi yaklaşık {n.fissionTj} terajoule enerji açığa çıkardı; bu, kömürün yaklaşık {n.fissionVsCoal} milyon katı. D–T füzyonu bunu da yaklaşık {n.fusionVsFission} katına çıkarıyor: kilogram başına {n.perKgTj} terajoule, yani kömürün {n.coalRatioLow}–{n.coalRatioHigh} milyon katı.
+
+İkinci soru karbon. Bir santralin iklime etkisini dürüstçe ölçmek için yalnızca bacasına değil, bütün ömrüne bakmak gerekir: madenlere, yakıtın taşınmasına, santralin yapımına ve sökülmesine. Hükümetlerarası İklim Değişikliği Paneli (IPCC), 2014 raporunda bu konudaki çalışmaları derledi ve her kaynağın bir kilovatsaat elektrik başına saldığı sera gazını hesapladı.
+
+<Co2Chart lang="tr">Bir kilovatsaat elektrik için santralin bütün ömrü boyunca salınan sera gazları, gram CO₂ eşdeğeri olarak. Değerler, IPCC’nin 2014 raporundaki ortanca değerler. Füzyon için ölçülmüş bir değer yok, çünkü henüz bir füzyon santrali yok.</Co2Chart>
+
+Kömürle üretilen bir kilovatsaat elektrik {n.co2.coal} gram, doğal gazla üretilen {n.co2.gas} gram sera gazına yol açıyor. Güneş, rüzgâr, hidroelektrik ve nükleer fisyon ise bunun çok altında: Kömürün değeri, karadaki rüzgâr türbinlerininkinin yaklaşık {n.co2.coalVsWind} katı. Füzyon için bir sayı veremiyoruz, çünkü henüz santral yok. Bildiğimiz şu: Füzyon santrali çalışırken karbon salmaz ve çok az yakıt kullanır. Geriye santralin yapımı ve malzemeleri kalıyor; bunu ancak ilk santraller kurulunca ölçebileceğiz.
+
+Karbonun dışında da önemli farklar var:
+
+| Kaynak | Havaya bağlı mı? | Uzun ömürlü atık | Bugün |
+| --- | --- | --- | --- |
+| Kömür | Hayır | Havada yüzyıllarca kalan CO₂ | Şebekede |
+| Doğal gaz | Hayır | Havada yüzyıllarca kalan CO₂ | Şebekede |
+| Nükleer fisyon | Hayır | Kullanılmış yakıt, on binlerce yıl | Şebekede |
+| Güneş | Evet: Gece üretmez, bulutta azalır | Yok | Şebekede |
+| Rüzgâr | Evet: Rüzgâr dinince durur | Yok | Şebekede |
+| Hidroelektrik | Kısmen: Yağışa ve mevsime bağlı | Yok | Şebekede |
+| Füzyon | Hayır | Yok; malzemeler yaklaşık yüz yılda yeniden kullanılabilir | Henüz santral yok |
+
+Bu karşılaştırma bir yarış değil. Güneş ve rüzgâr temiz, bugün şebekede ve birçok yerde yeni kurulan santrallerin en ucuzları. Uluslararası Yenilenebilir Enerji Ajansının (IRENA) raporuna göre 2024’te devreye giren büyük ölçekli yenilenebilir kapasitenin %91’i, en ucuz yeni fosil yakıtlı santralden daha ucuza elektrik üretiyor. Zayıf yanları, geceleri güneşin olmaması ve rüzgârın her zaman esmemesi. Bugün bu boşlukları çoğunlukla fosil yakıtlar, hidroelektrik ve depolama dolduruyor.
+
+Füzyonun vaadi tam bu boşluğa uyuyor: hava nasıl olursa olsun gece gündüz çalışan, az yer kaplayan ve yakıtı tükenmeyen bir kaynak. Yani füzyon, yenilenebilir kaynakların yerini almaktan çok onları tamamlayabilir. Bunun için iki şart var: Füzyon santralleri önce gerçekten çalışmalı, sonra elektriği makul bir fiyata üretebilmeli. Bugün ikisi de belli değil.
+
+Bütün bunlar yan yana gelince füzyonun neden “dünyanın kurtuluşu” diye anıldığı anlaşılıyor: Temiz, güvenli, yakıtı bol ve her koşulda çalışan bir enerji kaynağı. İklim değişikliğiyle mücadelede ve dünyanın büyüyen enerji ihtiyacını karşılamada, temiz ve bol enerji için insanlığın en büyük umutlarından biri. Ama bir umudu gerçeğe çevirmek, bir ateşi yakmaktan zor.
 
 ## Önümüzdeki engeller
 
@@ -199,6 +233,12 @@ Fizik:
 
 - M. Wang ve ark., [“The AME 2020 atomic mass evaluation (II)”](https://doi.org/10.1088/1674-1137/abddaf), *Chinese Physics C* 45 (2021) 030003: atom kütleleri.
 - H.-S. Bosch ve G. M. Hale, [“Improved formulas for fusion cross-sections and thermal reactivities”](https://doi.org/10.1088/0029-5515/32/4/I07), *Nuclear Fusion* 32 (1992) 611: reaktivite formülü.
+
+Karşılaştırma (İngilizce):
+
+- IPCC, [Climate Change 2014: Mitigation of Climate Change, Annex III: Technology-specific Cost and Performance Parameters](https://www.ipcc.ch/site/assets/uploads/2018/02/ipcc_wg3_ar5_annex-iii.pdf), Tablo A.III.2, s. 1335: yaşam döngüsü salımları.
+- IRENA, [Renewable Power Generation Costs in 2024](https://www.irena.org/Publications/2025/Jun/Renewable-Power-Generation-Costs-in-2024) (Temmuz 2025): yenilenebilir santrallerin maliyeti.
+- NIST Chemistry WebBook, [Methane](https://webbook.nist.gov/cgi/cbook.cgi?ID=C74828&Mask=1): metanın yanma ısısı.
 
 Bugünkü durum (İngilizce):
 

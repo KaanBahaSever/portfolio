@@ -10,6 +10,7 @@ import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
+import { LIFECYCLE_CO2 } from '../src/components/blog/posts/fusion/electricity.ts';
 import { fusionPostMessages } from '../src/components/blog/posts/fusion/messages.ts';
 import {
   NUCLIDES,
@@ -17,9 +18,12 @@ import {
   coulombBarrierKev,
   deuteriumPerLitreMg,
   dtReaction,
+  fissionJoulesPerKg,
+  fuelEnergies,
   ignitionMinimum,
   ignitionTripleProduct,
   kevToKelvin,
+  methaneJoulesPerKg,
   reactivity,
   reactivityPeak,
 } from '../src/components/blog/posts/fusion/model.ts';
@@ -187,8 +191,16 @@ test('the two posts translate each other', async () => {
   assert.equal(fen.pubDate, '2026-10-07');
   const figures = (text: string) => [...text.matchAll(/^<(\w+) lang="(tr|en)"/gm)].map((m) => m[1]);
   assert.deepEqual(figures(tr), figures(en));
-  assert.deepEqual(figures(en), ['Tokamak', 'BindingCurve', 'ReactionFigure', 'ReactivityChart', 'LawsonChart']);
-  assert.ok([...tr.matchAll(/^<\w+ lang="tr"/gm)].length === 5 && !/lang="en"/.test(tr));
+  assert.deepEqual(figures(en), [
+    'Tokamak',
+    'BindingCurve',
+    'ReactionFigure',
+    'ReactivityChart',
+    'LawsonChart',
+    'FuelEnergyChart',
+    'Co2Chart',
+  ]);
+  assert.ok([...tr.matchAll(/^<\w+ lang="tr"/gm)].length === 7 && !/lang="en"/.test(tr));
   const headings = (text: string) => [...text.matchAll(/^(#{2,3}) /gm)].map((m) => m[1]);
   assert.deepEqual(headings(tr), headings(en));
   const links = (text: string) => [...text.matchAll(/\]\((https?:[^)]+)\)/g)].map((m) => m[1]).sort();
@@ -267,4 +279,53 @@ test('the tokamak drawing: a closed, labelled machine that fits the phone crop',
   assert.ok(runs.reduce((sum, run) => sum + run.d.length, 0) < 60_000);
   // Every light level is a tenth between 0 and 1.
   for (const run of runs) assert.ok(run.light >= 0 && run.light <= 1 && Number.isInteger(Math.round(run.light * 10)));
+});
+
+test('energy per kilogram of fuel: gas 50 MJ, U-235 82 TJ, D–T about four times fission', () => {
+  assert.ok(Math.abs(methaneJoulesPerKg() / 50.03e6 - 1) < 0.001, `${methaneJoulesPerKg()}`);
+  assert.ok(Math.abs(fissionJoulesPerKg() / 8.21e13 - 1) < 0.002, `${fissionJoulesPerKg()}`);
+  const fusion = dtReaction().perKg;
+  assert.ok(fusion / fissionJoulesPerKg() > 4 && fusion / fissionJoulesPerKg() < 4.2);
+  assert.deepEqual(
+    fuelEnergies().map((row) => row.fuel),
+    ['coal', 'gas', 'fission', 'fusion'],
+  );
+  const en = postNumbers('en');
+  assert.deepEqual([en.gasMj, en.fissionTj, en.fusionVsFission, en.fissionVsCoal], ['50', '82', '4', '3']);
+});
+
+test('lifecycle CO₂ medians are those of IPCC AR5 WGIII Annex III, Table A.III.2', () => {
+  assert.deepEqual(
+    Object.fromEntries(LIFECYCLE_CO2.map((row) => [row.source, row.median])),
+    { coal: 820, gas: 490, solarUtility: 48, solarRooftop: 41, hydro: 24, nuclear: 12, windOffshore: 12, windOnshore: 11 },
+  );
+  assert.equal(postNumbers('tr').co2.coalVsWind, '75');
+});
+
+test('the comparison table has the same rows in both languages, fusion last and not on the grid', async () => {
+  /** The rows of the first Markdown table: cells of each body row. */
+  const table = (text: string) =>
+    text
+      .split(/\r?\n/)
+      .filter((line) => line.startsWith('| '))
+      .slice(2)
+      .map((line) => line.split('|').slice(1, -1).map((cell) => cell.trim()));
+  const tr = table(await source(TR_POST));
+  const en = table(await source(EN_POST));
+  assert.equal(tr.length, 7);
+  assert.equal(en.length, 7);
+  assert.deepEqual(
+    en.map((row) => row[0]),
+    ['Coal', 'Natural gas', 'Nuclear fission', 'Solar', 'Wind', 'Hydropower', 'Fusion'],
+  );
+  assert.deepEqual(
+    tr.map((row) => row[0]),
+    ['Kömür', 'Doğal gaz', 'Nükleer fisyon', 'Güneş', 'Rüzgâr', 'Hidroelektrik', 'Füzyon'],
+  );
+  for (const rows of [tr, en]) for (const row of rows) assert.equal(row.length, 4);
+  assert.equal(en.at(-1)?.[3], 'No plant yet');
+  assert.equal(tr.at(-1)?.[3], 'Henüz santral yok');
+  // Fusion gets no lifecycle number anywhere in the prose: it has not been measured.
+  assert.match(await source(TR_POST), /Füzyon için bir sayı veremiyoruz, çünkü henüz santral yok\./);
+  assert.match(await source(EN_POST), /We cannot give fusion a number, because there is no plant yet\./);
 });

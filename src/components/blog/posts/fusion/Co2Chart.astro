@@ -1,0 +1,179 @@
+---
+/**
+ * Lifecycle greenhouse-gas emissions per kWh of electricity: the IPCC AR5 medians (electricity.ts)
+ * as horizontal bars on a linear scale, so the gap between fossil fuels and the low-carbon sources
+ * shows at a glance. Fusion gets a row without a bar: no plant exists, so nothing has been measured.
+ * Each name sits above its bar; drawn twice (compact and wide) for legible text.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { type Layout, linear } from './chart.ts';
+import { LIFECYCLE_CO2 } from './electricity.ts';
+import Figure from './Figure.astro';
+import { fusionPostMessages } from './messages.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = fusionPostMessages[lang].co2;
+const f = formatters(lang);
+
+// The order and the values the table and the prose rely on.
+if (LIFECYCLE_CO2.some((row, i) => i > 0 && row.median > (LIFECYCLE_CO2[i - 1]?.median ?? Infinity))) {
+  throw new Error('Co2Chart: the sources should be sorted from most to least emissions');
+}
+const FOSSIL = new Set(['coal', 'gas']);
+if (LIFECYCLE_CO2.filter((row) => !FOSSIL.has(row.source)).some((row) => row.median > 50)) {
+  throw new Error('Co2Chart: every low-carbon source should stay under 50 g/kWh');
+}
+
+const label = m.aria(LIFECYCLE_CO2.map((row) => m.row(m.names[row.source], f.number(row.median))).join(' '));
+
+const X_MAX = 900;
+const TICKS = [0, 200, 400, 600, 800];
+const rows = [...LIFECYCLE_CO2.map((row) => ({ key: row.source as string, name: m.names[row.source], value: row.median as number | null })), { key: 'fusion', name: m.fusion, value: null }];
+
+const layouts: { key: string; class: string; layout: Layout; row: number; bar: number }[] = [
+  { key: 'compact', class: 'sm:hidden', layout: { width: 320, height: 0, left: 10, right: 34, top: 8, bottom: 46, font: 11 }, row: 38, bar: 11 },
+  { key: 'wide', class: 'hidden sm:block', layout: { width: 640, height: 0, left: 16, right: 44, top: 10, bottom: 50, font: 12.5 }, row: 40, bar: 13 },
+];
+---
+
+<Figure>
+  <div slot="graphic" class="fusion-chart">
+    {
+      layouts.map(({ class: className, layout: base, row, bar }) => {
+        const l = { ...base, height: base.top + rows.length * row + base.bottom };
+        const x = linear(0, X_MAX, l.left, l.width - l.right);
+        const plotBottom = l.top + rows.length * row;
+        return (
+          <svg
+            class:list={['h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+            viewBox={`0 0 ${l.width} ${l.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={label}
+            focusable="false"
+          >
+            <g class="axis font-mono" font-size={l.font}>
+              {TICKS.map((v) => (
+                <>
+                  <line x1={x(v)} x2={x(v)} y1={l.top} y2={plotBottom} class="gridline" />
+                  <text x={x(v)} y={plotBottom + 6 + l.font} text-anchor={v === 0 ? 'start' : 'middle'}>{f.number(v)}</text>
+                </>
+              ))}
+              <text x={l.width - l.right} y={l.height - 6} text-anchor="end" class="title">{m.xAxis} →</text>
+            </g>
+            <line x1={l.left} x2={l.width - l.right} y1={plotBottom} y2={plotBottom} class="baseline" />
+            {rows.map((r, i) => {
+              const top = l.top + i * row;
+              const barY = top + l.font + 7;
+              return (
+                <g>
+                  <text x={l.left} y={top + l.font + 2} font-size={l.font + 1} class:list={['name font-sans', r.value === null && 'name-fusion']}>{r.name}</text>
+                  {r.value === null ? (
+                    <>
+                      <rect x={l.left + 0.5} y={barY + 0.5} width={x(60) - l.left} height={bar - 1} rx="2" class="bar-unknown" />
+                      <text x={x(60) + 6} y={barY + bar / 2 + l.font / 3} font-size={l.font} class="unknown font-sans">{m.notMeasured}</text>
+                    </>
+                  ) : (
+                    <>
+                      <rect x={l.left} y={barY} width={Math.max(1.5, x(r.value) - l.left)} height={bar} rx="2" class:list={['bar', FOSSIL.has(r.key) && 'bar-fossil']} />
+                      <text x={x(r.value) + 6} y={barY + bar / 2 + l.font / 3} font-size={l.font} class="value font-mono">{f.number(r.value)}</text>
+                    </>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+        );
+      })
+    }
+  </div>
+  <slot />
+</Figure>
+
+<style>
+  .fusion-chart {
+    --ink: var(--color-zinc-800);
+    --fossil: var(--color-zinc-500);
+    --low: var(--color-zinc-700);
+    --accent: var(--color-accent-700);
+    --axis-text: var(--color-zinc-600);
+    --axis-title: var(--color-zinc-700);
+  }
+
+  :global(:where([data-theme='dark'])) .fusion-chart {
+    --ink: var(--color-zinc-200);
+    --fossil: var(--color-zinc-500);
+    --low: var(--color-zinc-300);
+    --accent: var(--color-accent-400);
+    --axis-text: var(--color-zinc-400);
+    --axis-title: var(--color-zinc-300);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .fusion-chart {
+      --ink: var(--color-zinc-200);
+      --fossil: var(--color-zinc-500);
+      --low: var(--color-zinc-300);
+      --accent: var(--color-accent-400);
+      --axis-text: var(--color-zinc-400);
+      --axis-title: var(--color-zinc-300);
+    }
+  }
+
+  .axis text {
+    fill: var(--axis-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis .title {
+    fill: var(--axis-title);
+  }
+
+  .gridline {
+    stroke: currentColor;
+    stroke-opacity: 0.1;
+  }
+
+  .baseline {
+    stroke: currentColor;
+    stroke-opacity: 0.45;
+  }
+
+  .name {
+    fill: var(--ink);
+  }
+
+  .name-fusion {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+
+  .bar {
+    fill: var(--low);
+  }
+
+  .bar-fossil {
+    fill: var(--fossil);
+  }
+
+  .bar-unknown {
+    fill: none;
+    stroke: var(--accent);
+    stroke-dasharray: 3 3;
+  }
+
+  .unknown {
+    fill: var(--accent);
+    font-style: italic;
+  }
+
+  .value {
+    fill: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

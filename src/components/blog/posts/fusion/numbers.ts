@@ -6,6 +6,7 @@
  */
 import type { Locale } from '../../../../i18n/config.ts';
 import { formatters } from '../../../../i18n/format.ts';
+import { lifecycleCo2 } from './electricity.ts';
 import {
   AIR_MOLECULES_PER_M3,
   COAL_MJ_PER_KG,
@@ -13,8 +14,10 @@ import {
   coulombBarrierKev,
   deuteriumPerLitreMg,
   dtReaction,
+  fissionJoulesPerKg,
   ignitionMinimum,
   kevToKelvin,
+  methaneJoulesPerKg,
   nuclide,
   reactivity,
   reactivityPeak,
@@ -80,6 +83,22 @@ export function postNumbers(lang: Locale) {
       helium: fixed(bindingPerNucleon(nuclide('He-4')), 2),
       iron: fixed(bindingPerNucleon(nuclide('Fe-56')), 2),
       uranium: fixed(bindingPerNucleon(nuclide('U-235')), 2),
+    },
+    /** Energy per kilogram: natural gas (MJ), complete fission of U-235 (TJ). */
+    gasMj: int(methaneJoulesPerKg() / 1e6),
+    fissionTj: int(fissionJoulesPerKg() / 1e12),
+    /** How many times more energy per kilogram D–T fusion gives than U-235 fission. */
+    fusionVsFission: int(dt.perKg / fissionJoulesPerKg()),
+    /** How many times more energy per kilogram U-235 fission gives than coal (27 MJ/kg), in millions. */
+    fissionVsCoal: int(fissionJoulesPerKg() / (((COAL_MJ_PER_KG.low + COAL_MJ_PER_KG.high) / 2) * 1e6) / 1e6),
+    /** IPCC AR5 lifecycle medians, gCO₂eq/kWh. */
+    co2: {
+      coal: int(lifecycleCo2('coal')),
+      gas: int(lifecycleCo2('gas')),
+      nuclear: int(lifecycleCo2('nuclear')),
+      windOnshore: int(lifecycleCo2('windOnshore')),
+      /** Coal against onshore wind, how many times. */
+      coalVsWind: int(lifecycleCo2('coal') / lifecycleCo2('windOnshore')),
     },
     /** Deuterium in a litre of water, mg. */
     deuteriumMg: int(deuteriumPerLitreMg()),

@@ -7,7 +7,8 @@
  * interpolated value free of case suffixes. Multi-line labels are arrays of lines.
  */
 import type { Localized } from '../../../../i18n/config.ts';
-import type { Reaction } from './model.ts';
+import type { Source } from './electricity.ts';
+import type { Fuel, Reaction } from './model.ts';
 
 export type TokamakPart = 'plasma' | 'fieldLine' | 'coils' | 'solenoid' | 'blanket' | 'vessel';
 
@@ -65,6 +66,35 @@ const en = {
     aria: (kev: string, celsius: string, value: string) =>
       `A U-shaped curve of the triple product of density, temperature and confinement time that a deuterium–tritium plasma needs to heat itself, against temperature. It is lowest, about ${value} keV seconds per cubic metre, at about ${kev} keV, or ${celsius} million °C, and rises on both sides.`,
   },
+  fuel: {
+    names: {
+      coal: 'Coal',
+      gas: 'Natural gas',
+      fission: 'Uranium-235 (fission)',
+      fusion: 'Deuterium–tritium (fusion)',
+    } satisfies Record<Fuel, string>,
+    xAxis: 'Energy from 1 kg of fuel',
+    aria: (coal: string, gas: string, fission: string, fusion: string, times: string) =>
+      `A bar chart of the energy in one kilogram of fuel, on a logarithmic scale. Coal gives ${coal}, natural gas ${gas}, uranium-235 split completely ${fission}, and deuterium–tritium fusion ${fusion}, about ${times} times as much as fission.`,
+  },
+  co2: {
+    names: {
+      coal: 'Coal',
+      gas: 'Natural gas',
+      solarUtility: 'Solar, utility-scale',
+      solarRooftop: 'Solar, rooftop',
+      hydro: 'Hydropower',
+      nuclear: 'Nuclear fission',
+      windOffshore: 'Wind, offshore',
+      windOnshore: 'Wind, onshore',
+    } satisfies Record<Source, string>,
+    fusion: 'Fusion',
+    notMeasured: 'not measured yet',
+    xAxis: 'Lifecycle emissions (g CO₂ per kWh)',
+    aria: (rows: string) =>
+      `A bar chart of the greenhouse gases emitted over a lifetime for each kilowatt-hour of electricity, IPCC medians. ${rows} Fusion has no value: it has not been measured yet.`,
+    row: (name: string, value: string) => `${name}: ${value} grams.`,
+  },
 };
 
 export type FusionPostMessages = typeof en;
@@ -80,7 +110,7 @@ const tr: FusionPostMessages = {
       vessel: ['Vakum kabı'],
     },
     aria: 'Ön tarafından bir dilimi kesilip çıkarılmış bir tokamak çizimi. Simit biçimindeki vakum kabının içinde parlayan bir plazma halkası dolaşıyor. Kabın çevresinde D biçimli toroidal alan bobinleri duruyor, ortadaki boşluğu da merkezî solenoid denen uzun bir silindir dolduruyor. Kesitte katmanlar görünüyor: dışta vakum kabı, onun içinde örtü, sonra karanlık bir vakum boşluğu ve en içte plazma. Manyetik alan çizgileri plazmanın çevresine sarmal biçiminde dolanıyor.',
-    legend: 'Tokamakın parçaları',
+    legend: 'Tokamağın parçaları',
   },
   reaction: {
     deuterium: 'Döteryum',
@@ -122,6 +152,35 @@ const tr: FusionPostMessages = {
     minimum: (kev: string, celsius: string) => `En kolayı: yaklaşık ${kev} keV (${celsius} milyon °C)`,
     aria: (kev: string, celsius: string, value: string) =>
       `Bir döteryum–trityum plazmasının kendini ısıtabilmesi için gereken yoğunluk, sıcaklık ve tutma süresi çarpımının sıcaklığa göre grafiği; eğri U biçiminde. En alçak noktası yaklaşık ${kev} keV’ta, yani ${celsius} milyon °C’de; orada gereken değer yaklaşık ${value} keV·s/m³. İki yana doğru yükseliyor.`,
+  },
+  fuel: {
+    names: {
+      coal: 'Kömür',
+      gas: 'Doğal gaz',
+      fission: 'Uranyum-235 (fisyon)',
+      fusion: 'Döteryum–trityum (füzyon)',
+    },
+    xAxis: '1 kg yakıttan elde edilen enerji',
+    aria: (coal: string, gas: string, fission: string, fusion: string, times: string) =>
+      `Bir kilogram yakıtın verdiği enerjiyi logaritmik ölçekte gösteren çubuk grafik. Kömür ${coal}, doğal gaz ${gas}, tamamı bölünen uranyum-235 ${fission}, döteryum–trityum füzyonu ise ${fusion} veriyor; bu, fisyonun yaklaşık ${times} katı.`,
+  },
+  co2: {
+    names: {
+      coal: 'Kömür',
+      gas: 'Doğal gaz',
+      solarUtility: 'Güneş, arazi',
+      solarRooftop: 'Güneş, çatı',
+      hydro: 'Hidroelektrik',
+      nuclear: 'Nükleer fisyon',
+      windOffshore: 'Rüzgâr, deniz',
+      windOnshore: 'Rüzgâr, kara',
+    },
+    fusion: 'Füzyon',
+    notMeasured: 'henüz ölçülmedi',
+    xAxis: 'Yaşam döngüsü salımı (kWh başına g CO₂)',
+    aria: (rows: string) =>
+      `Her kilovatsaat elektrik için santralin bütün ömrü boyunca salınan sera gazlarını gösteren çubuk grafik; IPCC’nin ortanca değerleri. ${rows} Füzyon için bir değer yok, çünkü henüz ölçülmedi.`,
+    row: (name: string, value: string) => `${name}: ${value} gram.`,
   },
 };
 

@@ -8,6 +8,8 @@ tags: [physics, energy, science]
 ---
 
 import BindingCurve from '../../components/blog/posts/fusion/BindingCurve.astro';
+import Co2Chart from '../../components/blog/posts/fusion/Co2Chart.astro';
+import FuelEnergyChart from '../../components/blog/posts/fusion/FuelEnergyChart.astro';
 import LawsonChart from '../../components/blog/posts/fusion/LawsonChart.astro';
 import ReactionFigure from '../../components/blog/posts/fusion/ReactionFigure.astro';
 import ReactivityChart from '../../components/blog/posts/fusion/ReactivityChart.astro';
@@ -159,7 +161,39 @@ This is why fusion is so exciting.
 
 **Short-lived waste.** Fusion is not entirely free of radioactivity. Tritium itself is radioactive (its half-life is 12.3 years) and must be handled with care. Fast neutrons also make the materials in the reactor’s walls radioactive over time. But their radioactivity falls a great deal within a few decades, and within about a hundred years the materials can be reused. The spent fuel of fission plants, by contrast, has to be stored for tens of thousands of years. Fusion makes no long-lived high-level waste.
 
-Put all this together and it is easy to see why fusion is called the world’s salvation: a source of energy that is clean, safe, has plenty of fuel, takes up little room and runs day and night, whatever the weather. In the fight against climate change and in meeting the world’s growing need for energy, it is one of humanity’s best hopes for clean, abundant energy. But turning a hope into reality is harder than lighting a fire.
+## Side by side with other sources
+
+To see better what fusion promises, let us put it next to the ways we make electricity today: coal, natural gas, nuclear fission, solar, wind and hydropower.
+
+The first question is fuel. Coal and natural gas give chemical energy: as they burn, atoms form new bonds, and each molecule releases a few electronvolts of energy. Fission and fusion use the energy of the nucleus instead; a single reaction gives millions of electronvolts. That difference shows directly in the energy we get from a kilogram of fuel.
+
+<FuelEnergyChart lang="en">The energy from one kilogram of fuel. The horizontal axis is logarithmic: each of the bold lines is a thousand times the one before. For natural gas, the heat of burning methane is used; for coal, {n.coalLow}–{n.coalHigh} megajoules per kilogram. For uranium-235, each fission counts about 200 MeV; for D–T, each fusion counts {n.q} MeV. Both nuclear values are the most you could get, if all of the fuel reacted.</FuelEnergyChart>
+
+A kilogram of natural gas gives about {n.gasMj} megajoules. If every nucleus in a kilogram of uranium-235 split, it would release about {n.fissionTj} terajoules, roughly {n.fissionVsCoal} million times as much as coal. D–T fusion multiplies that again by about {n.fusionVsFission}: {n.perKgTj} terajoules per kilogram, {n.coalRatioLow}–{n.coalRatioHigh} million times as much as coal.
+
+The second question is carbon. To measure a power plant’s effect on the climate honestly, we have to look at its whole life, not just its chimney: the mines, the transport of fuel, building the plant and taking it down. In its 2014 report, the Intergovernmental Panel on Climate Change (IPCC) gathered the studies on this and worked out how much greenhouse gas each source emits for each kilowatt-hour of electricity.
+
+<Co2Chart lang="en">The greenhouse gases emitted over a power plant’s whole life for each kilowatt-hour of electricity, in grams of CO₂ equivalent. The values are the medians from the IPCC’s 2014 report. Fusion has no measured value, because no fusion power plant exists yet.</Co2Chart>
+
+A kilowatt-hour of electricity from coal comes with {n.co2.coal} grams of greenhouse gases, and one from natural gas with {n.co2.gas} grams. Solar, wind, hydropower and nuclear fission are far below that: coal’s value is about {n.co2.coalVsWind} times that of onshore wind. We cannot give fusion a number, because there is no plant yet. What we do know is that a running fusion plant emits no carbon and uses very little fuel. That leaves building the plant and its materials, which we will only be able to measure once the first plants are built.
+
+There are important differences beyond carbon too:
+
+| Source | Weather-dependent? | Long-lived waste | Today |
+| --- | --- | --- | --- |
+| Coal | No | CO₂ that stays in the air for centuries | On the grid |
+| Natural gas | No | CO₂ that stays in the air for centuries | On the grid |
+| Nuclear fission | No | Spent fuel, for tens of thousands of years | On the grid |
+| Solar | Yes: none at night, less under cloud | None | On the grid |
+| Wind | Yes: stops when the wind drops | None | On the grid |
+| Hydropower | Partly: depends on rain and season | None | On the grid |
+| Fusion | No | None; materials reusable in about a hundred years | No plant yet |
+
+This comparison is not a race. Solar and wind are clean, on the grid today, and in many places the cheapest new power plants to build. According to the International Renewable Energy Agency (IRENA), 91% of the large-scale renewable capacity that started up in 2024 makes electricity more cheaply than the cheapest new fossil-fuel plant. Their weak side is that there is no sun at night and the wind does not always blow. Today those gaps are mostly filled by fossil fuels, hydropower and storage.
+
+Fusion’s promise fits exactly into that gap: a source that runs day and night whatever the weather, takes up little room and does not run out of fuel. So fusion could complement renewables rather than replace them. Two things have to happen first: fusion plants have to actually work, and then they have to make electricity at a reasonable price. Today neither is certain.
+
+Put all this together and it is easy to see why fusion is called the world’s salvation: a source of energy that is clean, safe, has plenty of fuel and runs in all conditions. In the fight against climate change and in meeting the world’s growing need for energy, it is one of humanity’s best hopes for clean, abundant energy. But turning a hope into reality is harder than lighting a fire.
 
 ## The road ahead
 
@@ -199,6 +233,12 @@ Physics:
 
 - M. Wang et al., [“The AME 2020 atomic mass evaluation (II)”](https://doi.org/10.1088/1674-1137/abddaf), *Chinese Physics C* 45 (2021) 030003: atomic masses.
 - H.-S. Bosch and G. M. Hale, [“Improved formulas for fusion cross-sections and thermal reactivities”](https://doi.org/10.1088/0029-5515/32/4/I07), *Nuclear Fusion* 32 (1992) 611: the reactivity formula.
+
+The comparison:
+
+- IPCC, [Climate Change 2014: Mitigation of Climate Change, Annex III: Technology-specific Cost and Performance Parameters](https://www.ipcc.ch/site/assets/uploads/2018/02/ipcc_wg3_ar5_annex-iii.pdf), Table A.III.2, p. 1335: lifecycle emissions.
+- IRENA, [Renewable Power Generation Costs in 2024](https://www.irena.org/Publications/2025/Jun/Renewable-Power-Generation-Costs-in-2024) (July 2025): the cost of renewable power plants.
+- NIST Chemistry WebBook, [Methane](https://webbook.nist.gov/cgi/cbook.cgi?ID=C74828&Mask=1): the heat of burning methane.
 
 Where it stands today:
 

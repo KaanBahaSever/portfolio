@@ -186,9 +186,10 @@ test('under the university the CVs list his three student communities, with the 
         ? [record.start, record.end].filter(Boolean).join('–')
         : record.periodLabel[locale].toLocaleLowerCase(LOCALE_META[locale].htmlLang);
       assert.equal(community.period, period, label);
-      // One or two printed lines, lead included (a line holds about 115 characters).
+      // One or two printed lines, lead included (a line holds about 115 characters); the Rocket and
+      // Space Club line, with Kalman filtering and PID, takes three.
       const line = `${cvMessages[locale].community(community.name, community.role, community.period)} ${community.text}`;
-      assert.ok(line.length <= 220, `${label}: ${line.length} characters`);
+      assert.ok(line.length <= (index === 0 ? 345 : 220), `${label}: ${line.length} characters`);
       // After the lead's colon English goes on in lower case; Turkish starts a sentence (TDK).
       assert.match(community.text, locale === 'en' ? /^\p{Ll}/u : /^\p{Lu}/u, label);
       assert.match(community.text, /\.$/, label);
@@ -202,6 +203,8 @@ test('the community lines carry the owner’s facts, in both languages', () => {
       [
         /avionics, telemetry, ground-control and flight-simulation software/,
         /three rockets, one low-altitude \(5,000 ft\) and two high-altitude \(10,000 ft\)/,
+        /wrote and tested Kalman filters for the sensor data/,
+        /PID controllers in vertical-landing experiments/,
       ],
       [/academic events, such as seminars and logic and mathematics competitions/, /community built around theoretical discussion/],
       [/technical workshops and live streams on Flask, HTML and Git\/GitHub/, /organised Cyber Security Week/],
@@ -210,6 +213,8 @@ test('the community lines carry the owner’s facts, in both languages', () => {
       [
         /aviyonik, telemetri, yer kontrol ve uçuş simülasyonu yazılımları/,
         /bir alçak irtifa \(5\.000 ft\) ve iki yüksek irtifa \(10\.000 ft\) roketi/,
+        /Kalman filtreleri yazıp defalarca test ettik/,
+        /dikey iniş deneylerinde PID kontrolcüleri/,
       ],
       [/seminerler, mantık ve matematik yarışmaları gibi akademik etkinlikler/, /Teorik tartışmaların yapıldığı bu toplulukta/],
       [/Flask, HTML ve Git\/GitHub üzerine teknik atölyeler ve canlı yayınlar/, /Siber Güvenlik Haftası etkinliğini/],

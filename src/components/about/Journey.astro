@@ -8,8 +8,9 @@
  * the figures. The chapters below are written out by hand, and tests/about-journey.test.ts
  * checks that they follow JOURNEY_CHAPTERS and use their own number and figure.
  *
- * Fragment ids are `journey-<key>`. The home page links to #journey and the timeline to
- * #journey-avionics, so keep existing keys when chapters are added or reordered.
+ * Fragment ids are `journey-<key>`. The home page and the timeline link to #journey and to
+ * single chapters (#journey-space, #journey-avionics, #journey-cubesat …), so keep existing
+ * keys when chapters are added or reordered.
  */
 import Chapter from './Chapter.astro';
 import Figure from './Figure.astro';
@@ -18,17 +19,29 @@ import BrokerGraph from './figures/BrokerGraph.astro';
 import CipherFlowchart from './figures/CipherFlowchart.astro';
 import DensityGrid from './figures/DensityGrid.astro';
 import DescentField from './figures/DescentField.astro';
+import GroundStationPass from './figures/GroundStationPass.astro';
 import HohmannTransfer from './figures/HohmannTransfer.astro';
 import IdeaNetwork from './figures/IdeaNetwork.astro';
 import MinimaxTree from './figures/MinimaxTree.astro';
 import OddSquares from './figures/OddSquares.astro';
 import Pipeline from './figures/Pipeline.astro';
 import Trajectory3d from './figures/Trajectory3d.astro';
-import { EARTH_MU, EARTH_RADIUS, MOON_ORBIT_RADIUS, PARKING_ALTITUDE, hohmannTransfer } from './geometry';
+import {
+  CUBESAT_ALTITUDE,
+  EARTH_MEAN_RADIUS,
+  EARTH_MU,
+  EARTH_RADIUS,
+  MIN_ELEVATION,
+  MOON_ORBIT_RADIUS,
+  PARKING_ALTITUDE,
+  hohmannTransfer,
+  overheadPass,
+} from './geometry';
 import Algorithms from './prose/Algorithms.astro';
 import Automation from './prose/Automation.astro';
 import Avionics from './prose/Avionics.astro';
 import Community from './prose/Community.astro';
+import CubeSat from './prose/CubeSat.astro';
 import CurrentCore from './prose/CurrentCore.astro';
 import Guidance from './prose/Guidance.astro';
 import Research from './prose/Research.astro';
@@ -64,6 +77,11 @@ const spaceCaption = c.space.caption(
   fmt.number(transfer.dv1, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
   fmt.number(transfer.time / 86_400, { maximumFractionDigits: 0 }),
 );
+
+// The CubeSat figure's pass, from the same model as its drawing: a 400 km example orbit and a
+// 10° elevation mask give about six minutes overhead.
+const pass = overheadPass(EARTH_MU, EARTH_MEAN_RADIUS, CUBESAT_ALTITUDE, MIN_ELEVATION);
+const cubesatCaption = c.cubesat.caption(fmt.number(pass.duration / 60, { maximumFractionDigits: 0 }));
 
 const item = 'py-10 first:pt-8 last:pb-0 sm:py-14 sm:first:pt-10';
 ---
@@ -159,6 +177,14 @@ const item = 'py-10 first:pt-8 last:pb-0 sm:py-14 sm:first:pt-10';
         <Simulation />
         <Figure slot="figure" number={figure('simulation')} caption={c.simulation.caption}>
           <Trajectory3d />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class={item}>
+      <Chapter id="journey-cubesat" number={number('cubesat')} label={c.cubesat.label} title={c.cubesat.title}>
+        <CubeSat />
+        <Figure slot="figure" number={figure('cubesat')} caption={cubesatCaption}>
+          <GroundStationPass />
         </Figure>
       </Chapter>
     </li>

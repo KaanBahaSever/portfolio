@@ -1,9 +1,9 @@
 /**
  * Geometry behind the About page figures. Each figure is drawn from the model it illustrates
- * (a real Hohmann transfer, a real placement count, a real minimax search, a real cipher, an
- * integrated flight profile, an integrated steering field, a network of ideas and the people
- * helping with them, a square tiled by odd numbers), so the pictures stay honest when someone
- * reads them closely.
+ * (a real Hohmann transfer, a real ground-station pass, a real placement count, a real minimax
+ * search, a real cipher, an integrated flight profile, an integrated steering field, a network
+ * of ideas and the people helping with them, a square tiled by odd numbers), so the pictures
+ * stay honest when someone reads them closely.
  *
  * Pure module: no DOM, no `astro:*` imports and erasable TypeScript only, so `node --test` can
  * load it. Coordinates are unitless model values; the figure components scale them to SVG.
@@ -137,6 +137,72 @@ export function conicArc(a: number, e: number, from: number, to: number, steps: 
     const r = p / (1 + e * Math.cos(theta));
     return { x: r * Math.cos(theta), y: r * Math.sin(theta) };
   });
+}
+
+/* ------------------------------------------------------------------------------------------ */
+/* A ground-station pass: how long a satellite in low orbit stays in view                      */
+/* ------------------------------------------------------------------------------------------ */
+
+/**
+ * Constants for the CubeSat figure: Earth's mean radius (km), an example altitude for a low
+ * orbit (km; the caption says it is an example) and the usual minimum elevation (degrees) a
+ * ground station needs above its horizon before it can work with a satellite.
+ */
+export const EARTH_MEAN_RADIUS = 6_371;
+export const CUBESAT_ALTITUDE = 400;
+export const MIN_ELEVATION = 10;
+
+const degrees = (radians: number) => (radians * 180) / Math.PI;
+const radians = (degrees: number) => (degrees * Math.PI) / 180;
+
+/**
+ * The Earth-central half-angle λ (degrees) of the stretch of a circular orbit at `altitude`
+ * above a sphere of `radius` that a ground station sees at least `elevation` degrees above its
+ * horizon: λ = arccos(R / (R + h) · cos ε) − ε. From the triangle Earth centre, station,
+ * satellite: the angle at the station is 90° + ε, so the sine rule gives the angle at the
+ * satellite as arcsin(R cos ε / (R + h)), and the three angles add up to 180°.
+ */
+export function visibleHalfAngle(radius: number, altitude: number, elevation: number): number {
+  for (const [name, value] of [
+    ['radius', radius],
+    ['altitude', altitude],
+  ] as const) {
+    if (!(Number.isFinite(value) && value > 0)) {
+      throw new RangeError(`visibleHalfAngle: ${name} must be a positive finite number, got ${value}`);
+    }
+  }
+  if (!(elevation >= 0 && elevation < 90)) {
+    throw new RangeError(`visibleHalfAngle: elevation must be in [0, 90) degrees, got ${elevation}`);
+  }
+  const e = radians(elevation);
+  return degrees(Math.acos((radius / (radius + altitude)) * Math.cos(e)) - e);
+}
+
+/** The period of a circular orbit of radius `a` (Kepler's third law): 2π√(a³/μ). */
+export function orbitalPeriod(mu: number, a: number): number {
+  if (!(Number.isFinite(mu) && mu > 0 && Number.isFinite(a) && a > 0)) {
+    throw new RangeError(`orbitalPeriod: mu and a must be positive finite numbers, got ${mu} and ${a}`);
+  }
+  return 2 * Math.PI * Math.sqrt(a ** 3 / mu);
+}
+
+export interface OverheadPass {
+  /** Earth-central half-angle of the visible arc, in degrees. */
+  halfAngle: number;
+  /** Orbital period and the time the satellite stays in view, in seconds. */
+  period: number;
+  duration: number;
+}
+
+/**
+ * A pass straight over the station: the satellite sweeps the visible arc of 2λ out of the 360°
+ * of its orbit, so it stays in view for T · 2λ / 360°. Earth's rotation under the orbit is left
+ * out (it changes a pass only a little), and a pass that is not overhead is shorter.
+ */
+export function overheadPass(mu: number, radius: number, altitude: number, elevation: number): OverheadPass {
+  const halfAngle = visibleHalfAngle(radius, altitude, elevation);
+  const period = orbitalPeriod(mu, radius + altitude);
+  return { halfAngle, period, duration: (period * 2 * halfAngle) / 360 };
 }
 
 /* ------------------------------------------------------------------------------------------ */

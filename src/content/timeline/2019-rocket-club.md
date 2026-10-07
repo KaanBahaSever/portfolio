@@ -10,4 +10,5 @@ dateLabel: 2019 – 2022
 Our team designed and built three rockets: one low-altitude rocket with a 5,000 ft target
 altitude and two high-altitude rockets with a 10,000 ft target. I was solely responsible for
 the flight avionics firmware and the parachute deployment control; the telemetry work is
-described in [the journey](/about/#journey-avionics).
+described in [the journey](/about/#journey-avionics). Towards the end, we also set out to build
+a CubeSat, which was left unfinished; its story is in [the CubeSat chapter](/about/#journey-cubesat).

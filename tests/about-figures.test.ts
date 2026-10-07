@@ -2,8 +2,11 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  CUBESAT_ALTITUDE,
+  EARTH_MEAN_RADIUS,
   EARTH_MU,
   EARTH_RADIUS,
+  MIN_ELEVATION,
   MOON_ORBIT_RADIUS,
   PARKING_ALTITUDE,
   GOLDEN_ANGLE,
@@ -22,10 +25,13 @@ import {
   integrateTrajectory,
   linePath,
   minimax,
+  orbitalPeriod,
+  overheadPass,
   placementDensity,
   sCurve,
   steer,
   steeringDirection,
+  visibleHalfAngle,
   type IdeaSeed,
   type Point,
 } from '../src/components/about/geometry.ts';
@@ -56,6 +62,53 @@ test('hohmannTransfer rejects orbits it cannot join', () => {
   assert.throws(() => hohmannTransfer(EARTH_MU, 1, 1), RangeError);
   assert.throws(() => hohmannTransfer(0, 1, 2), RangeError);
   assert.throws(() => hohmannTransfer(EARTH_MU, Number.NaN, 2), RangeError);
+});
+
+test('the CubeSat figure: a 400 km orbit is in view for about six minutes of an overhead pass', () => {
+  assert.equal(EARTH_MEAN_RADIUS, 6_371);
+  assert.equal(CUBESAT_ALTITUDE, 400);
+  assert.equal(MIN_ELEVATION, 10);
+  const pass = overheadPass(EARTH_MU, EARTH_MEAN_RADIUS, CUBESAT_ALTITUDE, MIN_ELEVATION);
+  // λ = arccos(6371 / 6771 · cos 10°) − 10° ≈ 12.1°.
+  close(pass.halfAngle, 12.08, 0.01, 'half-angle');
+  // T = 2π√(6771³ / μ) ≈ 92.4 minutes, and 2λ / 360° of it is about 6.2 minutes.
+  assert.ok(pass.period / 60 > 92.3 && pass.period / 60 < 92.6, `period ${pass.period / 60} min`);
+  close(pass.duration / 60, 6.2, 0.05, 'pass in minutes');
+  close(pass.duration, (pass.period * 2 * pass.halfAngle) / 360, 1e-9, 'duration');
+  // The caption rounds it to whole minutes.
+  assert.equal(Math.round(pass.duration / 60), 6);
+});
+
+test('visibleHalfAngle: the end of the visible arc is exactly ε above the station’s horizon', () => {
+  // Station at (0, R), satellite at Earth-central angle λ on the orbit of radius R + h. The
+  // elevation is the angle between the line of sight and the local horizontal (the x axis).
+  for (const [radius, altitude, elevation] of [
+    [EARTH_MEAN_RADIUS, CUBESAT_ALTITUDE, MIN_ELEVATION],
+    [72, 32, MIN_ELEVATION], // the drawn radii of the figure
+    [6_371, 800, 5],
+    [1, 1, 45],
+  ] as const) {
+    const lambda = (visibleHalfAngle(radius, altitude, elevation) * Math.PI) / 180;
+    const r = radius + altitude;
+    const dx = r * Math.sin(lambda);
+    const dy = r * Math.cos(lambda) - radius;
+    close((Math.atan2(dy, dx) * 180) / Math.PI, elevation, 1e-9, `elevation for ${radius}, ${altitude}`);
+  }
+  // With no mask, the satellite is visible down to the geometric horizon: λ = arccos(R / (R + h)).
+  close(visibleHalfAngle(6_371, 400, 0), (Math.acos(6_371 / 6_771) * 180) / Math.PI, 1e-12, 'no mask');
+  // A higher mask shortens the arc.
+  assert.ok(visibleHalfAngle(6_371, 400, 20) < visibleHalfAngle(6_371, 400, 10));
+  assert.throws(() => visibleHalfAngle(0, 400, 10), RangeError);
+  assert.throws(() => visibleHalfAngle(6_371, -1, 10), RangeError);
+  assert.throws(() => visibleHalfAngle(6_371, 400, 90), RangeError);
+  assert.throws(() => visibleHalfAngle(6_371, 400, -1), RangeError);
+});
+
+test('orbitalPeriod follows Kepler’s third law', () => {
+  // The geostationary radius goes round once a sidereal day (86 164 s).
+  close(orbitalPeriod(EARTH_MU, 42_164), 86_164, 5, 'geostationary period');
+  assert.throws(() => orbitalPeriod(EARTH_MU, 0), RangeError);
+  assert.throws(() => orbitalPeriod(-1, 7_000), RangeError);
 });
 
 test('conicArc runs from periapsis to apoapsis around the focus', () => {
@@ -434,15 +487,20 @@ test('every journey chapter has text in both locales, in the order JOURNEY_CHAPT
     }
   }
   // Keys the home page and the timeline link to (#journey-<key>) must stay.
-  for (const key of ['algorithms', 'avionics', 'guidance', 'simulation', 'core'] as const) {
+  for (const key of ['space', 'algorithms', 'avionics', 'guidance', 'simulation', 'cubesat', 'work', 'core'] as const) {
     assert.ok(JOURNEY_CHAPTERS.includes(key), key);
   }
+  // The CubeSat comes right after the flight simulation.
+  assert.equal(JOURNEY_CHAPTERS.indexOf('cubesat'), JOURNEY_CHAPTERS.indexOf('simulation') + 1);
 });
 
 test('figure captions and labels interpolate formatted values without case suffixes', () => {
   const { en, tr } = aboutMessages;
   assert.match(en.journey.chapters.space.caption('3.1', '5'), /Δv ≈ 3\.1 km\/s.*about 5 days/);
   assert.match(tr.journey.chapters.space.caption('3,1', '5'), /\(Δv ≈ 3,1 km\/s\).*yaklaşık 5 gün/);
+  // The CubeSat caption: the example altitude, the mask and the computed pass, not to scale.
+  assert.match(en.journey.chapters.cubesat.caption('6'), /example orbit 400 km up.*about 6 minutes.*10°.*Not to scale\.$/);
+  assert.match(tr.journey.chapters.cubesat.caption('6'), /Örnek olarak 400 km.*yaklaşık 6 dakika.*10°.*Çizim ölçekli değildir\.$/);
   assert.equal(en.journey.chapters.avionics.figureLabels.feet('10,000'), '10,000 ft');
   assert.equal(tr.journey.chapters.avionics.figureLabels.feet('10.000'), '10.000 ft');
   assert.equal(en.journey.chapters.avionics.figureLabels.rockets(1), '1 rocket');

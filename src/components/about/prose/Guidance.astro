@@ -1,7 +1,11 @@
 ---
 /**
- * Journey chapter 5: autonomous parachute guidance and precision landing. Per-locale prose.
- * The facts name the research but not how it started, so the text does not claim an origin.
+ * Journey chapter 5: autonomous parachute guidance and precision landing. Per-locale prose, in
+ * the owner's words: a purely experimental, enjoyable project with friends at university. A
+ * friend solved the mechanical part; he wrote the software (a decision algorithm built on
+ * linear algebra) and a simulation environment, and a few friends tested it. They read many
+ * earlier papers; the angle calculations used the law of cosines and trigonometric identities,
+ * and atan2 made the decision-making robust. Claim no flight tests or results beyond "tested".
  * The repository link was checked against the GitHub API (public, Python).
  */
 import { ui } from '../../ui/styles';
@@ -15,30 +19,42 @@ const repository = 'https://github.com/KaanBahaSever/AutonomousParachute';
   locale === 'tr' ? (
     <>
       <p>
-        Roketçilikle bağlantılı bir araştırma sorusu da vardı: Paraşüt açıldıktan sonra faydalı yük, kendini yerde
-        seçilen bir noktaya yönlendirebilir mi?
+        Otonom paraşüt, üniversitede arkadaşlarımızla yaptığımız, tamamen deneysel ve çok keyifli bir projeydi. Soru
+        basitti: Paraşüt açıldıktan sonra yük, kendini yerde seçilen bir noktaya yönlendirebilir mi?
       </p>
       <p>
-        Paraşütün iniş yolunu otonom olarak yönlendiren bir algoritma geliştirdim. Algoritma, lineer cebiri
-        atmosferdeki iniş dinamiğiyle birleştiriyor ve faydalı yükü önceden belirlenen iniş koordinatına götürüyor.
+        Mekanik kısmı arkadaşlarımızdan biri çözmüştü. Yazılım tarafı bendeydi: Lineer cebire dayanan bir karar
+        algoritması yazdım. Bir de simülasyon ortamı kurdum. Birkaç arkadaşımız algoritmayı güzelce test etti.
+      </p>
+      <p>
+        Bu konuda daha önce yazılmış birçok makale okuduk ve çok şey öğrendik. Açı hesaplarında kosinüs teoremini ve
+        birçok trigonometrik özdeşliği kullandık. Karar mekanizmasını da atan2 gibi fonksiyonlarla sağlamlaştırdık:
+        atan2(Δy, Δx), sıradan arktanjanttan farklı olarak açının hangi çeyrekte olduğunu da bulur ve Δx sıfır
+        olduğunda bile çalışır.
+      </p>
+      <p>
         Python kodu GitHub’da herkese açık: <a href={repository} class={ui.inlineLink}>AutonomousParachute</a>.
       </p>
-      <p>İşin özü, her an üç soruyu cevaplamak: Yük nerede, nereye sürükleniyor ve hangi yöne dönmeli?</p>
     </>
   ) : (
     <>
       <p>
-        A related research question: once the parachute is open, can the payload steer itself to a chosen point on the
-        ground?
+        The autonomous parachute was a purely experimental and very enjoyable project I did with friends at
+        university. The question was simple: once the parachute is open, can the payload steer itself to a chosen
+        point on the ground?
       </p>
       <p>
-        I developed an autonomous trajectory-steering algorithm for the parachute. It combines linear algebra with
-        atmospheric descent dynamics to guide the payload to a designated landing coordinate. The Python code is public
-        on GitHub: <a href={repository} class={ui.inlineLink}>AutonomousParachute</a>.
+        One of our friends solved the mechanical side. The software was mine: I wrote a decision algorithm built on
+        linear algebra, and a simulation environment to try it in. A few of our friends then tested it very well.
       </p>
       <p>
-        At every moment the problem comes down to three questions: where is the payload, where is it drifting, and
-        which way should it turn?
+        We read many earlier papers on the subject and learned a great deal from them. For the angle calculations we
+        used the law of cosines and many trigonometric identities, and functions such as atan2 made the decisions
+        robust: unlike a plain arctangent, atan2(Δy, Δx) knows which quadrant the angle lies in, and it still works
+        when Δx is zero.
+      </p>
+      <p>
+        The Python code is public on GitHub: <a href={repository} class={ui.inlineLink}>AutonomousParachute</a>.
       </p>
     </>
   )

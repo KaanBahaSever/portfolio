@@ -1,8 +1,14 @@
 ---
 /**
- * Journey chapter 1: the interest in space exploration that came before any code, and the
- * Medium article (Turkish) on the Apollo 11 crew's visit to Anıtkabir. On English pages the
- * link says the article is in Turkish and carries hreflang="tr".
+ * Journey chapter 1: how the interest in space began, in the owner's words. The film Contact
+ * (1997) when he was very small; reading about the Moon missions, then the Mars missions, and
+ * the probes that were lost or broke down in space (name none of them); the Soviet–American
+ * space race, researched from start to finish, and the films about it; his own small projects
+ * from 2015 (no details are known, so give none). The Titan submarine is a world fact, not his
+ * work: NASA's NIAC concept study (2014–2015, NASA Glenn) for exploring Kraken Mare, the
+ * largest sea of liquid methane and ethane on Titan, Saturn's largest moon. Then the Medium
+ * article (Turkish) on the Apollo 11 crew's visit to Anıtkabir; on English pages the link says
+ * the article is in Turkish and carries hreflang="tr".
  */
 import { ui } from '../../ui/styles';
 import { localizePath } from '../../../i18n/config';
@@ -16,11 +22,21 @@ const article = localizePath('/blog/aydan-anitkabir-e-yolculuk/', locale);
   locale === 'tr' ? (
     <>
       <p>
-        Kod yazmaya başlamadan çok önce uzay araştırmaları ilgimi çekiyordu. Uzay araçlarının nasıl tasarlandığını
-        inceliyor, Ay görevlerini analiz ediyor, kuramsal görev planları üzerine kafa yoruyordum.
+        Uzay merakım çok küçükken “Contact” filmiyle başladı. Filmden sonra durmadan okuyup araştırdım. Ay görevleri
+        beni derinden etkiledi; onlarla ilgili ne bulursam okuyordum. Sonra sıra Mars görevlerine geldi. Uzayda
+        kaybolan ya da arızalanan sondalar da çok ilgimi çekti.
       </p>
       <p>
-        Bu ilgim hiç azalmadı. İzlerini aşağıdaki roketçilik bölümlerinde ve Apollo 11 mürettebatının 1969’daki
+        Sovyetler Birliği ile ABD arasındaki uzay yarışını baştan sona araştırdım; bu yarışı anlatan bütün filmleri de
+        izledim. 2015’te de uzayla ilgili kendimce küçük projeler geliştirmeye başladım.
+      </p>
+      <p>
+        Eski bir projeye de hayran kalmıştım: Titan’a gönderilmesi düşünülen bir denizaltı. Titan, Satürn’ün en büyük
+        uydusu; yüzeyinde sıvı metan ve etandan oluşan denizler var. 2014–2015’te NASA için hazırlanan bu çalışma,
+        denizlerin en büyüğü olan Kraken Mare’yi bir denizaltıyla keşfetmeyi öneriyordu.
+      </p>
+      <p>
+        Bu merak hiç geçmedi. İzlerini aşağıdaki roketçilik bölümlerinde ve Apollo 11 mürettebatının 1969’daki
         Anıtkabir ziyaretini anlattığım “<a href={article} class={ui.inlineLink}>Ay’dan Anıtkabir’e Yolculuk</a>”
         yazısında görebilirsiniz.
       </p>
@@ -28,8 +44,19 @@ const article = localizePath('/blog/aydan-anitkabir-e-yolculuk/', locale);
   ) : (
     <>
       <p>
-        Long before I wrote any code, I was drawn to space exploration. I studied how spacecraft are architected,
-        analysed lunar missions and worked through theoretical mission plans.
+        My connection to space began when I was very young, with the film <cite>Contact</cite>. After it, I could
+        not stop reading and researching. The Moon missions made a deep impression on me, and I read everything I
+        could find about them. Then came the Mars missions, and the probes that were lost or failed in space caught
+        my interest just as much.
+      </p>
+      <p>
+        I researched the space race between the Soviet Union and the United States from start to finish and watched
+        all the films about it. In 2015 I started building small space-related projects of my own.
+      </p>
+      <p>
+        One old project fascinated me in particular: a submarine for Titan. Titan is Saturn’s largest moon, and its
+        surface has seas of liquid methane and ethane. The study, prepared for NASA in 2014–2015, proposed exploring
+        the largest of these seas, Kraken Mare, with a submarine.
       </p>
       <p>
         The interest never left. It runs through the rocketry chapters below, and through{' '}

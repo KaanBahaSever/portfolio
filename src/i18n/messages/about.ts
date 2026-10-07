@@ -18,6 +18,7 @@ export const JOURNEY_CHAPTERS = [
   'avionics',
   'guidance',
   'simulation',
+  'cubesat',
   'work',
   'community',
   'core',
@@ -71,7 +72,8 @@ const en = {
     chapters: {
       space: {
         short: 'Space',
-        label: 'Before 2016',
+        // From the film Contact in early childhood to his own small projects in 2015.
+        label: 'Childhood – 2015',
         title: 'Looking up: space exploration',
         /** Δv of the departure burn in km/s and the flight time in days, already formatted. */
         caption: (dv: string, days: string) =>
@@ -112,7 +114,8 @@ const en = {
         short: 'Parachute guidance',
         label: 'Research',
         title: 'Autonomous parachute guidance and precision landing',
-        caption: 'A steering field around the landing target, seen from above. The highlighted path is one guided descent.',
+        caption:
+          'A steering field around the landing target, seen from above. The arrows show the direction to head at each point; the highlighted path is one guided descent.',
       },
       simulation: {
         short: 'Flight simulation',
@@ -120,6 +123,15 @@ const en = {
         title: 'Flight simulation: from prototype to Rocket-Up',
         caption:
           'A trajectory integrated step by step in three dimensions, with its ground track and the velocity vector at one state.',
+      },
+      cubesat: {
+        short: 'CubeSat',
+        // The club's last period, which ended in 2022; no exact dates, so no period is rendered.
+        label: 'Rocket Club · CubeSat',
+        title: 'CubeSat: the satellite we could not finish',
+        /** The length of an overhead pass in minutes, already formatted ("6"). */
+        caption: (minutes: string) =>
+          `A ground station can only talk to a satellite while the satellite is above the station’s horizon. Take an example orbit 400 km up: a satellite passing straight overhead stays in view for only about ${minutes} minutes, and the ground station software has to make the most of them. The highlighted arc is the part of the orbit the station sees at least 10° (ε) above its horizon, and λ is the angle at Earth’s centre between the station and the end of that arc. Not to scale.`,
       },
       work: {
         short: 'crowd.inc',
@@ -205,7 +217,7 @@ const tr: AboutMessages = {
     chapters: {
       space: {
         short: 'Uzay',
-        label: '2016 öncesi',
+        label: 'Çocukluk – 2015',
         title: 'Gökyüzüne bakmak: uzay araştırmaları',
         // "Yerberi" is the TDK term for perigee; the caption says what it means. The values sit
         // in parentheses or before a fixed noun ("gün"), so no suffix depends on how a number
@@ -253,6 +265,14 @@ const tr: AboutMessages = {
         title: 'Uçuş simülasyonu: prototipten Rocket-Up’a',
         caption:
           'Üç boyutta adım adım hesaplanan bir yörünge. Kesikli çizgi yörüngenin yerdeki izdüşümünü, v oku da bir andaki hız vektörünü gösteriyor.',
+      },
+      cubesat: {
+        short: 'CubeSat',
+        label: 'Roket Kulübü · CubeSat',
+        title: 'CubeSat: bitiremediğimiz uydu',
+        // The number sits before a fixed noun ("dakika"), so no suffix depends on how it is read.
+        caption: (minutes) =>
+          `Yer istasyonu uyduyla yalnızca uydu ufkun üzerindeyken haberleşebilir. Örnek olarak 400 km yükseklikte bir yörünge düşünelim: Tam tepeden geçen bir uydu, istasyondan yalnızca yaklaşık ${minutes} dakika görünür. Yer istasyonu yazılımı bu birkaç dakikayı en iyi şekilde kullanmak zorundadır. Vurgulu yay, yörüngenin istasyondan ufkun en az 10° (ε) üzerinde görülen kısmı. λ ise Dünya’nın merkezinde, istasyon ile bu yayın ucu arasındaki açı. Çizim ölçekli değildir.`,
       },
       work: {
         short: 'crowd.inc',

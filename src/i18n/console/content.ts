@@ -99,7 +99,7 @@ const en = {
     heading('Where it started'),
     indented(
       2,
-      'Space came first: before any code, a long-standing interest in space exploration, spacecraft architectures, lunar mission analysis and theoretical mission planning.',
+      'Space came first. As a small child, the film “Contact” got me reading about the Moon and Mars missions and the space race, and in 2015 I started building small space-related projects of my own.',
     ),
     indented(
       2,
@@ -315,7 +315,7 @@ const tr: ConsoleContent = {
     heading('Her şey nasıl başladı'),
     indented(
       2,
-      'Önce uzay vardı. Daha kod yazmaya başlamadan uzay keşfi, uzay aracı mimarileri, Ay görevlerinin analizi ve kuramsal görev planlaması uzun süredir ilgimi çekiyordu.',
+      'Önce uzay vardı. Uzay merakım çok küçükken “Contact” filmiyle başladı; Ay ve Mars görevleri, uzay yarışı hakkında durmadan okudum. 2015’te de uzayla ilgili kendimce küçük projeler geliştirmeye başladım.',
     ),
     indented(
       2,

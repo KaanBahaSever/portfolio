@@ -1,9 +1,11 @@
 ---
-title: An interest in space exploration
-# The date only orders entries: the interest predates 2016 (no year recorded).
+title: My first small space projects
+# The interest began in early childhood with the film Contact; in 2015 he started building
+# small projects of his own around it (no details are known, so give none). The date orders
+# the entry and gives the year shown; the month is not known.
 date: 2015-01-01
-dateLabel: Before 2016
 ---
 
-A long-standing interest in space exploration: spacecraft architectures, lunar mission
-analysis and theoretical mission planning. [The journey](/about/#journey-space) starts here.
+My interest in space began when I was very young, with the film *Contact*. In 2015 I started
+building small space-related projects of my own. [The journey](/about/#journey-space) starts
+here.

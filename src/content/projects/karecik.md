@@ -1,6 +1,6 @@
 ---
 title: Karecik
-shortDescription: A production SaaS that local cafés and restaurants use for QR menus, customer interaction and menu and order management, built for zero downtime and low latency.
+shortDescription: A QR menu service for local cafés and restaurants. Customers scan a code and the menu opens on their phone; owners keep it up to date from a dashboard. It began with a menu for a friend’s café.
 isOpenSource: true
 repositoryUrl: https://github.com/KaanBahaSever/karecik
 liveUrl: https://karecik.com
@@ -12,17 +12,23 @@ order: 3
 date: 2026-08-24
 ---
 
+## Where it came from
+
+Karecik started when a friend of mine from middle school opened a café. At first I made him a
+QR menu, but it was a static page. Then, at his request, I set out to build a full point-of-sale
+(POS) system. I could not finish it in time, so instead we released a much more detailed,
+dynamic QR menu application. My friend has used it for years now. He has since opened two more
+branches, and today he uses Karecik in all three of them.
+
+The first versions date from 2021 and went by earlier working titles. In 2026 I polished that
+work and shipped it to production as Karecik.
+
 ## What it is
 
-Karecik is a production SaaS used by local cafés and restaurants for customer interaction and
-for managing their menus and orders. Customers scan the business's QR code and its menu opens
-on their phone, served from the business's own subdomain; owners manage everything from a
-dashboard. A menu has to open the moment someone scans it, so the service is built for zero
-downtime and low latency.
-
-The idea is older than the product. The concept and the first experimental prototypes date
-from 2021, under earlier working titles. In 2026 I polished that work into Karecik and shipped
-it to production.
+Karecik is a production SaaS for QR menus, used by local cafés and restaurants. Customers scan
+the business's QR code and its menu opens on their phone, served from the business's own
+subdomain; owners manage their menus from a dashboard. A menu has to open the moment someone
+scans it, so the service is built for zero downtime and low latency.
 
 ## Features
 

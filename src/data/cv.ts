@@ -13,7 +13,7 @@
  * (tests/cv-data.test.ts checks it). English uses British spelling, like the site. Turkish is
  * written natively and plainly, in short first-person sentences like the Turkish résumé
  * bullets, with ’ before suffixes on names and numbers ("2024’ten", "crowd.inc’te") and the
- * site's Turkish terms (CI/CD süreçleri, GitHub Actions iş akışları, runner, yayıncı/abone (pub/sub),
+ * site's Turkish terms (CI/CD süreçleri, GitHub Actions iş akışları, runner, MQTT aracısı (broker),
  * gömülü yazılım, veri tabanı, canlıda, lineer cebir, Amiral Battı, XOX).
  *
  * Pure module (types only from config.ts), so the build script and tests import it with plain Node.
@@ -118,8 +118,8 @@ const en: CvContent = {
       linkLabel: 'novacast.app',
       url: 'https://novacast.app',
       period: 'Since 2025 · in production',
-      stack: ['Go', 'MQTT'],
-      text: 'Real-time message broadcasting and device orchestration built around low-latency pub/sub pipelines. Built to replace inadequate legacy software at a computer firm where I worked: prototyped in Python, then re-architected in late 2025 as a Go and MQTT microservice.',
+      stack: ['Rust', 'Go', 'MQTT'],
+      text: 'Software that manages many screens of different makes from one web panel, on Windows, macOS, Linux, Samsung TV, LG TV and Android TV. We built it at a computer firm where I worked to replace bloated, inadequate software: a Rust player on each screen, reached by a Go server through an MQTT broker.',
     },
     {
       name: 'Karecik',
@@ -127,7 +127,7 @@ const en: CvContent = {
       url: 'https://karecik.com',
       period: 'Since 2021 · in production · GPL-3.0',
       stack: ['Go', 'PostgreSQL'],
-      text: 'A multi-tenant QR-menu SaaS that local cafés and restaurants use to manage menus and orders and to interact with customers, built for zero downtime and low latency. Early prototypes date from 2021 under earlier working titles; it shipped to production in 2026.',
+      text: 'A multi-tenant QR-menu SaaS used by local cafés and restaurants. It began as a QR menu for a friend’s café, and he now uses it in all three of his branches. Built for zero downtime and low latency. Early prototypes date from 2021 under earlier working titles; it shipped to production in 2026.',
     },
     {
       name: 'Açık Matematik',
@@ -201,9 +201,9 @@ const tr: CvContent = {
       linkLabel: 'novacast.app',
       url: 'https://novacast.app',
       period: '2025’ten beri · canlıda',
-      stack: ['Go', 'MQTT'],
-      // "Yayıncı/abone (pub/sub) modeli", as on the Novacast page and in the About figure.
-      text: 'Gerçek zamanlı mesaj yayını ve cihaz yönetimi için bir platform; düşük gecikmeli bir yayıncı/abone (pub/sub) modeli üzerine kurulu. Çalıştığım bir bilgisayar firmasında, yetersiz kalan eski bir yazılımın yerine geçmesi için geliştirdim. Önce Python ile prototipini yazdım, 2025’in sonlarında da Go ve MQTT ile bir mikroservis olarak baştan tasarladım.',
+      stack: ['Rust', 'Go', 'MQTT'],
+      // "Geliştirdik": the owner tells Novacast as team work, as on the Novacast page.
+      text: 'Farklı modellerdeki birçok ekranı tek bir web panelinden yöneten bir yazılım; Windows, macOS, Linux, Samsung TV, LG TV ve Android TV’de çalışıyor. Çalıştığım bir bilgisayar firmasında, hantal ve yetersiz kalan eski bir yazılımın yerine geçmesi için geliştirdik. Her ekranda Rust ile yazılmış bir oynatıcı var; Go ile yazılmış sunucu bu ekranlara bir MQTT aracısı (broker) üzerinden ulaşıyor.',
     },
     {
       name: 'Karecik',
@@ -211,7 +211,7 @@ const tr: CvContent = {
       url: 'https://karecik.com',
       period: '2021’den beri · canlıda · GPL-3.0',
       stack: ['Go', 'PostgreSQL'],
-      text: 'Çok kiracılı (multi-tenant) bir QR menü SaaS platformu. Yerel kafe ve restoranlar menülerini ve siparişlerini bu platformla yönetiyor, müşterileriyle de buradan iletişim kuruyor. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarladım. İlk prototipler 2021’de, proje henüz başka adlar taşırken yazıldı; platform 2026’da canlıya alındı.',
+      text: 'Yerel kafe ve restoranların kullandığı, çok kiracılı (multi-tenant) bir QR menü SaaS platformu. Bir arkadaşımın kafesi için yaptığım bir QR menüyle başladı; o arkadaşım bugün üç şubesinde de kullanıyor. Kesintisiz ve düşük gecikmeyle çalışacak şekilde tasarladım. İlk prototipler 2021’de, proje henüz başka adlar taşırken yazıldı; platform 2026’da canlıya alındı.',
     },
     {
       name: 'Açık Matematik',

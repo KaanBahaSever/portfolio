@@ -4,7 +4,7 @@
  * wherever the site tells how his Battleship came about (the About chapter, the game page and both
  * blog posts), and keep the order of events there: the desktop game came first, the Hunt & Target
  * algorithm later. The game page tells the whole chronology: the first games around 2005, the C#
- * desktop game around 2018 and the 2026 rewrite in TypeScript that is played on the page. The 2019
+ * desktop game in 2018 and the 2026 rewrite in TypeScript that is played on the page. The 2018
  * timeline entry sits on the About page under the chapter, so it keeps the order of events but
  * does not repeat the story. The console and the home page's teaser are checked with the rest of
  * their copy (tests/console-data.test.ts, tests/resume-copy.test.ts).
@@ -67,8 +67,8 @@ test('the About chapter tells why Battleship, in both languages', () => {
 test('the 2019 timeline entry keeps the order of events and leaves the story to the chapter above it', () => {
   // The About page shows the journey chapter and then this timeline: the story is told once.
   const entry: Record<Locale, string> = {
-    en: body('src/content/timeline/2019-graduation-projects.md'),
-    tr: body('src/content/tr/timeline/2019-graduation-projects.md'),
+    en: body('src/content/timeline/2018-graduation-projects.md'),
+    tr: body('src/content/tr/timeline/2018-graduation-projects.md'),
   };
   for (const locale of ['en', 'tr'] as const) {
     assert.match(entry[locale], LATER[locale], locale);
@@ -109,7 +109,7 @@ const CHRONOLOGY: Record<Locale, [step: string, pattern: RegExp][]> = {
   en: [
     ['around 2005, the first games on paper and on screen', /around 2005[^.]* on paper and on screen/],
     ['with his father, as a child', PAGE_STORY.en],
-    ['around 2018, in high school', /around 2018, my high-school years/],
+    ['2018, in high school', /goes back to 2018, my high-school years/],
     ['the desktop game in C#, a graduation project', /desktop game in C#[^.]* graduation projects/],
     ['its source', /href=\{desktopSource\}/],
     ['the algorithm, later', LATER.en],
@@ -120,7 +120,7 @@ const CHRONOLOGY: Record<Locale, [step: string, pattern: RegExp][]> = {
   tr: [
     ['2005 civarı, kâğıtta ve ekranda ilk oyunlar', /2005 civarında[^.]* Amiral Battı’yla[^.]* hem kâğıtta hem de ekranda/],
     ['babasıyla, çocukken', PAGE_STORY.tr],
-    ['2018 civarı, lise yılları', /2018 civarına, lise yıllarıma/],
+    ['2018, lise yılları', /2018’e, lise yıllarıma/],
     ['C#’la masaüstü oyunu, bir bitirme projesi', /C#’la[^.]* masaüstü oyunu[^.]* bitirme projelerimden/],
     ['kaynak kodu', /href=\{desktopSource\}/],
     ['algoritma sonradan', LATER.tr],

@@ -1,8 +1,8 @@
 ---
 title: Database applications and graduation projects
-# The date only orders entries: 2019, before university (no month recorded).
-date: 2019-06-01
-dateLabel: '2019'
+# The date only orders entries: 2018, the owner's year for the graduation projects (no month recorded).
+date: 2018-06-01
+dateLabel: '2018'
 # Keep the order of events: the Battleship opponent's Hunt & Target algorithm came later
 # than this desktop game. Only Battleship's language is on record (C#, from the repository,
 # checked against the GitHub API), so do not name one for tic-tac-toe.

@@ -1,6 +1,6 @@
 ---
 title: Veri tabanı uygulamaları ve bitirme projeleri
-dateLabel: '2019'
+dateLabel: '2018'
 ---
 
 Microsoft SQL Server (MS SQL) kullanan eksiksiz veri tabanı uygulamaları geliştirdim.

@@ -19,6 +19,8 @@ const en = {
     readingTime: (minutes: number) => `${minutes} min read`,
     /** Screen-reader text after the short language badge ("TR"). */
     writtenIn: (language: string) => `(written in ${language})`,
+    /** Accessible name and tooltip of a badge that links to the post in another language. */
+    readIn: (language: string) => `Read in ${language}`,
   },
   post: {
     allPosts: 'All posts',
@@ -59,6 +61,7 @@ const tr: BlogMessages = {
   list: {
     readingTime: (minutes) => `${minutes} dk okuma`,
     writtenIn: (language) => `(${language} yazılmış)`,
+    readIn: (language) => `${language} sürümünü oku`,
   },
   post: {
     allPosts: 'Tüm yazılar',

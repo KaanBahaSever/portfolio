@@ -3,7 +3,8 @@
  * A list of blog posts: date, reading time, serif title (a stretched link), description and tags.
  * Pass posts listed for the page's locale (getPublishedPosts(locale) or getPostsForProject()):
  * each of them has a page under that locale. Every post shows a small badge with the language it
- * is written in (TR or EN), so readers know before they click (the owner asked for it). A post in
+ * is written in (TR or EN), so readers know before they click (the owner asked for it), and a
+ * dashed badge for each other language it can be read in, linking to that version. A post in
  * the other language also carries `lang` on its title and description (plus `hreflang` on the
  * link), so screen readers switch pronunciation.
  */
@@ -14,7 +15,7 @@ import { LOCALE_META, localizePath } from '../../i18n/config';
 import { blogMessages } from '../../i18n/messages/blog';
 import { common } from '../../i18n/messages/common';
 import { getLocale } from '../../i18n/server';
-import type { BlogPost } from '../../utils/content';
+import { getAllPosts, type BlogPost } from '../../utils/content';
 
 interface Props {
   posts: BlogPost[];
@@ -37,6 +38,13 @@ const locale = getLocale(Astro);
 const m = blogMessages[locale];
 const t = common[locale];
 
+// Every language a post can be read in: its own, then its translations (same translationKey).
+const allPosts = await getAllPosts();
+const translationsOf = (post: BlogPost) =>
+  post.data.translationKey
+    ? allPosts.filter((other) => other.id !== post.id && other.data.translationKey === post.data.translationKey)
+    : [];
+
 const items = posts.map((post) => {
   const foreign = post.data.lang !== locale;
   return {
@@ -46,13 +54,20 @@ const items = posts.map((post) => {
     // Only set where it differs from the page, so the markup stays quiet in the common case.
     lang: foreign ? LOCALE_META[post.data.lang].htmlLang : undefined,
     badge: { short: LOCALE_META[post.data.lang].short, name: m.languageName[post.data.lang] },
+    // The other language versions link straight to their own page.
+    translations: translationsOf(post).map((other) => ({
+      short: LOCALE_META[other.data.lang].short,
+      label: m.list.readIn(m.languageName[other.data.lang]),
+      href: localizePath(`/blog/${other.id}/`, other.data.lang),
+      hreflang: LOCALE_META[other.data.lang].htmlLang,
+    })),
   };
 });
 ---
 
 <ul class="divide-y divide-zinc-200 dark:divide-zinc-800">
   {
-    items.map(({ post, href, minutes, lang, badge }) => (
+    items.map(({ post, href, minutes, lang, badge, translations }) => (
       <li class="py-6 first:pt-0 last:pb-0">
         <article class="group relative">
           <p class="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-zinc-600 tabular-nums dark:text-zinc-400">
@@ -69,6 +84,18 @@ const items = posts.map((post) => {
               <span aria-hidden="true">{badge.short}</span>
               <span class="sr-only"> {m.list.writtenIn(badge.name)}</span>
             </span>
+            {/* Above the title's stretched link (relative z-10), so each badge is its own link. */}
+            {translations.map((translation) => (
+              <a
+                href={translation.href}
+                hreflang={translation.hreflang}
+                title={translation.label}
+                class="relative z-10 inline-flex items-center rounded border border-dashed border-zinc-300 px-1.5 py-px text-[0.6875rem] leading-4 font-medium tracking-wider text-zinc-600 transition-colors hover:border-accent-600 hover:text-accent-700 dark:border-zinc-700 dark:text-zinc-400 dark:hover:border-accent-400 dark:hover:text-accent-400"
+              >
+                <span aria-hidden="true">{translation.short}</span>
+                <span class="sr-only">{translation.label}</span>
+              </a>
+            ))}
           </p>
           <Heading class="mt-2 font-serif text-xl leading-snug font-medium tracking-tight text-balance text-zinc-900 sm:text-[1.375rem] dark:text-zinc-100">
             <a

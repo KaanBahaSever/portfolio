@@ -118,7 +118,7 @@ const en = {
         title: 'From noisy data to a good estimate: Kalman filters and PID',
         /** Both models are illustrations (geometry.ts, CONTROL_FIGURE): say so first. */
         caption:
-          'An illustration, not the club’s flight data. Left: an idealised ascent (thin line), noisy altimeter readings (dots) and a Kalman filter’s estimate (highlighted line). The filter also uses a noisy accelerometer, and its estimate stays much closer to the true altitude than the readings do. Right: a simple model of a vertical landing. The rocket starts high up and has to hover at the target height (dashed) using its engine. With PID it first drops a little below the target, then settles on it. Without the integral term (PD) it stays below the target, because nothing builds up the thrust that carries the rocket’s weight.',
+          'An illustration, not the club’s flight data. Left: noisy altimeter readings (dots) and a Kalman filter’s estimate (highlighted line), which stays much closer to the true path (thin line). Right: a simple vertical landing. With PID the rocket settles at the target height (dashed); without the integral term (PD) it stays below it.',
       },
       guidance: {
         short: 'Parachute guidance',
@@ -266,9 +266,8 @@ const tr: AboutMessages = {
         short: 'Kalman ve PID',
         label: 'Roket ve Uzay Kulübü · Kalman · PID',
         title: 'Gürültülü veriden doğru tahmine: Kalman filtresi ve PID',
-        // "İtki" is the rocketry word for thrust; "havada asılı kalmak" for hovering.
         caption:
-          'Bu bir örnek çizim; kulübün uçuş verisi değil. Solda ideal bir yükseliş (ince çizgi), gürültülü altimetre ölçümleri (noktalar) ve Kalman filtresinin tahmini (vurgulu çizgi) var. Filtre gürültülü bir ivmeölçerden de yararlanıyor ve tahmini gerçek irtifaya ölçümlerden çok daha yakın kalıyor. Sağda basit bir dikey iniş modeli var: Roket yüksekten başlıyor ve motoruyla hedef yükseklikte (kesikli çizgi) havada asılı kalmaya çalışıyor. PID ile önce hedefin biraz altına iniyor, sonra hedefe oturuyor. İntegral terimi olmadan (PD) hedefin altında kalıyor, çünkü roketin ağırlığını taşıyacak itkiyi zamanla biriktiren bir şey yok.',
+          'Bu bir örnek çizim; kulübün uçuş verisi değil. Solda gürültülü altimetre ölçümleri (noktalar) ve Kalman filtresinin tahmini (vurgulu çizgi) var; tahmin gerçek yola (ince çizgi) çok daha yakın. Sağda basit bir dikey iniş var: Roket PID ile hedef yüksekliğe (kesikli çizgi) oturuyor, integral terimi olmadan (PD) hedefin altında kalıyor.',
       },
       guidance: {
         short: 'Paraşüt güdümü',

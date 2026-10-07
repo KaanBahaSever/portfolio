@@ -2,9 +2,10 @@
 /**
  * A list of blog posts: date, reading time, serif title (a stretched link), description and tags.
  * Pass posts listed for the page's locale (getPublishedPosts(locale) or getPostsForProject()):
- * each of them has a page under that locale. A post written in the other language gets a small
- * language badge, and its title and description carry `lang` (plus `hreflang` on the link), so
- * screen readers switch pronunciation.
+ * each of them has a page under that locale. Every post shows a small badge with the language it
+ * is written in (TR or EN), so readers know before they click (the owner asked for it). A post in
+ * the other language also carries `lang` on its title and description (plus `hreflang` on the
+ * link), so screen readers switch pronunciation.
  */
 import FormattedDate from './FormattedDate.astro';
 import Tag from './Tag.astro';
@@ -44,7 +45,7 @@ const items = posts.map((post) => {
     minutes: readingMinutes(post.body),
     // Only set where it differs from the page, so the markup stays quiet in the common case.
     lang: foreign ? LOCALE_META[post.data.lang].htmlLang : undefined,
-    badge: foreign ? { short: LOCALE_META[post.data.lang].short, name: m.languageName[post.data.lang] } : undefined,
+    badge: { short: LOCALE_META[post.data.lang].short, name: m.languageName[post.data.lang] },
   };
 });
 ---
@@ -64,12 +65,10 @@ const items = posts.map((post) => {
                 <span>{m.list.readingTime(minutes)}</span>
               </>
             )}
-            {badge && (
-              <span class="ms-1 inline-flex items-center rounded border border-zinc-300 px-1.5 py-px text-[0.6875rem] leading-4 font-medium tracking-wider text-zinc-700 dark:border-zinc-700 dark:text-zinc-300">
-                <span aria-hidden="true">{badge.short}</span>
-                <span class="sr-only"> {m.list.writtenIn(badge.name)}</span>
-              </span>
-            )}
+            <span class="ms-1 inline-flex items-center rounded border border-zinc-300 px-1.5 py-px text-[0.6875rem] leading-4 font-medium tracking-wider text-zinc-700 dark:border-zinc-700 dark:text-zinc-300">
+              <span aria-hidden="true">{badge.short}</span>
+              <span class="sr-only"> {m.list.writtenIn(badge.name)}</span>
+            </span>
           </p>
           <Heading class="mt-2 font-serif text-xl leading-snug font-medium tracking-tight text-balance text-zinc-900 sm:text-[1.375rem] dark:text-zinc-100">
             <a

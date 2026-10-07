@@ -222,4 +222,9 @@ test('the journey teaser follows the About page and tells the current story', ()
   assert.doesNotMatch(homeMessages.tr.journey.chapters.foundations.text, /Hunt & Target/);
   assert.match(homeMessages.tr.journey.chapters.avionics.text, /5\.000 ft/);
   assert.match(homeMessages.tr.journey.chapters.simulation.text, /Rocket-Up/);
+  // The owner asked for four cards of about the same length: none much shorter than the longest.
+  for (const locale of ['en', 'tr'] as const) {
+    const lengths = JOURNEY_CHAPTERS.map((key) => homeMessages[locale].journey.chapters[key].text.length);
+    assert.ok(Math.min(...lengths) >= 0.85 * Math.max(...lengths), `${locale}: ${lengths.join(', ')}`);
+  }
 });

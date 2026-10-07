@@ -64,25 +64,25 @@ const en = {
         meta: '2016 – 2019 · C# · MS SQL',
         // The early Battleship was a plain desktop game: its Hunt & Target opponent came later.
         // Battleship was the game the owner played with his father as a child; add no details.
-        text: 'It began in 2016 with C# at a vocational high school: data structures and algorithmic problem-solving, then database applications on MS SQL. The graduation projects were desktop Tic-Tac-Toe and Battleship, the game I played with my father as a child; the Hunt & Target algorithm came later.',
+        text: 'It began in 2016 with C# at a vocational high school: data structures, algorithms, then database applications on MS SQL. My graduation projects were desktop Tic-Tac-Toe and Battleship, the game I played with my father as a child; the Hunt & Target algorithm came later.',
       },
       avionics: {
         title: 'Rocket avionics',
         // No-break spaces in the club's name (here and in Turkish): on a narrow card the line breaks
         // after the dot, not inside the name.
         meta: '2019 – 2022 · Rocket and Space Club',
-        text: 'At the Istanbul University Rocket and Space Club, our team designed and built one low-altitude (5,000 ft) and two high-altitude (10,000 ft) rockets. I was the sole author of the flight avionics firmware and the parachute deployment control, and designed the telemetry logging. We also researched Kalman filters for the sensor data and used PID controllers in our experiments.',
+        text: 'At the Istanbul University Rocket and Space Club, our team built one low-altitude (5,000 ft) and two high-altitude (10,000 ft) rockets. I wrote the flight avionics firmware and the parachute deployment control, filtered the sensor data with Kalman filters and used PID in our experiments.',
       },
       guidance: {
         title: 'Autonomous parachute guidance',
         meta: 'Research · Python',
-        text: 'A steering algorithm that uses linear algebra and atmospheric descent dynamics to guide a payload to a designated landing coordinate.',
+        text: 'An experimental project with university friends: a parachute payload that steers itself to a chosen landing point. A friend built the mechanics; I wrote the decision algorithm with linear algebra and a simulation to test it in, using the law of cosines and atan2 for the angles.',
       },
       simulation: {
         title: 'Flight-physics simulation',
         meta: '2020 prototype · C++ rewrite',
         // One project that evolved, not two: the prototype is being rewritten as Rocket-Up.
-        text: 'One project that keeps evolving: a narrow Python prototype from 2020, now being rewritten from scratch as Rocket-Up, an open-source aerodynamic simulation engine in modern C++.',
+        text: 'One project that keeps evolving. In 2020 I wrote a narrow Python prototype that computes rocket trajectories in three dimensions. Now I am rewriting it from scratch in modern C++ as Rocket-Up, an open-source aerodynamic simulation engine for high-power rockets.',
       },
     } satisfies Record<JourneyChapter, Chapter>,
   },
@@ -168,23 +168,23 @@ const tr: HomeMessages = {
         title: 'Algoritma temelleri',
         meta: '2016 – 2019 · C# · MS SQL',
         // The site's name for the algorithm, with the English one a reader can search for.
-        text: 'Her şey 2016’da meslek lisesinde C# ile başladı. Önce veri yapıları ve algoritmik problem çözme üzerinde çalıştım, ardından MS SQL ile veri tabanı uygulamaları geliştirdim. Bitirme projelerim iki masaüstü oyunuydu: XOX ve çocukken babamla oynadığım Amiral Battı. Amiral Battı’daki bilgisayar rakibin av ve hedef (hunt & target) algoritmasını ise sonradan yazdım.',
+        text: 'Her şey 2016’da meslek lisesinde C# ile başladı: önce veri yapıları ve algoritmalar, sonra MS SQL ile veri tabanı uygulamaları. Bitirme projelerim XOX ve çocukken babamla oynadığım Amiral Battı’ydı. Amiral Battı’daki bilgisayar rakibin av ve hedef (hunt & target) algoritmasını ise sonradan yazdım.',
       },
       avionics: {
         title: 'Roket aviyoniği',
         meta: '2019 – 2022 · Roket ve Uzay Kulübü',
-        text: 'İstanbul Üniversitesi Roket ve Uzay Kulübünde ekip olarak bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik. Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrolünü tek başıma yazdım. Telemetri kaydını da ben tasarladım. Sensör verisi için Kalman filtrelerini araştırdık, deneylerimizde de PID kontrolcüleri kullandık.',
+        text: 'İstanbul Üniversitesi Roket ve Uzay Kulübünde ekip olarak bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi ürettik. Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrolünü ben yazdım. Sensör verisini Kalman filtreleriyle süzdük, deneylerimizde de PID kontrolcüleri kullandık.',
       },
       guidance: {
         title: 'Otonom paraşüt güdümü',
         meta: 'Araştırma · Python',
         // "Lineer cebir", as on the About page and in the console: one term for one subject.
-        text: 'Paraşütle inen bir yükü belirlenen iniş koordinatına yönlendiren bir algoritma. Lineer cebirden ve atmosferdeki iniş dinamiğinden yararlanıyor.',
+        text: 'Üniversitede arkadaşlarımızla yaptığımız deneysel bir proje: Paraşütle inen bir yük, kendini seçilen iniş noktasına yönlendiriyor. Mekanik kısmı bir arkadaşım çözdü. Ben lineer cebirle karar algoritmasını ve onu denediğimiz simülasyonu yazdım; açılar için kosinüs teoremini ve atan2’yi kullandık.',
       },
       simulation: {
         title: 'Uçuş fiziği simülasyonu',
         meta: '2020 prototipi · şimdi C++',
-        text: 'Bu, gelişmeye devam eden tek bir proje. 2020’de Python ile dar kapsamlı bir prototip yazmıştım. Şimdi onu modern C++ ile baştan yazıyorum. Yeni adı Rocket-Up: açık kaynak bir aerodinamik simülasyon motoru.',
+        text: 'Gelişmeye devam eden tek bir proje. 2020’de roket yörüngelerini üç boyutta hesaplayan, dar kapsamlı bir prototipi Python ile yazmıştım. Şimdi onu modern C++ ile baştan yazıyorum. Yeni adı Rocket-Up: yüksek güçlü roketler için açık kaynak bir aerodinamik simülasyon motoru.',
       },
     },
   },

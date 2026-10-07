@@ -34,8 +34,9 @@ for (const post of posts) {
     {
       locale === 'tr' ? (
         <p>
-          Matematik, yazılım ve bilim tarihi üzerine Türkçe ya da İngilizce notlar yazıyorum. İngilizce olanlar{' '}
-          <span class="font-mono text-[0.875em]">EN</span> ile işaretli.
+          Matematik, yazılım ve bilim tarihi üzerine Türkçe ya da İngilizce notlar yazıyorum. Her yazının dili yanında{' '}
+          <span class="font-mono text-[0.875em]">TR</span> ya da <span class="font-mono text-[0.875em]">EN</span> olarak
+          işaretli.
           {medium && (
             <>
               {' '}
@@ -48,8 +49,9 @@ for (const post of posts) {
         </p>
       ) : (
         <p>
-          Notes on mathematics, software and the history of science, in English or Turkish; posts in Turkish are marked{' '}
-          <span class="font-mono text-[0.875em]">TR</span>.
+          Notes on mathematics, software and the history of science, in English or Turkish. Each post is marked with
+          its language: <span class="font-mono text-[0.875em]">EN</span> for English,{' '}
+          <span class="font-mono text-[0.875em]">TR</span> for Turkish.
           {medium && (
             <>
               {' '}

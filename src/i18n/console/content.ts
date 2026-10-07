@@ -33,7 +33,7 @@ const en = {
     text(dim('Software Developer | Math-Driven Solutions & Algorithms · Istanbul')),
     blank(),
     text(
-      'I write systems software with a pure-mathematics background. I study mathematics at Istanbul University and work day to day in modern C++ and Go: system tools, telemetry and messaging platforms, algorithm-driven applications. Around the code I build one-click pipelines that test it, package it and deploy multi-platform builds.',
+      'I write systems software with a pure-mathematics background. I study mathematics at Istanbul University and work day to day in modern C++ and Go: system tools, telemetry and device-management software, algorithm-driven applications. Around the code I build one-click pipelines that test it, package it and deploy multi-platform builds.',
     ),
     blank(),
     text(
@@ -249,7 +249,7 @@ const tr: ConsoleContent = {
     text(dim('Yazılım Geliştirici | Matematik Odaklı Çözümler ve Algoritmalar · İstanbul')),
     blank(),
     text(
-      'Sistem yazılımı geliştiriyorum; temelim saf matematik. İstanbul Üniversitesinde matematik okuyorum. Günlük işimde modern C++ ve Go kullanıyorum; sistem araçları, telemetri ve mesajlaşma platformları, algoritmaya dayalı uygulamalar yazıyorum. Kodu tek tıkla test eden, paketleyen ve farklı platformlar için derleyip yayına alan CI/CD süreçleri de kuruyorum.',
+      'Sistem yazılımı geliştiriyorum; temelim saf matematik. İstanbul Üniversitesinde matematik okuyorum. Günlük işimde modern C++ ve Go kullanıyorum; sistem araçları, telemetri ve cihaz yönetimi yazılımları, algoritmaya dayalı uygulamalar yazıyorum. Kodu tek tıkla test eden, paketleyen ve farklı platformlar için derleyip yayına alan CI/CD süreçleri de kuruyorum.',
     ),
     blank(),
     text(

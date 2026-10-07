@@ -29,7 +29,7 @@ const en = {
   hero: {
     /** Plain text: the intro has no inline links, so one string per language is enough. */
     intro:
-      "Hi, and welcome. I'm Kaan. I build software, mostly in modern C++ and Go, and I'm about to finish my mathematics degree at Istanbul University. I love mathematics so much that I can't help bringing it into my work, from rocket software to real-time messaging systems. Here you'll find my projects, posts on mathematics and algorithms, small tools that run in your browser, and games you can play against the computer. Start wherever you like, and enjoy your visit.",
+      "Hi, and welcome. I'm Kaan, a software developer in Istanbul. I work mostly in modern C++ and Go, and I'm about to finish my mathematics degree at Istanbul University. As a child I took things apart to see how they worked. That curiosity led me to space, then to rockets, and in the end to the software I write today. Mathematics has been with me at every step: it taught me to understand a problem well before solving it, and then to show why the solution is right. Here you'll find my projects, posts on mathematics and algorithms, small tools that run in your browser, and games you can play against the computer. Start wherever you like, and enjoy your visit.",
     selectedWork: 'Selected work',
     /** Shown inside the CV button, after "Download CV". */
     cvFormat: 'PDF',
@@ -135,7 +135,7 @@ const tr: HomeMessages = {
     // A general, warm introduction that ends by inviting the visitor in; the job details are in the
     // Experience section right below, so the intro leaves them out (the owner asked for this).
     intro:
-      'Merhaba, hoş geldiniz! Ben Kaan. Çoğunlukla modern C++ ve Go ile yazılım geliştiriyorum; bir yandan da İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Matematiği o kadar seviyorum ki onu roket yazılımlarına da gerçek zamanlı mesaj sistemlerine de katmadan duramıyorum. Burada projelerimi, matematik ve algoritmalar üzerine yazılarımı, tarayıcıda çalışan küçük araçları ve bilgisayara karşı oynayabileceğiniz oyunları bulacaksınız; dilediğiniz yerden başlayın, iyi gezinmeler!',
+      'Merhaba, hoş geldiniz! Ben Kaan. İstanbul’da yaşıyorum ve yazılım geliştiriyorum; en çok modern C++ ve Go ile çalışıyorum. Bir yandan da İstanbul Üniversitesinde matematik bölümünü bitirmek üzereyim. Çocukken evdeki aletleri söküp nasıl çalıştıklarına bakardım. Bu merak beni önce uzaya, sonra roketlere, sonunda da bugün yazdığım yazılımlara getirdi. Matematik bu yolun her adımında yanımdaydı: Bir problemi çözmeden önce iyice anlamayı, sonra da çözümün neden doğru olduğunu göstermeyi ondan öğrendim. Bu sitede projelerimi, matematik ve algoritmalar üzerine yazılarımı, tarayıcıda çalışan küçük araçları ve bilgisayara karşı oynayabileceğiniz oyunları bulacaksınız. Dilediğiniz yerden başlayın, iyi gezinmeler!',
     selectedWork: 'Seçili işler',
     // The button downloads the Turkish CV; the English one is a small link beside it.
     cvFormat: 'PDF',

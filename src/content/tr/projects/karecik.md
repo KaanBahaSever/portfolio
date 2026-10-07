@@ -7,8 +7,8 @@ shortDescription: Yerel kafe ve restoranlar için bir QR menü hizmeti. Müşter
 
 Karecik, ortaokuldan bir arkadaşım kafe açınca başladı. Önce ona bir QR menü yaptım ama bu menü
 sabit bir sayfaydı. Sonra onun isteğiyle eksiksiz bir adisyon sistemi (POS) yapmaya giriştim.
-Ama zamanında yetiştiremedim. Bunun yerine çok daha ayrıntılı, dinamik bir QR menü uygulaması
-çıkardık. Arkadaşım yıllardır bu uygulamayı kullanıyor. Bu sürede iki şube daha açtı; artık üç
+Ama zamanında yetiştiremedim. Biz de onun yerine çok daha ayrıntılı, dinamik bir QR menü
+uygulamasını yayına aldık. Arkadaşım yıllardır bu uygulamayı kullanıyor. Bu sürede iki şube daha açtı; artık üç
 şubesinde de Karecik var.
 
 İlk sürümler 2021’e dayanıyor; projeye o zamanlar başka adlar vermiştim. 2026’da bu çalışmayı

@@ -10,8 +10,8 @@ işletim sistemi farklı olabilir; hepsi bir web paneli üzerinden yönetiliyor.
 yazılımlara “digital signage” deniyor. Ayrıntılar [novacast.app](https://novacast.app)
 adresinde.
 
-Windows, macOS, Linux, Samsung TV, LG TV ve Android TV’de çalışıyor. Hepsine kolayca
-kuruluyor. Ekranı bir kez kurduktan sonra onu ağ üzerinden, istediğiniz yerden
+Windows, macOS, Linux, Samsung TV, LG TV ve Android TV’de çalışıyor. Her birine kolayca
+kurulabiliyor. Ekranı bir kez kurduktan sonra onu ağ üzerinden, istediğiniz yerden
 yönetebiliyorsunuz.
 
 Novacast’i genelde kurumsal şirketler kullanıyor. Şirketler onunla bütün ekranlarında reklam

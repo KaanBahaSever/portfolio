@@ -117,6 +117,46 @@ export function dtReaction() {
 /** Typical heating value of coal, J/kg: hard coal gives about 24–30 MJ/kg. */
 export const COAL_MJ_PER_KG = { low: 24, high: 30 } as const;
 
+/**
+ * Methane, the main part of natural gas: CH₄ + 2 O₂ → CO₂ + 2 H₂O. The NIST Chemistry WebBook
+ * gives ΔcH°(gas) = −890.7 kJ/mol (Pittam and Pilcher, 1972), with liquid water; a power plant’s
+ * water leaves as vapour, so the usable (lower) heating value takes off 2 × 44.0 kJ/mol, the heat
+ * of vaporisation of water at 25 °C. Molar mass 16.043 g/mol.
+ */
+const METHANE = { combustionKjPerMol: 890.7, waterVaporisationKjPerMol: 44.0, gramsPerMol: 16.043 } as const;
+
+/** Lower heating value of methane, J/kg (≈ 50 MJ/kg). */
+export function methaneJoulesPerKg(): number {
+  const kjPerMol = METHANE.combustionKjPerMol - 2 * METHANE.waterVaporisationKjPerMol;
+  return (kjPerMol * 1000) / (METHANE.gramsPerMol / 1000);
+}
+
+/** Energy released per fission of uranium-235, MeV: about 200 MeV ends up as heat in a reactor. */
+export const FISSION_MEV = 200;
+
+/** Energy per kilogram of uranium-235 if every nucleus split, J/kg (≈ 82 TJ/kg). */
+export function fissionJoulesPerKg(): number {
+  return (FISSION_MEV * 1e6 * JOULES_PER_EV) / (nuclide('U-235').mass * KG_PER_U);
+}
+
+export type Fuel = 'coal' | 'gas' | 'fission' | 'fusion';
+
+/**
+ * Energy from one kilogram of each fuel, J/kg, as a range (coal varies; the others are single
+ * values). The nuclear values assume all of the fuel reacts: upper bounds.
+ */
+export function fuelEnergies(): { fuel: Fuel; low: number; high: number }[] {
+  const gas = methaneJoulesPerKg();
+  const fission = fissionJoulesPerKg();
+  const fusion = dtReaction().perKg;
+  return [
+    { fuel: 'coal', low: COAL_MJ_PER_KG.low * 1e6, high: COAL_MJ_PER_KG.high * 1e6 },
+    { fuel: 'gas', low: gas, high: gas },
+    { fuel: 'fission', low: fission, high: fission },
+    { fuel: 'fusion', low: fusion, high: fusion },
+  ];
+}
+
 /** Temperature in kelvin for a plasma temperature in keV (T = E / k). */
 export function kevToKelvin(kev: number): number {
   return (kev * 1000) / BOLTZMANN_EV_PER_K;

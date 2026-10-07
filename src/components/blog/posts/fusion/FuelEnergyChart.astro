@@ -1,0 +1,209 @@
+---
+/**
+ * Energy from one kilogram of fuel: coal, natural gas, uranium-235 fission and D–T fusion, as
+ * horizontal bars on a logarithmic scale (model.ts). Coal is a range (24–30 MJ/kg): a solid bar to
+ * the low value and a lighter one to the high value. Each name sits above its bar, so the chart
+ * reads the same on phones; drawn twice (compact and wide) for legible text.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { type Layout, logarithmic } from './chart.ts';
+import Figure from './Figure.astro';
+import { fusionPostMessages } from './messages.ts';
+import { COAL_MJ_PER_KG, fissionJoulesPerKg, fuelEnergies, methaneJoulesPerKg, dtReaction } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = fusionPostMessages[lang].fuel;
+const f = formatters(lang);
+
+const fuels = fuelEnergies();
+const fusion = dtReaction().perKg;
+const fission = fissionJoulesPerKg();
+const gas = methaneJoulesPerKg();
+// The facts the prose states: gas ≈ 50 MJ/kg, fission ≈ 82 TJ/kg, fusion ≈ 4 × fission and about
+// ten million times coal.
+if (Math.abs(gas / 50e6 - 1) > 0.01) throw new Error(`FuelEnergyChart: methane gives ${gas} J/kg`);
+if (Math.abs(fission / 82e12 - 1) > 0.01) throw new Error(`FuelEnergyChart: U-235 gives ${fission} J/kg`);
+if (!(fusion / fission > 4 && fusion / fission < 4.2)) throw new Error(`FuelEnergyChart: fusion/fission = ${fusion / fission}`);
+if (!(fusion / (COAL_MJ_PER_KG.high * 1e6) > 1e7)) throw new Error('FuelEnergyChart: fusion should be over ten million times coal');
+if (fuels.some((row, i) => i > 0 && row.low <= (fuels[i - 1]?.high ?? 0))) {
+  throw new Error('FuelEnergyChart: the fuels should be listed from least to most energy');
+}
+
+/** J/kg written with the largest fitting unit: “50 MJ”, “82 TJ”, “24–30 MJ”. */
+const UNITS: [number, string][] = [
+  [1e12, 'TJ'],
+  [1e9, 'GJ'],
+  [1e6, 'MJ'],
+];
+function energy(low: number, high: number): string {
+  const [scale, unit] = UNITS.find(([s]) => low >= s) ?? [1e6, 'MJ'];
+  const a = f.number(Math.round(low / scale));
+  const b = f.number(Math.round(high / scale));
+  return a === b ? `${a} ${unit}` : `${a}–${b} ${unit}`;
+}
+
+const label = m.aria(
+  energy(COAL_MJ_PER_KG.low * 1e6, COAL_MJ_PER_KG.high * 1e6),
+  energy(gas, gas),
+  energy(fission, fission),
+  energy(fusion, fusion),
+  f.number(Math.round(fusion / fission)),
+);
+
+const X_MIN = 1e6;
+const X_MAX = 1e15;
+const TICKS: [number, string][] = [
+  [1e6, '1 MJ'],
+  [1e9, '1 GJ'],
+  [1e12, '1 TJ'],
+  [1e15, '1 PJ'],
+];
+
+const layouts: { key: string; class: string; layout: Layout; row: number; bar: number }[] = [
+  { key: 'compact', class: 'sm:hidden', layout: { width: 320, height: 0, left: 10, right: 62, top: 10, bottom: 46, font: 11 }, row: 46, bar: 14 },
+  { key: 'wide', class: 'hidden sm:block', layout: { width: 640, height: 0, left: 16, right: 84, top: 12, bottom: 50, font: 12.5 }, row: 52, bar: 18 },
+];
+---
+
+<Figure>
+  <div slot="graphic" class="fusion-chart">
+    {
+      layouts.map(({ class: className, layout: base, row, bar }) => {
+        const l = { ...base, height: base.top + fuels.length * row + base.bottom };
+        const x = logarithmic(X_MIN, X_MAX, l.left, l.width - l.right);
+        const plotBottom = l.top + fuels.length * row;
+        return (
+          <svg
+            class:list={['h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+            viewBox={`0 0 ${l.width} ${l.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={label}
+            focusable="false"
+          >
+            <g class="axis font-mono" font-size={l.font}>
+              {Array.from({ length: 10 }, (_, i) => 10 ** (6 + i)).map((v) => (
+                <line x1={x(v)} x2={x(v)} y1={l.top} y2={plotBottom} class={TICKS.some(([t]) => t === v) ? 'gridline-strong' : 'gridline'} />
+              ))}
+              {TICKS.map(([v, text]) => (
+                <text x={x(v)} y={plotBottom + 6 + l.font} text-anchor={v === X_MIN ? 'start' : 'middle'}>{text}</text>
+              ))}
+              <text x={l.width - l.right} y={l.height - 6} text-anchor="end" class="title">{m.xAxis} →</text>
+            </g>
+            <line x1={l.left} x2={l.width - l.right} y1={plotBottom} y2={plotBottom} class="baseline" />
+            {fuels.map((fuel, i) => {
+              const top = l.top + i * row;
+              const barY = top + l.font + 8;
+              const nuclear = fuel.fuel === 'fission' || fuel.fuel === 'fusion';
+              return (
+                <g>
+                  <text x={l.left} y={top + l.font + 2} font-size={l.font + 1} class:list={['name font-sans', fuel.fuel === 'fusion' && 'name-fusion']}>{m.names[fuel.fuel]}</text>
+                  <rect x={l.left} y={barY} width={x(fuel.low) - l.left} height={bar} rx="2" class:list={['bar', nuclear && 'bar-nuclear', fuel.fuel === 'fusion' && 'bar-fusion']} />
+                  {fuel.high > fuel.low && (
+                    <rect x={x(fuel.low)} y={barY} width={x(fuel.high) - x(fuel.low)} height={bar} class="bar-range" />
+                  )}
+                  <text x={x(fuel.high) + 6} y={barY + bar / 2 + l.font / 3} font-size={l.font} class="value font-mono">{energy(fuel.low, fuel.high)}</text>
+                </g>
+              );
+            })}
+          </svg>
+        );
+      })
+    }
+  </div>
+  <slot />
+</Figure>
+
+<style>
+  .fusion-chart {
+    --ink: var(--color-zinc-800);
+    --muted: var(--color-zinc-500);
+    --fossil: var(--color-zinc-500);
+    --nuclear: var(--color-zinc-700);
+    --accent: var(--color-accent-700);
+    --axis-text: var(--color-zinc-600);
+    --axis-title: var(--color-zinc-700);
+  }
+
+  :global(:where([data-theme='dark'])) .fusion-chart {
+    --ink: var(--color-zinc-200);
+    --muted: var(--color-zinc-400);
+    --fossil: var(--color-zinc-500);
+    --nuclear: var(--color-zinc-300);
+    --accent: var(--color-accent-400);
+    --axis-text: var(--color-zinc-400);
+    --axis-title: var(--color-zinc-300);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .fusion-chart {
+      --ink: var(--color-zinc-200);
+      --muted: var(--color-zinc-400);
+      --fossil: var(--color-zinc-500);
+      --nuclear: var(--color-zinc-300);
+      --accent: var(--color-accent-400);
+      --axis-text: var(--color-zinc-400);
+      --axis-title: var(--color-zinc-300);
+    }
+  }
+
+  .axis text {
+    fill: var(--axis-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis .title {
+    fill: var(--axis-title);
+  }
+
+  .gridline {
+    stroke: currentColor;
+    stroke-opacity: 0.06;
+  }
+
+  .gridline-strong {
+    stroke: currentColor;
+    stroke-opacity: 0.16;
+  }
+
+  .baseline {
+    stroke: currentColor;
+    stroke-opacity: 0.45;
+  }
+
+  .name {
+    fill: var(--ink);
+  }
+
+  .name-fusion {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+
+  .bar {
+    fill: var(--fossil);
+  }
+
+  .bar-nuclear {
+    fill: var(--nuclear);
+  }
+
+  .bar-fusion {
+    fill: var(--accent);
+  }
+
+  .bar-range {
+    fill: var(--fossil);
+    fill-opacity: 0.45;
+  }
+
+  .value {
+    fill: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

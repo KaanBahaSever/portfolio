@@ -65,7 +65,7 @@ export interface CvContent {
   summary: string;
   /**
    * Under Istanbul University in Education, in place of the home page's highlights for it, in the
-   * owner's order: Rocket Club, Mathematics Club, Google Developer Student Clubs.
+   * owner's order: Rocket and Space Club, Mathematics Club, Google Developer Student Clubs.
    */
   communities: readonly CvCommunity[];
   projects: readonly CvProject[];
@@ -85,7 +85,7 @@ const en: CvContent = {
     {
       // The owner's four kinds of software (2026-09-30), ground control among them; the rockets
       // as in resume.ts.
-      name: 'Rocket Club',
+      name: 'Rocket and Space Club',
       role: 'Vice President',
       period: '2019–2022',
       text: 'developed avionics, telemetry, ground-control and flight-simulation software for the team’s three rockets, one low-altitude (5,000 ft) and two high-altitude (10,000 ft).',
@@ -162,11 +162,12 @@ const tr: CvContent = {
   communities: [
     {
       // The owner's own terms: "aviyonik, telemetri, yer kontrol ve uçuş simülasyonu yazılımları".
-      // Turkish groups thousands with a dot, as in resume.ts: 5.000 ft.
-      name: 'Roket Kulübü',
+      // Turkish groups thousands with a dot, as in resume.ts: 5.000 ft. "Ekipçe yaptığımız" keeps the
+      // line, lead included, within two printed lines (220 characters) with the club's full short name.
+      name: 'Roket ve Uzay Kulübü',
       role: 'Başkan Yardımcısı',
       period: '2019–2022',
-      text: 'Ekibimizin ürettiği bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi için aviyonik, telemetri, yer kontrol ve uçuş simülasyonu yazılımları geliştirdim.',
+      text: 'Ekipçe yaptığımız bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi için aviyonik, telemetri, yer kontrol ve uçuş simülasyonu yazılımları geliştirdim.',
     },
     {
       name: 'Matematik Kulübü',

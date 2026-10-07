@@ -156,7 +156,7 @@ test('the CVs list only the four selected projects, in the owner’s order', () 
  * each (resume.ts VOLUNTEERING, by English title) and the name the CV gives it in each language.
  */
 const COMMUNITIES = [
-  { record: 'Istanbul University Rocket Club', en: 'Rocket Club', tr: 'Roket Kulübü' },
+  { record: 'Istanbul University Rocket and Space Club', en: 'Rocket and Space Club', tr: 'Roket ve Uzay Kulübü' },
   { record: 'Mathematics Club', en: 'Mathematics Club', tr: 'Matematik Kulübü' },
   {
     record: 'Google Developer Student Clubs',
@@ -235,13 +235,13 @@ test('the CVs have no volunteering section: its clubs are listed under the unive
 test('the words around the CV compose titles the way each language does', () => {
   assert.equal(cvMessages.en.degree('Bachelor of Science', 'Mathematics'), 'Bachelor of Science in Mathematics');
   assert.equal(cvMessages.tr.degree('Lisans', 'Matematik'), 'Matematik (Lisans)');
-  assert.equal(cvMessages.en.role('Vice President', 'Rocket Club'), 'Vice President, Rocket Club');
-  assert.equal(cvMessages.tr.role('Başkan Yardımcısı', 'Roket Kulübü'), 'Roket Kulübü Başkan Yardımcısı');
+  assert.equal(cvMessages.en.role('Vice President', 'Rocket and Space Club'), 'Vice President, Rocket and Space Club');
+  assert.equal(cvMessages.tr.role('Başkan Yardımcısı', 'Roket ve Uzay Kulübü'), 'Roket ve Uzay Kulübü Başkan Yardımcısı');
   // A community line starts with the community, then the role where there is one, then when.
-  assert.equal(cvMessages.en.community('Rocket Club', 'Vice President', '2019–2022'), 'Rocket Club, Vice President (2019–2022):');
+  assert.equal(cvMessages.en.community('Rocket and Space Club', 'Vice President', '2019–2022'), 'Rocket and Space Club, Vice President (2019–2022):');
   assert.equal(
-    cvMessages.tr.community('Roket Kulübü', 'Başkan Yardımcısı', '2019–2022'),
-    'Roket Kulübü Başkan Yardımcısı (2019–2022):',
+    cvMessages.tr.community('Roket ve Uzay Kulübü', 'Başkan Yardımcısı', '2019–2022'),
+    'Roket ve Uzay Kulübü Başkan Yardımcısı (2019–2022):',
   );
   assert.equal(cvMessages.en.community('Mathematics Club', undefined, 'later university years'), 'Mathematics Club (later university years):');
   assert.equal(

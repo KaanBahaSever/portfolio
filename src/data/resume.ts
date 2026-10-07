@@ -162,7 +162,7 @@ export const EDUCATION: readonly EducationItem[] = [
 export const VOLUNTEERING: readonly ActivityItem[] = [
   {
     kind: 'volunteering',
-    title: { en: 'Istanbul University Rocket Club', tr: 'İstanbul Üniversitesi Roket Kulübü' },
+    title: { en: 'Istanbul University Rocket and Space Club', tr: 'İstanbul Üniversitesi Roket ve Uzay Kulübü' },
     role: { en: 'Vice President', tr: 'Başkan Yardımcısı' },
     start: '2019',
     end: '2022',
@@ -170,12 +170,14 @@ export const VOLUNTEERING: readonly ActivityItem[] = [
       en: [
         'With the club’s team, designed and built one low-altitude rocket (5,000 ft) and two high-altitude rockets (10,000 ft).',
         'Solely developed the flight avionics firmware and the parachute deployment control system, both driven by onboard sensor fusion of orientation, gyroscope and altimeter data.',
+        'With the team, researched Kalman filtering of the noisy sensor data, wrote the algorithms and tested them again and again; used PID controllers in experiments such as vertical landing.',
         'Designed the SD-card telemetry logging protocol that worked alongside the RF telemetry modules, and built a desktop dashboard that parses flight data and plots post-flight trajectories.',
       ],
       tr: [
         // Turkish groups thousands with a dot: 5.000 ft.
         'Kulüpteki ekibimizle bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik.',
         'Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrol sistemini tek başıma geliştirdim. İkisi de roketteki yönelim, jiroskop ve altimetre verilerini birleştiren sensör füzyonuyla çalışıyordu.',
+        'Ekip olarak, gürültülü sensör verisini bir Kalman filtresinden geçirmeyi araştırdık; algoritmalarını yazıp tekrar tekrar test ettik. Dikey iniş gibi deneylerde de PID kontrolcüleri kullandık.',
         'Telemetri verisini SD karta kaydetmek için bir protokol tasarladım; bu protokol RF telemetri modülleriyle birlikte çalışıyordu. Uçuş verisini ayrıştırıp uçuştan sonra yörüngeyi grafiğe döken bir masaüstü paneli de geliştirdim.',
       ],
     },

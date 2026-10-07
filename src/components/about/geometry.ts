@@ -1,9 +1,9 @@
 /**
  * Geometry behind the About page figures. Each figure is drawn from the model it illustrates
  * (a real Hohmann transfer, a real ground-station pass, a real placement count, a real minimax
- * search, a real cipher, an integrated flight profile, an integrated steering field, a network
- * of ideas and the people helping with them, a square tiled by odd numbers), so the pictures
- * stay honest when someone reads them closely.
+ * search, a real cipher, an integrated flight profile, a real Kalman filter and PID loop, an
+ * integrated steering field, a network of ideas and the people helping with them, a square tiled
+ * by odd numbers), so the pictures stay honest when someone reads them closely.
  *
  * Pure module: no DOM, no `astro:*` imports and erasable TypeScript only, so `node --test` can
  * load it. Coordinates are unitless model values; the figure components scale them to SVG.
@@ -400,6 +400,285 @@ export function burnForApogee(apogee: number, thrust: number, gravity: number): 
   }
   return Math.sqrt((2 * apogee) / (thrust * (1 + thrust / gravity)));
 }
+
+/* ------------------------------------------------------------------------------------------ */
+/* Kalman filtering: a good altitude estimate from noisy sensors                                */
+/* ------------------------------------------------------------------------------------------ */
+
+/**
+ * Mulberry32, a small seeded generator of uniform numbers in [0, 1). The figures need noise
+ * that looks random but is the same on every build, so the seed fixes it.
+ */
+export function seededRandom(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4_294_967_296;
+  };
+}
+
+/** Standard normal samples (mean 0, standard deviation 1) from a uniform source, by Box–Muller. */
+export function gaussian(random: () => number): () => number {
+  return () => {
+    // 1 − u lies in (0, 1], so the logarithm stays finite.
+    const u = 1 - random();
+    const v = random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  };
+}
+
+export interface IdealAscent {
+  /** Sample times, `step` apart, from lift-off to the last sample before apogee. */
+  time: number[];
+  /** True altitude and vertical velocity at each sample. */
+  altitude: number[];
+  velocity: number[];
+  /** The true acceleration over each interval between two samples (one fewer than the samples). */
+  acceleration: number[];
+}
+
+/**
+ * The ascent of flightProfile(): a net upward acceleration `thrust` until `burn`, then a coast
+ * under `gravity`, sampled every `step` up to apogee. The acceleration is constant within each
+ * interval (the burn should end on a sample), so stepping with it is exact.
+ */
+export function idealAscent(options: { thrust: number; burn: number; gravity: number; step: number }): IdealAscent {
+  const { thrust, burn, gravity, step } = options;
+  for (const [name, value] of [
+    ['thrust', thrust],
+    ['burn', burn],
+    ['gravity', gravity],
+    ['step', step],
+  ] as const) {
+    if (!(Number.isFinite(value) && value > 0)) {
+      throw new RangeError(`idealAscent: ${name} must be a positive finite number, got ${value}`);
+    }
+  }
+  const time = [0];
+  const altitude = [0];
+  const velocity = [0];
+  const acceleration: number[] = [];
+  for (let i = 1; i <= 100_000; i++) {
+    const a = (i - 0.5) * step < burn ? thrust : -gravity;
+    const v0 = velocity[i - 1] ?? 0;
+    const v1 = v0 + a * step;
+    // Apogee falls between samples, or on one: rounding can leave the velocity a hair either
+    // side of zero there, so a sample at apogee itself is kept.
+    if (v1 < -1e-9) return { time, altitude, velocity, acceleration };
+    acceleration.push(a);
+    altitude.push((altitude[i - 1] ?? 0) + v0 * step + 0.5 * a * step * step);
+    velocity.push(v1);
+    time.push(i * step);
+    if (v1 <= 1e-9) return { time, altitude, velocity, acceleration };
+  }
+  throw new RangeError('idealAscent: no apogee within 100 000 steps');
+}
+
+export interface KalmanOptions {
+  /** Time between samples. */
+  step: number;
+  /** True altitude at each sample, and the true acceleration over each interval (one fewer). */
+  altitude: readonly number[];
+  acceleration: readonly number[];
+  /** Standard deviation of the altimeter's noise: R = σ_z². */
+  altimeterNoise: number;
+  /** Standard deviation of the accelerometer's noise, which sets the process noise Q. */
+  accelerometerNoise: number;
+  /** Seed of the noise, so a build always draws the same readings. */
+  seed: number;
+}
+
+export interface KalmanTrack {
+  /** The altimeter readings: the true altitude plus noise. */
+  measured: number[];
+  /** The filter's altitude estimate after each reading. */
+  estimate: number[];
+  /** The gain on altitude: how far each estimate moved towards its reading (0 to 1). */
+  gain: number[];
+}
+
+/**
+ * A Kalman filter that estimates altitude h and vertical velocity v from two noisy sensors, the
+ * way rocket altimeters fuse them. Predict: step the state forward with the accelerometer's
+ * reading a (h ← h + v·Δt + ½a·Δt², v ← v + a·Δt), and grow the uncertainty P ← F P Fᵀ + Q, where
+ * Q = σ_a² G Gᵀ with G = (½Δt², Δt) because the accelerometer's noise enters the same way a is.
+ * Update: compare the altimeter's reading z with the predicted altitude, and move by the Kalman
+ * gain K = P Hᵀ / (H P Hᵀ + R) times the difference: x̂ ← x̂ + K (z − h). A reading the filter
+ * trusts more than its own prediction gets a gain closer to 1. The filter starts from the first
+ * reading, at rest.
+ */
+export function kalmanAltitude(options: KalmanOptions): KalmanTrack {
+  const { step: dt, altitude, acceleration, altimeterNoise, accelerometerNoise, seed } = options;
+  for (const [name, value] of [
+    ['step', dt],
+    ['altimeterNoise', altimeterNoise],
+    ['accelerometerNoise', accelerometerNoise],
+  ] as const) {
+    if (!(Number.isFinite(value) && value > 0)) {
+      throw new RangeError(`kalmanAltitude: ${name} must be a positive finite number, got ${value}`);
+    }
+  }
+  if (altitude.length === 0 || acceleration.length !== altitude.length - 1) {
+    throw new RangeError('kalmanAltitude: give one acceleration for each interval between altitudes');
+  }
+  const noise = gaussian(seededRandom(seed));
+  const R = altimeterNoise ** 2;
+  const q = accelerometerNoise ** 2;
+  const g0 = 0.5 * dt * dt;
+  const g1 = dt;
+  // Q = q G Gᵀ.
+  const Q = [q * g0 * g0, q * g0 * g1, q * g1 * g1] as const;
+
+  const first = (altitude[0] ?? 0) + altimeterNoise * noise();
+  let h = first;
+  let v = 0;
+  // The symmetric covariance P = [[p00, p01], [p01, p11]]: as unsure as one reading about h,
+  // and about one unit per time unit about v.
+  let p00 = R;
+  let p01 = 0;
+  let p11 = 1;
+  const measured = [first];
+  const estimate = [first];
+  const gain = [1];
+
+  for (let k = 1; k < altitude.length; k++) {
+    // Predict with the accelerometer's reading over the last interval.
+    const a = (acceleration[k - 1] ?? 0) + accelerometerNoise * noise();
+    h += v * dt + 0.5 * a * dt * dt;
+    v += a * dt;
+    // F P Fᵀ with F = [[1, Δt], [0, 1]], plus Q.
+    const n00 = p00 + 2 * dt * p01 + dt * dt * p11 + Q[0];
+    const n01 = p01 + dt * p11 + Q[1];
+    const n11 = p11 + Q[2];
+
+    // Update with the altimeter (H = [1, 0]).
+    const z = (altitude[k] ?? 0) + altimeterNoise * noise();
+    const s = n00 + R;
+    const k0 = n00 / s;
+    const k1 = n01 / s;
+    const innovation = z - h;
+    h += k0 * innovation;
+    v += k1 * innovation;
+    // P ← (I − K H) P.
+    p00 = (1 - k0) * n00;
+    p01 = (1 - k0) * n01;
+    p11 = n11 - k1 * n01;
+
+    measured.push(z);
+    estimate.push(h);
+    gain.push(k0);
+  }
+  return { measured, estimate, gain };
+}
+
+/** Root-mean-square difference between two equally long series. */
+export function rmsError(actual: readonly number[], expected: readonly number[]): number {
+  if (actual.length === 0 || actual.length !== expected.length) {
+    throw new RangeError('rmsError: the series must be non-empty and equally long');
+  }
+  const sum = actual.reduce((total, value, i) => total + (value - (expected[i] ?? 0)) ** 2, 0);
+  return Math.sqrt(sum / actual.length);
+}
+
+/* ------------------------------------------------------------------------------------------ */
+/* PID control: holding a height on an engine's thrust                                          */
+/* ------------------------------------------------------------------------------------------ */
+
+export interface PidOptions {
+  /** The three gains: proportional, integral and derivative. */
+  kp: number;
+  ki: number;
+  kd: number;
+  /** Downward acceleration of gravity, and the largest upward acceleration the engine can give. */
+  gravity: number;
+  maxThrust: number;
+  /** Starting height (at rest) and the target height. */
+  start: number;
+  target: number;
+  /** Controller and simulation step, and how long to run. */
+  step: number;
+  duration: number;
+}
+
+export interface PidResponse {
+  /** Height and thrust at each step (time = index × step). */
+  height: number[];
+  thrust: number[];
+}
+
+/**
+ * A toy vertical landing: a rocket held up by an engine whose thrust (an upward acceleration
+ * between 0 and `maxThrust`) a discrete PID controller sets every `step`, starting at rest at
+ * `start` and asked to hold `target`. With error e = target − h, the controller commands
+ * Kp·e (how far off it is now) + Ki·Σe·Δt (how long it has been off) + Kd·Δe/Δt (how fast the
+ * error is changing). The plant is h'' = thrust − gravity, stepped with semi-implicit Euler.
+ * While the thrust is pinned at a limit the error is not added up (anti-windup), so the
+ * integral does not grow without bound during the initial fall.
+ *
+ * Without the integral term (ki = 0) the rocket settles gravity / kp below the target: only an
+ * error can then hold up its weight. The integral term builds up that thrust and removes it.
+ */
+export function pidDescent(options: PidOptions): PidResponse {
+  const { kp, ki, kd, gravity, maxThrust, start, target, step: dt, duration } = options;
+  for (const [name, value] of [
+    ['step', dt],
+    ['duration', duration],
+    ['maxThrust', maxThrust],
+  ] as const) {
+    if (!(Number.isFinite(value) && value > 0)) {
+      throw new RangeError(`pidDescent: ${name} must be a positive finite number, got ${value}`);
+    }
+  }
+  if (!(maxThrust > gravity)) throw new RangeError('pidDescent: the engine must be able to lift the rocket');
+  let h = start;
+  let v = 0;
+  let integral = 0;
+  let previous = target - start;
+  const height = [h];
+  const thrust: number[] = [];
+  const steps = Math.round(duration / dt);
+  for (let i = 0; i < steps; i++) {
+    const error = target - h;
+    const derivative = (error - previous) / dt;
+    previous = error;
+    // Add the error up only when doing so keeps the command within the engine's range.
+    const trial = kp * error + ki * (integral + error * dt) + kd * derivative;
+    if (trial >= 0 && trial <= maxThrust) integral += error * dt;
+    const command = Math.min(maxThrust, Math.max(0, kp * error + ki * integral + kd * derivative));
+    v += (command - gravity) * dt;
+    h += v * dt;
+    thrust.push(command);
+    height.push(h);
+  }
+  thrust.push(thrust.at(-1) ?? 0);
+  return { height, thrust };
+}
+
+/**
+ * The control figure's two models, in model units: the ascent of the avionics figure's 10,000 ft
+ * flight (apogee 10 at t = 5), read by an altimeter with noise σ_z = 0.7 and an accelerometer
+ * with σ_a = 0.3; and a rocket that starts at rest at height 10 and must hold height 4, under
+ * gravity 2 with an engine that gives at most 5, with PID gains from a triple closed-loop pole
+ * at −0.8 (Kp = 3·0.8², Ki = 0.8³, Kd = 3·0.8) on the linear model. Illustrations, not flight data.
+ */
+export const CONTROL_FIGURE = {
+  ascent: { thrust: 4, burn: 1, gravity: 1, step: 0.2 },
+  kalman: { altimeterNoise: 0.7, accelerometerNoise: 0.3, seed: 2019 },
+  pid: {
+    kp: 3 * 0.8 ** 2,
+    ki: 0.8 ** 3,
+    kd: 3 * 0.8,
+    gravity: 2,
+    maxThrust: 5,
+    start: 10,
+    target: 4,
+    step: 0.05,
+    duration: 16,
+  },
+} as const;
 
 /* ------------------------------------------------------------------------------------------ */
 /* Parachute guidance: a steering field that converges on the landing target                    */

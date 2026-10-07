@@ -16,6 +16,7 @@ export const JOURNEY_CHAPTERS = [
   'algorithms',
   'research',
   'avionics',
+  'control',
   'guidance',
   'simulation',
   'cubesat',
@@ -99,7 +100,7 @@ const en = {
       avionics: {
         short: 'Rocketry',
         /** Follows the period (2019 – 2022). */
-        label: 'Rocket Club',
+        label: 'Rocket and Space Club',
         title: 'Rocketry and flight avionics',
         caption:
           'The two altitude classes on one scale, as idealised flights: one low-altitude rocket with a 5,000 ft target altitude and two high-altitude rockets with a 10,000 ft target. Apogee is where dh/dt = 0; the dots stand for logged telemetry samples.',
@@ -109,6 +110,15 @@ const en = {
           /** How many of the club's rockets were built for that altitude. */
           rockets: (n: number) => (n === 1 ? '1 rocket' : `${n} rockets`),
         },
+      },
+      control: {
+        short: 'Kalman and PID',
+        // The same club and years as the rocketry chapter; no exact dates, so no period is rendered.
+        label: 'Rocket and Space Club · Kalman · PID',
+        title: 'From noisy data to a good estimate: Kalman filters and PID',
+        /** Both models are illustrations (geometry.ts, CONTROL_FIGURE): say so first. */
+        caption:
+          'An illustration, not the club’s flight data. Left: an idealised ascent (thin line), noisy altimeter readings (dots) and a Kalman filter’s estimate (highlighted line). The filter also uses a noisy accelerometer, and its estimate stays much closer to the true altitude than the readings do. Right: a simple model of a vertical landing. The rocket starts high up and has to hover at the target height (dashed) using its engine. With PID it first drops a little below the target, then settles on it. Without the integral term (PD) it stays below the target, because nothing builds up the thrust that carries the rocket’s weight.',
       },
       guidance: {
         short: 'Parachute guidance',
@@ -127,7 +137,7 @@ const en = {
       cubesat: {
         short: 'CubeSat',
         // The club's last period, which ended in 2022; no exact dates, so no period is rendered.
-        label: 'Rocket Club · CubeSat',
+        label: 'Rocket and Space Club · CubeSat',
         title: 'CubeSat: the satellite we could not finish',
         /** The length of an overhead pass in minutes, already formatted ("6"). */
         caption: (minutes: string) =>
@@ -243,7 +253,7 @@ const tr: AboutMessages = {
       },
       avionics: {
         short: 'Roketçilik',
-        label: 'Roket Kulübü',
+        label: 'Roket ve Uzay Kulübü',
         title: 'Roketçilik ve uçuş aviyoniği',
         caption:
           'İki irtifa sınıfı aynı ölçekte, ideal uçuşlarla gösteriliyor: hedef irtifası 5.000 ft olan bir alçak irtifa roketi ve hedefi 10.000 ft olan iki yüksek irtifa roketi. Tepe noktası, roketin yükselmeyi bıraktığı yerdir (dh/dt = 0). Noktalar, kaydedilen telemetri ölçümlerini temsil ediyor.',
@@ -251,6 +261,14 @@ const tr: AboutMessages = {
           feet: (value) => `${value} ft`,
           rockets: (n) => `${n} roket`,
         },
+      },
+      control: {
+        short: 'Kalman ve PID',
+        label: 'Roket ve Uzay Kulübü · Kalman · PID',
+        title: 'Gürültülü veriden doğru tahmine: Kalman filtresi ve PID',
+        // "İtki" is the rocketry word for thrust; "havada asılı kalmak" for hovering.
+        caption:
+          'Bu bir örnek çizim; kulübün uçuş verisi değil. Solda ideal bir yükseliş (ince çizgi), gürültülü altimetre ölçümleri (noktalar) ve Kalman filtresinin tahmini (vurgulu çizgi) var. Filtre gürültülü bir ivmeölçerden de yararlanıyor ve tahmini gerçek irtifaya ölçümlerden çok daha yakın kalıyor. Sağda basit bir dikey iniş modeli var: Roket yüksekten başlıyor ve motoruyla hedef yükseklikte (kesikli çizgi) havada asılı kalmaya çalışıyor. PID ile önce hedefin biraz altına iniyor, sonra hedefe oturuyor. İntegral terimi olmadan (PD) hedefin altında kalıyor, çünkü roketin ağırlığını taşıyacak itkiyi zamanla biriktiren bir şey yok.',
       },
       guidance: {
         short: 'Paraşüt güdümü',
@@ -268,7 +286,7 @@ const tr: AboutMessages = {
       },
       cubesat: {
         short: 'CubeSat',
-        label: 'Roket Kulübü · CubeSat',
+        label: 'Roket ve Uzay Kulübü · CubeSat',
         title: 'CubeSat: bitiremediğimiz uydu',
         // The number sits before a fixed noun ("dakika"), so no suffix depends on how it is read.
         caption: (minutes) =>

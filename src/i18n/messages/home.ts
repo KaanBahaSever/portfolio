@@ -20,7 +20,7 @@ export type JourneyChapter = (typeof JOURNEY_CHAPTERS)[number];
 
 interface Chapter {
   title: string;
-  /** Mono line under the title: when and with what ("2019 – 2022 · Rocket Club"). */
+  /** Mono line under the title: when and with what ("2019 – 2022 · Rocket and Space Club"). */
   meta: string;
   text: string;
 }
@@ -68,8 +68,10 @@ const en = {
       },
       avionics: {
         title: 'Rocket avionics',
-        meta: '2019 – 2022 · Rocket Club',
-        text: 'At the Istanbul University Rocket Club, our team designed and built one low-altitude (5,000 ft) and two high-altitude (10,000 ft) rockets. I was the sole author of the flight avionics firmware and the parachute deployment control, and designed the telemetry logging.',
+        // No-break spaces in the club's name (here and in Turkish): on a narrow card the line breaks
+        // after the dot, not inside the name.
+        meta: '2019 – 2022 · Rocket and Space Club',
+        text: 'At the Istanbul University Rocket and Space Club, our team designed and built one low-altitude (5,000 ft) and two high-altitude (10,000 ft) rockets. I was the sole author of the flight avionics firmware and the parachute deployment control, and designed the telemetry logging. We also researched Kalman filters for the sensor data and used PID controllers in our experiments.',
       },
       guidance: {
         title: 'Autonomous parachute guidance',
@@ -170,8 +172,8 @@ const tr: HomeMessages = {
       },
       avionics: {
         title: 'Roket aviyoniği',
-        meta: '2019 – 2022 · Roket Kulübü',
-        text: 'İstanbul Üniversitesi Roket Kulübünde ekip olarak bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik. Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrolünü tek başıma yazdım. Telemetri kaydını da ben tasarladım.',
+        meta: '2019 – 2022 · Roket ve Uzay Kulübü',
+        text: 'İstanbul Üniversitesi Roket ve Uzay Kulübünde ekip olarak bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi tasarlayıp ürettik. Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrolünü tek başıma yazdım. Telemetri kaydını da ben tasarladım. Sensör verisi için Kalman filtrelerini araştırdık, deneylerimizde de PID kontrolcüleri kullandık.',
       },
       guidance: {
         title: 'Otonom paraşüt güdümü',

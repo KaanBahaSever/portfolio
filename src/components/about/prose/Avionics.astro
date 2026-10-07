@@ -1,9 +1,11 @@
 ---
 /**
- * Journey chapter 4: university (November 2019), the Istanbul University Rocket Club and the
- * flight avionics. The team designed and built three rockets: one low-altitude (5,000 ft) and
- * two high-altitude (10,000 ft). Do not claim launches or flight results beyond that.
+ * Journey chapter 4: university (November 2019), the Istanbul University Rocket and Space Club
+ * and the flight avionics. The team designed and built three rockets: one low-altitude (5,000 ft)
+ * and two high-altitude (10,000 ft). Do not claim launches or flight results beyond that. The
+ * Kalman filter and PID work has its own chapter next (#journey-control); one sentence points there.
  */
+import { ui } from '../../ui/styles';
 import { getLocale } from '../../../i18n/server';
 
 const locale = getLocale(Astro);
@@ -13,14 +15,16 @@ const locale = getLocale(Astro);
   locale === 'tr' ? (
     <>
       <p>
-        Kasım 2019’da üniversiteye başladım ve İstanbul Üniversitesi Roket Kulübüne katıldım. 2022’ye kadar kulübün
-        başkan yardımcısıydım. Ekip olarak üç roket tasarlayıp ürettik. Biri, hedef irtifası 5.000 ft olan alçak irtifa
-        roketiydi; diğer ikisi ise hedef irtifası 10.000 ft olan yüksek irtifa roketleriydi.
+        Kasım 2019’da üniversiteye başladım ve İstanbul Üniversitesi Roket ve Uzay Kulübüne katıldım. 2022’ye
+        kadar kulübün başkan yardımcısıydım. Ekip olarak üç roket tasarlayıp ürettik. Biri, hedef irtifası 5.000 ft
+        olan alçak irtifa roketiydi; diğer ikisi ise hedef irtifası 10.000 ft olan yüksek irtifa roketleriydi.
       </p>
       <p>
         Uçuş aviyoniğinin gömülü yazılımı ve paraşüt açma kontrol sistemi tamamen benim sorumluluğumdaydı. İki sistem de
         sensör füzyonuna dayanıyordu; yani roketteki sensörlerden gelen yönelim, jiroskop ve altimetre verilerini
-        birleştirerek çalışıyordu.
+        birleştirerek çalışıyordu. Bu gürültülü veriden Kalman filtresiyle nasıl iyi bir tahmin çıkardığımızı ve
+        PID kontrolcülerini nerede kullandığımızı <a href="#journey-control" class={ui.inlineLink}>sonraki bölümde</a>
+        anlatıyorum.
       </p>
       <p>
         Telemetrinin SD karta nasıl kaydedileceğini belirleyen protokolleri de ben tasarladım. SD karttaki kayıt,
@@ -31,13 +35,15 @@ const locale = getLocale(Astro);
   ) : (
     <>
       <p>
-        I started university in November 2019 and joined the Istanbul University Rocket Club, where I was Vice
-        President until 2022. Our team designed and built three rockets: one low-altitude rocket with a 5,000 ft target
-        altitude and two high-altitude rockets with a 10,000 ft target.
+        I started university in November 2019 and joined the Istanbul University Rocket and Space Club, where I was
+        Vice President until 2022. Our team designed and built three rockets: one low-altitude rocket with a 5,000 ft
+        target altitude and two high-altitude rockets with a 10,000 ft target.
       </p>
       <p>
         I was solely responsible for the flight avionics firmware and the parachute deployment control system. Both
-        relied on onboard sensor fusion of orientation, gyroscope and altimeter telemetry.
+        relied on onboard sensor fusion of orientation, gyroscope and altimeter telemetry. How we got a good estimate
+        out of that noisy data with a Kalman filter, and where we used PID controllers, is told in
+        <a href="#journey-control" class={ui.inlineLink}>the next chapter</a>.
       </p>
       <p>
         I also designed the protocols for logging telemetry to an SD card, which worked alongside the RF telemetry

@@ -99,7 +99,7 @@ test('the résumé never calls the owner an engineer, in either language', () =>
 test('volunteering carries the current facts', () => {
   const byTitle = (title: string) => VOLUNTEERING.find((item) => resumeText(item.title, 'en') === title);
 
-  const rockets = byTitle('Istanbul University Rocket Club');
+  const rockets = byTitle('Istanbul University Rocket and Space Club');
   assert.ok(rockets && isDated(rockets));
   assert.deepEqual([rockets.start, rockets.end], ['2019', '2022']);
   assert.match(rockets.highlights.en.join(' '), /one low-altitude rocket \(5,000 ft\) and two high-altitude rockets \(10,000 ft\)/);

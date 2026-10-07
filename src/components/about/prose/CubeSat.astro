@@ -1,12 +1,12 @@
 ---
 /**
- * Journey chapter 7: the CubeSat the Istanbul University Rocket Club set out to build in its
- * last period (the club broke up in 2022). Per-locale prose, in the owner's words: a satellite
- * that follows the CubeSat standard, a NASA PDF guide for CubeSat developers (do not name the
- * document or a CubeSat size), research on the solar panels, the onboard software and the
- * ground station software; his part was to program the ground station and the boards inside
- * the satellite. Budget cuts and the club breaking up left it unfinished. Add no dates, results
- * or other roles.
+ * Journey chapter 8: the CubeSat the Istanbul University Rocket and Space Club set out to build
+ * in its last period (the club broke up in 2022). Per-locale prose, in the owner's words: a
+ * satellite that follows the CubeSat standard, a NASA PDF guide for CubeSat developers (do not
+ * name the document or a CubeSat size), research on the solar panels, the onboard software and
+ * the ground station software. His part: programming the boards inside the satellite and, on
+ * top of that, writing the ground station software, a dashboard running on a computer. Budget
+ * cuts and the club breaking up left it unfinished. Add no dates, results or other roles.
  */
 import { getLocale } from '../../../i18n/server';
 
@@ -17,14 +17,15 @@ const locale = getLocale(Astro);
   locale === 'tr' ? (
     <>
       <p>
-        Roket Kulübünün son döneminde bir CubeSat, yani küçük bir küp uydu geliştirmeye karar verdik. Uydumuz
-        CubeSat standardının bütün kurallarına uyacaktı. NASA’nın CubeSat geliştirenler için hazırladığı bir PDF
-        rehber vardı ve ondan çok şey öğrendik: nasıl lehim yapılacağını, fırlatmaya hazır bir CubeSat’ın nasıl
+        Roket ve Uzay Kulübünün son döneminde bir CubeSat, yani küçük bir küp uydu geliştirmeye karar verdik.
+        Uydumuz CubeSat standardının bütün kurallarına uyacaktı. NASA’nın CubeSat geliştirenler için hazırladığı bir
+        PDF rehber vardı ve ondan çok şey öğrendik: nasıl lehim yapılacağını, fırlatmaya hazır bir CubeSat’ın nasıl
         tasarlanacağını.
       </p>
       <p>
         Çok araştırdık. Güneş panellerini, uydunun içinde çalışacak yazılımı, hatta yer istasyonu yazılımını tek tek
-        düşünüp tasarladık. Yer istasyonunu ve uydunun içindeki kartları ben programlayacaktım.
+        düşünüp tasarladık. Uydunun içindeki kartları ben programlayacaktım. Bir de yer istasyonu yazılımını, yani
+        bir bilgisayarda çalışacak bir kontrol panelini (<span lang="en">dashboard</span>) ben yazacaktım.
       </p>
       <p>
         Ama bütçe kesintileri ve kulübün dağılması yüzünden proje yarım kaldı. Çok güzel bir projeydi; ne
@@ -34,14 +35,14 @@ const locale = getLocale(Astro);
   ) : (
     <>
       <p>
-        Towards the end of the Rocket Club, we decided to build a CubeSat, a small cube-shaped satellite. Ours was to
-        follow every rule of the CubeSat standard. NASA had a PDF guide for CubeSat developers, and we learned a lot
-        from it: how to solder, and how to design a CubeSat that is ready for launch.
+        Towards the end of the Rocket and Space Club, we decided to build a CubeSat, a small cube-shaped satellite.
+        Ours was to follow every rule of the CubeSat standard. NASA had a PDF guide for CubeSat developers, and we
+        learned a lot from it: how to solder, and how to design a CubeSat that is ready for launch.
       </p>
       <p>
         We did a lot of research. We thought through and designed the solar panels, the software that would run
-        inside the satellite and even the ground station software. I was going to program the ground station and the
-        boards inside the satellite.
+        inside the satellite and even the ground station software. I was going to program the boards inside the
+        satellite, and also write the ground station software: a dashboard running on a computer.
       </p>
       <p>
         But budget cuts and the club breaking up left the project half-finished. It was a really good project; we just

@@ -71,7 +71,7 @@ test('the sources were found', () => {
 
 test('suffixes on institution names are not split off with an apostrophe (TDK)', () => {
   // TDK: "Kurum, kuruluş ve iş yeri adlarına gelen ekler kesme işaretiyle ayrılmaz", so
-  // "İstanbul Üniversitesinde", "Roket Kulübünün", as on the home page and in the console.
+  // "İstanbul Üniversitesinde", "Roket ve Uzay Kulübünün", as on the home page and in the console.
   const split = /(Üniversitesi|Kulübü|Fakültesi|Vakfı|Kurumu|Derneği|Enstitüsü|Bakanlığı)[’']\p{Ll}/u;
   for (const { path, text } of turkishSources) {
     const match = split.exec(text);
@@ -182,8 +182,8 @@ test('the crowd.inc chapter and about.txt open with what the site was, in the sa
     en: [flat(work.slice(split))],
     tr: [flat(work.slice(work.indexOf("locale === 'tr' ? ("), split))],
   };
-  // The timeline entry sits on the same page, right under the chapters: like the Rocket Club
-  // entry, it stays short and points to the chapter instead of repeating it.
+  // The timeline entry sits on the same page, right under the chapters: like the Rocket and Space
+  // Club entry, it stays short and points to the chapter instead of repeating it.
   for (const path of ['src/content/timeline/2021-crowd-inc.md', 'src/content/tr/timeline/2021-crowd-inc.md']) {
     const entry = flat(file(path).text);
     assert.match(entry, /hundreds of users|yüzlerce kullanıcısı/, path);

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 
 import {
+  CONTROL_FIGURE,
   CUBESAT_ALTITUDE,
   EARTH_MEAN_RADIUS,
   EARTH_MU,
@@ -18,17 +19,23 @@ import {
   curvePoint,
   densestCell,
   flightProfile,
+  gaussian,
   gnomons,
   hohmannTransfer,
+  idealAscent,
   ideaNetwork,
   insideRect,
   integrateTrajectory,
+  kalmanAltitude,
   linePath,
   minimax,
   orbitalPeriod,
   overheadPass,
+  pidDescent,
   placementDensity,
+  rmsError,
   sCurve,
+  seededRandom,
   steer,
   steeringDirection,
   visibleHalfAngle,
@@ -235,6 +242,118 @@ test('integrateTrajectory lands on the ground and drifts with the crosswind', ()
   assert.equal(positions.at(-1)!.z, 0);
   assert.ok(positions.at(-1)!.y > 0);
   assert.ok(Math.max(...positions.map((p) => p.z)) > 3);
+});
+
+/* The Kalman and PID figure: an altitude estimate from noisy sensors, and a toy vertical landing. */
+
+const ascent = idealAscent(CONTROL_FIGURE.ascent);
+const kalmanRun = (seed: number) =>
+  kalmanAltitude({
+    step: CONTROL_FIGURE.ascent.step,
+    altitude: ascent.altitude,
+    acceleration: ascent.acceleration,
+    ...CONTROL_FIGURE.kalman,
+    seed,
+  });
+
+test('seededRandom and gaussian: the same seed gives the same noise, with the right spread', () => {
+  const a = seededRandom(7);
+  const b = seededRandom(7);
+  const first = Array.from({ length: 5 }, a);
+  assert.deepEqual(first, Array.from({ length: 5 }, b));
+  assert.notDeepEqual(first, Array.from({ length: 5 }, seededRandom(8)));
+  assert.ok(first.every((u) => u >= 0 && u < 1));
+  const normal = gaussian(seededRandom(1));
+  const samples = Array.from({ length: 20_000 }, normal);
+  const mean = samples.reduce((sum, x) => sum + x, 0) / samples.length;
+  const variance = samples.reduce((sum, x) => sum + (x - mean) ** 2, 0) / samples.length;
+  close(mean, 0, 0.03, 'mean');
+  close(Math.sqrt(variance), 1, 0.03, 'standard deviation');
+});
+
+test('idealAscent follows the avionics figure’s 10,000 ft flight up to apogee', () => {
+  // Thrust 4 for one time unit, then a coast under gravity 1: apogee 10 at t = 5, as in flightProfile().
+  assert.equal(ascent.time.length, ascent.altitude.length);
+  assert.equal(ascent.acceleration.length, ascent.altitude.length - 1);
+  close(ascent.time.at(-1)!, 5, 1e-9, 'apogee time');
+  close(ascent.altitude.at(-1)!, 10, 1e-9, 'apogee');
+  close(ascent.velocity.at(-1)!, 0, 1e-9, 'at rest at apogee');
+  const profile = flightProfile({ thrust: 4, burn: 1, gravity: 1, descentRate: 1.1, tau: 0.8, step: 0.2 });
+  ascent.altitude.forEach((h, i) => close(h, profile.samples[i]!.y, 1e-9, `sample ${i}`));
+  // Burn-out at t = 1: ½·4·1² = 2 high.
+  close(ascent.altitude[5]!, 2, 1e-9, 'burn-out height');
+  assert.throws(() => idealAscent({ ...CONTROL_FIGURE.ascent, step: 0 }), RangeError);
+});
+
+test('kalmanAltitude: the estimate is much closer to the true altitude than the readings', () => {
+  const track = kalmanRun(CONTROL_FIGURE.kalman.seed);
+  assert.equal(track.measured.length, ascent.altitude.length);
+  assert.equal(track.estimate.length, ascent.altitude.length);
+  const raw = rmsError(track.measured, ascent.altitude);
+  const filtered = rmsError(track.estimate, ascent.altitude);
+  // The readings scatter about as much as the altimeter's noise (σ_z = 0.7)…
+  assert.ok(raw > 0.45 && raw < 1, `readings: RMS error ${raw}`);
+  // …and the figure's estimate has less than half that error.
+  assert.ok(filtered < 0.5 * raw, `estimate: RMS error ${filtered} against ${raw}`);
+  // Not a lucky seed: averaged over many noise draws, the filter still roughly halves the error.
+  const ratios = Array.from({ length: 100 }, (_, i) => {
+    const run = kalmanRun(i + 1);
+    return rmsError(run.estimate, ascent.altitude) / rmsError(run.measured, ascent.altitude);
+  });
+  const meanRatio = ratios.reduce((sum, r) => sum + r, 0) / ratios.length;
+  assert.ok(meanRatio < 0.6, `mean ratio ${meanRatio}`);
+  // The gain starts at 1 (the first reading is all it has) and falls as the filter grows sure.
+  assert.equal(track.gain[0], 1);
+  assert.ok(track.gain.slice(1).every((k) => k > 0 && k < 1));
+  assert.ok(track.gain.at(-1)! < track.gain[1]!);
+});
+
+test('kalmanAltitude is deterministic, follows the truth when the sensors are exact, and refuses bad input', () => {
+  assert.deepEqual(kalmanRun(2019), kalmanRun(2019));
+  assert.notDeepEqual(kalmanRun(2019).measured, kalmanRun(2020).measured);
+  const exact = kalmanAltitude({
+    step: CONTROL_FIGURE.ascent.step,
+    altitude: ascent.altitude,
+    acceleration: ascent.acceleration,
+    altimeterNoise: 1e-9,
+    accelerometerNoise: 1e-9,
+    seed: 1,
+  });
+  assert.ok(rmsError(exact.estimate, ascent.altitude) < 1e-6);
+  const base = { step: 0.2, altitude: [0, 1], acceleration: [1], altimeterNoise: 1, accelerometerNoise: 1, seed: 1 };
+  assert.throws(() => kalmanAltitude({ ...base, acceleration: [] }), RangeError);
+  assert.throws(() => kalmanAltitude({ ...base, altimeterNoise: 0 }), RangeError);
+  assert.throws(() => rmsError([1], [1, 2]), RangeError);
+});
+
+test('pidDescent: PID settles on the target height, PD settles gravity / Kp short of it', () => {
+  const { pid } = CONTROL_FIGURE;
+  const full = pidDescent(pid);
+  assert.equal(full.height.length, Math.round(pid.duration / pid.step) + 1);
+  assert.equal(full.height[0], pid.start);
+  // The rocket never comes near the ground (h = 0), and the engine stays within its range.
+  assert.ok(Math.min(...full.height) > 1, `lowest point ${Math.min(...full.height)}`);
+  assert.ok(full.thrust.every((u) => u >= 0 && u <= pid.maxThrust));
+  // It dips below the target before the integral term has built up the thrust that holds it…
+  assert.ok(Math.min(...full.height) < pid.target - 0.5);
+  // …and over the last second it stays within 0.02 of the target, its thrust balancing gravity.
+  for (const h of full.height.slice(-Math.round(1 / pid.step))) close(h, pid.target, 0.02, 'settled height');
+  close(full.thrust.at(-1)!, pid.gravity, 0.02, 'hover thrust');
+  // Without the integral term the error itself has to hold up the weight: it settles g / Kp below.
+  const pd = pidDescent({ ...pid, ki: 0 });
+  close(pd.height.at(-1)!, pid.target - pid.gravity / pid.kp, 0.01, 'PD offset');
+  assert.ok(pid.target - pd.height.at(-1)! > 0.8, 'the offset is large enough to see in the figure');
+  // Deterministic, and it refuses an engine that cannot lift the rocket.
+  assert.deepEqual(pidDescent(pid), full);
+  assert.throws(() => pidDescent({ ...pid, maxThrust: 1 }), RangeError);
+  assert.throws(() => pidDescent({ ...pid, step: 0 }), RangeError);
+});
+
+test('the Kalman and PID caption says first that it is an illustration, not club data', () => {
+  assert.match(aboutMessages.en.journey.chapters.control.caption, /^An illustration, not the club’s flight data\. /);
+  assert.match(aboutMessages.tr.journey.chapters.control.caption, /^Bu bir örnek çizim; kulübün uçuş verisi değil\. /);
+  // The chapter follows the rocketry chapter.
+  assert.equal(JOURNEY_CHAPTERS.indexOf('control'), JOURNEY_CHAPTERS.indexOf('avionics') + 1);
 });
 
 /* The crowd.inc figure: a network of ideas and the people who help with them. */
@@ -487,7 +606,7 @@ test('every journey chapter has text in both locales, in the order JOURNEY_CHAPT
     }
   }
   // Keys the home page and the timeline link to (#journey-<key>) must stay.
-  for (const key of ['space', 'algorithms', 'avionics', 'guidance', 'simulation', 'cubesat', 'work', 'core'] as const) {
+  for (const key of ['space', 'algorithms', 'avionics', 'control', 'guidance', 'simulation', 'cubesat', 'work', 'core'] as const) {
     assert.ok(JOURNEY_CHAPTERS.includes(key), key);
   }
   // The CubeSat comes right after the flight simulation.

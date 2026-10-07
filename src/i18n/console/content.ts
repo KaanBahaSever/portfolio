@@ -37,7 +37,7 @@ const en = {
     ),
     blank(),
     text(
-      'Before that: software developer at crowd.inc (2021–2024), an idea-sharing platform with hundreds of users; and Vice President of the Istanbul University Rocket Club (2019–2022), where our team built three rockets and I wrote the flight avionics firmware.',
+      'Before that: software developer at crowd.inc (2021–2024), an idea-sharing platform with hundreds of users; and Vice President of the Istanbul University Rocket and Space Club (2019–2022), where our team built three rockets and I wrote the flight avionics firmware.',
     ),
     blank(),
     text(dim('Next: '), run('cat about.txt'), '  ', run('projects'), '  ', run('ls skills')),
@@ -76,11 +76,15 @@ const en = {
     heading('Rockets'),
     indented(
       2,
-      'Istanbul University Rocket Club — Vice President, 2019–2022. Our team designed and built three rockets: one low-altitude (5,000 ft) and two high-altitude (10,000 ft).',
+      'Istanbul University Rocket and Space Club — Vice President, 2019–2022. Our team designed and built three rockets: one low-altitude (5,000 ft) and two high-altitude (10,000 ft).',
     ),
     indented(
       2,
       'Wrote the flight avionics firmware and the parachute deployment control system on my own, using onboard sensor fusion of orientation, gyroscope and altimeter data. Designed the SD-card telemetry logging protocols, alongside the RF telemetry transmission modules, and built a desktop dashboard that parses flight data and plots the trajectory after each flight.',
+    ),
+    indented(
+      2,
+      'With the team, researched passing the noisy sensor data through a Kalman filter, then wrote the algorithms and tested them again and again. Used PID controllers in experiments such as vertical landing.',
     ),
     blank(),
     heading('Research'),
@@ -253,7 +257,7 @@ const tr: ConsoleContent = {
     ),
     blank(),
     text(
-      'Daha önce 2021–2024 arasında, yüzlerce kullanıcısı olan fikir paylaşma platformu crowd.inc’te yazılım geliştirici olarak çalıştım. 2019–2022 arasında İstanbul Üniversitesi Roket Kulübünün başkan yardımcısıydım. Ekibimiz üç roket yaptı; uçuş aviyoniğinin gömülü yazılımını ben yazdım.',
+      'Daha önce 2021–2024 arasında, yüzlerce kullanıcısı olan fikir paylaşma platformu crowd.inc’te yazılım geliştirici olarak çalıştım. 2019–2022 arasında İstanbul Üniversitesi Roket ve Uzay Kulübünün başkan yardımcısıydım. Ekibimiz üç roket yaptı; uçuş aviyoniğinin gömülü yazılımını ben yazdım.',
     ),
     blank(),
     text(dim('Sırada: '), run('cat about.txt'), '  ', run('projects'), '  ', run('ls skills')),
@@ -292,11 +296,15 @@ const tr: ConsoleContent = {
     heading('Roketler'),
     indented(
       2,
-      'İstanbul Üniversitesi Roket Kulübü — Başkan Yardımcısı, 2019–2022. Ekibimizle üç roket tasarlayıp ürettik: bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi.',
+      'İstanbul Üniversitesi Roket ve Uzay Kulübü — Başkan Yardımcısı, 2019–2022. Ekibimizle üç roket tasarlayıp ürettik: bir alçak irtifa (5.000 ft) ve iki yüksek irtifa (10.000 ft) roketi.',
     ),
     indented(
       2,
       'Uçuş aviyoniğinin gömülü yazılımını ve paraşüt açma kontrol sistemini tek başıma yazdım. İkisi de roketteki yönelim, jiroskop ve altimetre verilerini birleştiren sensör füzyonuyla çalışıyordu. RF telemetri iletim modülleriyle birlikte çalışan SD kart telemetri kayıt protokollerini tasarladım. Uçuş verilerini okuyup her uçuştan sonra yörüngeyi grafiğe döken bir masaüstü paneli de geliştirdim.',
+    ),
+    indented(
+      2,
+      'Ekipçe gürültülü sensör verisini bir Kalman filtresinden geçirmeyi araştırdık; algoritmalarını yazıp tekrar tekrar test ettik. Dikey iniş gibi deneylerde de PID kontrolcüleri kullandık.',
     ),
     blank(),
     heading('Araştırma'),

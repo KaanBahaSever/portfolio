@@ -1,0 +1,104 @@
+---
+/**
+ * Journey chapter 5: Kalman filters and PID control at the Istanbul University Rocket and Space
+ * Club, in the owner's words (2026-10): while developing the rockets, the team researched passing
+ * the measured sensor data through a Kalman filter, wrote the algorithms and tested them again
+ * and again; in experiments such as landing a rocket vertically, they used PID controllers.
+ * Explained for a reader who knows no mathematics. Claim no flight results, no successful
+ * landing, no loop rates or other numbers: "dikey iniş gibi deneylerde", nothing more.
+ */
+import { getLocale } from '../../../i18n/server';
+
+const locale = getLocale(Astro);
+---
+
+{
+  locale === 'tr' ? (
+    <>
+      <p>
+        Roketteki sensörlerden gelen veri hiçbir zaman tertemiz değildir. Hava basıncından yüksekliği ölçen altimetre
+        her an biraz farklı bir değer okur. İvmeölçer, motorun titreşimini de ölçüme katar. Jiroskoptan hesaplanan açı
+        da zamanla yavaş yavaş kayar. Ham veriye doğrudan güvenseydik, örneğin paraşüt yanlış anda açılabilirdi. Bu
+        yüzden roketleri geliştirirken ölçülen veriyi bir Kalman filtresinden geçirmeyi araştırdık.
+      </p>
+      <p>
+        Kalman filtresi her adımda iki iş yapar. Önce tahmin eder: Roketin az önceki yüksekliğinden, hızından ve
+        ivmeölçerin okuduğu ivmeden yola çıkarak şu an nerede olması gerektiğini hesaplar. Sonra bu tahmini altimetrenin
+        yeni ölçümüyle düzeltir. Hangisine ne kadar güveneceğini de ikisinin belirsizliğine bakarak belirler: Ölçüm
+        gürültülüyse tahmine, tahmin belirsizleşmişse ölçüme daha çok kulak verir. Bu ağırlığa Kalman kazancı (K)
+        denir.
+      </p>
+      <p>
+        Düzeltme adımı tek satıra sığar: <span class="whitespace-nowrap">x̂ ← x̂ + K (z − x̂)</span>. Burada x̂
+        tahmin, z de yeni ölçüm. Parantezin içi, ölçümün tahminden ne kadar farklı olduğunu söyler. K ise 0 ile 1
+        arasında bir sayıdır ve bu farkın ne kadarını hesaba katacağımızı belirler. K 0’a yakınsa ölçümü neredeyse
+        görmezden geliriz; 1’e yakınsa tahmini bırakıp ölçüme geçeriz. Gündelik bir örnek vereyim: Karanlık bir odada
+        yürürken adımlarınızı sayarak nerede olduğunuzu tahmin edersiniz. Bir duvara dokununca da bu tahmini
+        düzeltirsiniz. Adım saymak model, duvara dokunmak ise ölçüm.
+      </p>
+      <p>
+        Filtrenin algoritmalarını yazdık ve tekrar tekrar test ettik. Konu, okuduğum matematikle doğrudan
+        bağlantılı: Filtre, tahminini ve bu tahminin ne kadar belirsiz olduğunu lineer cebirdeki
+        matrislerle takip eder. Ölçümlerdeki gürültüyü ise olasılık kuramındaki normal dağılımla tarif eder.
+      </p>
+      <p>
+        Dikey iniş gibi deneylerde ise PID kontrolcüleri kullandık. PID kontrolcüsü, hedef değer ile ölçülen değer
+        arasındaki farka, yani hataya bakar ve sisteme ne kadar müdahale edeceğini hesaplar. Üç parçası vardır. P
+        (oransal) şu an hedeften ne kadar uzakta olduğumuza bakar. I (integral) hatayı zaman içinde toplar: Ne kadar
+        süredir ve ne kadar uzakta kaldığımızı hesaba katar. D (türev) ise hatanın ne kadar hızlı değiştiğine bakar
+        ve hedefi geçmeden önce frene basar.
+      </p>
+      <p>
+        Duşta suyun sıcaklığını ayarladığınızı düşünün. Su soğuksa musluğu sıcağa doğru çevirirsiniz; su ne kadar
+        soğuksa o kadar çok çevirirsiniz (P). Su bir süredir hep biraz soğuk kalıyorsa musluğu biraz daha çevirirsiniz
+        (I). Sıcaklık hızla yükseliyorsa, haşlanmamak için çevirmeyi erkenden bırakırsınız (D). PID kontrolcüsü de
+        aynı şeyi sayılarla ve çok daha hızlı yapar. Kalman filtresi roketin nerede olduğunu iyi bilmemizi sağlar;
+        PID de bu bilgiyle roketi istediğimiz yere götürmeye çalışır.
+      </p>
+    </>
+  ) : (
+    <>
+      <p>
+        Data from a rocket’s sensors is never clean. The altimeter, which works out height from air pressure, reads a
+        slightly different value every moment. The accelerometer picks up the motor’s vibration as well, and an angle
+        worked out from the gyroscope slowly drifts over time. If we had trusted the raw data directly, the parachute
+        could, for example, have opened at the wrong moment. So while developing the rockets, we researched passing
+        the measured data through a Kalman filter.
+      </p>
+      <p>
+        A Kalman filter does two things at every step. First it predicts: from the rocket’s last height and speed and
+        the acceleration the accelerometer reads, it works out where the rocket should be now. Then it corrects that
+        prediction with the altimeter’s new reading. How much it trusts each one depends on how uncertain each is: if
+        the reading is noisy, it leans on the prediction; if the prediction has grown uncertain, it leans on the
+        reading. That weight is called the Kalman gain, K.
+      </p>
+      <p>
+        The correction fits on one line: <span class="whitespace-nowrap">x̂ ← x̂ + K (z − x̂)</span>, where x̂ is the
+        estimate and z the new reading. The part in brackets says how far the reading is from the estimate, and K, a
+        number between 0 and 1, says how much of that difference to take on. With K near 0 the reading is all but
+        ignored; near 1, the estimate moves all the way to the reading. An everyday version: walking through a dark
+        room, you guess where you are by counting your steps, and when you touch a wall, you correct the guess.
+        Counting steps is the model; touching the wall is the measurement.
+      </p>
+      <p>
+        We wrote the filter’s algorithms and tested them again and again. It is close to the mathematics I study:
+        the filter keeps its estimate, and how uncertain that estimate is, in matrices from linear algebra, and it
+        describes the noise with the normal distribution from probability.
+      </p>
+      <p>
+        In experiments such as landing a rocket vertically, we used PID controllers. A PID controller looks at the
+        error, the gap between the target value and the measured one, and works out how hard to push back. It has
+        three parts. P (proportional) looks at how far off we are right now. I (integral) adds the error up over time:
+        how far off we have been, and for how long. D (derivative) looks at how fast the error is changing, and
+        brakes before we overshoot.
+      </p>
+      <p>
+        Think of setting the temperature in a shower. If the water is cold, you turn the tap towards hot, and the
+        colder it is, the further you turn it (P). If it has stayed a little cold for a while, you turn it a bit more
+        (I). If the temperature is rising fast, you stop turning early so you do not get scalded (D). A PID controller
+        does the same with numbers, and much faster. The Kalman filter tells us where the rocket is; PID uses that to
+        try to take the rocket where we want it.
+      </p>
+    </>
+  )
+}

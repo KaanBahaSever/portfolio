@@ -45,7 +45,7 @@ Projeyi CMake ile derliyorum.
 ## Nereden geliyor?
 
 Bu simülasyon, roketlerle uğraştığım yılların devamı. 2019–2022 arasında İstanbul Üniversitesi
-Roket Kulübünün başkan yardımcısıydım. Ekibimizle üç roket tasarlayıp ürettik: bir alçak irtifa
+Roket ve Uzay Kulübünün başkan yardımcısıydım. Ekibimizle üç roket tasarlayıp ürettik: bir alçak irtifa
 roketi (5.000 ft) ve iki yüksek irtifa roketi (10.000 ft). Bu roketlerde uçuş elektroniğinin
 (aviyonik) yazılımını ve paraşütü açan kontrol sistemini tek başıma geliştirdim. Roketlerden bu
 simülasyona uzanan hikâyeyi [Hakkımda sayfasında](/about/#journey) anlatıyorum.

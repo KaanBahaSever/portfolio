@@ -54,8 +54,8 @@ It builds with CMake.
 ## Background
 
 The simulation belongs to the same thread as my rocketry work. From 2019 to 2022 I was Vice
-President of the Istanbul University Rocket Club, where our team designed and built three
-rockets: one low-altitude rocket (5,000 ft) and two high-altitude rockets (10,000 ft). I was
+President of the Istanbul University Rocket and Space Club, where our team designed and built
+three rockets: one low-altitude rocket (5,000 ft) and two high-altitude rockets (10,000 ft). I was
 the sole author of their flight avionics firmware and of the parachute deployment control
 system. The [About page](/about/#journey) tells that story, from the avionics to this
 simulation.

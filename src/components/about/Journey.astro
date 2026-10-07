@@ -9,7 +9,7 @@
  * checks that they follow JOURNEY_CHAPTERS and use their own number and figure.
  *
  * Fragment ids are `journey-<key>`. The home page and the timeline link to #journey and to
- * single chapters (#journey-space, #journey-avionics, #journey-cubesat …), so keep existing
+ * single chapters (#journey-space, #journey-avionics, #journey-control, #journey-cubesat …), so keep existing
  * keys when chapters are added or reordered.
  */
 import Chapter from './Chapter.astro';
@@ -22,9 +22,11 @@ import DescentField from './figures/DescentField.astro';
 import GroundStationPass from './figures/GroundStationPass.astro';
 import HohmannTransfer from './figures/HohmannTransfer.astro';
 import IdeaNetwork from './figures/IdeaNetwork.astro';
+import KalmanTrack from './figures/KalmanTrack.astro';
 import MinimaxTree from './figures/MinimaxTree.astro';
 import OddSquares from './figures/OddSquares.astro';
 import Pipeline from './figures/Pipeline.astro';
+import PidResponse from './figures/PidResponse.astro';
 import Trajectory3d from './figures/Trajectory3d.astro';
 import {
   CUBESAT_ALTITUDE,
@@ -41,6 +43,7 @@ import Algorithms from './prose/Algorithms.astro';
 import Automation from './prose/Automation.astro';
 import Avionics from './prose/Avionics.astro';
 import Community from './prose/Community.astro';
+import Control from './prose/Control.astro';
 import CubeSat from './prose/CubeSat.astro';
 import CurrentCore from './prose/CurrentCore.astro';
 import Guidance from './prose/Guidance.astro';
@@ -156,6 +159,17 @@ const item = 'py-10 first:pt-8 last:pb-0 sm:py-14 sm:first:pt-10';
         <Avionics />
         <Figure slot="figure" number={figure('avionics')} caption={c.avionics.caption}>
           <AltitudeClasses />
+        </Figure>
+      </Chapter>
+    </li>
+    <li class={item}>
+      <Chapter id="journey-control" number={number('control')} label={c.control.label} title={c.control.title}>
+        <Control />
+        <Figure slot="figure" number={figure('control')} caption={c.control.caption}>
+          <div class="grid grid-cols-2 items-center gap-3 sm:gap-5">
+            <KalmanTrack />
+            <PidResponse />
+          </div>
         </Figure>
       </Chapter>
     </li>

@@ -34,11 +34,11 @@ const en = {
   degree: (degree: string, field: string) => `${degree} in ${field}`,
   /**
    * The semibold start of a student-community bullet under the university, the community first:
-   * "Rocket Club, Vice President (2019–2022):", "Mathematics Club (later university years):".
+   * "Rocket and Space Club, Vice President (2019–2022):", "Mathematics Club (later university years):".
    */
   community: (name: string, role: string | undefined, period: string) =>
     `${role ? `${name}, ${role}` : name} (${period}):`,
-  /** A role held in an organisation: "Vice President, Istanbul University Rocket Club". */
+  /** A role held in an organisation: "Vice President, Istanbul University Rocket and Space Club". */
   role: (role: string, organization: string) => `${role}, ${organization}`,
   /** A spoken language with its level: "Turkish (native)". */
   language: (name: string, level: string) => `${name} (${level.toLocaleLowerCase('en-US')})`,
@@ -61,9 +61,9 @@ const tr: CvMessages = {
   },
   // As on the home page: "Matematik (Lisans)".
   degree: (degree, field) => `${field} (${degree})`,
-  // As in role(): the post after the organisation, no comma ("Roket Kulübü Başkan Yardımcısı (2019–2022):").
+  // As in role(): the post after the organisation, no comma ("Roket ve Uzay Kulübü Başkan Yardımcısı (2019–2022):").
   community: (name, role, period) => `${role ? `${name} ${role}` : name} (${period}):`,
-  // The organisation first and no comma, as Turkish names a post ("Roket Kulübü Başkan Yardımcısı").
+  // The organisation first and no comma, as Turkish names a post ("Roket ve Uzay Kulübü Başkan Yardımcısı").
   role: (role, organization) => `${organization} ${role}`,
   language: (name, level) => `${name} (${level.toLocaleLowerCase('tr-TR')})`,
 };

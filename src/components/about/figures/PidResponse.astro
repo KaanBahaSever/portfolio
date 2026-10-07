@@ -1,0 +1,68 @@
+---
+/**
+ * A PID controller in a toy vertical landing (pidDescent()): a rocket starts at rest high up and
+ * must hold a lower target height (dashed) on its engine's thrust. The accent line is the PID
+ * response, which dips below the target and then settles on it; the thin line is the same
+ * controller without its integral term, which settles short of the target because nothing
+ * builds up the thrust that holds up the rocket's weight. The x axis is the ground. The labels
+ * "PID" and "PD" read the same in both languages. An illustration, not club data. Decorative.
+ */
+import { CONTROL_FIGURE, linePath, pidDescent, round, type Point } from '../geometry';
+
+const { pid } = CONTROL_FIGURE;
+const full = pidDescent(pid);
+const withoutIntegral = pidDescent({ ...pid, ki: 0 });
+
+const tMax = pid.duration;
+const hMax = 11;
+const origin = { x: 18, y: 124 };
+const plot = { width: 128, height: 100 };
+const toScreen = (t: number, h: number): Point => ({
+  x: origin.x + (t / tMax) * plot.width,
+  y: origin.y - (h / hMax) * plot.height,
+});
+const path = (heights: readonly number[]) => linePath(heights.map((h, i) => toScreen(i * pid.step, h)));
+
+const targetY = round(toScreen(0, pid.target).y);
+const pdEndY = round(toScreen(tMax, withoutIntegral.height.at(-1) ?? 0).y);
+const plotRight = origin.x + plot.width;
+
+const xAxisEnd = plotRight + 8;
+const yAxisTop = 12;
+
+const ink = 'text-zinc-900 dark:text-zinc-100';
+const muted = 'text-zinc-400 dark:text-zinc-600';
+const label = 'text-zinc-600 dark:text-zinc-400';
+const accent = 'text-accent-600 dark:text-accent-400';
+---
+
+<svg
+  viewBox="0 0 160 140"
+  class="block h-auto w-full"
+  fill="none"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  <g class={muted} stroke="currentColor" stroke-width="1">
+    <path d={`M${origin.x} ${origin.y} H${xAxisEnd}`} />
+    <path d={`M${xAxisEnd - 4} ${origin.y - 3} L${xAxisEnd} ${origin.y} L${xAxisEnd - 4} ${origin.y + 3}`} />
+    <path d={`M${origin.x} ${origin.y} V${yAxisTop}`} />
+    <path d={`M${origin.x - 3} ${yAxisTop + 4} L${origin.x} ${yAxisTop} L${origin.x + 3} ${yAxisTop + 4}`} />
+    <path d={`M${origin.x} ${targetY} H${plotRight}`} stroke-dasharray="2 3" />
+  </g>
+
+  <g class={`${ink} font-serif italic`} fill="currentColor" font-size="12">
+    <text x={xAxisEnd - 4} y={origin.y + 14} text-anchor="middle">t</text>
+    <text x={origin.x + 7} y={yAxisTop + 6}>h</text>
+  </g>
+
+  <path class={ink} d={path(withoutIntegral.height)} stroke="currentColor" stroke-width="1" stroke-opacity="0.7" />
+  <path class={accent} d={path(full.height)} stroke="currentColor" stroke-width="1.5" />
+
+  <g class="font-mono" fill="currentColor" font-size="7" letter-spacing="0.06em" text-anchor="end">
+    <text class={accent} x={plotRight} y={targetY - 4}>PID</text>
+    <text class={label} x={plotRight} y={pdEndY + 9}>PD</text>
+  </g>
+</svg>

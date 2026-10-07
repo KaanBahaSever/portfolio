@@ -1,0 +1,258 @@
+---
+/**
+ * Binding energy per nucleon against the number of nucleons, from AME2020 atomic masses
+ * (model.ts). Fusion climbs the curve from the light end, fission from the heavy end; iron and
+ * nickel sit at the top. Drawn twice, compact for phones and wide from sm, like ShotsChart in the
+ * Battleship post; only one is displayed (and exposed to assistive technology) at a time.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { type Layout, linear, polyline } from './chart.ts';
+import Figure from './Figure.astro';
+import { fusionPostMessages } from './messages.ts';
+import { NUCLIDES, bindingPerNucleon, nuclide } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = fusionPostMessages[lang].binding;
+const f = formatters(lang);
+const two = (x: number) => f.number(x, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const points = NUCLIDES.map((n) => ({ n, value: bindingPerNucleon(n) }));
+const top = points.reduce((best, p) => (p.value > best.value ? p : best));
+// The facts the figure and the prose state.
+if (!['Fe-56', 'Ni-62'].includes(top.n.id)) throw new Error(`BindingCurve: the peak should be iron or nickel, not ${top.n.id}`);
+if (Math.abs(bindingPerNucleon(nuclide('Fe-56')) - bindingPerNucleon(nuclide('Ni-62'))) > 0.01) {
+  throw new Error('BindingCurve: iron and nickel should be within 0.01 MeV of each other');
+}
+if (!(bindingPerNucleon(nuclide('He-4')) > bindingPerNucleon(nuclide('Li-6')))) {
+  throw new Error('BindingCurve: helium-4 should stand above lithium-6');
+}
+
+const label = m.aria(
+  two(bindingPerNucleon(nuclide('Fe-56'))),
+  two(bindingPerNucleon(nuclide('He-4'))),
+  two(bindingPerNucleon(nuclide('H-2'))),
+  two(bindingPerNucleon(nuclide('U-235'))),
+);
+
+/** Labelled nuclides: offset from the dot and text anchor; `wide` ones only on the wide chart. */
+const LABELS: { id: string; dx: number; dy: number; anchor: 'start' | 'middle' | 'end'; wide?: boolean }[] = [
+  { id: 'H-2', dx: 7, dy: 4, anchor: 'start' },
+  { id: 'H-3', dx: 7, dy: 4, anchor: 'start' },
+  { id: 'He-4', dx: -6, dy: -4, anchor: 'end' },
+  { id: 'Li-6', dx: 7, dy: 9, anchor: 'start' },
+  { id: 'C-12', dx: 7, dy: 10, anchor: 'start', wide: true },
+  { id: 'Fe-56', dx: 0, dy: -9, anchor: 'middle' },
+  { id: 'Sn-120', dx: 0, dy: -9, anchor: 'middle', wide: true },
+  { id: 'Pb-208', dx: 0, dy: -9, anchor: 'middle', wide: true },
+  { id: 'U-235', dx: 0, dy: 16, anchor: 'middle' },
+];
+
+const layouts: { key: string; class: string; layout: Layout }[] = [
+  { key: 'compact', class: 'sm:hidden', layout: { width: 320, height: 280, left: 34, right: 12, top: 34, bottom: 40, font: 11 } },
+  { key: 'wide', class: 'hidden sm:block', layout: { width: 640, height: 360, left: 46, right: 20, top: 40, bottom: 46, font: 12 } },
+];
+
+function chart(l: Layout) {
+  const x = linear(0, 250, l.left, l.width - l.right);
+  const y = linear(0, 10.5, l.height - l.bottom, l.top);
+  const curve = polyline(points.map((p) => [x(p.n.a), y(p.value)]));
+  return { x, y, curve, plotBottom: l.height - l.bottom };
+}
+
+const yTicks = [0, 2, 4, 6, 8, 10];
+const xTicks = [0, 50, 100, 150, 200, 250];
+---
+
+<Figure>
+  <div slot="graphic" class="fusion-chart">
+    {
+      layouts.map(({ key, class: className, layout: l }) => {
+        const c = chart(l);
+        const wide = key === 'wide';
+        const fusionFrom: [number, number] = [c.x(wide ? 16 : 22), c.y(2.6)];
+        const fusionTo: [number, number] = [c.x(wide ? 44 : 50), c.y(7.5)];
+        const fissionFrom: [number, number] = [c.x(236), c.y(6.65)];
+        const fissionTo: [number, number] = [c.x(132), c.y(7.8)];
+        return (
+          <svg
+            class:list={['h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+            viewBox={`0 0 ${l.width} ${l.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={label}
+            focusable="false"
+          >
+            <defs>
+              <marker id={`bc-arrow-accent-${key}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" class="arrowhead-accent" />
+              </marker>
+              <marker id={`bc-arrow-${key}`} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" class="arrowhead" />
+              </marker>
+            </defs>
+            <g class="axis font-mono" font-size={l.font}>
+              {yTicks.map((v) => (
+                <>
+                  <line x1={l.left} x2={l.width - l.right} y1={c.y(v)} y2={c.y(v)} class="gridline" />
+                  <text x={l.left - 6} y={c.y(v) + l.font / 3} text-anchor="end">{v}</text>
+                </>
+              ))}
+              {xTicks.map((v) => (
+                <>
+                  <line x1={c.x(v)} x2={c.x(v)} y1={c.plotBottom} y2={c.plotBottom + 4} class="tick" />
+                  <text x={c.x(v)} y={c.plotBottom + 6 + l.font} text-anchor="middle">{v}</text>
+                </>
+              ))}
+              <text x={l.width - l.right} y={l.height - 4} text-anchor="end" class="title">{m.xAxis} →</text>
+              <text x={l.left - 6} y={l.top - 16} text-anchor="start" class="title">↑ {m.yAxis}</text>
+            </g>
+            <line x1={l.left} x2={l.width - l.right} y1={c.plotBottom} y2={c.plotBottom} class="baseline" />
+            <path d={c.curve} class="curve" />
+            {points.map((p) => (
+              <circle cx={c.x(p.n.a)} cy={c.y(p.value)} r={p.n.id === 'Fe-56' ? 4 : 2.6} class:list={['dot', p.n.id === 'Fe-56' && 'dot-peak']} />
+            ))}
+            <g font-size={l.font} class="labels font-sans">
+              {LABELS.filter((item) => wide || !item.wide).map((item) => {
+                const n = nuclide(item.id);
+                // The mass number as a raised tspan: superscript digits differ from font to font.
+                return (
+                  <text x={c.x(n.a) + item.dx} y={c.y(bindingPerNucleon(n)) + item.dy} text-anchor={item.anchor}>
+                    <tspan font-size={l.font * 0.72} dy={-l.font * 0.4}>{n.a}</tspan>
+                    <tspan dy={l.font * 0.4}>{n.id.split('-')[0]}</tspan>
+                  </text>
+                );
+              })}
+              <text x={c.x(wide ? 80 : 70)} y={c.y(10.15)} text-anchor="start" class="peak">
+                {m.peak.map((line, i) => (
+                  <tspan x={c.x(wide ? 80 : 70)} dy={i === 0 ? 0 : l.font + 2}>{line}</tspan>
+                ))}
+              </text>
+            </g>
+            <path
+              d={`M${fusionFrom[0]} ${fusionFrom[1]}Q${c.x(wide ? 40 : 46)} ${c.y(4.2)} ${fusionTo[0]} ${fusionTo[1]}`}
+              class="arrow-accent"
+              marker-end={`url(#bc-arrow-accent-${key})`}
+            />
+            <text x={fusionFrom[0] + 8} y={fusionFrom[1] + 4} font-size={l.font + 1} class="arrow-label-accent font-sans">{m.fusion}</text>
+            <path
+              d={`M${fissionFrom[0]} ${fissionFrom[1]}Q${c.x(180)} ${c.y(6.9)} ${fissionTo[0]} ${fissionTo[1]}`}
+              class="arrow"
+              marker-end={`url(#bc-arrow-${key})`}
+            />
+            <text x={c.x(178)} y={c.y(6.3)} font-size={l.font + 1} text-anchor="middle" class="arrow-label font-sans">{m.fission}</text>
+          </svg>
+        );
+      })
+    }
+  </div>
+  <slot />
+</Figure>
+
+<style>
+  .fusion-chart {
+    --ink: var(--color-zinc-800);
+    --muted: var(--color-zinc-500);
+    --accent: var(--color-accent-700);
+    --axis-text: var(--color-zinc-600);
+    --axis-title: var(--color-zinc-700);
+  }
+
+  :global(:where([data-theme='dark'])) .fusion-chart {
+    --ink: var(--color-zinc-200);
+    --muted: var(--color-zinc-400);
+    --accent: var(--color-accent-400);
+    --axis-text: var(--color-zinc-400);
+    --axis-title: var(--color-zinc-300);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .fusion-chart {
+      --ink: var(--color-zinc-200);
+      --muted: var(--color-zinc-400);
+      --accent: var(--color-accent-400);
+      --axis-text: var(--color-zinc-400);
+      --axis-title: var(--color-zinc-300);
+    }
+  }
+
+  .axis text {
+    fill: var(--axis-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis .title {
+    fill: var(--axis-title);
+  }
+
+  .gridline {
+    stroke: currentColor;
+    stroke-opacity: 0.1;
+  }
+
+  .tick,
+  .baseline {
+    stroke: currentColor;
+    stroke-opacity: 0.45;
+  }
+
+  .curve {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+  }
+
+  .dot {
+    fill: var(--ink);
+  }
+
+  .dot-peak {
+    fill: var(--accent);
+  }
+
+  .labels text {
+    fill: var(--ink);
+  }
+
+  .labels .peak {
+    fill: var(--axis-title);
+  }
+
+  .arrow-accent,
+  .arrow {
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  .arrow-accent {
+    stroke: var(--accent);
+  }
+
+  .arrow {
+    stroke: var(--muted);
+  }
+
+  .arrowhead-accent {
+    fill: var(--accent);
+  }
+
+  .arrowhead {
+    fill: var(--muted);
+  }
+
+  .arrow-label-accent {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+
+  .arrow-label {
+    fill: var(--ink);
+    font-weight: 600;
+  }
+</style>

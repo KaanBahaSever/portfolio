@@ -1,0 +1,392 @@
+---
+/**
+ * The post's hero drawing: a tokamak with a slice cut away (geometry in tokamak.ts, computed during
+ * the build). Labels sit beside the machine with leader lines from sm up; on phones the drawing is
+ * cropped to the machine, numbered markers replace the labels and a list below names them.
+ *
+ * The faces are written as one markup string (set:html) rather than ~600 Astro elements, which
+ * keeps the page small; their colours come from the material classes below, mixed per face by its
+ * light level (--l), and switch with the theme. Particles drift along the field lines unless the
+ * visitor prefers reduced motion.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import Figure from './Figure.astro';
+import { fusionPostMessages, type TokamakPart } from './messages.ts';
+import { VIEW, paintRuns, polylinePath, tokamakDrawing } from './tokamak.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = fusionPostMessages[lang].tokamak;
+const drawing = tokamakDrawing();
+
+if (drawing.fieldLines.length < 2) throw new Error('Tokamak: expected at least two visible field-line stretches');
+if (drawing.coils < 10) throw new Error('Tokamak: expected at least ten toroidal field coils outside the cut');
+for (const [part, [x, y]] of Object.entries(drawing.anchors)) {
+  if (!(x > 150 && x < 610 && y > 60 && y < 430)) throw new Error(`Tokamak: the ${part} anchor is outside the phone crop`);
+}
+
+const faces = paintRuns(drawing.faces)
+  .map((run) => {
+    const lit = run.material.startsWith('cut-') ? '' : ` style="--l:${run.light}"`;
+    return `<path class="tk-${run.material}"${lit} d="${run.d}"/>`;
+  })
+  .join('');
+const lines = drawing.fieldLines.map(polylinePath);
+const fieldMarkup =
+  lines.map((d) => `<path class="tk-field" d="${d}"/>`).join('') +
+  lines.map((d) => `<path class="tk-particles" d="${d}"/>`).join('');
+
+/** Where each label goes beside the machine (sm and up), and its marker number on phones. */
+const LABELS: { part: TokamakPart; side: 'left' | 'right'; y: number }[] = [
+  { part: 'solenoid', side: 'left', y: 96 },
+  { part: 'coils', side: 'left', y: 250 },
+  { part: 'blanket', side: 'right', y: 104 },
+  { part: 'vessel', side: 'right', y: 168 },
+  { part: 'fieldLine', side: 'right', y: 262 },
+  { part: 'plasma', side: 'right', y: 368 },
+];
+const anchorOf: Record<TokamakPart, readonly [number, number]> = {
+  plasma: drawing.anchors.plasma,
+  fieldLine: drawing.anchors.fieldLine,
+  coils: drawing.anchors.coil,
+  solenoid: drawing.anchors.solenoid,
+  blanket: drawing.anchors.blanket,
+  vessel: drawing.anchors.vessel,
+};
+const LINE = 15;
+const LEFT_X = 150;
+const RIGHT_X = 612;
+const labels = LABELS.map((label, index) => {
+  const [ax, ay] = anchorOf[label.part];
+  const lines = m.parts[label.part];
+  const textX = label.side === 'left' ? LEFT_X : RIGHT_X;
+  // The leader ends beside the label's first line.
+  const endX = label.side === 'left' ? textX + 6 : textX - 6;
+  const endY = label.y - 4;
+  return { ...label, number: index + 1, ax, ay, lines, textX, endX, endY };
+});
+const r = (n: number) => Math.round(n * 10) / 10;
+---
+
+<Figure class="fusion-tokamak">
+  <div slot="graphic" class="tk-frame">
+    <svg
+      class="tk-svg text-zinc-900 dark:text-zinc-100"
+      viewBox={`0 0 ${VIEW.width} ${VIEW.height}`}
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label={m.aria}
+      focusable="false"
+    >
+      <defs>
+        <filter id="tk-glow" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="16" />
+        </filter>
+        <filter id="tk-soft" x="-20%" y="-100%" width="140%" height="300%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
+      </defs>
+      <ellipse class="tk-shadow" cx="380" cy="404" rx="190" ry="18" filter="url(#tk-soft)" />
+      <g set:html={faces} />
+      <path class="tk-glow" d={polylinePath(drawing.axis)} filter="url(#tk-glow)" />
+      <g set:html={fieldMarkup} />
+      <g class="tk-labels font-sans">
+        {
+          labels.map((label) => (
+            <g>
+              <path class="tk-leader" d={`M${r(label.ax)} ${r(label.ay)}L${label.endX} ${label.endY}`} />
+              <circle class="tk-dot" cx={r(label.ax)} cy={r(label.ay)} r="2.6" />
+              <text
+                x={label.textX}
+                y={label.y}
+                text-anchor={label.side === 'left' ? 'end' : 'start'}
+                font-size="13.5"
+              >
+                {label.lines.map((line, i) => (
+                  <tspan x={label.textX} dy={i === 0 ? 0 : LINE}>
+                    {line}
+                  </tspan>
+                ))}
+              </text>
+            </g>
+          ))
+        }
+      </g>
+      <g class="tk-markers font-sans" aria-hidden="true">
+        {
+          labels.map((label) => (
+            <g>
+              <circle class="tk-marker" cx={r(label.ax)} cy={r(label.ay)} r="12" />
+              <text x={r(label.ax)} y={r(label.ay) + 5} text-anchor="middle" font-size="14" font-weight="600">
+                {label.number}
+              </text>
+            </g>
+          ))
+        }
+      </g>
+    </svg>
+  </div>
+  <ol
+    slot="legend"
+    class="tk-legend grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs text-zinc-700 sm:hidden dark:text-zinc-300"
+    aria-label={m.legend}
+  >
+    {
+      labels.map((label) => (
+        <li class="flex items-baseline gap-2">
+          <span class="tk-legend-number font-mono">{label.number}</span>
+          <span>{label.lines.join(' ')}</span>
+        </li>
+      ))
+    }
+  </ol>
+  <slot />
+</Figure>
+
+<style>
+  .tk-frame {
+    --tk-vessel-lit: var(--color-zinc-100);
+    --tk-vessel-shade: var(--color-zinc-400);
+    --tk-coil-lit: var(--color-zinc-500);
+    --tk-coil-shade: var(--color-zinc-800);
+    --tk-solenoid-lit: var(--color-zinc-300);
+    --tk-solenoid-shade: var(--color-zinc-600);
+    --tk-plasma-rim: var(--color-accent-50);
+    --tk-plasma-core: var(--color-accent-300);
+    --tk-cut-vessel: var(--color-zinc-500);
+    --tk-cut-blanket: var(--color-zinc-300);
+    --tk-cut-gap: var(--color-zinc-900);
+    --tk-cut-plasma: var(--color-accent-200);
+    --tk-glow: var(--color-accent-300);
+    --tk-glow-opacity: 0.45;
+    --tk-field: var(--color-accent-700);
+    --tk-particle: var(--color-accent-800);
+    --tk-ink: var(--color-zinc-700);
+    --tk-leader: var(--color-zinc-500);
+    --tk-shadow: var(--color-zinc-900);
+
+    /* Phones: crop the 760 × 470 drawing to the machine, x 150–610 and y 60–430. */
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 460 / 370;
+  }
+
+  :global(:where([data-theme='dark'])) .tk-frame {
+    --tk-vessel-lit: var(--color-zinc-400);
+    --tk-vessel-shade: var(--color-zinc-800);
+    --tk-coil-lit: var(--color-zinc-300);
+    --tk-coil-shade: var(--color-zinc-700);
+    --tk-solenoid-lit: var(--color-zinc-400);
+    --tk-solenoid-shade: var(--color-zinc-700);
+    --tk-plasma-rim: var(--color-accent-100);
+    --tk-plasma-core: var(--color-accent-400);
+    --tk-cut-vessel: var(--color-zinc-500);
+    --tk-cut-blanket: var(--color-zinc-600);
+    --tk-cut-gap: var(--color-zinc-950);
+    --tk-cut-plasma: var(--color-accent-300);
+    --tk-glow: var(--color-accent-400);
+    --tk-glow-opacity: 0.6;
+    --tk-field: white;
+    --tk-particle: white;
+    --tk-ink: var(--color-zinc-300);
+    --tk-leader: var(--color-zinc-400);
+    --tk-shadow: black;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .tk-frame {
+      --tk-vessel-lit: var(--color-zinc-400);
+      --tk-vessel-shade: var(--color-zinc-800);
+      --tk-coil-lit: var(--color-zinc-300);
+      --tk-coil-shade: var(--color-zinc-700);
+      --tk-solenoid-lit: var(--color-zinc-400);
+      --tk-solenoid-shade: var(--color-zinc-700);
+      --tk-plasma-rim: var(--color-accent-100);
+      --tk-plasma-core: var(--color-accent-400);
+      --tk-cut-vessel: var(--color-zinc-500);
+      --tk-cut-blanket: var(--color-zinc-600);
+      --tk-cut-gap: var(--color-zinc-950);
+      --tk-cut-plasma: var(--color-accent-300);
+      --tk-glow: var(--color-accent-400);
+      --tk-glow-opacity: 0.6;
+      --tk-field: white;
+      --tk-particle: white;
+      --tk-ink: var(--color-zinc-300);
+      --tk-leader: var(--color-zinc-400);
+      --tk-shadow: black;
+      }
+  }
+
+  .tk-svg {
+    position: absolute;
+    width: calc(760 / 460 * 100%);
+    max-width: none;
+    height: auto;
+    left: calc(-150 / 460 * 100%);
+    top: calc(-60 / 370 * 100%);
+  }
+
+  .tk-labels {
+    display: none;
+  }
+
+  @media (min-width: 40rem) {
+    .tk-frame {
+      aspect-ratio: 760 / 470;
+    }
+
+    .tk-svg {
+      width: 100%;
+      left: 0;
+      top: 0;
+    }
+
+    .tk-labels {
+      display: inline;
+    }
+
+    .tk-markers {
+      display: none;
+    }
+  }
+
+  .tk-svg :global(path) {
+    stroke-linejoin: round;
+  }
+
+  .tk-svg :global(.tk-vessel),
+  .tk-svg :global(.tk-coil),
+  .tk-svg :global(.tk-solenoid),
+  .tk-svg :global(.tk-plasma) {
+    fill: var(--c);
+    /* The same colour as a hairline outline closes the seams between neighbouring faces. */
+    stroke: var(--c);
+    stroke-width: 0.6;
+  }
+
+  .tk-svg :global(.tk-vessel) {
+    --c: color-mix(in oklab, var(--tk-vessel-lit) calc(var(--l) * 100%), var(--tk-vessel-shade));
+  }
+
+  .tk-svg :global(.tk-coil) {
+    --c: color-mix(in oklab, var(--tk-coil-lit) calc(var(--l) * 100%), var(--tk-coil-shade));
+  }
+
+  .tk-svg :global(.tk-solenoid) {
+    --c: color-mix(in oklab, var(--tk-solenoid-lit) calc(var(--l) * 100%), var(--tk-solenoid-shade));
+  }
+
+  .tk-svg :global(.tk-plasma) {
+    --c: color-mix(in oklab, var(--tk-plasma-rim) calc(var(--l) * 100%), var(--tk-plasma-core));
+  }
+
+  .tk-svg :global(.tk-cut-vessel) {
+    fill: var(--tk-cut-vessel);
+  }
+
+  .tk-svg :global(.tk-cut-blanket) {
+    fill: var(--tk-cut-blanket);
+  }
+
+  .tk-svg :global(.tk-cut-gap) {
+    fill: var(--tk-cut-gap);
+  }
+
+  .tk-svg :global(.tk-cut-plasma) {
+    fill: var(--tk-cut-plasma);
+  }
+
+  .tk-shadow {
+    fill: var(--tk-shadow);
+    opacity: 0.12;
+  }
+
+  .tk-glow {
+    fill: none;
+    stroke: var(--tk-glow);
+    stroke-width: 70;
+    stroke-linecap: round;
+    opacity: var(--tk-glow-opacity);
+    mix-blend-mode: screen;
+  }
+
+  .tk-svg :global(.tk-field) {
+    fill: none;
+    stroke: var(--tk-field);
+    stroke-width: 1.3;
+    stroke-opacity: 0.85;
+    stroke-linecap: round;
+  }
+
+  .tk-svg :global(.tk-particles) {
+    fill: none;
+    stroke: var(--tk-particle);
+    stroke-width: 3.4;
+    stroke-linecap: round;
+    stroke-dasharray: 0 22;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tk-svg :global(.tk-particles) {
+      animation: tk-flow 2.4s linear infinite;
+    }
+  }
+
+  @keyframes tk-flow {
+    to {
+      stroke-dashoffset: -44;
+    }
+  }
+
+  .tk-labels text {
+    fill: var(--tk-ink);
+  }
+
+  .tk-leader {
+    fill: none;
+    stroke: var(--tk-leader);
+    stroke-width: 0.9;
+  }
+
+  .tk-dot {
+    fill: var(--tk-ink);
+    stroke: white;
+    stroke-width: 1;
+  }
+
+  .tk-marker {
+    fill: var(--color-zinc-900);
+    stroke: white;
+    stroke-width: 1.5;
+  }
+
+  .tk-markers text {
+    fill: white;
+  }
+
+  .tk-legend-number {
+    display: inline-grid;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: none;
+    border-radius: 9999px;
+    background: var(--color-zinc-900);
+    color: white;
+    font-size: 0.6875rem;
+    font-weight: 600;
+  }
+
+  :global(:where([data-theme='dark'])) .tk-legend-number {
+    background: var(--color-zinc-700);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .tk-legend-number {
+      background: var(--color-zinc-700);
+    }
+  }
+</style>

@@ -1,0 +1,219 @@
+---
+title: 'Fusion Reactors: A Small Sun on Earth'
+description: 'What fusion is, why it is such a clean source of energy, and where it stands today: the Sun’s recipe, explained step by step with drawings and a few plain formulas.'
+pubDate: 2026-10-07
+lang: en
+translationKey: fusion-reactor
+tags: [physics, energy, science]
+---
+
+import BindingCurve from '../../components/blog/posts/fusion/BindingCurve.astro';
+import LawsonChart from '../../components/blog/posts/fusion/LawsonChart.astro';
+import ReactionFigure from '../../components/blog/posts/fusion/ReactionFigure.astro';
+import ReactivityChart from '../../components/blog/posts/fusion/ReactivityChart.astro';
+import Tokamak from '../../components/blog/posts/fusion/Tokamak.astro';
+import { postNumbers } from '../../components/blog/posts/fusion/numbers';
+
+export const n = postNumbers('en');
+
+{/*
+  The figures and the numbers in the text are computed during the build by
+  src/components/blog/posts/fusion/model.ts: atomic masses from AME2020, reactivities from the
+  Bosch–Hale (1992) fit. The text does not hard-code results; it takes them from postNumbers, and
+  tests/blog-fusion-post.test.ts checks the numbers inside the KaTeX formulas against the model.
+  The Turkish version is fuzyon-reaktoru.mdx; both posts carry the same facts, keep them in step.
+  “Where does it stand today?” is written as of October 2026; every fact has a source at the end.
+*/}
+
+I started reading about fusion in 2015, and a lot has changed since then. A laboratory got more energy out of fusion than it put into the fuel, for the first time. A machine that had run for forty years broke one more record just before it retired. Private companies raised billions of dollars. In this post I want to explain the beautiful idea behind fusion: learning how the Sun shines, and lighting the same fire on Earth, inside a machine.
+
+You do not need to know any mathematics. We will meet a few formulas, and I will explain each one where it first appears, with an everyday comparison. The curves in the charts and most of the numbers in the text are computed while the site is built, by a small model that starts from real measurements.
+
+<Tokamak lang="en">A tokamak, the kind of fusion reactor studied most today. I cut a slice out of the front so the inside shows. Plasma runs around inside the doughnut-shaped vessel; the D-shaped coils around it and the solenoid in the middle make the magnetic field that holds the plasma away from the walls. At the cut, from the outside in: the vacuum vessel, the blanket, a thin gap of vacuum and the plasma. The lines on the plasma are magnetic field lines; I exaggerated their twist so the helix shows. The drawing is computed from a small 3D model with dimensions like ITER’s.</Tokamak>
+
+## The Sun’s recipe
+
+The Sun looks like a fire, but it does not burn the way wood does. In its core, hydrogen nuclei collide, fuse and become helium. This is fusion. Each fusion makes a tiny amount of mass disappear, and that mass comes back as light and heat. Nearly all the energy of life on Earth comes from these reactions.
+
+The Sun’s core is at about 15 million °C. That is very hot, but as we will see, it is actually low for fusion. What makes it easy for the Sun is its size: its enormous mass squeezes the matter in the core under its own weight and holds it there. The Sun is also in no hurry. A cubic metre of its core gives off only a few hundred watts of heat, less than an electric heater. What makes the Sun so powerful is that it has a great many of those cubic metres.
+
+On Earth we have neither that much room nor that much time. To follow the Sun’s recipe here, we have to change the fuel and turn the heat up much further. To see why, let us first take a close look at nuclei.
+
+## Why light nuclei give off energy
+
+At the centre of every atom there is a tiny nucleus, made of protons and neutrons; together we call them nucleons. Protons carry positive charge, so they push each other away. What holds them together is the nuclear force: very strong, but it only works over very short distances.
+
+Imagine bringing two magnets together. At some point they snap together, and that snap is energy being released. The more tightly they stick, the more energy comes out, and the harder they are to pull apart. Nuclei are the same. The energy needed to take a nucleus apart into its pieces is its binding energy. Divided by the number of nucleons, it tells us how tightly each piece holds on, on average: the binding energy per nucleon.
+
+The chart below shows how this number changes from light nuclei to heavy ones.
+
+<BindingCurve lang="en">Binding energy per nucleon; the points are computed from measured atomic masses (AME2020). The curve climbs steeply through the lightest nuclei, peaks at iron and nickel, and then falls slowly. Joining light nuclei (fusion) and splitting heavy ones (fission) are both steps towards the top, and both release energy.</BindingCurve>
+
+The shape of the curve tells the whole story. At the top, at about {n.binding.iron} MeV, sit iron and nickel, the most tightly bound nuclei in nature. (MeV means “million electronvolts”, a small unit of energy used for atoms. We will only use it to compare.) There are two ways to climb towards the top. Split a heavy nucleus such as uranium in two, and the pieces are more tightly bound; the difference comes out as energy. That is what today’s nuclear power plants do, and it is called fission. The other way is to join light nuclei: fusion.
+
+The left side of the curve is much steeper. In deuterium, the binding energy per nucleon is only {n.binding.deuterium} MeV; in helium-4 it is {n.binding.helium} MeV. So joining light nuclei gives much more energy per nucleon than fission does. Notice also how helium-4 jumps above the curve: two protons and two neutrons make a particularly tight package. The best recipe for fusion is to make that package.
+
+## E = mc²: the missing mass
+
+The fuel of fusion reactors is two heavy siblings of hydrogen. An ordinary hydrogen nucleus is a single proton. A deuterium nucleus has one proton and one neutron; a tritium nucleus has one proton and two neutrons. When the two fuse, out come a helium-4 nucleus and a free neutron:
+
+$$
+\mathrm{D} + \mathrm{T} \longrightarrow {}^{4}\mathrm{He}\ (3.5\ \mathrm{MeV}) + \mathrm{n}\ (14.1\ \mathrm{MeV})
+$$
+
+The numbers in brackets show how much energy each product flies off with; together they make {n.q} MeV. Where does this energy come from? Let us weigh everything before and after the reaction. We measure the masses in atomic mass units, u for short; one u is roughly the mass of a proton. Deuterium and tritium together weigh {n.massBefore} u, helium and the neutron together {n.massAfter} u. The difference, {n.defect} u, has disappeared: about {n.defectShare} of the fuel’s mass.
+
+Einstein’s famous formula tells us where the missing mass went:
+
+$$
+E = mc^2
+$$
+
+Here $E$ is energy, $m$ is mass and $c$ is the speed of light, about 300,000 kilometres per second. $c^2$ means $c \cdot c$: an already huge number multiplied by itself. The formula says that a little mass is worth a great deal of energy. If one gram of mass turned entirely into energy, it would make $0.001 \cdot (3 \times 10^8)^2 = 9 \times 10^{13}$ joules. ($10^8$ means a 1 followed by 8 zeros: 100 million.) That is the energy in about two thousand tonnes of petrol.
+
+<ReactionFigure lang="en">Deuterium and tritium fuse, leaving a helium-4 nucleus and a neutron. The products are {n.defect} u lighter than the fuel, and the missing mass appears as {n.q} MeV of energy. The lighter neutron carries off {n.neutronShare} of it. Masses from AME2020.</ReactionFigure>
+
+Why do the products fly apart in opposite directions, and why does the neutron get more of the energy? Think of a rifle. When it fires, the bullet goes forward and the rifle kicks back. Both get the same push, but the light bullet flies much faster and carries off most of the energy. Here, helium is four times heavier than the neutron. So the neutron flies four times faster and takes four fifths of the energy, {n.neutron} MeV. This detail will matter later. Helium is charged, so it stays in the plasma and heats it; the uncharged neutron flies straight out.
+
+Now let us put this on an everyday scale. A kilogram of deuterium–tritium fuel gives about {n.perKgTj} terajoules through this reaction. One gram gives {n.perGramGj} gigajoules; to get the same energy from coal you would have to burn {n.coalTonnesLow}–{n.coalTonnesHigh} tonnes of it. (A kilogram of good coal gives {n.coalLow}–{n.coalHigh} megajoules.) Kilogram for kilogram, fusion fuel holds roughly {n.coalRatioLow}–{n.coalRatioHigh} million times more energy than coal. A single gram of fuel does the work of a lorry full of coal.
+
+## Why hundreds of millions of degrees?
+
+The hard part of fusion is bringing the nuclei together. Both are positively charged, and they push each other away like two magnets with the same poles facing. For the nuclear force to take over, they have to come close enough to almost touch. Getting deuterium and tritium that close costs about {n.barrierKev} keV, that is, {n.barrierKev} thousand electronvolts. We call this repulsion the Coulomb barrier. Think of it as a hill the nuclei have to get over.
+
+Temperature is a measure of how fast particles move. Physicists often give the temperature of a plasma directly in keV, a unit of energy: 1 keV corresponds to about {n.kevMillionK} million degrees. (At these temperatures, the 273-degree difference between Celsius and Kelvin does not matter.) For every nucleus to get over the hill easily, we would need about {n.barrierBillionK} billion degrees. Fortunately, we do not need that much, for two reasons.
+
+First, temperature is an average. Some particles in a gas move much faster than the average, and they are the ones that come closest to the top of the hill. Second, a strange gift of quantum physics: tunnelling. In the quantum world, a particle that cannot get over a hill can still, with a small probability, pass through it and come out on the other side. The closer it gets to the top, the faster that probability grows. Together, these two effects bring the temperature needed down from billions of degrees to hundreds of millions.
+
+In a gas this hot, electrons come off their atoms. What remains is a soup of bare nuclei and free electrons that conducts electricity. We call it plasma, the fourth state of matter after solid, liquid and gas. Lightning and the glow of a neon lamp are plasmas too.
+
+Physicists measure how readily a fuel fuses with a number called the reactivity, written $\langle\sigma v\rangle$. You can think of it as the chance that two people on a crowded dance floor bump into each other and shake hands. The power a cubic metre of plasma makes through fusion is:
+
+$$
+P = \tfrac{1}{4}\, n^2\, \langle\sigma v\rangle\, E
+$$
+
+Here $n$ is the number of nuclei in a cubic metre, and $E$ is the energy each fusion releases, {n.q} MeV. Half the fuel is deuterium and half is tritium, so the number of pairs that can meet is $\tfrac{n}{2} \cdot \tfrac{n}{2} = \tfrac{1}{4} n^2$. That $n^2$ matters a great deal: double the density and the power goes up four times, just as doubling the number of people on the dance floor makes four times as many encounters.
+
+<ReactivityChart lang="en">The reactivity of three fusion fuels, computed with the formula Bosch and Hale (1992) fitted to measurements. Both axes are logarithmic: each line up is ten times the one below. Deuterium–tritium (D–T) is far ahead of the other two fuels at every temperature: at 10 keV it fuses about {n.ratioDd} times more readily than deuterium–deuterium (D–D) and about {n.ratioDhe3} times more readily than deuterium–helium-3 (D–³He). The second row under the horizontal axis gives the same temperatures in millions of degrees.</ReactivityChart>
+
+The chart says two things. First, D–T is by far the easiest fuel, which is why nearly every fusion power plant design starts with it. Second, the curve rises very fast with temperature, but it peaks at about {n.dtPeakKev} keV. Heating the plasma further has a cost, and as we will see shortly, the best range is 10 to 20 keV. That is {n.at10} to {n.at20} million degrees: ten times hotter than the centre of the Sun.
+
+## Three ingredients: temperature, density, time
+
+A hot plasma is like a room heated by a stove in winter: heat keeps leaking out. If you turned the stove off, how long would the room take to cool down? For a plasma, the answer is called the energy confinement time and written $\tau_E$ (read “tau E”). The longer $\tau_E$, the better the plasma keeps its heat.
+
+The dream of a fusion reactor is a plasma that heats itself. Remember that the helium nucleus from each fusion stays in the plasma and hands its energy over to it. Once the heat that helium brings in makes up for the heat leaking out, no outside heating is needed. The plasma becomes a fire that keeps burning without anyone adding wood. This is called ignition. In the 1950s John Lawson worked out this balance and showed that what matters is the product of three numbers: density, temperature and confinement time. For D–T fuel the condition is:
+
+$$
+n\, T\, \tau_E \gtrsim 3 \times 10^{21}\ \mathrm{keV \cdot s / m^3}
+$$
+
+(The $\gtrsim$ sign means “roughly greater than”.) You do not have to make all three large; the product just has to be big enough. A tokamak plasma holds about $10^{20}$ nuclei in each cubic metre, roughly {n.thinnerThanAirThousands} thousand times thinner than air. If such a plasma at 15 keV keeps its heat for about 2 seconds, the condition is met: $10^{20} \cdot 15 \cdot 2 = 3 \times 10^{21}$.
+
+The product needed also depends on the temperature. The chart below shows how.
+
+<LawsonChart lang="en">The triple product a D–T plasma needs to heat itself. The calculation looks for the point where the heat brought in by helium exactly makes up for the heat leaking out; it leaves out energy lost as radiation. The curve looks like a valley. If the plasma is too cold, fusions are too rare. If it is too hot, fusions no longer get much faster, but the heat that has to be kept keeps growing. The bottom of the valley is at about {n.ignitionKev} keV, around {n.ignitionMillionC} million degrees.</LawsonChart>
+
+This valley is why fusion reactors aim for around 150 million degrees. Today’s large tokamaks can reach these temperatures; the hard part is making the density and the confinement time large enough while they are there.
+
+### Gain: Q
+
+In news about fusion you will often see the letter Q. It is the ratio of the fusion power the plasma gives to the power we put in to heat it:
+
+$$
+Q = \frac{\text{fusion power}}{\text{heating power}}
+$$
+
+$Q = 1$ is breakeven: the plasma gives back as much as it takes. ITER aims for $Q = 10$: 500 megawatts of fusion power from 50 megawatts of heating. An ignited plasma needs no outside heating at all, so for it Q is infinite.
+
+But this is the “scientific” gain. For a power plant to actually supply electricity to the grid, the whole facility has to come out ahead. The machines that cool the magnets, the heating systems and the lasers draw a lot of electricity from the grid, and only part of fusion’s heat can be turned into electricity. So a power plant that pays its way needs Q well above 1. We will come back to this when we look at where things stand today.
+
+## How do we hold a plasma?
+
+No container can withstand a gas at 150 million degrees. But plasma has one advantage: its particles are charged. A charged particle cannot move in a straight line in a magnetic field; it circles around a field line in a helix. Like a bead on a string, it stays tied to the line: it slides along it easily but cannot move away from it.
+
+A straight tube has two open ends, and particles slide along the field lines and escape through them. The answer is to bend the tube and join its ends into a doughnut. Coils placed around the doughnut make a magnetic field that runs around the ring inside it; we call it the toroidal field. Unfortunately, that is not enough. A bent field is stronger on the inside of the doughnut than on the outside. Because of that difference, particles slowly drift up or down and eventually hit the wall.
+
+The cure is to twist the field lines around the doughnut. In a tokamak, a large electric current flowing through the plasma does this. The central solenoid works like the first winding of a transformer; the plasma becomes the second winding, and a current of millions of amperes flows in it. This current makes a second field that circles the doughnut’s cross-section: the poloidal field. Together, the two fields make field lines that wind like the stripes on a candy cane. The thin lines in the first drawing show them. A particle following such a line passes alternately along the inside and the outside of the doughnut, and the drifts cancel out.
+
+The tokamak is not the only way. A stellarator gets the same twist without a current in the plasma, by bending the coils themselves in a clever way. Wendelstein 7-X in Germany is the largest example. Laser fusion does not try to hold the plasma at all. At the National Ignition Facility (NIF) in the United States, 192 laser beams hit a fuel capsule the size of a peppercorn from all sides at once. The capsule implodes, and the fuel is squeezed, heated and fused in about a billionth of a second. Here the Lawson condition is met over a very short time, but at an enormous density.
+
+And how do we turn fusion’s energy into electricity? The neutrons, which carry most of the energy, ignore the magnetic field. They leave the plasma and hit the thick wall around it, the blanket. The blanket heats up, that heat turns water into steam, and the steam drives a turbine, just as in today’s power plants. The blanket has one more job. The lithium in it makes tritium when it catches neutrons:
+
+$$
+\mathrm{n} + {}^{6}\mathrm{Li} \longrightarrow {}^{4}\mathrm{He} + \mathrm{T}
+$$
+
+So a fusion power plant can make part of its own fuel. Nobody has yet shown this on a large scale, though.
+
+## Why so clean?
+
+This is why fusion is so exciting.
+
+**No carbon.** The product of the reaction is helium, the harmless gas we fill balloons with. A running plant gives off no carbon dioxide.
+
+**It cannot run away.** A fission reactor has a self-sustaining chain reaction that must be kept in check all the time. Fusion has no such chain. At any moment, the reactor holds only a few grams of fuel, and keeping the plasma burning is very hard. If something goes wrong, the plasma cools within seconds and the reaction stops by itself. A fusion plant cannot have a meltdown.
+
+**Plenty of fuel.** Deuterium is in ordinary water: about one hydrogen atom in 6,400 is deuterium. A litre of water holds about {n.deuteriumMg} milligrams of it, and the oceans hold enough deuterium to last humanity a very long time. There is almost no tritium in nature, but it can be made from the lithium in the blanket, and lithium is found in rocks and in seawater.
+
+**Short-lived waste.** Fusion is not entirely free of radioactivity. Tritium itself is radioactive (its half-life is 12.3 years) and must be handled with care. Fast neutrons also make the materials in the reactor’s walls radioactive over time. But their radioactivity falls a great deal within a few decades, and within about a hundred years the materials can be reused. The spent fuel of fission plants, by contrast, has to be stored for tens of thousands of years. Fusion makes no long-lived high-level waste.
+
+Put all this together and it is easy to see why fusion is called the world’s salvation: a source of energy that is clean, safe, has plenty of fuel, takes up little room and runs day and night, whatever the weather. In the fight against climate change and in meeting the world’s growing need for energy, it is one of humanity’s best hopes for clean, abundant energy. But turning a hope into reality is harder than lighting a fire.
+
+## The road ahead
+
+To be honest, there is still a long way to go.
+
+- **No power plant has yet supplied net electricity to the grid.** All the successes so far are about scientific gain. The facilities as a whole still use much more energy than they produce.
+- **Tritium is scarce.** There is almost none in nature; the tritium used today is a by-product of a few fission reactors. Power plants must breed their own in the blanket, and that has not yet been tried at a real scale.
+- **Materials take a beating.** {n.neutron} MeV neutrons knock atoms in the walls out of place and make the material brittle over time. Materials that can withstand this rain for years are still being developed.
+- **Scientific gain is not enough.** Even $Q = 10$ in the plasma does not mean a gain for the whole plant. The electricity used for the magnets, the cooling and the heating has to be counted too.
+- **Time and cost.** Fusion machines are large, complex and expensive. For years people have joked that fusion is “always thirty years away”, and schedules often slip.
+
+## Where does it stand today? (October 2026)
+
+When I started reading in 2015, fusion was mostly the work of government laboratories and international projects such as ITER. Eleven years later the picture has changed a lot. As of October 2026, these are the highlights:
+
+**Ignition with lasers.** On 5 December 2022, NIF sent 2.05 MJ of laser energy into a fuel capsule and got 3.15 MJ of fusion energy out. For the first time, a fusion experiment gave back more energy than was delivered to its fuel. NIF has reached ignition 11 times since. A shot on 7 April 2025 produced 8.6 MJ of fusion energy, 4.13 times the laser energy delivered. The latest, on 20 June 2026, produced 7.9 MJ. These are gains at the target, though: to make 2 MJ of laser light, NIF’s lasers draw about 300 MJ from the grid.
+
+**JET’s farewell.** JET, Europe’s joint tokamak in England, finished its work in December 2023 after running since 1983. In its last D–T experiments it produced 69 MJ of fusion energy in 5 seconds from only 0.2 milligrams of fuel, the most energy a fusion machine has produced in a single pulse.
+
+**ITER.** ITER, built together by more than 30 countries in the south of France, will be the world’s largest tokamak. Under the new schedule announced in 2024, research operations start in 2034, full magnetic energy follows in 2036, and D–T experiments begin in 2039. For D–T experiments that is about four years later than the old plan, at around 5 billion euros in extra cost. Assembly, on the other hand, has sped up. The first of the nine huge modules that form the machine’s doughnut-shaped core was lowered into place in April 2025. The sixth followed on 28 July 2026, completing two thirds of the core, and the last is planned for 2027. The last of the central solenoid’s six modules reached France in September 2025.
+
+**Long pulses.** In January 2025, the EAST tokamak in China held a high-confinement (H-mode) plasma for 1,066 seconds. A few weeks later, in February 2025, WEST in France kept a plasma at about 50 million degrees going for 1,337 seconds, over 22 minutes. And in May 2025 the German stellarator Wendelstein 7-X held a high value of the triple product for 43 seconds. According to data published later, it shares the best result for long pulses with JET.
+
+**Private companies.** According to the Fusion Industry Association’s July 2026 report, 56 fusion companies raised 4.48 billion dollars in the previous 12 months, and the total investment reported since 2021 is 14.24 billion dollars. One of the largest, Commonwealth Fusion Systems (CFS), is building a much smaller tokamak with strong magnets made from high-temperature superconductors. In July 2026 the company said it was finishing the assembly of its SPARC machine in Massachusetts; it aims to reach Q > 1 in 2027. It then plans to build its first power plant, ARC, in Virginia and to put power on the grid in the early 2030s. Google has already signed an agreement to buy 200 megawatts of that plant’s electricity. Helion agreed with Microsoft in 2023 to supply electricity from 2028. In July 2025 it began building its first plant in Washington State, and in February 2026 it announced that its Polaris test machine had measured D–T fusion and heated its plasma to 150 million degrees.
+
+**Governments.** China is building a new tokamak called BEST in Hefei and hopes to demonstrate net energy gain and electricity generation around 2030. The United Kingdom has committed 2.5 billion pounds to STEP, a prototype planned to start operating in 2040 at West Burton, the site of a former coal power station. According to the International Atomic Energy Agency’s (IAEA) 2025 report, more than 160 fusion devices are operating, under construction or planned around the world.
+
+One thing is still missing from this list: not a single kilowatt-hour made by fusion has reached the grid. And most of the dates above are targets; as in the past, they may slip.
+
+## Closing
+
+Since 2015 we have seen capsules ignited by lasers, plasmas that burn for minutes, and power plants under construction. No light bulb runs on fusion yet, and nobody can say for sure when one will. But every morning the Sun reminds us that the recipe works. I would very much like to see one of those small suns warming our homes one day.
+
+## Sources
+
+Physics:
+
+- M. Wang et al., [“The AME 2020 atomic mass evaluation (II)”](https://doi.org/10.1088/1674-1137/abddaf), *Chinese Physics C* 45 (2021) 030003: atomic masses.
+- H.-S. Bosch and G. M. Hale, [“Improved formulas for fusion cross-sections and thermal reactivities”](https://doi.org/10.1088/0029-5515/32/4/I07), *Nuclear Fusion* 32 (1992) 611: the reactivity formula.
+
+Where it stands today:
+
+- LLNL, [Achieving fusion ignition](https://lmf.llnl.gov/science/achieving-fusion-ignition): NIF’s ignition shots.
+- Optica OPN, [Ignition accomplished: NIF looks to the future](https://www.optica-opn.org/home/newsroom/2022/december/ignition_accomplished_nif_looks_to_the_future/) (December 2022): the energy the lasers draw from the grid.
+- UK Government, [JET’s final tritium experiments yield new fusion energy record](https://www.gov.uk/government/news/jets-final-tritium-experiments-yield-new-fusion-energy-record) (February 2024).
+- ITER, [Baseline 2024 press conference summary](https://iter.org/sites/default/files/media/2024-07/baseline_press_conference_summary_july-2024_b.pdf) (July 2024), and Physics World, [on the delay and extra cost](https://physicsworld.com/iter-fusion-reactor-hit-by-massive-decade-long-delay-and-e5bn-price-hike/).
+- ITER, [the first sector module in place](https://www.iter.org/node/31159) (April 2025) and [two thirds of the core in place](https://www.iter.org/two-thirds-iter-tokamak-core-now-place) (July 2026).
+- US ITER, [Sixth module delivered for heart of ITER](https://usiter.ornl.gov/news/sixth-module-delivered-for-heart-of-iter/) (September 2025).
+- Chinese Academy of Sciences, [EAST’s 1,066-second record](https://english.cas.cn/newsroom/cas_media/202501/t20250121_899052.shtml) (January 2025).
+- CEA, [WEST beats the world record for plasma duration](https://cea.fr/english/Pages/News/nuclear-fusion-west-beats-the-world-record-for-plasma-duration.aspx) (February 2025).
+- Max Planck Institute for Plasma Physics, [Wendelstein 7-X sets new performance records](https://www.ipp.mpg.de/5532945/w7x) (June 2025).
+- Fusion Industry Association, [2026 report](https://www.fusionindustryassociation.org/fusion-industry-attracts-record-annual-funding-of-4-48bn-raising-total-to-14-24bn/) (July 2026).
+- CFS, [SPARC](https://cfs.energy/technology/sparc), [the 4-billion-dollar funding announcement](https://cfs.energy/news-and-media/commonwealth-fusion-systems-raises-another-1-billion-bringing-total-capital-raised-to-4-billion/) (July 2026) and [the agreement with Google](https://cfs.energy/news-and-media/google-and-commonwealth-fusion-systems-sign-strategic-partnership/) (June 2025).
+- CNBC, [Microsoft’s agreement with Helion](https://www.cnbc.com/2023/05/10/microsoft-agrees-to-buy-power-from-sam-altman-backed-helion-in-2028.html) (May 2023); Helion, [building Orion begins](https://www.helionenergy.com/blog/starting-to-build-the-worlds-first-fusion-power-plant-in-malaga-wa) (July 2025) and [Polaris results](https://www.helionenergy.com/newsroom/helion-achieves-new-fusion-energy-milestones) (February 2026).
+- Chinese Academy of Sciences, [the BEST tokamak](https://english.cas.cn/newsroom/cas-in-media/202601/t20260119_1145881.shtml) (January 2026).
+- UK Government, [2.5 billion pounds for STEP](https://www.gov.uk/government/news/25-billion-for-world-first-prototype-fusion-energy-plant) (June 2025).
+- IAEA, [World Fusion Outlook 2025](https://www.iaea.org/publications/15935/iaea-world-fusion-outlook-2025).

@@ -1,0 +1,320 @@
+---
+/**
+ * The D–T reaction, before and after: deuterium and tritium meet; a helium-4 nucleus and a neutron
+ * fly apart in opposite directions, the neutron with four fifths of the energy. Masses and
+ * energies come from model.ts (AME2020 masses, E = mc²). Two layouts: side by side from sm up,
+ * stacked on phones.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import Figure from './Figure.astro';
+import { fusionPostMessages } from './messages.ts';
+import { dtReaction } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = fusionPostMessages[lang].reaction;
+const f = formatters(lang);
+const fixed = (x: number, digits: number) => f.number(x, { minimumFractionDigits: digits, maximumFractionDigits: digits });
+const dt = dtReaction();
+
+// The numbers the prose and the formula state: 17.6 MeV, 3.5 + 14.1, and 0.4% of the mass.
+const { rounded } = dt;
+if (rounded.q !== 17.6 || rounded.alpha !== 3.5 || rounded.neutron !== 14.1) {
+  throw new Error(`ReactionFigure: the reaction reads ${rounded.q} = ${rounded.alpha} + ${rounded.neutron} MeV`);
+}
+if (Math.abs(dt.neutron - rounded.neutron) > 0.1) throw new Error(`ReactionFigure: the neutron gets ${dt.neutron} MeV`);
+if (Math.abs(dt.defectShare - 0.00375) > 0.0001) throw new Error(`ReactionFigure: the mass defect is ${dt.defectShare}`);
+
+const label = m.aria(fixed(rounded.alpha, 1), fixed(rounded.neutron, 1), fixed(rounded.q, 1), f.percent(dt.defectShare, { maximumFractionDigits: 1 }));
+
+type Kind = 'p' | 'n';
+/** Nucleon offsets within each nucleus (units of the drawing). */
+const NUCLEI: Record<'d' | 't' | 'he' | 'n', [number, number, Kind][]> = {
+  d: [
+    [-9.1, 0, 'p'],
+    [9.1, 0, 'n'],
+  ],
+  t: [
+    [0, -8.5, 'p'],
+    [-9.1, 7.2, 'n'],
+    [9.1, 7.2, 'n'],
+  ],
+  he: [
+    [-8.5, -8.5, 'p'],
+    [8.5, -8.5, 'n'],
+    [-8.5, 8.5, 'n'],
+    [8.5, 8.5, 'p'],
+  ],
+  n: [[0, 0, 'n']],
+};
+const R = 11;
+
+interface Placed {
+  nucleus: keyof typeof NUCLEI;
+  x: number;
+  y: number;
+  name: string;
+}
+
+interface Layout {
+  width: number;
+  height: number;
+  font: number;
+  before: { title: [number, number]; d: Placed; t: Placed; arrows: [number, number, number, number][]; mass: [number, number] };
+  between: [number, number, number, number];
+  after: {
+    title: [number, number];
+    flash: [number, number];
+    he: Placed;
+    n: Placed;
+    heArrow: [number, number, number, number];
+    nArrow: [number, number, number, number];
+    heEnergy: [number, number];
+    nEnergy: [number, number];
+    mass: [number, number];
+  };
+  total: [number, number];
+}
+
+const wide: Layout = {
+  width: 600,
+  height: 210,
+  font: 14,
+  before: {
+    title: [120, 26],
+    d: { nucleus: 'd', x: 60, y: 100, name: m.deuterium },
+    t: { nucleus: 't', x: 180, y: 100, name: m.tritium },
+    arrows: [
+      [90, 100, 112, 100],
+      [150, 100, 128, 100],
+    ],
+    mass: [120, 168],
+  },
+  between: [236, 100, 272, 100],
+  after: {
+    title: [430, 26],
+    flash: [400, 100],
+    he: { nucleus: 'he', x: 336, y: 100, name: m.helium },
+    n: { nucleus: 'n', x: 552, y: 100, name: m.neutron },
+    heArrow: [384, 100, 362, 100],
+    nArrow: [416, 100, 530, 100],
+    heEnergy: [336, 60],
+    nEnergy: [480, 88],
+    mass: [430, 168],
+  },
+  total: [300, 200],
+};
+
+const compact: Layout = {
+  width: 320,
+  height: 350,
+  font: 12,
+  before: {
+    title: [160, 22],
+    d: { nucleus: 'd', x: 90, y: 72, name: m.deuterium },
+    t: { nucleus: 't', x: 230, y: 72, name: m.tritium },
+    arrows: [
+      [114, 72, 146, 72],
+      [206, 72, 174, 72],
+    ],
+    mass: [160, 136],
+  },
+  between: [160, 146, 160, 172],
+  after: {
+    title: [160, 194],
+    flash: [150, 248],
+    he: { nucleus: 'he', x: 70, y: 248, name: m.helium },
+    n: { nucleus: 'n', x: 290, y: 248, name: m.neutron },
+    heArrow: [134, 248, 98, 248],
+    nArrow: [166, 248, 268, 248],
+    heEnergy: [70, 208],
+    nEnergy: [219, 236],
+    mass: [160, 314],
+  },
+  total: [160, 342],
+};
+
+const layouts = [
+  { key: 'compact', class: 'sm:hidden', layout: compact },
+  { key: 'wide', class: 'hidden sm:block', layout: wide },
+];
+
+/** A burst: a small star of rays. */
+function flash(x: number, y: number): string {
+  const rays = 10;
+  return Array.from({ length: rays }, (_, i) => {
+    const a = (i / rays) * 2 * Math.PI;
+    const inner = 5;
+    const outer = i % 2 === 0 ? 15 : 10;
+    return `M${(x + inner * Math.cos(a)).toFixed(1)} ${(y + inner * Math.sin(a)).toFixed(1)}L${(x + outer * Math.cos(a)).toFixed(1)} ${(y + outer * Math.sin(a)).toFixed(1)}`;
+  }).join('');
+}
+
+const nameBelow = 40;
+---
+
+<Figure class="max-w-xl">
+  <div slot="graphic" class="fusion-reaction">
+    {
+      layouts.map(({ key, class: className, layout: l }) => {
+        const arrow = `rx-arrow-${key}`;
+        const nucleus = (p: Placed) => (
+          <g>
+            {NUCLEI[p.nucleus].map(([dx, dy, kind]) => (
+              <circle cx={p.x + dx} cy={p.y + dy} r={R} class={kind === 'p' ? 'proton' : 'neutron'} />
+            ))}
+            <text x={p.x} y={p.y + nameBelow} text-anchor="middle" class="name">{p.name}</text>
+          </g>
+        );
+        return (
+          <svg
+            class:list={['h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+            viewBox={`0 0 ${l.width} ${l.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={label}
+            focusable="false"
+          >
+            <defs>
+              <marker id={arrow} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0 0L10 5L0 10z" class="arrowhead" />
+              </marker>
+            </defs>
+            <g class="font-sans" font-size={l.font}>
+              <text x={l.before.title[0]} y={l.before.title[1]} text-anchor="middle" class="title">{m.before}</text>
+              {nucleus(l.before.d)}
+              {nucleus(l.before.t)}
+              {l.before.arrows.map(([x1, y1, x2, y2]) => (
+                <line x1={x1} y1={y1} x2={x2} y2={y2} class="motion" marker-end={`url(#${arrow})`} />
+              ))}
+              <text x={l.before.mass[0]} y={l.before.mass[1]} text-anchor="middle" class="mass font-mono">{m.massBefore(fixed(dt.massBefore, 3))}</text>
+
+              <line x1={l.between[0]} y1={l.between[1]} x2={l.between[2]} y2={l.between[3]} class="between" marker-end={`url(#${arrow})`} />
+
+              <text x={l.after.title[0]} y={l.after.title[1]} text-anchor="middle" class="title">{m.after}</text>
+              <path d={flash(l.after.flash[0], l.after.flash[1])} class="flash" />
+              {nucleus(l.after.he)}
+              {nucleus(l.after.n)}
+              <line x1={l.after.heArrow[0]} y1={l.after.heArrow[1]} x2={l.after.heArrow[2]} y2={l.after.heArrow[3]} class="motion" marker-end={`url(#${arrow})`} />
+              <line x1={l.after.nArrow[0]} y1={l.after.nArrow[1]} x2={l.after.nArrow[2]} y2={l.after.nArrow[3]} class="motion-fast" marker-end={`url(#${arrow})`} />
+              <text x={l.after.heEnergy[0]} y={l.after.heEnergy[1]} text-anchor="middle" class="energy font-mono">{fixed(rounded.alpha, 1)} MeV</text>
+              <text x={l.after.nEnergy[0]} y={l.after.nEnergy[1]} text-anchor="middle" class="energy font-mono">{fixed(rounded.neutron, 1)} MeV</text>
+              <text x={l.after.mass[0]} y={l.after.mass[1]} text-anchor="middle" class="mass font-mono">{m.massAfter(fixed(dt.massAfter, 3))}</text>
+              <text x={l.total[0]} y={l.total[1]} text-anchor="middle" class="total font-mono">
+                {`${fixed(dt.massBefore, 3)} − ${fixed(dt.massAfter, 3)} = ${fixed(dt.defect, 3)} u  →  ${fixed(rounded.q, 1)} MeV`}
+              </text>
+            </g>
+          </svg>
+        );
+      })
+    }
+  </div>
+  <ul slot="legend" class="rx-key flex justify-center gap-x-5 text-xs text-zinc-600 dark:text-zinc-400">
+    <li class="flex items-center gap-2">
+      <svg class="size-3.5" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="6" class="rx-key-proton" /></svg>
+      {m.proton}
+    </li>
+    <li class="flex items-center gap-2">
+      <svg class="size-3.5" viewBox="0 0 14 14" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="6" class="rx-key-neutron" /></svg>
+      {m.neutronKey}
+    </li>
+  </ul>
+  <slot />
+</Figure>
+
+<style>
+  .fusion-reaction,
+  .rx-key {
+    --proton: var(--color-accent-600);
+    --neutron: var(--color-zinc-300);
+    --nucleon-edge: var(--color-zinc-700);
+    --ink: var(--color-zinc-800);
+    --muted: var(--color-zinc-500);
+    --flash: var(--color-amber-500);
+  }
+
+  :global(:where([data-theme='dark'])) .fusion-reaction,
+  :global(:where([data-theme='dark'])) .rx-key {
+    --proton: var(--color-accent-400);
+    --neutron: var(--color-zinc-600);
+    --nucleon-edge: var(--color-zinc-200);
+    --ink: var(--color-zinc-200);
+    --muted: var(--color-zinc-400);
+    --flash: var(--color-amber-400);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .fusion-reaction,
+    :global(:where(:root:not([data-theme]))) .rx-key {
+      --proton: var(--color-accent-400);
+      --neutron: var(--color-zinc-600);
+      --nucleon-edge: var(--color-zinc-200);
+      --ink: var(--color-zinc-200);
+      --muted: var(--color-zinc-400);
+      --flash: var(--color-amber-400);
+    }
+  }
+
+  .proton,
+  .rx-key-proton {
+    fill: var(--proton);
+    stroke: var(--nucleon-edge);
+    stroke-width: 1;
+  }
+
+  .neutron,
+  .rx-key-neutron {
+    fill: var(--neutron);
+    stroke: var(--nucleon-edge);
+    stroke-width: 1;
+  }
+
+  .name,
+  .title {
+    fill: var(--ink);
+  }
+
+  .title {
+    font-weight: 600;
+  }
+
+  .mass {
+    fill: var(--muted);
+  }
+
+  .energy,
+  .total {
+    fill: var(--ink);
+    font-weight: 600;
+  }
+
+  .motion,
+  .motion-fast,
+  .between {
+    stroke: var(--muted);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+  }
+
+  .motion-fast {
+    stroke-width: 2.5;
+  }
+
+  .between {
+    stroke-dasharray: 3 3;
+  }
+
+  .arrowhead {
+    fill: var(--muted);
+  }
+
+  .flash {
+    stroke: var(--flash);
+    stroke-width: 2.25;
+    stroke-linecap: round;
+  }
+</style>

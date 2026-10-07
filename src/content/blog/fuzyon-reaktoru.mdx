@@ -1,0 +1,219 @@
+---
+title: 'Füzyon Reaktörü: Yeryüzünde Küçük Bir Güneş'
+description: 'Füzyon nedir, neden bu kadar temiz bir enerji kaynağıdır ve bugün nerede duruyor? Güneş’in tarifini, çizimler ve birkaç sade formülle adım adım anlatıyorum.'
+pubDate: 2026-10-07
+lang: tr
+translationKey: fusion-reactor
+tags: [fizik, enerji, bilim]
+---
+
+import BindingCurve from '../../components/blog/posts/fusion/BindingCurve.astro';
+import LawsonChart from '../../components/blog/posts/fusion/LawsonChart.astro';
+import ReactionFigure from '../../components/blog/posts/fusion/ReactionFigure.astro';
+import ReactivityChart from '../../components/blog/posts/fusion/ReactivityChart.astro';
+import Tokamak from '../../components/blog/posts/fusion/Tokamak.astro';
+import { postNumbers } from '../../components/blog/posts/fusion/numbers';
+
+export const n = postNumbers('tr');
+
+{/*
+  Şekiller ve metindeki sayılar, site derlenirken src/components/blog/posts/fusion/model.ts ile
+  hesaplanıyor: atom kütleleri AME2020’den, reaktiviteler Bosch ve Hale’in (1992) formülünden.
+  Metin sayıları elle yazmıyor, postNumbers’tan alıyor; KaTeX formüllerindeki sayıları
+  tests/blog-fusion-post.test.ts modelle karşılaştırıyor. İngilizce sürümü fusion-reactor.mdx; iki
+  yazı aynı bilgileri taşıyor, birlikte güncel tutun. “Bugün nerede?” bölümü Ekim 2026 itibarıyla
+  yazıldı; her bilginin kaynağı yazının sonunda.
+*/}
+
+Füzyonu okumaya 2015’te başladım. O günden bu yana çok şey değişti. Bir laboratuvar, yakıtına verdiği enerjiden fazlasını füzyondan geri almayı ilk kez başardı. Kırk yıl çalışan bir makine, emekli olmadan hemen önce bir rekor daha kırdı. Özel şirketler milyarlarca dolar topladı. Bu yazıda füzyonun ardındaki güzel fikri anlatmak istiyorum: Güneş’in nasıl yandığını öğrenip aynı ateşi yeryüzünde, bir makinenin içinde yakmak.
+
+Matematik bilmeniz gerekmiyor. Birkaç formül göreceğiz, ama her birini ilk göründüğü yerde gündelik bir benzetmeyle açıklayacağım. Grafiklerdeki eğrileri ve yazıdaki sayıların çoğunu, site hazırlanırken gerçek ölçümlerden yola çıkan küçük bir modele hesaplattım.
+
+<Tokamak lang="tr">Bir tokamak, yani bugün en çok çalışılan füzyon reaktörü türü. İçi görünsün diye önünden bir dilim kesip çıkardım. Simit biçimindeki kabın içinde plazma dolaşıyor; çevredeki D biçimli bobinler ve ortadaki solenoid, plazmayı duvarlara değdirmeden tutan manyetik alanı kuruyor. Kesitte dıştan içe vakum kabı, örtü, ince bir vakum boşluğu ve plazma görünüyor. Plazmanın üzerindeki çizgiler manyetik alan çizgileri; sarmal görünsün diye bükümlerini abarttım. Çizim, ITER’e benzer ölçülerle kurulmuş küçük bir üç boyutlu modelden hesaplanıyor.</Tokamak>
+
+## Güneş’in tarifi
+
+Güneş’e bakınca bir ateş görürüz ama Güneş, odun gibi yanmıyor. Merkezinde hidrojen çekirdekleri birbirine çarpıp kaynaşıyor ve helyuma dönüşüyor. Buna füzyon, Türkçesiyle kaynaşma diyoruz. Her kaynaşmada çok az bir kütle kayboluyor; bu kütle ışık ve ısı olarak geri dönüyor. Dünyadaki hayatın neredeyse bütün enerjisi bu tepkimelerden geliyor.
+
+Güneş’in merkezi yaklaşık 15 milyon °C. Bu çok sıcak, ama birazdan göreceğimiz gibi füzyon için aslında az. Güneş’in işini kolaylaştıran şey büyüklüğü: Devasa kütlesi, merkezindeki maddeyi kendi ağırlığıyla sıkıştırıp orada tutuyor. Üstelik Güneş acele etmiyor. Merkezindeki bir metreküp, yalnızca birkaç yüz watt ısı üretiyor; bir elektrikli sobadan bile az. Güneş’i bu kadar güçlü yapan, bu metreküplerden çok, ama çok fazla olması.
+
+Yeryüzünde ne o kadar yerimiz var ne de o kadar zamanımız. Güneş’in tarifini burada uygulamak için hem yakıtı değiştirmemiz hem de ateşi çok daha fazla harlamamız gerekiyor. Neden böyle olduğunu anlamak için önce çekirdeklere yakından bakalım.
+
+## Hafif çekirdekler neden enerji verir?
+
+Her atomun ortasında küçücük bir çekirdek var. Çekirdek protonlardan ve nötronlardan oluşuyor; ikisine birden “nükleon” diyoruz. Protonlar artı yüklü olduğu için birbirini iter. Onları bir arada tutan, nükleer kuvvet: Yalnızca çok kısa mesafelerde işleyen ama çok güçlü bir çekim.
+
+İki mıknatısı birbirine yaklaştırdığınızı düşünün. Belli bir mesafeden sonra “çat” diye birbirlerine yapışırlar. O çat sesi, açığa çıkan enerjidir. Ne kadar sıkı yapışırlarsa o kadar çok enerji çıkar ve onları ayırmak da o kadar zor olur. Çekirdekler de böyle. Bir çekirdeği parçalarına ayırmak için gereken enerjiye çekirdeğin “bağlanma enerjisi” diyoruz. Bunu nükleon sayısına bölersek, her bir parçanın ortalama ne kadar sıkı tutunduğunu buluruz: nükleon başına bağlanma enerjisi.
+
+Aşağıdaki grafik, hafif çekirdeklerden ağırlara doğru bu sayının nasıl değiştiğini gösteriyor.
+
+<BindingCurve lang="tr">Nükleon başına bağlanma enerjisi; noktalar, ölçülmüş atom kütlelerinden (AME2020) hesaplanıyor. Eğri en hafif çekirdeklerde dik bir şekilde yükseliyor, demir ve nikelde tepeye çıkıyor, sonra yavaşça iniyor. Hafif çekirdekleri birleştirmek (füzyon) de ağır çekirdekleri bölmek (fisyon) de tepeye doğru atılmış bir adımdır ve enerji açığa çıkarır.</BindingCurve>
+
+Eğrinin biçimi her şeyi anlatıyor. Tepede, yaklaşık {n.binding.iron} MeV ile demir ve nikel var; doğadaki en sıkı bağlı çekirdekler bunlar. (MeV, “milyon elektronvolt” demek; atom dünyasında kullanılan küçük bir enerji birimi. Biz onu yalnızca karşılaştırma için kullanacağız.) Tepeye iki yoldan tırmanabiliriz. Uranyum gibi ağır bir çekirdeği ikiye bölersek, parçalar daha sıkı bağlı olur ve aradaki fark enerji olarak açığa çıkar. Bugünkü nükleer santraller bunu yapıyor; adı fisyon, yani bölünme. Öbür yol, hafif çekirdekleri birleştirmek: füzyon.
+
+Eğrinin sol tarafı çok daha dik. Döteryumda nükleon başına bağlanma enerjisi yalnızca {n.binding.deuterium} MeV, helyum-4’te ise {n.binding.helium} MeV. Demek ki hafif çekirdekleri birleştirmek, nükleon başına fisyondan çok daha fazla enerji verir. Helyum-4’ün eğrinin üstüne fırlamasına da dikkat edin: İki proton ve iki nötron, özellikle sıkı bir paket oluşturuyor. Füzyonun en iyi tarifi de bu paketi yapmak.
+
+## E = mc²: Kaybolan kütle
+
+Füzyon reaktörlerinin yakıtı, hidrojenin iki ağır kardeşi. Sıradan hidrojenin çekirdeği tek bir protondur. Döteryumun çekirdeğinde bir proton ve bir nötron, trityumun çekirdeğinde ise bir proton ve iki nötron var. Bu ikisi kaynaşınca bir helyum-4 çekirdeği ve serbest bir nötron ortaya çıkıyor:
+
+$$
+\mathrm{D} + \mathrm{T} \longrightarrow {}^{4}\mathrm{He}\ (3{,}5\ \mathrm{MeV}) + \mathrm{n}\ (14{,}1\ \mathrm{MeV})
+$$
+
+Parantezlerdeki sayılar, ürünlerin ne kadar enerjiyle uçup gittiğini gösteriyor; toplamı {n.q} MeV. Bu enerji nereden geliyor? Tepkimeden önce ve sonra her şeyi tartalım. Kütleleri atom kütle birimiyle, kısaca u ile ölçüyoruz; bir u, aşağı yukarı bir protonun kütlesi. Döteryum ile trityum birlikte {n.massBefore} u geliyor, helyum ile nötron ise {n.massAfter} u. Aradaki {n.defect} u kayboldu. Bu, yakıtın kütlesinin yaklaşık {n.defectShare} kadarı.
+
+Kaybolan kütlenin nereye gittiğini Einstein’ın ünlü formülü söylüyor:
+
+$$
+E = mc^2
+$$
+
+Burada $E$ enerji, $m$ kütle, $c$ ise ışığın hızı: saniyede yaklaşık 300.000 kilometre. $c^2$, $c \cdot c$ demek; yani zaten kocaman olan bir sayının kendisiyle çarpımı. Formül bize, azıcık kütlenin çok büyük bir enerjiye denk olduğunu söylüyor. Bir gram kütle tamamen enerjiye dönüşseydi $0{,}001 \cdot (3 \times 10^8)^2 = 9 \times 10^{13}$ joule ederdi. ($10^8$, 1’in arkasına 8 sıfır koymak demek, yani 100 milyon.) Bu, iki bin ton kadar benzinin enerjisi.
+
+<ReactionFigure lang="tr">Döteryum ile trityum kaynaşıyor; geriye bir helyum-4 çekirdeği ve bir nötron kalıyor. Ürünler yakıttan {n.defect} u daha hafif ve kaybolan kütle {n.q} MeV enerji olarak ortaya çıkıyor. Hafif olan nötron, enerjinin {n.neutronShare} kadarını alıp götürüyor. Kütleler AME2020 ölçümlerinden.</ReactionFigure>
+
+Ürünler neden ters yönlere uçuyor ve neden nötron daha fazla enerji alıyor? Bir tüfek düşünün. Ateşlendiğinde mermi ileri, tüfek geri gider. İkisi aynı itişi alır, ama hafif olan mermi çok daha hızlı uçar ve enerjinin büyük kısmını o götürür. Burada da helyum, nötrondan dört kat ağır. Bu yüzden nötron dört kat hızlı uçar ve enerjinin beşte dördünü, {n.neutron} MeV’u alır. Bu ayrıntı ileride önemli olacak. Helyum yüklü olduğu için plazmanın içinde kalıp onu ısıtır; yüksüz nötron ise doğrudan dışarı kaçar.
+
+Şimdi bunu gündelik bir ölçüye çevirelim. Bir kilogram döteryum–trityum yakıtı bu tepkimeyle yaklaşık {n.perKgTj} terajoule enerji verir. Bir gramı {n.perGramGj} gigajoule eder; aynı enerjiyi kömürden almak için {n.coalTonnesLow}–{n.coalTonnesHigh} ton kömür yakmak gerekir. (İyi bir kömürün kilogramı {n.coalLow}–{n.coalHigh} megajoule verir.) Kilogram kilograma karşılaştırınca füzyon yakıtı, kömürden aşağı yukarı {n.coalRatioLow}–{n.coalRatioHigh} milyon kat fazla enerji taşır. Bir gramlık yakıt, bir kamyon dolusu kömürün işini görür.
+
+## Neden yüz milyonlarca derece?
+
+Füzyonun zor tarafı, çekirdekleri bir araya getirmek. İki çekirdek de artı yüklü ve birbirlerini, aynı kutupları karşı karşıya gelen iki mıknatıs gibi iterler. Nükleer kuvvetin devreye girmesi için birbirlerine neredeyse değecek kadar yaklaşmaları gerekir. Döteryum ile trityumu o kadar yaklaştırmanın bedeli yaklaşık {n.barrierKev} keV, yani {n.barrierKev} bin elektronvolt. Bu itişe Coulomb engeli diyoruz. Çekirdeklerin önünde aşılması gereken bir tepe gibi düşünebilirsiniz.
+
+Sıcaklık, parçacıkların ne kadar hızlı hareket ettiğinin ölçüsüdür. Fizikçiler plazmanın sıcaklığını çoğu zaman doğrudan bir enerji birimi olan keV cinsinden verir: 1 keV yaklaşık {n.kevMillionK} milyon dereceye karşılık gelir. (Bu sıcaklıklarda Celsius ile Kelvin arasındaki 273 derecelik fark önemsiz kalıyor.) Bütün çekirdeklerin tepeyi rahatça aşabilmesi için yaklaşık {n.barrierBillionK} milyar derece gerekirdi. Neyse ki bu kadarı gerekmiyor. Bunun iki sebebi var.
+
+Birincisi, sıcaklık bir ortalama. Bir gazdaki parçacıkların bazıları ortalamadan çok daha hızlı hareket eder ve tepeye en çok yaklaşanlar onlardır. İkincisi, kuantum fiziğinin tuhaf bir hediyesi: tünel olayı. Kuantum dünyasında bir parçacık, tepenin üstünden aşamasa bile küçük bir olasılıkla içinden geçip öbür tarafa çıkabilir. Tepenin zirvesine ne kadar yaklaşırsa bu olasılık o kadar hızlı büyür. Bu iki etki birlikte, gereken sıcaklığı milyarlarca dereceden yüz milyonlarca dereceye indiriyor.
+
+Bu kadar sıcak bir gazda elektronlar atomlardan kopar. Geriye çıplak çekirdeklerden ve serbest elektronlardan oluşan, elektriği ileten bir çorba kalır. Buna plazma diyoruz; maddenin katı, sıvı ve gazdan sonraki dördüncü hâli. Şimşek de neon lambasının ışığı da birer plazmadır.
+
+Bir yakıtın ne kadar kolay kaynaştığını fizikçiler “reaktivite” denen bir sayıyla ölçer ve $\langle\sigma v\rangle$ diye yazar. Bunu kalabalık bir dans pistinde iki kişinin karşılaşıp el sıkışma ihtimali gibi düşünebilirsiniz. Bir metreküp plazmanın füzyonla ürettiği güç şöyle yazılır:
+
+$$
+P = \tfrac{1}{4}\, n^2\, \langle\sigma v\rangle\, E
+$$
+
+Burada $n$, bir metreküpteki çekirdek sayısı; $E$ ise her kaynaşmanın verdiği enerji, yani {n.q} MeV. Yakıtın yarısı döteryum, yarısı trityum olduğu için birbirine rastlayabilecek çiftlerin sayısı $\tfrac{n}{2} \cdot \tfrac{n}{2} = \tfrac{1}{4} n^2$ olur. Buradaki $n^2$ çok önemli: Yoğunluğu iki katına çıkarırsanız güç dört katına çıkar. Tıpkı dans pistindeki insan sayısı iki katına çıkınca karşılaşmaların dört katına çıkması gibi.
+
+<ReactivityChart lang="tr">Üç füzyon yakıtının reaktivitesi; Bosch ve Hale’in (1992) ölçümlere uydurduğu formülle hesaplanıyor. İki eksen de logaritmik, yani yukarı doğru her çizgi bir öncekinin on katı. Döteryum–trityum (D–T) her sıcaklıkta öbür iki yakıtın çok önünde: 10 keV’ta döteryum–döteryumdan (D–D) yaklaşık {n.ratioDd}, döteryum–helyum-3’ten (D–³He) yaklaşık {n.ratioDhe3} kat daha kolay kaynaşıyor. Yatay eksenin altındaki ikinci sıra, aynı sıcaklıkları milyon derece olarak veriyor.</ReactivityChart>
+
+Grafik iki şey söylüyor. Birincisi, D–T açık ara en kolay yakıt. Füzyon santrali tasarımlarının neredeyse hepsinin onunla başlamasının sebebi bu. İkincisi, eğri sıcaklıkla birlikte çok hızlı yükseliyor, ama yaklaşık {n.dtPeakKev} keV’ta tepe yapıyor. Plazmayı daha da ısıtmanın bir bedeli var ve birazdan göreceğimiz gibi en verimli bölge 10 ile 20 keV arası. Bu da {n.at10} ile {n.at20} milyon derece arası demek: Güneş’in merkezinden on kat daha sıcak.
+
+## Üç malzeme: sıcaklık, yoğunluk, süre
+
+Sıcak bir plazma, kışın sobayla ısıttığımız bir odaya benzer: Isı durmadan dışarı sızar. Sobayı kapatsanız oda ne kadar sürede soğurdu? Plazma için bu sorunun yanıtına “enerji tutma süresi” diyoruz ve $\tau_E$ diye yazıyoruz (“tau E” diye okunur). $\tau_E$ ne kadar uzunsa plazma ısısını o kadar iyi saklıyor demektir.
+
+Bir füzyon reaktörünün hayali, plazmanın kendi kendini ısıtması. Hatırlarsanız, her kaynaşmada çıkan helyum çekirdeği plazmanın içinde kalıyor ve enerjisini ona bırakıyordu. Helyumun getirdiği ısı, kaçan ısıyı karşılamaya başladığı anda dışarıdan ısıtmaya gerek kalmaz. Plazma, içine odun atılmadan kendi kendine yanan bir ateşe döner. Buna tutuşma diyoruz. John Lawson 1950’lerde bu dengeyi hesapladı ve gereken şartın üç sayının çarpımına bağlı olduğunu gösterdi: yoğunluk, sıcaklık ve tutma süresi. D–T yakıtı için şart şöyle:
+
+$$
+n\, T\, \tau_E \gtrsim 3 \times 10^{21}\ \mathrm{keV \cdot s / m^3}
+$$
+
+($\gtrsim$ işareti “aşağı yukarı bundan büyük” demek.) Üçünü birden büyütmek gerekmiyor; çarpımın yeterince büyük olması yetiyor. Bir tokamaktaki plazmanın her metreküpünde yaklaşık $10^{20}$ çekirdek bulunur. Bu, havadan aşağı yukarı {n.thinnerThanAirThousands} bin kat seyrek demek. Böyle bir plazma 15 keV sıcaklıkta ısısını 2 saniye kadar tutabilirse şart sağlanır: $10^{20} \cdot 15 \cdot 2 = 3 \times 10^{21}$.
+
+Gereken çarpım sıcaklığa da bağlı. Aşağıdaki grafik bunu gösteriyor.
+
+<LawsonChart lang="tr">Bir D–T plazmasının kendini ısıtabilmesi için gereken üçlü çarpım. Hesap, helyumun getirdiği ısının kaçan ısıyı tam karşıladığı noktayı arıyor; ışınımla kaybolan enerjiyi hesaba katmıyor. Eğri bir vadiye benziyor. Plazma fazla soğuksa tepkimeler çok seyrek oluyor. Fazla sıcaksa tepkimeler artık pek hızlanmıyor, ama saklanması gereken ısı büyümeye devam ediyor. Vadinin dibi yaklaşık {n.ignitionKev} keV’ta, yani {n.ignitionMillionC} milyon derece civarında.</LawsonChart>
+
+Füzyon reaktörlerinin 150 milyon derece civarını hedeflemesinin sebebi bu vadi. Bugünkü büyük tokamaklar bu sıcaklıklara ulaşabiliyor; asıl zor olan, o sıcaklıkta yoğunluğu ve tutma süresini yeterince büyütmek.
+
+### Kazanç: Q
+
+Füzyon haberlerinde Q harfini sık görürsünüz. Q, plazmanın verdiği füzyon gücünün, onu ısıtmak için içeri verdiğimiz güce oranı:
+
+$$
+Q = \frac{\text{füzyon gücü}}{\text{ısıtma gücü}}
+$$
+
+$Q = 1$ başa baş noktası: Plazma, aldığı kadarını geri veriyor. ITER’in hedefi $Q = 10$, yani 50 megavatlık ısıtmayla 500 megavat füzyon gücü. Tutuşmuş bir plazma ise dışarıdan ısıtma istemez; onun için Q sonsuz olur.
+
+Yalnız bu, “bilimsel” kazanç. Bir santralin şebekeye gerçekten elektrik vermesi için bütün tesisin hesabı tutmalı. Mıknatısları soğutan makineler, ısıtma sistemleri ve lazerler şebekeden çok elektrik çeker. Üstelik füzyonun ısısının ancak bir kısmı elektriğe çevrilebilir. Bu yüzden kâr eden bir santral için Q’nun 1’in çok üstünde olması gerekir. Bu ayrıma, bugünkü duruma bakarken yeniden döneceğiz.
+
+## Plazmayı nasıl tutarız?
+
+150 milyon derecelik bir gaza hiçbir kap dayanamaz. Ama plazmanın bir avantajı var: Parçacıkları yüklü. Yüklü bir parçacık manyetik alanda düz gidemez; alan çizgisinin çevresinde dönerek sarmal çizer. İpe dizilmiş bir boncuk gibi çizgiye bağlı kalır: Çizgi boyunca kolayca kayar, ama çizgiden uzaklaşamaz.
+
+Düz bir tüpün iki ucu açıktır ve parçacıklar alan çizgileri boyunca kayıp uçlardan kaçar. Çözüm, tüpü bükmek ve iki ucunu birleştirip bir simit yapmak. Simidin çevresine dizilen bobinler, simidin içinde halka boyunca uzanan bir manyetik alan kurar; buna toroidal alan diyoruz. Ne yazık ki bu yetmiyor. Bükülmüş bir alan, simidin iç tarafında daha güçlü, dış tarafında daha zayıftır. Bu fark yüzünden parçacıklar yavaş yavaş yukarı ya da aşağı sürüklenir ve sonunda duvara çarpar.
+
+Çaresi, alan çizgilerini simidin çevresinde burmak. Tokamakta bunu plazmanın içinden akan büyük bir elektrik akımı yapar. Ortadaki merkezî solenoid bir transformatörün birinci sargısı gibi çalışır; plazma da ikinci sargı olur ve içinde milyonlarca amperlik bir akım akar. Bu akım, simidin kesiti çevresinde dolanan ikinci bir alan oluşturur: poloidal alan. İki alan birleşince alan çizgileri, akide şekerinin çizgileri gibi sarmal çizer. İlk çizimdeki ince çizgiler bunları gösteriyor. Böyle bir çizgiyi izleyen parçacık simidin bir iç tarafından, bir dış tarafından geçer ve sürüklenmeler birbirini götürür.
+
+Tokamak tek yol değil. Stellaratör, aynı burulmayı plazmada akım akıtmadan, bobinlerin kendisini ustaca bükerek sağlar. Almanya’daki Wendelstein 7-X bunun en büyük örneği. Lazerle füzyonda ise plazmayı tutmaya hiç uğraşılmaz. ABD’deki Ulusal Ateşleme Tesisi’nde (NIF) 192 lazer ışını, karabiber tanesi büyüklüğündeki bir yakıt kapsülünü her yönden aynı anda vurur. Kapsül içe doğru çöker, yakıt saniyenin milyarda biri kadar kısa bir sürede sıkışır, ısınır ve kaynaşır. Lawson şartı burada çok kısa bir sürede, ama inanılmaz bir yoğunlukla sağlanır.
+
+Peki füzyonun enerjisini elektriğe nasıl çeviririz? Enerjinin büyük kısmını taşıyan nötronlar manyetik alana aldırmaz. Plazmadan çıkıp çevredeki kalın duvara, yani örtüye çarparlar (İngilizcede *blanket*). Örtü ısınır, bu ısı suyu buhara çevirir ve buhar bir türbini döndürür; tıpkı bugünkü santrallerde olduğu gibi. Örtünün bir görevi daha var. İçindeki lityum, nötronları yakalayınca trityum üretir:
+
+$$
+\mathrm{n} + {}^{6}\mathrm{Li} \longrightarrow {}^{4}\mathrm{He} + \mathrm{T}
+$$
+
+Yani bir füzyon santrali, yakıtının bir kısmını kendisi üretebilir. Ama bunu büyük ölçekte henüz kimse göstermedi.
+
+## Neden bu kadar temiz?
+
+Füzyonun bu kadar heyecan verici olmasının sebebi burada.
+
+**Karbon salmaz.** Tepkimenin ürünü helyum: Balonları şişirdiğimiz zararsız gaz. Santral çalışırken karbondioksit çıkmaz.
+
+**Kontrolden çıkamaz.** Fisyon reaktörlerinde kendi kendini sürdüren bir zincirleme tepkime vardır ve onu sürekli dizginlemek gerekir. Füzyonda böyle bir zincir yok. Reaktörün içinde herhangi bir anda yalnızca birkaç gram yakıt bulunur ve plazmayı yanar hâlde tutmak çok zordur. Bir şey ters giderse plazma saniyeler içinde soğur ve tepkime kendiliğinden durur. Füzyonda bir erime kazası olamaz.
+
+**Yakıtı bol.** Döteryum sıradan suyun içinde var: Yaklaşık her 6.400 hidrojen atomundan biri döteryum. Bir litre suda {n.deuteriumMg} miligram kadar döteryum bulunur ve denizlerdeki döteryum, insanlığa çok uzun süre yetecek kadar bol. Trityum doğada neredeyse hiç yok, ama örtüdeki lityumdan üretilebilir. Lityum da kayalarda ve deniz suyunda bulunur.
+
+**Atığı kısa ömürlü.** Füzyon radyoaktiviteden tamamen arınmış değil. Trityumun kendisi radyoaktiftir (yarı ömrü 12,3 yıl) ve dikkatle ele alınmalıdır. Hızlı nötronlar da reaktörün duvarlarındaki malzemeleri zamanla radyoaktif hâle getirir. Ama bu malzemelerin radyoaktivitesi birkaç on yılda büyük ölçüde azalır; yaklaşık yüz yıl içinde malzemeler yeniden kullanılabilir hâle gelir. Fisyon santrallerinin kullanılmış yakıtı ise on binlerce yıl saklanmak zorunda. Füzyon, uzun ömürlü yüksek seviyeli atık üretmez.
+
+Bütün bunlar yan yana gelince füzyonun neden “dünyanın kurtuluşu” diye anıldığı anlaşılıyor: Temiz, güvenli, yakıtı bol, az yer kaplayan ve gece gündüz, hava nasıl olursa olsun çalışan bir enerji kaynağı. İklim değişikliğiyle mücadelede ve dünyanın büyüyen enerji ihtiyacını karşılamada, temiz ve bol enerji için insanlığın en büyük umutlarından biri. Ama bir umudu gerçeğe çevirmek, bir ateşi yakmaktan zor.
+
+## Önümüzdeki engeller
+
+Dürüst olmak gerekirse yol hâlâ uzun.
+
+- **Henüz hiçbir santral şebekeye net elektrik vermedi.** Bugüne kadarki başarıların hepsi bilimsel kazançla ilgili. Tesislerin tamamı, hâlâ ürettiklerinden çok daha fazla enerji tüketiyor.
+- **Trityum az.** Doğada neredeyse yok; bugün kullanılan trityum, birkaç fisyon reaktöründe yan ürün olarak elde ediliyor. Santrallerin kendi trityumunu örtüde üretmesi şart ve bu henüz gerçek ölçekte denenmedi.
+- **Malzemeler hırpalanıyor.** {n.neutron} MeV’luk nötronlar duvarlardaki atomları yerinden oynatır ve malzemeyi zamanla gevrekleştirir. Bu yağmura yıllarca dayanacak malzemeler hâlâ geliştiriliyor.
+- **Bilimsel kazanç yetmiyor.** Plazmada $Q = 10$ bile tesisin bütününde kazanç anlamına gelmiyor. Mıknatıslar, soğutma ve ısıtma için harcanan elektrik de hesaba girmeli.
+- **Zaman ve maliyet.** Füzyon makineleri büyük, karmaşık ve pahalı. Füzyon için yıllardır “hep otuz yıl uzakta” diye şaka yapılır; takvimler sık sık kayıyor.
+
+## Bugün nerede? (Ekim 2026)
+
+2015’te okumaya başladığımda füzyon büyük ölçüde devlet laboratuvarlarının ve ITER gibi uluslararası projelerin işiydi. On bir yıl sonra tablo epey değişti. Ekim 2026 itibarıyla öne çıkanlar şunlar:
+
+**Lazerle ateşleme.** 5 Aralık 2022’de NIF, yakıt kapsülüne 2,05 MJ lazer enerjisi gönderdi ve 3,15 MJ füzyon enerjisi aldı. Bir füzyon deneyi, yakıtına verilen enerjiden fazlasını ilk kez geri vermişti. NIF o günden bu yana ateşlemeyi 11 kez başardı. 7 Nisan 2025’teki deneyde 8,6 MJ füzyon enerjisi elde edildi; bu, verilen lazer enerjisinin 4,13 katı. En son 20 Haziran 2026’daki deney 7,9 MJ verdi. Yalnız bunlar hedefteki kazançlar: NIF’in lazerleri, 2 MJ’lik ışığı üretmek için şebekeden yaklaşık 300 MJ çekiyor.
+
+**JET’in vedası.** Avrupa’nın İngiltere’deki ortak tokamakı JET, 1983’ten beri süren çalışmasını Aralık 2023’te tamamladı. Son D–T deneylerinde, yalnızca 0,2 miligram yakıtla 5 saniyede 69 MJ füzyon enerjisi üretti. Bu, bir füzyon makinesinin tek atımda ürettiği en yüksek enerji.
+
+**ITER.** Fransa’nın güneyinde 30’dan fazla ülkenin birlikte inşa ettiği ITER, dünyanın en büyük tokamakı olacak. 2024’te açıklanan yeni takvime göre bilimsel çalışmalar 2034’te başlayacak, tam manyetik enerjiye 2036’da ulaşılacak, D–T deneyleri de 2039’da başlayacak. Bu, D–T deneyleri için eski plana göre yaklaşık dört yıllık bir gecikme ve 5 milyar avro kadar ek maliyet demek. Montaj ise hızlandı. Makinenin simit biçimli gövdesini oluşturan dokuz dev modülün ilki Nisan 2025’te yerine indirildi. 28 Temmuz 2026’da altıncısı da yerleştirildi ve gövdenin üçte ikisi tamamlandı; sonuncusunun 2027’de yerine konması planlanıyor. Merkezî solenoidin altı modülünün sonuncusu da Eylül 2025’te Fransa’ya ulaştı.
+
+**Uzun atımlar.** Çin’deki EAST tokamakı Ocak 2025’te, yüksek tutma kipinde (H-mode) bir plazmayı 1.066 saniye ayakta tuttu. Birkaç hafta sonra, Şubat 2025’te, Fransa’daki WEST yaklaşık 50 milyon derecelik bir plazmayı 1.337 saniye, yani 22 dakikadan uzun süre korudu. Almanya’daki stellaratör Wendelstein 7-X de Mayıs 2025’te üçlü çarpımın yüksek bir değerini 43 saniye boyunca korudu. Uzun atımlarda bu alandaki en iyi sonucu, sonradan yayımlanan verilere göre JET’le paylaşıyor.
+
+**Özel şirketler.** Füzyon Endüstrisi Derneği’nin (FIA) Temmuz 2026 raporuna göre 56 füzyon şirketi, son 12 ayda 4,48 milyar dolar topladı; 2021’den bu yana bildirilen toplam yatırım 14,24 milyar dolar. En büyüklerinden biri olan Commonwealth Fusion Systems (CFS), yüksek sıcaklık süperiletkenlerinden yapılmış güçlü mıknatıslarla çok daha küçük bir tokamak kuruyor. Şirket Temmuz 2026’da Massachusetts’teki SPARC makinesinin montajını tamamlamak üzere olduğunu açıkladı; hedefi, 2027’de Q > 1’e ulaşmak. Ardından Virginia’da ARC adlı ilk santralini kurup 2030’ların başında şebekeye elektrik vermeyi planlıyor. Google, bu santralin 200 megavatlık elektriğini almak için şimdiden anlaşma imzaladı. Helion adlı şirket ise 2023’te Microsoft’la, 2028’den itibaren elektrik vermek üzere anlaştı. Temmuz 2025’te Washington eyaletinde ilk santralinin inşaatına başladı ve Şubat 2026’da Polaris adlı deney makinesinde D–T füzyonunu ölçtüğünü, plazmayı 150 milyon dereceye çıkardığını açıkladı.
+
+**Devletler.** Çin, Hefei’de BEST adlı yeni bir tokamak kuruyor ve 2030 civarında net enerji kazancı ile elektrik üretimini göstermeyi umuyor. İngiltere, STEP adlı prototip için 2,5 milyar sterlin ayırdı; makinenin eski bir kömür santralinin yerinde, West Burton’da kurulması ve 2040’ta çalışmaya başlaması planlanıyor. Uluslararası Atom Enerjisi Ajansı’nın (IAEA) 2025 raporuna göre dünyada çalışan, yapımı süren ya da planlanan füzyon cihazlarının sayısı 160’ı geçti.
+
+Bu listede bir şey hâlâ eksik: Füzyonla üretilip şebekeye verilmiş tek bir kilovatsaat bile yok. Yukarıdaki tarihlerin çoğu da birer hedef; geçmişte olduğu gibi kayabilirler.
+
+## Son söz
+
+2015’ten bu yana lazerle ateşlenen kapsüller, dakikalarca yanan plazmalar ve inşaatı süren santraller gördük. Hâlâ hiçbir ampul füzyonla yanmıyor ve o günün tarihini kimse kesin olarak söyleyemez. Ama Güneş her sabah bize tarifin işe yaradığını hatırlatıyor. Bir gün o küçük güneşlerden birinin evlerimizi ısıttığını görmeyi çok isterim.
+
+## Kaynaklar
+
+Fizik:
+
+- M. Wang ve ark., [“The AME 2020 atomic mass evaluation (II)”](https://doi.org/10.1088/1674-1137/abddaf), *Chinese Physics C* 45 (2021) 030003: atom kütleleri.
+- H.-S. Bosch ve G. M. Hale, [“Improved formulas for fusion cross-sections and thermal reactivities”](https://doi.org/10.1088/0029-5515/32/4/I07), *Nuclear Fusion* 32 (1992) 611: reaktivite formülü.
+
+Bugünkü durum (İngilizce):
+
+- LLNL, [Achieving fusion ignition](https://lmf.llnl.gov/science/achieving-fusion-ignition): NIF’in ateşleme deneyleri.
+- Optica OPN, [Ignition accomplished: NIF looks to the future](https://www.optica-opn.org/home/newsroom/2022/december/ignition_accomplished_nif_looks_to_the_future/) (Aralık 2022): lazerlerin şebekeden çektiği enerji.
+- Birleşik Krallık Hükümeti, [JET’s final tritium experiments yield new fusion energy record](https://www.gov.uk/government/news/jets-final-tritium-experiments-yield-new-fusion-energy-record) (Şubat 2024).
+- ITER, [Baseline 2024 basın toplantısı özeti](https://iter.org/sites/default/files/media/2024-07/baseline_press_conference_summary_july-2024_b.pdf) (Temmuz 2024) ve Physics World, [ITER’in gecikmesi ve ek maliyeti](https://physicsworld.com/iter-fusion-reactor-hit-by-massive-decade-long-delay-and-e5bn-price-hike/).
+- ITER, [ilk modülün yerleştirilmesi](https://www.iter.org/node/31159) (Nisan 2025) ve [gövdenin üçte ikisi yerinde](https://www.iter.org/two-thirds-iter-tokamak-core-now-place) (Temmuz 2026).
+- US ITER, [Sixth module delivered for heart of ITER](https://usiter.ornl.gov/news/sixth-module-delivered-for-heart-of-iter/) (Eylül 2025).
+- Çin Bilimler Akademisi, [EAST’in 1.066 saniyelik rekoru](https://english.cas.cn/newsroom/cas_media/202501/t20250121_899052.shtml) (Ocak 2025).
+- CEA, [WEST beats the world record for plasma duration](https://cea.fr/english/Pages/News/nuclear-fusion-west-beats-the-world-record-for-plasma-duration.aspx) (Şubat 2025).
+- Max Planck Plazma Fiziği Enstitüsü, [Wendelstein 7-X’in rekoru](https://www.ipp.mpg.de/5532945/w7x) (Haziran 2025).
+- Fusion Industry Association, [2026 raporu](https://www.fusionindustryassociation.org/fusion-industry-attracts-record-annual-funding-of-4-48bn-raising-total-to-14-24bn/) (Temmuz 2026).
+- CFS, [SPARC](https://cfs.energy/technology/sparc), [4 milyar dolarlık yatırım duyurusu](https://cfs.energy/news-and-media/commonwealth-fusion-systems-raises-another-1-billion-bringing-total-capital-raised-to-4-billion/) (Temmuz 2026) ve [Google anlaşması](https://cfs.energy/news-and-media/google-and-commonwealth-fusion-systems-sign-strategic-partnership/) (Haziran 2025).
+- CNBC, [Microsoft ile Helion’un anlaşması](https://www.cnbc.com/2023/05/10/microsoft-agrees-to-buy-power-from-sam-altman-backed-helion-in-2028.html) (Mayıs 2023); Helion, [Orion inşaatının başlaması](https://www.helionenergy.com/blog/starting-to-build-the-worlds-first-fusion-power-plant-in-malaga-wa) (Temmuz 2025) ve [Polaris’in sonuçları](https://www.helionenergy.com/newsroom/helion-achieves-new-fusion-energy-milestones) (Şubat 2026).
+- Çin Bilimler Akademisi, [BEST tokamakı](https://english.cas.cn/newsroom/cas-in-media/202601/t20260119_1145881.shtml) (Ocak 2026).
+- Birleşik Krallık Hükümeti, [STEP için 2,5 milyar sterlin](https://www.gov.uk/government/news/25-billion-for-world-first-prototype-fusion-energy-plant) (Haziran 2025).
+- IAEA, [World Fusion Outlook 2025](https://www.iaea.org/publications/15935/iaea-world-fusion-outlook-2025).

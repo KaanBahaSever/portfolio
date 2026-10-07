@@ -1,0 +1,203 @@
+---
+/**
+ * The ignition curve: the triple product n T τ_E a 50:50 D–T plasma needs to heat itself, against
+ * temperature (model.ts, from the Bosch–Hale reactivity). A U-shaped valley whose bottom, near
+ * 14 keV and 3 × 10²¹ keV·s/m³, is why reactors aim for 100–200 million degrees. Drawn twice.
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { type Layout, exponent, logarithmic, polyline, scientific } from './chart.ts';
+import Figure from './Figure.astro';
+import { fusionPostMessages } from './messages.ts';
+import { ignitionMinimum, ignitionTripleProduct, kevToKelvin } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = fusionPostMessages[lang].lawson;
+const f = formatters(lang);
+const decimal = f.number(1.5).charAt(1);
+
+const minimum = ignitionMinimum();
+// The textbook figure the prose quotes: about 3 × 10²¹ keV·s/m³ near 14 keV.
+if (!(minimum.kev > 12 && minimum.kev < 16 && minimum.value > 2.5e21 && minimum.value < 3.2e21)) {
+  throw new Error(`LawsonChart: the minimum moved to ${minimum.kev} keV, ${minimum.value} keV·s/m³`);
+}
+
+const X_MIN = 3;
+const X_MAX = 100;
+const Y_MIN = 1e21;
+const Y_MAX = 1e23;
+const kev = f.number(Math.round(minimum.kev));
+// Rounded to tens of millions, like the prose (numbers.ts): the valley's bottom is broad.
+const celsius = f.number(Math.round(kevToKelvin(minimum.kev) / 1e7) * 10);
+const label = m.aria(kev, celsius, scientific(minimum.value, decimal));
+
+const layouts: { key: string; class: string; layout: Layout; ticks: number[] }[] = [
+  {
+    key: 'compact',
+    class: 'sm:hidden',
+    layout: { width: 320, height: 290, left: 44, right: 12, top: 34, bottom: 40, font: 11 },
+    ticks: [3, 10, 30, 100],
+  },
+  {
+    key: 'wide',
+    class: 'hidden sm:block',
+    layout: { width: 640, height: 320, left: 56, right: 20, top: 40, bottom: 44, font: 12 },
+    ticks: [3, 5, 10, 20, 50, 100],
+  },
+];
+
+function chart(l: Layout) {
+  const x = logarithmic(X_MIN, X_MAX, l.left, l.width - l.right);
+  const y = logarithmic(Y_MIN, Y_MAX, l.height - l.bottom, l.top);
+  const points: [number, number][] = [];
+  for (let i = 0; i <= 160; i++) {
+    const t = X_MIN * (X_MAX / X_MIN) ** (i / 160);
+    points.push([x(t), y(Math.min(Y_MAX, ignitionTripleProduct(t)))]);
+  }
+  const curve = polyline(points);
+  // The region above the curve: the plasma heats itself.
+  const above = `${curve}L${x(X_MAX).toFixed(1)} ${l.top}L${x(X_MIN).toFixed(1)} ${l.top}Z`;
+  return { x, y, curve, above, plotBottom: l.height - l.bottom };
+}
+---
+
+<Figure>
+  <div slot="graphic" class="fusion-chart">
+    {
+      layouts.map(({ key, class: className, layout: l, ticks }) => {
+        const c = chart(l);
+        const compact = key === 'compact';
+        const mx = c.x(minimum.kev);
+        const my = c.y(minimum.value);
+        return (
+          <svg
+            class:list={['h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+            viewBox={`0 0 ${l.width} ${l.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={label}
+            focusable="false"
+          >
+            <path d={c.above} class="region" />
+            <g class="axis font-mono" font-size={l.font}>
+              {[21, 22, 23].map((e) => (
+                <>
+                  <line x1={l.left} x2={l.width - l.right} y1={c.y(10 ** e)} y2={c.y(10 ** e)} class="gridline" />
+                  <text x={l.left - 6} y={c.y(10 ** e) + l.font / 3} text-anchor="end">
+                    10<tspan dy={-l.font * 0.45} font-size={l.font * 0.78}>{exponent(e)}</tspan>
+                  </text>
+                </>
+              ))}
+              {ticks.map((t) => (
+                <>
+                  <line x1={c.x(t)} x2={c.x(t)} y1={c.plotBottom} y2={c.plotBottom + 4} class="tick" />
+                  <text x={c.x(t)} y={c.plotBottom + 6 + l.font} text-anchor="middle">{f.number(t)}</text>
+                </>
+              ))}
+              <text x={l.width - l.right} y={l.height - 4} text-anchor="end" class="title">{m.xAxis} →</text>
+              <text x={l.left - 6} y={l.top - 16} text-anchor="start" class="title">↑ {m.yAxis}</text>
+            </g>
+            <line x1={l.left} x2={l.width - l.right} y1={c.plotBottom} y2={c.plotBottom} class="baseline" />
+            <path d={c.curve} class="curve" />
+            <g class="font-sans" font-size={l.font + 1}>
+              <text x={c.x(compact ? 30 : 40)} y={c.y(compact ? 4e22 : 5e22)} text-anchor="middle" class="region-label">{m.burning}</text>
+              <text x={compact ? c.x(3.3) : c.x(60)} y={c.y(compact ? 1.13e21 : 1.45e21)} text-anchor={compact ? 'start' : 'middle'} class="short-label">{m.short}</text>
+            </g>
+            <circle cx={mx} cy={my} r="4.5" class="minimum" />
+            <text x={compact ? (l.left + l.width - l.right) / 2 : mx} y={my + 22} font-size={l.font} text-anchor="middle" class="minimum-label font-sans">
+              {m.minimum(kev, celsius)}
+            </text>
+          </svg>
+        );
+      })
+    }
+  </div>
+  <slot />
+</Figure>
+
+<style>
+  .fusion-chart {
+    --ink: var(--color-zinc-800);
+    --muted: var(--color-zinc-500);
+    --accent: var(--color-accent-700);
+    --region: var(--color-accent-500);
+    --axis-text: var(--color-zinc-600);
+    --axis-title: var(--color-zinc-700);
+  }
+
+  :global(:where([data-theme='dark'])) .fusion-chart {
+    --ink: var(--color-zinc-200);
+    --muted: var(--color-zinc-400);
+    --accent: var(--color-accent-400);
+    --region: var(--color-accent-400);
+    --axis-text: var(--color-zinc-400);
+    --axis-title: var(--color-zinc-300);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .fusion-chart {
+      --ink: var(--color-zinc-200);
+      --muted: var(--color-zinc-400);
+      --accent: var(--color-accent-400);
+      --region: var(--color-accent-400);
+      --axis-text: var(--color-zinc-400);
+      --axis-title: var(--color-zinc-300);
+    }
+  }
+
+  .axis text {
+    fill: var(--axis-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis .title {
+    fill: var(--axis-title);
+  }
+
+  .gridline {
+    stroke: currentColor;
+    stroke-opacity: 0.1;
+  }
+
+  .tick,
+  .baseline {
+    stroke: currentColor;
+    stroke-opacity: 0.45;
+  }
+
+  .region {
+    fill: var(--region);
+    fill-opacity: 0.1;
+  }
+
+  .curve {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+  }
+
+  .region-label {
+    fill: var(--accent);
+    font-weight: 600;
+  }
+
+  .short-label {
+    fill: var(--muted);
+    font-weight: 600;
+  }
+
+  .minimum {
+    fill: var(--accent);
+    stroke: white;
+    stroke-width: 1.5;
+  }
+
+  .minimum-label {
+    fill: var(--ink);
+  }
+</style>

@@ -1,0 +1,252 @@
+---
+/**
+ * How readily three fuels fuse: the thermal reactivity ⟨σv⟩ against temperature, from the
+ * Bosch–Hale fit (model.ts), on logarithmic axes, with the 10–20 keV band where reactors work and
+ * the temperatures in millions of degrees under the keV scale. Drawn twice (compact and wide).
+ */
+import type { Locale } from '../../../../i18n/config.ts';
+import { formatters } from '../../../../i18n/format.ts';
+import { type Layout, exponent, logarithmic, polyline, scientific } from './chart.ts';
+import Figure from './Figure.astro';
+import { fusionPostMessages } from './messages.ts';
+import { type Reaction, REACTIVITY_RANGE, kevToKelvin, reactivity, reactivityPeak } from './model.ts';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const m = fusionPostMessages[lang].reactivity;
+const f = formatters(lang);
+const decimal = f.number(1.5).charAt(1);
+
+// The facts the prose states (Bosch & Hale 1992, Table VIII: 1.136 × 10⁻¹⁶ cm³/s at 10 keV).
+const at10 = reactivity('dt', 10);
+if (Math.abs(at10 / 1.136e-22 - 1) > 0.005) throw new Error(`ReactivityChart: D–T at 10 keV is ${at10}`);
+const peak = reactivityPeak('dt');
+if (!(peak.kev > 60 && peak.kev < 70 && peak.value > 8.4e-22 && peak.value < 9.2e-22)) {
+  throw new Error(`ReactivityChart: D–T should peak near 65 keV at about 9 × 10⁻²² m³/s, not ${peak.kev} keV`);
+}
+for (let kev = REACTIVITY_RANGE.min; kev <= REACTIVITY_RANGE.max; kev += 0.5) {
+  if (!(reactivity('dt', kev) > reactivity('dd', kev) && reactivity('dt', kev) > reactivity('dhe3', kev))) {
+    throw new Error(`ReactivityChart: D–T should lead at ${kev} keV`);
+  }
+}
+
+const Y_MIN = 1e-28;
+const Y_MAX = 2e-21;
+const REACTIONS: Reaction[] = ['dhe3', 'dd', 'dt'];
+
+const label = m.aria(
+  scientific(at10, decimal),
+  f.number(Math.round(peak.kev)),
+  f.number(Math.round(at10 / reactivity('dd', 10))),
+  f.number(Math.round(at10 / reactivity('dhe3', 10))),
+);
+
+const layouts: { key: string; class: string; layout: Layout; ticks: number[] }[] = [
+  {
+    key: 'compact',
+    class: 'sm:hidden',
+    layout: { width: 320, height: 290, left: 44, right: 22, top: 34, bottom: 58, font: 11 },
+    ticks: [1, 10, 100],
+  },
+  {
+    key: 'wide',
+    class: 'hidden sm:block',
+    layout: { width: 640, height: 370, left: 56, right: 20, top: 40, bottom: 62, font: 12 },
+    ticks: [1, 2, 5, 10, 20, 50, 100],
+  },
+];
+
+function chart(l: Layout) {
+  const x = logarithmic(REACTIVITY_RANGE.min, REACTIVITY_RANGE.max, l.left, l.width - l.right);
+  const y = logarithmic(Y_MIN, Y_MAX, l.height - l.bottom, l.top);
+  const series = REACTIONS.map((reaction) => {
+    const points: [number, number][] = [];
+    for (let i = 0; i <= 200; i++) {
+      const kev = REACTIVITY_RANGE.min * (REACTIVITY_RANGE.max / REACTIVITY_RANGE.min) ** (i / 200);
+      const value = reactivity(reaction, kev);
+      if (value >= Y_MIN) points.push([x(kev), y(value)]);
+    }
+    return { reaction, d: polyline(points) };
+  });
+  return { x, y, series, plotBottom: l.height - l.bottom };
+}
+
+const yExponents = [-28, -27, -26, -25, -24, -23, -22, -21];
+/** Where each curve's name sits: temperature (keV) and offset from the curve. */
+const NAMES: Record<Reaction, { kev: number; dy: number }> = {
+  dt: { kev: 4, dy: -10 },
+  dhe3: { kev: 40, dy: -9 },
+  dd: { kev: 40, dy: 17 },
+};
+const million = (kev: number) => f.number(Math.round(kevToKelvin(kev) / 1e6));
+---
+
+<Figure>
+  <div slot="graphic" class="fusion-chart">
+    {
+      layouts.map(({ key, class: className, layout: l, ticks }) => {
+        const c = chart(l);
+        const compact = key === 'compact';
+        return (
+          <svg
+            class:list={['h-auto w-full text-zinc-900 dark:text-zinc-100', className]}
+            viewBox={`0 0 ${l.width} ${l.height}`}
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label={label}
+            focusable="false"
+          >
+            <rect x={c.x(10)} y={l.top} width={c.x(20) - c.x(10)} height={c.plotBottom - l.top} class="band" />
+            <text x={(c.x(10) + c.x(20)) / 2} y={c.plotBottom - 8} font-size={l.font - 1} text-anchor="middle" class="band-label font-sans">
+              {compact ? '10–20 keV' : m.window}
+            </text>
+            <g class="axis font-mono" font-size={l.font}>
+              {yExponents.filter((e) => !compact || e % 2 === 0).map((e) => (
+                <>
+                  <line x1={l.left} x2={l.width - l.right} y1={c.y(10 ** e)} y2={c.y(10 ** e)} class="gridline" />
+                  <text x={l.left - 6} y={c.y(10 ** e) + l.font / 3} text-anchor="end">
+                    10<tspan dy={-l.font * 0.45} font-size={l.font * 0.78}>{exponent(e)}</tspan>
+                  </text>
+                </>
+              ))}
+              {ticks.map((kev) => (
+                <>
+                  <line x1={c.x(kev)} x2={c.x(kev)} y1={c.plotBottom} y2={c.plotBottom + 4} class="tick" />
+                  <text x={c.x(kev)} y={c.plotBottom + 6 + l.font} text-anchor="middle">{f.number(kev)}</text>
+                  <text x={c.x(kev)} y={c.plotBottom + 10 + 2 * l.font} text-anchor="middle" class="celsius">{million(kev)}</text>
+                </>
+              ))}
+              <text x={l.left - 6} y={c.plotBottom + 6 + l.font} text-anchor="end" class="title">keV</text>
+              <text x={l.width - l.right} y={l.height - 4} text-anchor="end" class="title">{m.xAxisCelsius} →</text>
+              <text x={l.left - 6} y={l.top - 16} text-anchor="start" class="title">↑ {m.yAxis}</text>
+            </g>
+            <line x1={l.left} x2={l.width - l.right} y1={c.plotBottom} y2={c.plotBottom} class="baseline" />
+            {c.series.map((s) => (
+              <path d={s.d} class={`series-${s.reaction}`} />
+            ))}
+            <g class="names font-sans" font-size={l.font + 1}>
+              {REACTIONS.map((reaction) => (
+                <text
+                  x={c.x(NAMES[reaction].kev)}
+                  y={c.y(reactivity(reaction, NAMES[reaction].kev)) + NAMES[reaction].dy}
+                  text-anchor="middle"
+                  class={`name-${reaction}`}
+                >
+                  {m.names[reaction]}
+                </text>
+              ))}
+            </g>
+          </svg>
+        );
+      })
+    }
+  </div>
+  <slot />
+</Figure>
+
+<style>
+  .fusion-chart {
+    --ink: var(--color-zinc-800);
+    --muted: var(--color-zinc-500);
+    --accent: var(--color-accent-700);
+    --band: var(--color-accent-500);
+    --axis-text: var(--color-zinc-600);
+    --axis-title: var(--color-zinc-700);
+  }
+
+  :global(:where([data-theme='dark'])) .fusion-chart {
+    --ink: var(--color-zinc-200);
+    --muted: var(--color-zinc-400);
+    --accent: var(--color-accent-400);
+    --band: var(--color-accent-400);
+    --axis-text: var(--color-zinc-400);
+    --axis-title: var(--color-zinc-300);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :global(:where(:root:not([data-theme]))) .fusion-chart {
+      --ink: var(--color-zinc-200);
+      --muted: var(--color-zinc-400);
+      --accent: var(--color-accent-400);
+      --band: var(--color-accent-400);
+      --axis-text: var(--color-zinc-400);
+      --axis-title: var(--color-zinc-300);
+    }
+  }
+
+  .axis text {
+    fill: var(--axis-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .axis .celsius {
+    fill: var(--muted);
+  }
+
+  .axis .title {
+    fill: var(--axis-title);
+  }
+
+  .gridline {
+    stroke: currentColor;
+    stroke-opacity: 0.1;
+  }
+
+  .tick,
+  .baseline {
+    stroke: currentColor;
+    stroke-opacity: 0.45;
+  }
+
+  .band {
+    fill: var(--band);
+    fill-opacity: 0.12;
+  }
+
+  .band-label {
+    fill: var(--accent);
+  }
+
+  .series-dt,
+  .series-dd,
+  .series-dhe3 {
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .series-dt {
+    stroke: var(--accent);
+    stroke-width: 2.75;
+  }
+
+  .series-dd {
+    stroke: var(--ink);
+    stroke-width: 1.75;
+    stroke-dasharray: 5 3;
+  }
+
+  .series-dhe3 {
+    stroke: var(--muted);
+    stroke-width: 1.75;
+  }
+
+  .names text {
+    font-weight: 600;
+  }
+
+  .name-dt {
+    fill: var(--accent);
+  }
+
+  .name-dd {
+    fill: var(--ink);
+  }
+
+  .name-dhe3 {
+    fill: var(--muted);
+  }
+</style>

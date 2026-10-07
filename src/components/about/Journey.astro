@@ -17,9 +17,9 @@ import Figure from './Figure.astro';
 import AltitudeClasses from './figures/AltitudeClasses.astro';
 import BrokerGraph from './figures/BrokerGraph.astro';
 import CipherFlowchart from './figures/CipherFlowchart.astro';
+import CubeSatInOrbit from './figures/CubeSatInOrbit.astro';
 import DensityGrid from './figures/DensityGrid.astro';
 import DescentField from './figures/DescentField.astro';
-import GroundStationPass from './figures/GroundStationPass.astro';
 import HohmannTransfer from './figures/HohmannTransfer.astro';
 import IdeaNetwork from './figures/IdeaNetwork.astro';
 import KalmanTrack from './figures/KalmanTrack.astro';
@@ -81,8 +81,8 @@ const spaceCaption = c.space.caption(
   fmt.number(transfer.time / 86_400, { maximumFractionDigits: 0 }),
 );
 
-// The CubeSat figure's pass, from the same model as its drawing: a 400 km example orbit and a
-// 10° elevation mask give about six minutes overhead.
+// The CubeSat caption's pass, the ground station's side of the drawing's radio link: a 400 km
+// example orbit and a 10° elevation mask give about six minutes overhead.
 const pass = overheadPass(EARTH_MU, EARTH_MEAN_RADIUS, CUBESAT_ALTITUDE, MIN_ELEVATION);
 const cubesatCaption = c.cubesat.caption(fmt.number(pass.duration / 60, { maximumFractionDigits: 0 }));
 
@@ -198,7 +198,7 @@ const item = 'py-10 first:pt-8 last:pb-0 sm:py-14 sm:first:pt-10';
       <Chapter id="journey-cubesat" number={number('cubesat')} label={c.cubesat.label} title={c.cubesat.title}>
         <CubeSat />
         <Figure slot="figure" number={figure('cubesat')} caption={cubesatCaption}>
-          <GroundStationPass />
+          <CubeSatInOrbit />
         </Figure>
       </Chapter>
     </li>

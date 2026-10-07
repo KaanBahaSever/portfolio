@@ -1,17 +1,25 @@
 ---
 title: Karecik
-shortDescription: Yerel kafe ve restoranların kullandığı bir QR menü hizmeti. İşletmeler menülerini ve siparişlerini buradan yönetiyor, müşterileriyle de buradan iletişim kuruyor. Kesintisiz ve hızlı çalışsın diye tasarladım.
+shortDescription: Yerel kafe ve restoranlar için bir QR menü hizmeti. Müşteri kodu okutuyor, menü telefonunda açılıyor; işletme sahibi de menüyü bir panelden güncel tutuyor. Bir arkadaşımın kafesi için yaptığım menüyle başladı.
 ---
+
+## Nasıl başladı?
+
+Karecik, ortaokuldan bir arkadaşım kafe açınca başladı. Önce ona bir QR menü yaptım ama bu menü
+sabit bir sayfaydı. Sonra onun isteğiyle eksiksiz bir adisyon sistemi (POS) yapmaya giriştim.
+Ama zamanında yetiştiremedim. Bunun yerine çok daha ayrıntılı, dinamik bir QR menü uygulaması
+çıkardık. Arkadaşım yıllardır bu uygulamayı kullanıyor. Bu sürede iki şube daha açtı; artık üç
+şubesinde de Karecik var.
+
+İlk sürümler 2021’e dayanıyor; projeye o zamanlar başka adlar vermiştim. 2026’da bu çalışmayı
+toparladım ve Karecik adıyla yayına aldım.
 
 ## Nedir?
 
-Müşteri, işletmenin QR kodunu okutuyor ve menü telefonunda açılıyor. Her işletmenin kendine ait
-bir adresi (alt alan adı) var; menü o adreste. İşletme sahibi de her şeyi bir yönetim panelinden
-ayarlıyor. Kodu okutan kimse beklemek istemez. Bu yüzden hıza ve kesintisiz çalışmaya çok önem
-verdim.
-
-Aslında fikir de ilk deneme sürümleri de 2021’e dayanıyor; projeye o zamanlar başka adlar
-vermiştim. 2026’da bu çalışmayı toparladım ve Karecik adıyla yayına aldım.
+Karecik, yerel kafe ve restoranların kullandığı bir QR menü hizmeti. Müşteri, işletmenin QR
+kodunu okutuyor ve menü telefonunda açılıyor. Her işletmenin kendine ait bir adresi (alt alan
+adı) var; menü o adreste. İşletme sahibi de menülerini bir yönetim panelinden düzenliyor. Kodu
+okutan kimse beklemek istemez. Bu yüzden hıza ve kesintisiz çalışmaya çok önem verdim.
 
 ## Neler var?
 

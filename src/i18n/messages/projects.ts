@@ -60,7 +60,7 @@ const en = {
   /** Captions for the line drawings in src/components/projects/ProjectFigure.astro. */
   figures: {
     asion: 'Focus sessions on a time axis: which window was active, and for how long.',
-    novacast: 'Publish/subscribe fan-out: one published message reaches every subscribed device through the broker.',
+    novacast: 'One web panel, many different screens: a command sent from the panel reaches the screens through the broker.',
     karecik: 'From QR code to menu: scanning opens the business’s menu on the customer’s phone.',
     'acik-matematik': 'A page from first-year analysis: a Riemann sum under a curve and a tangent line.',
     neosmbios: 'An SMBIOS record: no field is read before it is checked against the record’s own length byte.',
@@ -118,7 +118,7 @@ const tr: ProjectsMessages = {
   // in the middle, a placeholder is a gap in the text.
   figures: {
     asion: 'Bir zaman çizgisi: Hangi pencere ne kadar süre ön plandaydı?',
-    novacast: 'Tek mesaj, birçok cihaz: Gönderilen mesaj, aradaki sunucu üzerinden abone olan her cihaza ulaşıyor.',
+    novacast: 'Tek panel, birçok farklı ekran: Panelden gönderilen komut, aradaki aracı sunucu (broker) üzerinden ekranlara ulaşıyor.',
     karecik: 'QR koddan menüye: Kodu okutan müşterinin telefonunda işletmenin menüsü açılıyor.',
     'acik-matematik':
       'Birinci sınıf analiz dersinden bir sayfa: eğrinin altındaki alanı dikdörtgenlerle yaklaşık hesaplayan bir Riemann toplamı ve bir teğet doğrusu.',

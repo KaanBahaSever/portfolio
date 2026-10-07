@@ -36,8 +36,19 @@ const focusSessions = [
 ];
 const laneY = (lane: number) => 22 + lane * 18;
 
-/* Novacast: subscriber devices on the right; each fan-out curve leaves the broker at (107, 50). */
-const subscribers = [14, 32, 50, 68, 86];
+/*
+ * Novacast: the web panel on the left sends to the broker (the accent), which fans out to screens
+ * of different kinds on the right. Each curve leaves the broker at (107, 50) and ends at the
+ * left edge of its screen (x, y); the dot on it is the curve's midpoint, a message on its way.
+ */
+const screens = [
+  { kind: 'tv', x: 176, y: 13 },
+  { kind: 'monitor', x: 182, y: 36 },
+  { kind: 'laptop', x: 187, y: 56.5 },
+  { kind: 'portrait', x: 189, y: 82 },
+] as const;
+const fanOut = (x: number, y: number) => `M107 50C140 50 140 ${y} ${x - 4} ${y}`;
+const midpoint = (x: number, y: number) => ({ x: (107 + 3 * 140 + 3 * 140 + x - 4) / 8, y: 25 + y / 2 });
 
 /* Karecik: a 21 × 21 QR symbol in module units (finder patterns, timing pattern, some data). */
 const finders = [
@@ -127,20 +138,32 @@ const lookupRow = 1;
     id === 'novacast' && (
       <>
         <g class={faint}>
-          {subscribers.map((y) => (
-            <path d={`M107 50C150 50 150 ${y} 196 ${y}`} />
+          {screens.map(({ x, y }) => (
+            <path d={fanOut(x, y)} />
           ))}
+          {/* The panel's content rows. */}
+          <path d="M26 46H52M26 54H46M26 62H50" />
         </g>
         <g class={ink}>
-          <circle cx="28" cy="50" r="5" />
-          <path d="M33 50H87" />
-          <path d="m83 46.5 4 3.5-4 3.5" />
-          {subscribers.map((y) => (
-            <>
-              <rect x="198" y={y - 4} width="8" height="8" rx="1.5" />
-              <circle cx="150.4" cy={25 + y / 2} r="1.6" fill="currentColor" stroke="none" />
-            </>
-          ))}
+          {/* The web panel: a browser window with a title bar. */}
+          <rect x="18" y="30" width="44" height="40" rx="3" />
+          <path d="M18 38H62" />
+          <circle cx="23" cy="34" r="0.9" fill="currentColor" stroke="none" />
+          <circle cx="27" cy="34" r="0.9" fill="currentColor" stroke="none" />
+          <path d="M66 50H85" />
+          <path d="m81 46.5 4 3.5-4 3.5" />
+          {/* A wide TV on a stand, a monitor, a laptop and a portrait display. */}
+          <rect x="176" y="4" width="38" height="18" rx="1.5" />
+          <path d="M189 25H201M195 22V25" />
+          <rect x="182" y="29" width="26" height="14" rx="1.5" />
+          <path d="M191 46H199M195 43V46" />
+          <rect x="187" y="51" width="20" height="11" rx="1.5" />
+          <path d="M183 64.5H211" />
+          <rect x="189" y="70" width="12" height="24" rx="1.5" />
+          {screens.map(({ x, y }) => {
+            const dot = midpoint(x, y);
+            return <circle cx={dot.x} cy={dot.y} r="1.6" fill="currentColor" stroke="none" />;
+          })}
         </g>
         <g class={accent}>
           <circle cx="98" cy="50" r="9" fill="currentColor" fill-opacity="0.12" />

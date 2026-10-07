@@ -1,9 +1,10 @@
 ---
 /**
  * Journey chapter 9: modern C++ and Go today (Asion since 2024, Novacast since 2025) and the
- * mathematics degree. Novacast: built to replace inadequate legacy software at a computer
- * company the owner worked at (unnamed); Python prototype first, re-architected in late 2025
- * as a Go + MQTT microservice; in production.
+ * mathematics degree. Novacast: software for managing many screens of different makes from one
+ * web panel, built by the owner and his team at a computer company he worked at (unnamed) to
+ * replace bloated (Electron), inadequate software; a Rust player on each screen, a Go server and
+ * an MQTT broker; in production.
  */
 import { ui } from '../../ui/styles';
 import { localizePath } from '../../../i18n/config';
@@ -31,10 +32,12 @@ const novacast = localizePath('/projects/novacast/', locale);
         iletişimi var. Şu an erken erişimde.
       </p>
       <p>
-        <a href={novacast} class={ui.inlineLink}>Novacast</a>’i 2025’te, çalıştığım bir bilgisayar firmasındaki yetersiz
-        eski yazılımın yerine geçsin diye geliştirmeye başladım. Önce Python ile bir prototip yazdım. 2025’in
-        sonlarında onu Go ve MQTT tabanlı bir mikroservis olarak baştan tasarladım. Bugün canlıda çalışıyor; mesajları
-        düşük gecikmeyle yayınlıyor ve cihazları yönetiyor.
+        <a href={novacast} class={ui.inlineLink}>Novacast</a>’i 2025’te, çalıştığım bir bilgisayar firmasında
+        geliştirmeye başladık. Firmadaki eski yazılım hantaldı ve ihtiyaçlarımıza yetmiyordu; Novacast onun yerine
+        geçti. Farklı modellerdeki birçok ekranı tek bir web panelinden yönetiyor: Windows, macOS ve Linux
+        bilgisayarları; Samsung, LG ve Android TV’leri. Her ekranda Rust ile yazılmış küçük bir oynatıcı çalışıyor. Go ile yazılmış
+        sunucu da bu ekranlara bir MQTT aracısı (<span lang="en">broker</span>) üzerinden ulaşıyor. Proje bugün
+        canlıda çalışıyor.
       </p>
       <p>
         Bir yandan da İstanbul Üniversitesindeki matematik lisansımı tamamlıyorum. Kodumda reel analizi, soyut cebiri
@@ -55,9 +58,10 @@ const novacast = localizePath('/projects/novacast/', locale);
         hooks, a lightweight daemon architecture and gRPC between its components, and is in early access.
       </p>
       <p>
-        <a href={novacast} class={ui.inlineLink}>Novacast</a> began in 2025 as a replacement for inadequate legacy
-        software at a computer company where I worked. A Python prototype came first; in late 2025 I re-architected it
-        as a Go and MQTT microservice for low-latency message broadcasting and device orchestration. It is now in
+        <a href={novacast} class={ui.inlineLink}>Novacast</a> began in 2025 at a computer company where I worked, as a
+        replacement for software that was bloated and fell short of our needs. It manages many screens of different
+        makes from one web panel: Windows, macOS and Linux machines, and Samsung, LG and Android TVs. A small Rust
+        player runs on each screen, and a Go server reaches the screens through an MQTT broker. It is now in
         production.
       </p>
       <p>

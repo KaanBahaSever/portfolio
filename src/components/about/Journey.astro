@@ -81,7 +81,7 @@ const spaceCaption = c.space.caption(
   fmt.number(transfer.time / 86_400, { maximumFractionDigits: 0 }),
 );
 
-// The CubeSat caption's pass, the ground station's side of the drawing's radio link: a 400 km
+// The CubeSat caption's pass, the time spent on the drawing's highlighted arc: a 400 km
 // example orbit and a 10° elevation mask give about six minutes overhead.
 const pass = overheadPass(EARTH_MU, EARTH_MEAN_RADIUS, CUBESAT_ALTITUDE, MIN_ELEVATION);
 const cubesatCaption = c.cubesat.caption(fmt.number(pass.duration / 60, { maximumFractionDigits: 0 }));

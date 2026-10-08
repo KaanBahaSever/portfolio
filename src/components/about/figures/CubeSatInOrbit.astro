@@ -1,43 +1,23 @@
 ---
 /**
- * An example 3U CubeSat in orbit (cubesatScene() in ../cubesat.ts): the body of three units with
- * its rails and unit seams, four deployed solar panels with their cells, and the turnstile of UHF
- * antennas at the far end, drawn in 3D: projected, shaded by each face's angle to the Sun and
- * painted back to front during the build. Below it, the curve of the Earth, the orbit (dotted,
- * through the body's centre) and a ground station with its radio link (accent), drawn first so
- * the satellite covers the link's start. Not to scale; the caption says so. Decorative: the
- * caption says in words what is drawn.
- *
- * Each face is painted twice: in the panel's paper colour, so it hides what lies behind it, then
- * with its shade. The SVG paths come out in the scene's painting order.
+ * A schematic 1U CubeSat on its orbit (cubesatScene() in ../cubesat.ts): a 10 cm cube drawn in
+ * 3D as a line drawing (its nine visible edges), two solar cells outlined on each visible face and
+ * two antenna whips on top. Below it, the Earth with a ground station at the top
+ * (accent dot) and its line of sight to the satellite (dashed); the accent arc is the part of the
+ * orbit the station sees at least 10° above its horizon, the dotted rest of the orbit it cannot
+ * see. Not to scale; the caption says so. Decorative: the caption says in words what is drawn.
  */
 import { arrowHead, linePath, round, type Point } from '../geometry';
-import { EARTH, VIEW, circleArc, cubesatScene, halfSpan, onCircle, type Face } from '../cubesat';
+import { EARTH, ORBIT, VIEW, cubesatScene, onCircle } from '../cubesat';
 
 const scene = cubesatScene();
+const { cube } = scene;
 const closed = (points: readonly Point[]) => `${linePath(points)} Z`;
 
-/**
- * Shading, so that a face turned to the Sun looks lighter in both themes: on light paper the
- * shadowed faces get a deeper ink tint (--s), on dark paper the lit faces a brighter one (--d).
- * The solar cells are always darker than the panel frame around them.
- */
-const r2 = (value: number) => Math.round(value * 100) / 100;
-const shading = (face: Face) =>
-  `--s:${r2(0.03 + 0.16 * (1 - face.light))};--d:${r2(0.04 + 0.16 * face.light)}`;
-const cellShading = (face: Face) => `--s:${r2(0.34 + 0.3 * (1 - face.light))};--d:${r2(0.55 + 0.3 * (1 - face.light))}`;
-const shaded = '[fill-opacity:var(--s)] dark:[fill-opacity:var(--d)]';
-
-// The Earth: its limb across the frame, and just above it the thin line of the atmosphere.
-const arcAcross = (radius: number) => circleArc(radius, -halfSpan(radius), halfSpan(radius), 96);
-const limb = arcAcross(EARTH.radius);
-const atmosphere = arcAcross(EARTH.radius + 4);
-
-// The orbit, through the body's centre, and a direction tick ahead of the satellite.
-const orbit = arcAcross(scene.orbitRadius);
-const TICK = 11.5;
-const tick = onCircle(scene.orbitRadius, TICK);
-const beforeTick = onCircle(scene.orbitRadius, TICK - 1);
+// A direction tick on the visible arc, a little before the satellite sets on the right.
+const tickAngle = scene.halfAngle * 0.6;
+const tick = onCircle(ORBIT, tickAngle);
+const beforeTick = onCircle(ORBIT, tickAngle - 2);
 
 const ink = 'text-zinc-900 dark:text-zinc-100';
 const muted = 'text-zinc-400 dark:text-zinc-600';
@@ -54,42 +34,33 @@ const paper = 'fill-white dark:fill-zinc-900';
   focusable="false"
 >
   <g class={muted} stroke="currentColor" stroke-width="1">
-    <path d={linePath(orbit)} stroke-dasharray="1 3" />
-    <path d={arrowHead(tick, { x: tick.x - beforeTick.x, y: tick.y - beforeTick.y }, 4)} />
-    <path d={linePath(atmosphere)} stroke-width="0.75" />
+    {/* The orbit where the station cannot see the satellite. */}
+    <path d={linePath(scene.hiddenArc)} stroke-dasharray="1 3" />
   </g>
 
-  <path class={ink} d={linePath(limb)} stroke="currentColor" stroke-width="1" />
-
-  <g class="text-accent-600 dark:text-accent-400">
-    <path d={linePath(scene.link)} stroke="currentColor" stroke-width="1.25" stroke-dasharray="3 3" />
-    <circle cx={round(scene.station.x)} cy={round(scene.station.y)} r="3" fill="currentColor" />
+  <g class={ink} stroke="currentColor" stroke-width="1">
+    <circle cx={EARTH.centre.x} cy={EARTH.centre.y} r={EARTH.radius} />
+    {/* The station's line of sight; the cube, painted next, covers its far end. */}
+    <path d={linePath(scene.link)} stroke-dasharray="2 3" />
   </g>
 
+  <g class="text-accent-600 dark:text-accent-400" stroke="currentColor">
+    <path d={linePath(scene.visibleArc)} stroke-width="1.5" />
+    <path d={arrowHead(tick, { x: tick.x - beforeTick.x, y: tick.y - beforeTick.y }, 4.5)} stroke-width="1.5" />
+    <circle cx={round(scene.station.x)} cy={round(scene.station.y)} r="3" fill="currentColor" stroke="none" />
+  </g>
+
+  {/* The cube: its outline filled with the panel colour, so the orbit passes behind it. */}
+  <path d={closed(cube.silhouette)} class={paper} />
   <g class={ink} stroke="currentColor">
-    {
-      scene.items.map((item) =>
-        item.kind === 'whip' ? (
-          <path d={linePath([item.from, item.to])} stroke-width="0.75" />
-        ) : (
-          <>
-            <path d={closed(item.outline)} class={paper} stroke="none" />
-            <path d={closed(item.outline)} fill="currentColor" class={shaded} style={shading(item)} stroke-width="0.75" />
-            {item.cells.map((cell) => (
-              <path
-                d={closed(cell)}
-                fill="currentColor"
-                class={`${shaded} dark:text-zinc-950`}
-                style={cellShading(item)}
-                stroke="none"
-              />
-            ))}
-            {item.lines.map((line) => (
-              <path d={linePath(line)} stroke-width="0.5" stroke-opacity="0.45" />
-            ))}
-          </>
-        ),
-      )
-    }
+    <g stroke-width="0.75" stroke-opacity="0.55">
+      {cube.faces.flatMap((face) => face.cells.map((cell) => <path d={closed(cell)} />))}
+    </g>
+    <g stroke-width="1.25">
+      {cube.edges.map((edge) => <path d={linePath(edge)} />)}
+    </g>
+    <g stroke-width="1">
+      {cube.whips.map((whip) => <path d={linePath(whip)} />)}
+    </g>
   </g>
 </svg>

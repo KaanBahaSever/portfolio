@@ -616,15 +616,14 @@ test('figure captions and labels interpolate formatted values without case suffi
   const { en, tr } = aboutMessages;
   assert.match(en.journey.chapters.space.caption('3.1', '5'), /Δv ≈ 3\.1 km\/s.*about 5 days/);
   assert.match(tr.journey.chapters.space.caption('3,1', '5'), /\(Δv ≈ 3,1 km\/s\).*yaklaşık 5 gün/);
-  // The CubeSat caption: an example 3U CubeSat, not the club's (its CubeSat was never finished
-  // and its size is not on record), with the standard's size; then the example altitude, the
-  // mask and the computed pass; not to scale.
+  // The CubeSat caption: a schematic 1U CubeSat, a 10 cm cube with its panels on its faces; then
+  // the example altitude, the mask and the computed pass; not to scale.
   const cubesat = { en: en.journey.chapters.cubesat.caption('6'), tr: tr.journey.chapters.cubesat.caption('6') };
-  assert.match(cubesat.en, /^An example 3U CubeSat, not our club’s satellite\. /);
-  assert.match(cubesat.tr, /^Örnek bir 3U CubeSat, kulübümüzün uydusu değil\. /);
-  for (const caption of Object.values(cubesat)) assert.ok(caption.includes('10 × 10 × 34 cm'), caption);
-  assert.match(cubesat.en, /example orbit 400 km up.*10°.*about 6 minutes.*Not to scale\.$/);
-  assert.match(cubesat.tr, /Örnek olarak 400 km.*10°.*yaklaşık 6 dakika.*Çizim ölçekli değildir\.$/);
+  assert.match(cubesat.en, /^A schematic drawing\. An example 1U CubeSat: a 10 cm cube, with solar panels on its faces\. /);
+  assert.match(cubesat.tr, /^Şematik bir çizim\. Örnek bir 1U CubeSat: 10 cm’lik bir küp, güneş panelleri yüzeylerinde\. /);
+  assert.match(cubesat.en, /example orbit 400 km up.*about 6 minutes.*Not to scale\.$/);
+  assert.match(cubesat.tr, /Örnek olarak 400 km.*yaklaşık 6 dakika.*Çizim ölçekli değildir\.$/);
+  for (const caption of Object.values(cubesat)) assert.ok(caption.includes('10°'), caption);
   assert.equal(en.journey.chapters.avionics.figureLabels.feet('10,000'), '10,000 ft');
   assert.equal(tr.journey.chapters.avionics.figureLabels.feet('10.000'), '10.000 ft');
   assert.equal(en.journey.chapters.avionics.figureLabels.rockets(1), '1 rocket');

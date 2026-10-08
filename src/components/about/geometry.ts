@@ -4,7 +4,7 @@
  * integrated flight profile, a real Kalman filter and PID loop, an integrated steering field, a
  * network of ideas and the people helping with them, a square tiled by odd numbers), so the
  * pictures stay honest when someone reads them closely. The CubeSat's 3D model lives next door in
- * cubesat.ts; its caption's ground-station pass is computed here.
+ * cubesat.ts; the ground-station pass behind it is computed here.
  *
  * Pure module: no DOM, no `astro:*` imports and erasable TypeScript only, so `node --test` can
  * load it. Coordinates are unitless model values; the figure components scale them to SVG.
@@ -145,7 +145,7 @@ export function conicArc(a: number, e: number, from: number, to: number, steps: 
 /* ------------------------------------------------------------------------------------------ */
 
 /**
- * Constants for the CubeSat figure's caption: Earth's mean radius (km), an example altitude for
+ * Constants for the CubeSat figure: Earth's mean radius (km), an example altitude for
  * a low orbit (km; the caption says it is an example) and the usual minimum elevation (degrees)
  * a ground station needs above its horizon before it can work with a satellite.
  */

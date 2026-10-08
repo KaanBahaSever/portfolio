@@ -43,12 +43,6 @@ interface ChapterText {
  */
 const ODD_SUM = `${['1', '3', '5', '7', '9'].join(' + ')} = 5²`;
 
-/**
- * The size of a 3U CubeSat's body (#journey-cubesat), the same in both languages: 10 × 10 ×
- * 34.05 cm by the standard, rounded. No-break spaces keep it on one line.
- */
-const SIZE_3U = `${['10', '10', '34'].join(' × ')} cm`;
-
 const en = {
   meta: {
     title: 'About',
@@ -146,12 +140,12 @@ const en = {
         label: 'Rocket and Space Club · CubeSat',
         title: 'CubeSat: the satellite we could not finish',
         /**
-         * The figure is an example 3U CubeSat (cubesat.ts), not the club's: its CubeSat was never
-         * finished and its size is not on record, so the caption says so first. The pass comes
-         * from overheadPass(), in minutes, already formatted ("6").
+         * The figure is a schematic 1U CubeSat (cubesat.ts): a cube with its solar panels on its
+         * faces, like the club's. The pass comes from overheadPass(), in minutes, already
+         * formatted ("6").
          */
         caption: (minutes: string) =>
-          `An example 3U CubeSat, not our club’s satellite. Its body is three 10 cm cubes in a row (about ${SIZE_3U}), with four solar panels opened out at its sides and its antennas at the far end. Below it is the curve of the Earth, and the dashed line is the radio link to a ground station. In an example orbit 400 km up, a satellite passing straight overhead stays at least 10° above the station’s horizon for only about ${minutes} minutes, and the ground station software has to make the most of them. Not to scale.`,
+          `A schematic drawing. An example 1U CubeSat: a 10 cm cube, with solar panels on its faces. The dashed line runs to a ground station, and the highlighted arc is the part of the orbit that station sees at least 10° above its horizon. In an example orbit 400 km up, a satellite passing straight overhead stays in that arc for only about ${minutes} minutes, and the ground station software has to make the most of them. Not to scale.`,
       },
       work: {
         short: 'crowd.inc',
@@ -299,7 +293,7 @@ const tr: AboutMessages = {
         title: 'CubeSat: bitiremediğimiz uydu',
         // The number sits before a fixed noun ("dakika"), so no suffix depends on how it is read.
         caption: (minutes) =>
-          `Örnek bir 3U CubeSat, kulübümüzün uydusu değil. Gövdesi arka arkaya dizilmiş üç tane 10 cm’lik küpten oluşuyor (yaklaşık ${SIZE_3U}). İki yanında açılmış dört güneş paneli, arka ucunda da antenleri var. Altta Dünya’nın kavisi görünüyor; kesikli çizgi de bir yer istasyonuyla kurulan radyo bağlantısı. Örnek olarak 400 km yükseklikte bir yörünge düşünelim: Tam tepeden geçen bir uydu, istasyonun ufkunun en az 10° üzerinde yalnızca yaklaşık ${minutes} dakika kalır. Yer istasyonu yazılımı bu birkaç dakikayı en iyi şekilde kullanmak zorundadır. Çizim ölçekli değildir.`,
+          `Şematik bir çizim. Örnek bir 1U CubeSat: 10 cm’lik bir küp, güneş panelleri yüzeylerinde. Kesikli çizgi bir yer istasyonuna uzanıyor. Vurgulu yay, yörüngenin bu istasyondan ufkun en az 10° üzerinde görülen kısmı. Örnek olarak 400 km yükseklikte bir yörüngede, tam tepeden geçen bir uydu bu yayda yalnızca yaklaşık ${minutes} dakika kalır. Yer istasyonu yazılımı bu birkaç dakikayı en iyi şekilde kullanmak zorundadır. Çizim ölçekli değildir.`,
       },
       work: {
         short: 'crowd.inc',

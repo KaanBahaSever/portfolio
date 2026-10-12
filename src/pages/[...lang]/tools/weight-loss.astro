@@ -1,0 +1,327 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import WeightLoss from '../../../components/tools/WeightLoss.astro';
+import ToolTips from '../../../components/tools-index/ToolTips.astro';
+import type { ToolTip } from '../../../components/tools-index/types';
+import Icon from '../../../components/ui/Icon.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import Section from '../../../components/ui/Section.astro';
+import { localizePath, type Localized } from '../../../i18n/config';
+import { formatters } from '../../../i18n/format';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { weightLossMessages } from '../../../i18n/tools/weight-loss';
+import { ACTIVITY_FACTORS, ACTIVITY_LEVELS, KCAL_PER_KG } from '../../../lib/health/weight-plan';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = weightLossMessages[locale];
+const t = common[locale];
+const f = formatters(locale);
+
+/** Numbers as the page's language writes them: 6.25 / 6,25, 7,700 / 7.700. */
+const n = (value: number) => f.number(value, { maximumFractionDigits: 3 });
+// Turkish decimals use commas, so the list is separated by semicolons there: "1,2; 1,375; … ve 1,9".
+const factorValues = ACTIVITY_LEVELS.map((level) => n(ACTIVITY_FACTORS[level]));
+const factors =
+  locale === 'tr' ? `${factorValues.slice(0, -1).join('; ')} ve ${factorValues.at(-1)}` : f.list(factorValues);
+const kcalPerKg = n(KCAL_PER_KG);
+
+const h3 = 'font-serif text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100';
+const body = 'mt-3 space-y-3 leading-relaxed text-zinc-700 dark:text-zinc-300';
+/**
+ * Display formulas in HTML, as on the distance calculator (KaTeX's stylesheet is not loaded on
+ * tool pages). Each term group is an inline-block, so a long formula breaks between terms on a
+ * phone instead of overflowing. role="math" with a spoken aria-label per language.
+ */
+const formula =
+  'my-5 rounded-lg border border-zinc-200 bg-white px-4 py-4 text-center font-serif text-lg leading-relaxed text-zinc-900 sm:text-xl dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 [&_sub]:text-[0.65em] [&_sup]:text-[0.65em] [&>span]:inline-block';
+/** A fraction: numerator over a rule over denominator. */
+const frac = 'inline-flex flex-col items-center align-middle text-[0.9em] leading-tight';
+const over = 'border-t border-current px-1';
+
+const speech: Localized<{ male: string; female: string; tdee: string; step: string; equilibrium: string }> = {
+  en: {
+    male: 'BMR for men equals 10 w plus 6.25 h minus 5 a plus 5',
+    female: 'BMR for women equals 10 w plus 6.25 h minus 5 a minus 161',
+    tdee: 'TDEE equals BMR times PAL',
+    step: 'w of n plus 1 equals w of n minus the fraction: TDEE of w n minus I, over 7,700',
+    equilibrium: 'w star equals the fraction: I over PAL, minus 6.25 h, plus 5 a, minus s; over 10',
+  },
+  tr: {
+    male: 'Erkeklerde BMR eşittir 10 w artı 6,25 h eksi 5 a artı 5',
+    female: 'Kadınlarda BMR eşittir 10 w artı 6,25 h eksi 5 a eksi 161',
+    tdee: 'TDEE eşittir BMR çarpı PAL',
+    step: 'w n artı bir eşittir w n eksi kesir: w n kilodaki TDEE eksi I, bölü 7.700',
+    equilibrium: 'w yıldız eşittir kesir: I bölü PAL, eksi 6,25 h, artı 5 a, eksi s; bölü 10',
+  },
+};
+const say = speech[locale];
+
+// Page-only prose: kept here rather than in the catalogue, which also ships to the browser.
+const tips: Localized<ToolTip[]> = {
+  en: [
+    {
+      lead: 'Pick your activity level honestly.',
+      body: 'Most people think they move more than they do. If you are between two levels, take the lower one; if you lose faster than planned, you can move up later.',
+    },
+    {
+      lead: 'Why the curve flattens.',
+      body: 'A lighter body uses less energy, so the same meals make a smaller deficit each week. That is why the plan takes longer than the dashed straight line, which keeps the first day’s deficit forever.',
+    },
+    {
+      lead: 'The scale moves every day.',
+      body: 'Water, salt, glycogen and what is still being digested can change your weight by a kilogram or more overnight. Compare weekly averages, not single mornings.',
+    },
+    {
+      lead: 'Weigh yourself the same way.',
+      body: 'Same scale, same time: in the morning, after the bathroom, before eating or drinking. Then the numbers can be compared.',
+    },
+    {
+      lead: 'Keep your muscle.',
+      body: 'Enough protein and some strength training help you keep lean mass while you lose fat, and lean mass keeps your BMR from falling as much.',
+    },
+    {
+      lead: 'Start again from where you are.',
+      body: 'Every few weeks, enter your current weight and today’s date. The plan then starts from your real weight instead of the projected one.',
+    },
+  ],
+  tr: [
+    {
+      lead: 'Hareket düzeyinizi dürüstçe seçin.',
+      body: 'Çoğumuz kendimizi olduğumuzdan daha hareketli sanırız. İki düzey arasında kaldıysanız düşük olanı seçin; planladığınızdan hızlı kilo verirseniz sonra bir üst düzeye geçebilirsiniz.',
+    },
+    {
+      lead: 'Eğri neden yatıklaşıyor?',
+      body: 'Daha hafif bir vücut daha az enerji harcar. Bu yüzden aynı öğünler her hafta biraz daha küçük bir açık oluşturur. Plan da bu nedenle, ilk günkü açığın hiç değişmediğini varsayan kesikli düz çizgiden daha uzun sürer.',
+    },
+    {
+      lead: 'Tartı her gün oynar.',
+      body: 'Su, tuz, glikojen ve henüz sindirilmemiş yiyecekler kilonuzu bir gecede bir kilogram, hatta daha fazla değiştirebilir. Tek tek sabahları değil, haftalık ortalamaları karşılaştırın.',
+    },
+    {
+      lead: 'Hep aynı şekilde tartılın.',
+      body: 'Aynı tartıda, aynı saatte tartılın: sabah, tuvaletten sonra, bir şey yiyip içmeden önce. Böylece sayıları birbiriyle karşılaştırabilirsiniz.',
+    },
+    {
+      lead: 'Kaslarınızı koruyun.',
+      body: 'Yeterli protein ve biraz kuvvet antrenmanı, yağ yakarken yağsız kütlenizi korumanıza yardımcı olur. Yağsız kütle de BMR’nizin daha az düşmesini sağlar.',
+    },
+    {
+      lead: 'Bulunduğunuz yerden yeniden başlayın.',
+      body: 'Birkaç haftada bir şu anki kilonuzu ve bugünün tarihini girin. Böylece plan, tahmin edilen kilodan değil gerçek kilonuzdan başlar.',
+    },
+  ],
+};
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    eyebrow={m.header.eyebrow}
+    title={m.meta.title}
+    lead={m.header.lead}
+    back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+  />
+
+  <WeightLoss />
+
+  <aside
+    aria-label={m.privacy.label}
+    class="mt-6 flex gap-3 rounded-xl border border-accent-600/20 bg-accent-50 p-4 text-sm leading-relaxed text-accent-950 sm:p-5 dark:border-accent-500/25 dark:bg-accent-500/10 dark:text-accent-100"
+  >
+    <Icon name="lock" class="mt-0.5 size-5 shrink-0 text-accent-700 dark:text-accent-400" />
+    <p><strong class="font-semibold">{m.privacy.title}</strong> {m.privacy.body}</p>
+  </aside>
+
+  <Section id="formula" title={m.formulaTitle}>
+    <div class="grid gap-x-12 gap-y-10 lg:grid-cols-2">
+      <div class="min-w-0">
+        {
+          locale === 'tr' ? (
+            <>
+              <h3 class={h3}>Bazal metabolizma hızı</h3>
+              <p class={body}>
+                Bazal metabolizma hızı (BMR), vücudunuzun dinlenirken, yalnızca hayatta kalmak için bir günde harcadığı
+                enerjidir. Hesaplayıcı varsayılan olarak Mifflin–St Jeor denklemini (Mifflin ve ark., 1990) kullanır.
+                Burada <var>w</var> kilogram cinsinden kilo, <var>h</var> santimetre cinsinden boy, <var>a</var> da yıl
+                cinsinden yaştır:
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 class={h3}>Basal metabolic rate</h3>
+              <p class={body}>
+                The basal metabolic rate (BMR) is the energy your body uses in a day at rest, just to keep going. By
+                default the calculator uses the Mifflin–St Jeor equation (Mifflin et al., 1990), with weight <var>w</var> in
+                kilograms, height <var>h</var> in centimeters and age <var>a</var> in years:
+              </p>
+            </>
+          )
+        }
+        {
+          /*
+           * One line per term group on purpose: whitespace inside <sub> would show as a gap. The
+           * HTML compressor drops line breaks between tags, so the space between the groups is
+           * written out ({' '}); it is also where a phone breaks the line.
+           */
+        }
+        <p class={formula} role="math" aria-label={say.male}>
+          <span>BMR<sub>{locale === 'tr' ? 'erkek' : 'men'}</sub> = 10<var>w</var> + {n(6.25)}<var>h</var></span>{' '}
+          <span>− 5<var>a</var> + 5</span>
+        </p>
+        <p class={formula} role="math" aria-label={say.female}>
+          <span>BMR<sub>{locale === 'tr' ? 'kadın' : 'women'}</sub> = 10<var>w</var> + {n(6.25)}<var>h</var></span>{' '}
+          <span>− 5<var>a</var> − 161</span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <div class={body}>
+              <p>
+                Revize Harris–Benedict denklemi (Roza ve Shizgal, 1984) erkeklerde {n(88.362)} + {n(13.397)}
+                <var>w</var> + {n(4.799)}
+                <var>h</var> − {n(5.677)}
+                <var>a</var>, kadınlarda {n(447.593)} + {n(9.247)}
+                <var>w</var> + {n(3.098)}
+                <var>h</var> − {n(4.33)}
+                <var>a</var> şeklindedir. Katch–McArdle denklemi ise kiloyu değil yağsız vücut kütlesini kullanır: 370 +{' '}
+                {n(21.6)} × yağsız kütle. Plan boyunca verilen her kilogramın dörtte birinin yağsız kütle olduğu varsayılır
+                (Forbes’un “dörtte bir” kuralı); bu yüzden bu denklemde BMR, verilen her kilogram için {n(5.4)} kcal düşer.
+              </p>
+              <p>
+                Günlük kalori ihtiyacı (TDEE), BMR’nin hareket düzeyi katsayısıyla (PAL) çarpımıdır. Katsayılar hareketsizden
+                son derece hareketliye doğru {factors} olarak alınır:
+              </p>
+            </div>
+          ) : (
+            <div class={body}>
+              <p>
+                The revised Harris–Benedict equation (Roza & Shizgal, 1984) is {n(88.362)} + {n(13.397)}
+                <var>w</var> + {n(4.799)}
+                <var>h</var> − {n(5.677)}
+                <var>a</var> for men and {n(447.593)} + {n(9.247)}
+                <var>w</var> + {n(3.098)}
+                <var>h</var> − {n(4.33)}
+                <var>a</var> for women. Katch–McArdle uses lean body mass instead of weight: 370 + {n(21.6)} × lean mass.
+                Over the plan, a quarter of each kilogram lost is taken to be lean mass (Forbes’s rule of thumb), so with
+                this equation BMR falls by {n(5.4)} kcal for every kilogram lost.
+              </p>
+              <p>
+                Maintenance calories, the total daily energy expenditure (TDEE), are BMR times the physical activity level
+                (PAL), from sedentary to extra active {factors}:
+              </p>
+            </div>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.tdee}>
+          <span>TDEE = BMR × PAL</span>
+        </p>
+      </div>
+
+      <div class="min-w-0">
+        {
+          locale === 'tr' ? (
+            <>
+              <h3 class={h3}>Kaloriden kilograma</h3>
+              <p class={body}>
+                Verilen bir kilogramın yaklaşık {kcalPerKg} kcal’ye karşılık geldiği kabul edilir. Her gün (<var>n</var>)
+                o günkü kiloyla hesaplanan kalori ihtiyacından yediğiniz miktar (<var>I</var>) çıkarılır
+                ve kalan açık kilograma çevrilir:
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 class={h3}>From calories to kilograms</h3>
+              <p class={body}>
+                Each kilogram lost is taken to be worth about {kcalPerKg} kcal. On every day <var>n</var>, what you eat
+                (<var>I</var>) is subtracted from maintenance at that day’s weight, and the deficit is turned into
+                kilograms:
+              </p>
+            </>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.step}>
+          <span><var>w</var><sub><var>n</var>+1</sub> = <var>w</var><sub><var>n</var></sub> −</span>{' '}
+          <span>
+            <span class={frac}>
+              <span>TDEE(<var>w</var><sub><var>n</var></sub>) − <var>I</var></span>
+              <span class={over}>{kcalPerKg}</span>
+            </span>
+          </span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <div class={body}>
+              <p>
+                BMR ertesi gün yeni kiloyla yeniden hesaplanır. Böylece kilo düştükçe kalori ihtiyacı da düşer ve aynı
+                miktarı yemeye devam ederseniz açık her gün biraz küçülür. “Günlük açık” seçeneğinde ise açık tanım gereği
+                sabittir: Kilo bir doğru boyunca iner, onun yerine yediğiniz miktar azalır. Yaş, boy ve hareket düzeyi plan
+                boyunca girdiğiniz gibi kalır.
+              </p>
+              <p>
+                Yediğiniz miktar sabitse kilo, kalori ihtiyacının bu miktara eşit olduğu noktada durur. Mifflin–St Jeor
+                için bu denge kilosu şöyledir (erkeklerde <var>s</var> = 5, kadınlarda <var>s</var> = −161):
+              </p>
+            </div>
+          ) : (
+            <div class={body}>
+              <p>
+                The next day BMR is recomputed from the new weight, so maintenance falls as you lose weight, and if you keep
+                eating the same amount, the deficit shrinks a little every day. In “Daily deficit” mode the deficit is held
+                fixed by definition: weight falls in a straight line, and what you eat falls instead. Age, height and
+                activity stay as entered for the whole plan.
+              </p>
+              <p>
+                With a fixed intake, weight stops falling where maintenance equals what you eat. For Mifflin–St Jeor that
+                equilibrium weight is (with <var>s</var> = 5 for men and <var>s</var> = −161 for women)
+              </p>
+            </div>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.equilibrium}>
+          <span><var>w</var>* =</span>{' '}
+          <span>
+            <span class={frac}>
+              <span><var>I</var>/PAL − {n(6.25)}<var>h</var> + 5<var>a</var> − <var>s</var></span>
+              <span class={over}>10</span>
+            </span>
+          </span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <div class={body}>
+              <p>
+                Hedef bu kilonun altında ya da ona eşitse, o miktarı yiyerek hedefe hiç ulaşılmaz; grafikteki eğri bu
+                kiloya doğru yatıklaşır. Diğer iki denklem de kiloya doğrusal bağlı olduğundan, onlar için de aynı
+                yöntemle kapalı bir formül çıkar.
+              </p>
+              <p>
+                Kilogram başına {kcalPerKg} kcal kuralı yaklaşık bir değerdir. Hall ve arkadaşları (2011, The Lancet),
+                bu tür sabit kuralların uzun vadede verilecek kiloyu olduğundan fazla gösterdiğini ortaya koydu. Burada
+                BMR’nin her gün yeniden hesaplanması bu yavaşlamanın bir kısmını yansıtır; ama vücudun diyet sırasında
+                enerji harcamasını ayrıca azaltmasını (adaptif termogenez) hesaba katmaz. Sonuçları bir tahmin olarak
+                okuyun.
+              </p>
+            </div>
+          ) : (
+            <div class={body}>
+              <p>
+                If the target is at or below this weight, it is never reached at that intake, and the curve on the chart
+                levels off toward it. The other two equations are also straight lines in weight, so they give a closed
+                form in the same way.
+              </p>
+              <p>
+                The {kcalPerKg} kcal per kilogram rule is an approximation. Hall et al. (2011, The Lancet) showed that
+                static rules like it overestimate long-term weight loss. Recomputing BMR every day captures part of that
+                slowdown, but not adaptive thermogenesis, the further drop in energy use the body makes while dieting.
+                Read the result as an estimate.
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </Section>
+
+  <ToolTips title={m.tips} tips={tips[locale]} columns={3} />
+</BaseLayout>

@@ -2,8 +2,8 @@
 /**
  * The privacy note on /tools/. Prose with a link, so it is written once per language as markup
  * (no translated HTML strings). Keep both versions saying the same thing: nothing is uploaded,
- * and of the visitor's files and text only the Notepad draft is kept, in this browser's local
- * storage. The claim is scoped to user content on purpose: the header's EN|TR switch also
+ * and of what the visitor enters only the Notepad draft and the Weight-loss calculator's values
+ * are kept, in this browser's local storage. The claim is scoped to user content on purpose: the header's EN|TR switch also
  * remembers the chosen language in local storage.
  *
  * The prose sits inside a {…} expression, where JSX whitespace rules apply: a line break next
@@ -19,6 +19,7 @@ import { toolsIndexMessages } from '../../i18n/tools/index';
 const locale = getLocale(Astro);
 const m = toolsIndexMessages[locale];
 const notepadHref = localizePath('/tools/notepad/', locale);
+const weightLossHref = localizePath('/tools/weight-loss/', locale);
 const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
 ---
 
@@ -39,9 +40,10 @@ const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
             cihazınızda işlenir, hiçbir zaman bir sunucuya yüklenmez.
           </p>
           <p>
-            Dosyalarınızdan ve metinlerinizden yalnızca <a href={notepadHref} class={ui.inlineLink}>Not defteri</a> taslağı
-            saklanır. Sayfayı yenilediğinizde kaybolmasın diye bu tarayıcının yerel depolama alanında tutulur ve bu
-            cihazdan hiç çıkmaz.
+            Girdiklerinizden yalnızca iki şey saklanır: <a href={notepadHref} class={ui.inlineLink}>Not defteri</a> taslağınız
+            (sayfayı yenilediğinizde kaybolmasın diye) ve <a href={weightLossHref} class={ui.inlineLink}>Kilo verme
+            hesaplayıcı</a> aracına girdiğiniz değerler.
+            İkisi de bu tarayıcının yerel depolama alanında tutulur ve bu cihazdan hiç çıkmaz.
           </p>
         </>
       ) : (
@@ -51,9 +53,10 @@ const strong = 'font-semibold text-zinc-900 dark:text-zinc-100';
             processed on your device and never uploaded to a server.
           </p>
           <p>
-            Of your files and text, the only thing kept is
-            the <a href={notepadHref} class={ui.inlineLink}>Notepad</a> draft: it is saved in this browser’s local
-            storage so a reload does not lose it, and it never leaves this device.
+            Of what you enter, only two things are kept:
+            the <a href={notepadHref} class={ui.inlineLink}>Notepad</a> draft, so a reload does not lose it, and the
+            values in the <a href={weightLossHref} class={ui.inlineLink}>Weight-loss calculator</a>. Both are saved in
+            this browser’s local storage and never leave this device.
           </p>
         </>
       )

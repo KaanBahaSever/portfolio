@@ -103,4 +103,14 @@ export const TOOLS: readonly ToolInfo[] = [
     status: 'ready',
     href: '/tools/geo-distance/',
   },
+  {
+    slug: 'weight-loss',
+    title: { en: 'Weight-loss calculator', tr: 'Kilo verme hesaplayıcı' },
+    description: {
+      en: 'Estimate your BMR and maintenance calories, set a daily intake or deficit and a target weight, and see the day you reach it on a chart and in a table.',
+      tr: 'BMR’nizi ve günlük kalori ihtiyacınızı hesaplayın. Hedef kilonuzu ve günde ne kadar yiyeceğinizi girin; hedefe ulaşacağınız günü grafikte ve tabloda görün.',
+    },
+    status: 'ready',
+    href: '/tools/weight-loss/',
+  },
 ];

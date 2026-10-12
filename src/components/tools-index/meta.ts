@@ -13,4 +13,5 @@ export const TOOL_FORMATS: Readonly<Record<string, readonly string[]>> = {
   'prime-factorizer': ['BigInt', 'Web Worker'],
   'binary-text': ['UTF-8', 'ASCII'],
   'geo-distance': ['DMS', 'WGS-84'],
+  'weight-loss': ['kcal', 'CSV'],
 };

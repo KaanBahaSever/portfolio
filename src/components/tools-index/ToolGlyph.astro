@@ -3,7 +3,8 @@
  * Thin-line figure for a tool card (24×24 grid): the object the tool works on, drawn in
  * currentColor, with one accent mark for what the tool does to it (the picture set on a page,
  * the caret that writes, the cut that splits, the arrows that compress, the key bit that locks,
- * the primes a number splits into, the arrows that convert, the route between two places).
+ * the primes a number splits into, the arrows that convert, the route between two places, the
+ * weight that comes down to a target).
  * Decorative: the card names the tool in text. Unknown slugs get a neutral page.
  */
 interface Props {
@@ -95,6 +96,12 @@ const glyphs: Record<string, Glyph> = {
       [7, 17.5, 1.4],
       [16.5, 7, 1.4],
     ],
+  },
+  // A chart's axes and a dashed target line; the weight curve comes down and levels off on it.
+  'weight-loss': {
+    ink: ['M3.5 3.5v17h17', 'M7 16.5h1.75', 'M10.75 16.5h1.75'],
+    accent: ['M6.5 6Q9 15 17 16.5'],
+    dots: [[17.5, 16.5, 1.5]],
   },
 };
 

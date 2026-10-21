@@ -113,4 +113,14 @@ export const TOOLS: readonly ToolInfo[] = [
     status: 'ready',
     href: '/tools/weight-loss/',
   },
+  {
+    slug: 'gravity',
+    title: { en: 'Gravity simulator', tr: 'Yerçekimi simülasyonu' },
+    description: {
+      en: 'The Earth and the Moon in 3D under Newton’s law of gravitation. Add planets, moons and satellites of any mass, throw them into orbit and see their path before you let go.',
+      tr: 'Dünya ve Ay, Newton’un kütleçekim yasasıyla üç boyutlu olarak hareket ediyor. İstediğiniz kütlede gezegen, uydu ve yapay uydu ekleyin; onları yörüngeye fırlatın ve bırakmadan önce izleyecekleri yolu görün.',
+    },
+    status: 'ready',
+    href: '/tools/gravity/',
+  },
 ];

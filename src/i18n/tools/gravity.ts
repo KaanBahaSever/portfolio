@@ -26,7 +26,7 @@ const en = {
   },
   header: {
     eyebrow: 'Browser tool',
-    lead: 'The Earth and the Moon in 3D, moved by Newton’s law of gravitation with their real masses and distance. Add bodies of any mass, throw them into orbit, and see the path each one will take before you let it go.',
+    lead: 'The Earth and the Moon, moved by Newton’s law of gravitation with their real masses and distance, in a 3D view you can turn and zoom. Add bodies of any mass, throw them into orbit, and see the path each one will take before you let it go.',
   },
   toolLabel: 'Gravity simulator',
   noscript: 'This simulator needs JavaScript to run.',
@@ -241,7 +241,7 @@ const tr: GravityMessages = {
   },
   header: {
     eyebrow: 'Tarayıcı aracı',
-    lead: 'Dünya ve Ay, gerçek kütleleri ve aralarındaki gerçek uzaklıkla, Newton’un kütleçekim yasasına göre üç boyutlu olarak hareket ediyor. İstediğiniz kütlede cisimler ekleyin, onları yörüngeye fırlatın ve bırakmadan önce her birinin izleyeceği yolu görün.',
+    lead: 'Dünya ve Ay, gerçek kütleleri ve aralarındaki gerçek uzaklıkla Newton’un kütleçekim yasasına göre hareket ediyor. Üç boyutlu görünümü dilediğiniz gibi çevirip yakınlaştırabilirsiniz. İstediğiniz kütlede cisimler ekleyin, onları yörüngeye fırlatın ve bırakmadan önce her birinin izleyeceği yolu görün.',
   },
   toolLabel: 'Yerçekimi simülasyonu',
   noscript: 'Bu simülasyonun çalışması için JavaScript gerekir.',

@@ -1,8 +1,10 @@
 ---
 /**
  * Fig. 404: the graph of a function with a removable discontinuity. The open circle (the one
- * accent mark) is the point missing from the domain — the page that is not there. Static
- * except for a one-time draw-in; decorative (aria-hidden), the caption says what it shows.
+ * accent mark) is the point missing from the domain — the page that is not there. Its x value
+ * is the address the visitor asked for (/abc reads "abc"); the browser fills it in, and without
+ * JavaScript it stays "404". Static except for a one-time draw-in; decorative (aria-hidden), the
+ * caption says what it shows.
  */
 import { notFoundMessages } from '../../i18n/messages/not-found';
 import { getLocale } from '../../i18n/server';
@@ -12,7 +14,10 @@ interface Props {
 }
 
 const { class: className } = Astro.props;
-const m = notFoundMessages[getLocale(Astro)].figure;
+const locale = getLocale(Astro);
+const m = notFoundMessages[locale].figure;
+// The Turkish 404 serves every missing /tr/... address; its label drops that prefix.
+const localePrefix = locale === 'en' ? '' : locale;
 
 /*
  * The curve is one cubic Bézier followed by a smooth continuation. The hole sits at t = ½ on
@@ -60,8 +65,14 @@ const axisY = 170;
         stroke-dasharray="3 4"></path>
 
       <g stroke="none" class="nf-fade" style="--nf-delay: 1000ms">
-        <text x={hole.x} y={axisY + 20} text-anchor="middle" font-size="12" class="fill-zinc-600 font-mono dark:fill-zinc-400"
-          >404</text
+        <text
+          x={hole.x}
+          y={axisY + 20}
+          text-anchor="middle"
+          font-size="12"
+          class="fill-zinc-600 font-mono dark:fill-zinc-400"
+          data-not-found-x
+          data-locale-prefix={localePrefix}>404</text
         >
         <text x="300" y="26" text-anchor="end" font-size="16" class="fill-zinc-600 font-serif italic dark:fill-zinc-400"
           >f</text
@@ -89,6 +100,25 @@ const axisY = 170;
     <span>{m.caption}</span>
   </figcaption>
 </figure>
+
+<script>
+  import { notFoundLabel } from '../../lib/not-found-label';
+
+  // The y axis is at x = 40 and the "x" label ends at 304: a long label slides right of the
+  // tick instead of running into the axis.
+  const AXIS_CLEARANCE = 46;
+  const RIGHT_EDGE = 288;
+
+  for (const text of document.querySelectorAll<SVGTextElement>('[data-not-found-x]')) {
+    const label = notFoundLabel(location.pathname, text.dataset.localePrefix ?? '');
+    if (!label) continue;
+    text.textContent = label;
+    const half = text.getComputedTextLength() / 2;
+    const x = Number(text.getAttribute('x'));
+    const shifted = Math.min(Math.max(x, AXIS_CLEARANCE + half), RIGHT_EDGE - half);
+    if (shifted !== x) text.setAttribute('x', String(shifted));
+  }
+</script>
 
 <style>
   /* Same draw-in as Fig. 1 on the home page; without motion the figure is simply there. */

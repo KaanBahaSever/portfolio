@@ -14,4 +14,5 @@ export const TOOL_FORMATS: Readonly<Record<string, readonly string[]>> = {
   'binary-text': ['UTF-8', 'ASCII'],
   'geo-distance': ['DMS', 'WGS-84'],
   'weight-loss': ['kcal', 'CSV'],
+  gravity: ['WebGL', 'SI'],
 };

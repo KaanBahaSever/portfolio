@@ -1,0 +1,406 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Gravity from '../../../components/tools/Gravity.astro';
+import ToolTips from '../../../components/tools-index/ToolTips.astro';
+import type { ToolTip } from '../../../components/tools-index/types';
+import Icon from '../../../components/ui/Icon.astro';
+import PageHeader from '../../../components/ui/PageHeader.astro';
+import Section from '../../../components/ui/Section.astro';
+import { localizePath, type Localized } from '../../../i18n/config';
+import { formatters } from '../../../i18n/format';
+import { common } from '../../../i18n/messages/common';
+import { getLocale, localeStaticPaths } from '../../../i18n/server';
+import { gravityMessages } from '../../../i18n/tools/gravity';
+import { EARTH_MASS, EARTH_MOON_DISTANCE, G, MOON_MASS, SOFTENING, STEP_FRACTION } from '../../../lib/physics/gravity';
+import { presenter } from '../../../scripts/tools/gravity/present';
+
+export const getStaticPaths = () => localeStaticPaths();
+
+const locale = getLocale(Astro);
+const m = gravityMessages[locale];
+const t = common[locale];
+const f = formatters(locale);
+const present = presenter(locale);
+
+// Constants as the simulation uses them, in the page's number format.
+const g = present.scientific(G, 5);
+const earthMass = present.scientific(EARTH_MASS);
+const moonMass = present.scientific(MOON_MASS);
+const moonDistance = present.distance(EARTH_MOON_DISTANCE);
+const eta = f.number(STEP_FRACTION);
+const softening = f.number(SOFTENING / 1000);
+
+const h3 = 'font-serif text-xl font-medium tracking-tight text-zinc-900 dark:text-zinc-100';
+const body = 'mt-3 space-y-3 leading-relaxed text-zinc-700 dark:text-zinc-300';
+/**
+ * Display formulas in HTML, as on the distance calculator (KaTeX's stylesheet is not loaded on
+ * tool pages). Each term group is an inline-block, so a long formula breaks between terms on a
+ * phone instead of overflowing. role="math" with a spoken aria-label per language.
+ */
+const formula =
+  'my-5 rounded-lg border border-zinc-200 bg-white px-4 py-4 text-center font-serif text-lg leading-relaxed text-zinc-900 sm:text-xl dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 [&_sub]:text-[0.65em] [&_sup]:text-[0.65em] [&>span]:inline-block';
+/** The same box with one line per span: the three lines of the Verlet step. */
+const formulaLines = formula.replace('[&>span]:inline-block', '[&>span]:block');
+/** A fraction: numerator over a rule over denominator. */
+const frac = 'inline-flex flex-col items-center align-middle text-[0.9em] leading-tight';
+const over = 'border-t border-current px-1';
+const root = 'border-t border-current pt-px';
+
+const speech: Localized<{
+  newton: string;
+  angle: string;
+  components: string;
+  acceleration: string;
+  verlet: string;
+  circular: string;
+  period: string;
+}> = {
+  en: {
+    newton: 'F equals G m 1 m 2 over r squared',
+    angle: 'theta equals atan2 of delta y and delta x',
+    components: 'F x equals F cosine theta, and F y equals F sine theta',
+    acceleration: 'a x equals F x over m, and a y equals F y over m',
+    verlet:
+      'v at n plus one half equals v n plus a n delta t over 2. x at n plus 1 equals x n plus v at n plus one half times delta t. v at n plus 1 equals v at n plus one half plus a at n plus 1 times delta t over 2.',
+    circular: 'v equals the square root of G M over r',
+    period: 'T equals 2 pi times the square root of a cubed over G M',
+  },
+  tr: {
+    newton: 'F eşittir G m bir m iki bölü r kare',
+    angle: 'teta eşittir atan2; birinci bileşen delta y, ikinci bileşen delta x',
+    components: 'F x eşittir F kosinüs teta, F y eşittir F sinüs teta',
+    acceleration: 'a x eşittir F x bölü m, a y eşittir F y bölü m',
+    verlet:
+      'v n artı yarım eşittir v n artı a n çarpı delta t bölü 2. x n artı bir eşittir x n artı v n artı yarım çarpı delta t. v n artı bir eşittir v n artı yarım artı a n artı bir çarpı delta t bölü 2.',
+    circular: 'v eşittir karekök G M bölü r',
+    period: 'T eşittir 2 pi çarpı karekök a küp bölü G M',
+  },
+};
+const say = speech[locale];
+
+// Page-only prose: kept here rather than in the catalogue, which also ships to the browser.
+const tips: Localized<ToolTip[]> = {
+  en: [
+    {
+      lead: 'Getting a circular orbit.',
+      body: 'The easiest way is “Circular orbit” under “Add a body”: choose the body to go around and a distance. By hand, throw at right angles to the line toward the planet and adjust the length of the arrow until the dashed line closes into a circle.',
+    },
+    {
+      lead: 'Slower or faster than a circle.',
+      body: 'Throw a little slower and the body falls into an ellipse that swings closer in, speeding up as it passes. Throw faster and the ellipse grows; at √2 times the circular speed it is no longer bound and leaves for good. The label next to the arrow tells you which.',
+    },
+    {
+      lead: 'Try the figure eight.',
+      body: 'Three equal masses following each other along one curve is one of the few three-body orbits that repeat. Add a Moon close to it and see how long the dance lasts.',
+    },
+    {
+      lead: 'Why the energy number moves.',
+      body: 'The simulation takes small steps instead of following the motion exactly, so the total energy wobbles a little. Velocity Verlet keeps that wobble bounded instead of letting it grow, which is why orbits do not slowly spiral out. A collision really does lose energy: it would turn into heat.',
+    },
+    {
+      lead: 'Follow a body.',
+      body: 'Select a body and tick “Follow selected”: the camera moves with it. Follow the Earth to see the Moon go round it; the trails stay drawn in the frame of the whole scene, so they show how the Earth itself wobbles.',
+    },
+    {
+      lead: 'Zoom in to see true sizes.',
+      body: 'Bodies are drawn with a minimum size on screen so they stay visible. Zoom in close and they shrink to their real radius: the Earth’s radius is 6,371 km, and the geostationary satellite is more than six Earth radii away.',
+    },
+  ],
+  tr: [
+    {
+      lead: 'Dairesel yörünge nasıl elde edilir?',
+      body: 'En kolay yol, “Cisim ekle” bölümündeki “Dairesel yörünge” seçeneğidir: Çevresinde dönülecek cismi ve uzaklığı seçin. Elle denemek isterseniz cismi, gezegene uzanan çizgiye dik fırlatın ve kesikli çizgi bir daireye kapanana kadar okun uzunluğunu ayarlayın.',
+    },
+    {
+      lead: 'Dairesel hızdan yavaş ya da hızlı.',
+      body: 'Biraz yavaş fırlatırsanız cisim, gezegene daha çok yaklaşan bir elipse girer ve yaklaştıkça hızlanır. Hızlı fırlatırsanız elips büyür; dairesel hızın √2 katına ulaşınca cisim artık bağlı kalmaz ve bir daha dönmemek üzere uzaklaşır. Okun yanındaki yazı hangisinin olacağını söyler.',
+    },
+    {
+      lead: 'Sekiz sahnesini deneyin.',
+      body: 'Eşit kütleli üç cismin aynı eğri üzerinde birbirini izlemesi, kendini tekrar eden az sayıdaki üç cisim yörüngesinden biridir. Yakınına bir Ay ekleyin ve dansın ne kadar sürdüğünü izleyin.',
+    },
+    {
+      lead: 'Enerji sayısı neden oynuyor?',
+      body: 'Simülasyon hareketi birebir izlemek yerine küçük adımlar atar, bu yüzden toplam enerji biraz dalgalanır. Hız Verlet yöntemi bu dalgalanmanın büyümesine izin vermez; yörüngelerin yavaş yavaş dışarı doğru açılmamasının nedeni budur. Çarpışmada ise enerji gerçekten kaybolur: Gerçekte ısıya dönüşürdü.',
+    },
+    {
+      lead: 'Bir cismi izleyin.',
+      body: 'Bir cismi seçip “Seçileni izle” kutusunu işaretleyin; kamera onunla birlikte hareket eder. Dünya’yı izlerseniz Ay’ın onun çevresinde dönüşünü görürsünüz. İzler ise bütün sahneye göre çizilmeye devam eder, böylece Dünya’nın kendisinin nasıl salındığını da gösterir.',
+    },
+    {
+      lead: 'Gerçek boyutlar için yakınlaşın.',
+      body: 'Cisimler görünür kalsınlar diye ekranda belli bir boyuttan küçük çizilmez. Yakınlaştıkça gerçek yarıçaplarına küçülürler: Dünya’nın yarıçapı 6.371 km’dir, yer eşzamanlı uydu ise Dünya’nın merkezinden altı Dünya yarıçapından daha uzaktadır.',
+    },
+  ],
+};
+---
+
+<BaseLayout title={m.meta.title} description={m.meta.description} width="wide">
+  <PageHeader
+    eyebrow={m.header.eyebrow}
+    title={m.meta.title}
+    lead={m.header.lead}
+    back={{ href: localizePath('/tools/', locale), label: t.nav.tools }}
+  />
+
+  <Gravity />
+
+  <aside
+    aria-label={m.privacy.label}
+    class="mt-6 flex gap-3 rounded-xl border border-accent-600/20 bg-accent-50 p-4 text-sm leading-relaxed text-accent-950 sm:p-5 dark:border-accent-500/25 dark:bg-accent-500/10 dark:text-accent-100"
+  >
+    <Icon name="lock" class="mt-0.5 size-5 shrink-0 text-accent-700 dark:text-accent-400" />
+    <p><strong class="font-semibold">{m.privacy.title}</strong> {m.privacy.body}</p>
+  </aside>
+
+  <Section id="formula" title={m.formulaTitle}>
+    <div class="grid gap-x-12 gap-y-10 lg:grid-cols-2">
+      <div class="min-w-0">
+        {
+          locale === 'tr' ? (
+            <>
+              <p class="leading-relaxed text-zinc-700 dark:text-zinc-300">
+                Bunun bir sürümünü yıllar önce canvas ile yazmıştım. O sürümde yalnızca Dünya ve Ay vardı; onları
+                Newton’un kütleçekim yasasıyla hareket ettiriyor, çekimin yönünü de atan2 ile buluyordum. Buradaki
+                simülasyon da aynı fikre dayanıyor.
+              </p>
+              <h3 class:list={[h3, 'mt-8']}>Newton’un kütleçekim yasası</h3>
+              <p class={body}>
+                Kütleleri <var>m</var>
+                <sub>1</sub> ve <var>m</var>
+                <sub>2</sub> olan, aralarında <var>r</var> uzaklığı bulunan iki cisim birbirini şu kuvvetle çeker:
+              </p>
+            </>
+          ) : (
+            <>
+              <p class="leading-relaxed text-zinc-700 dark:text-zinc-300">
+                I first wrote a version of this years ago with canvas. It had only the Earth and the Moon, moved by
+                Newton’s law of gravitation, with atan2 to find the direction of the pull. This simulation is built on
+                the same idea.
+              </p>
+              <h3 class:list={[h3, 'mt-8']}>Newton’s law of universal gravitation</h3>
+              <p class={body}>
+                Two bodies of mass <var>m</var>
+                <sub>1</sub> and <var>m</var>
+                <sub>2</sub> a distance <var>r</var> apart pull on each other with a force of
+              </p>
+            </>
+          )
+        }
+        {
+          /*
+           * One line per term group on purpose: whitespace inside <sub> and <sup> would show as
+           * gaps. The HTML compressor drops line breaks between tags, so the space between the
+           * groups is written out ({' '}); it is also where a phone breaks the line.
+           */
+        }
+        <p class={formula} role="math" aria-label={say.newton}>
+          <span><var>F</var> =</span>{' '}
+          <span>
+            <span class={frac}>
+              <span><var>G</var> <var>m</var><sub>1</sub> <var>m</var><sub>2</sub></span>
+              <span class={over}><var>r</var><sup>2</sup></span>
+            </span>
+          </span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <p class={body}>
+              Burada <var>G</var> = {g} m³ kg⁻¹ s⁻² kütleçekim sabitidir. Simülasyon gerçek değerleri kullanır: Dünya’nın
+              kütlesi {earthMass} kg, Ay’ınki {moonMass} kg, aralarındaki ortalama uzaklık {moonDistance}. Her cisim
+              diğer bütün cisimlerle ayrı ayrı çekişir ve bu kuvvetler toplanır.
+            </p>
+          ) : (
+            <p class={body}>
+              Here <var>G</var> = {g} m³ kg⁻¹ s⁻² is the gravitational constant. The simulation uses real values: the
+              Earth’s mass is {earthMass} kg, the Moon’s {moonMass} kg, and their mean distance {moonDistance}. Every
+              body pulls on every other body, and the forces add up.
+            </p>
+          )
+        }
+
+        {
+          locale === 'tr' ? (
+            <>
+              <h3 class:list={[h3, 'mt-10']}>Yön ve bileşenler</h3>
+              <p class={body}>
+                Kuvvet, bir cisimden ötekine doğru yönelir. Aradaki farklar Δ<var>x</var> ve Δ<var>y</var> ise bu
+                yönün açısı atan2 ile bulunur:
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 class:list={[h3, 'mt-10']}>Direction and components</h3>
+              <p class={body}>
+                The force points from one body toward the other. With Δ<var>x</var> and Δ<var>y</var> the differences
+                between them, the angle of that direction comes from atan2:
+              </p>
+            </>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.angle}>
+          <span><var>θ</var> = atan2(Δ<var>y</var>, Δ<var>x</var>)</span>
+        </p>
+        <p class={formula} role="math" aria-label={say.components}>
+          <span><var>F</var><sub><var>x</var></sub> = <var>F</var> cos <var>θ</var>,</span>{' '}
+          <span><var>F</var><sub><var>y</var></sub> = <var>F</var> sin <var>θ</var></span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <p class={body}>
+              atan(Δ<var>y</var>/Δ<var>x</var>) yerine atan2 kullanılmasının nedeni, açının dört bölgede de doğru
+              çıkmasıdır: Bölmede Δ<var>x</var>’in işareti kaybolur, atan2 ise iki farkın işaretine ayrı ayrı bakar.
+              cos <var>θ</var> = Δ<var>x</var>/<var>r</var> ve sin <var>θ</var> = Δ<var>y</var>/<var>r</var> olduğundan
+              bu, kuvveti birim vektörle çarpmakla tamamen aynı sonucu verir. Sonra her bileşen kütleye bölünür{' '}
+              (<var>F</var> = <var>m</var>
+              <var>a</var>):
+            </p>
+          ) : (
+            <p class={body}>
+              atan2 is used rather than atan(Δ<var>y</var>/Δ<var>x</var>) because the division loses the sign of
+              Δ<var>x</var>, while atan2 looks at both signs and gets the angle right in all four quadrants. Since
+              cos <var>θ</var> = Δ<var>x</var>/<var>r</var> and sin <var>θ</var> = Δ<var>y</var>/<var>r</var>, this is
+              exactly the same as multiplying the force by the unit vector. Each component is then divided by the
+              mass (<var>F</var> = <var>m</var>
+              <var>a</var>):
+            </p>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.acceleration}>
+          <span><var>a</var><sub><var>x</var></sub> = <var>F</var><sub><var>x</var></sub>/<var>m</var>,</span>{' '}
+          <span><var>a</var><sub><var>y</var></sub> = <var>F</var><sub><var>y</var></sub>/<var>m</var></span>
+        </p>
+      </div>
+
+      <div class="min-w-0">
+        {
+          locale === 'tr' ? (
+            <>
+              <h3 class={h3}>Hız Verlet yöntemi</h3>
+              <p class={body}>
+                İvmeler bilinince konumlar ve hızlar küçük zaman adımlarıyla (Δ<var>t</var>) ilerletilir. Her adımda
+                hız yarım adım güncellenir, konum bu hızla bir tam adım ilerler, yeni konumlarda ivmeler yeniden
+                hesaplanır ve hız kalan yarım adımla tamamlanır:
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 class={h3}>The velocity Verlet step</h3>
+              <p class={body}>
+                With the accelerations known, positions and velocities move forward in small time steps Δ<var>t</var>.
+                Each step gives the velocity half a kick, moves the position a full step with it, works out the
+                accelerations at the new positions, and finishes the velocity with the other half:
+              </p>
+            </>
+          )
+        }
+        <p class={formulaLines} role="math" aria-label={say.verlet}>
+          <span><var>v</var><sub><var>n</var>+½</sub> = <var>v</var><sub><var>n</var></sub> + <var>a</var><sub><var>n</var></sub> Δ<var>t</var>/2</span>
+          <span><var>x</var><sub><var>n</var>+1</sub> = <var>x</var><sub><var>n</var></sub> + <var>v</var><sub><var>n</var>+½</sub> Δ<var>t</var></span>
+          <span><var>v</var><sub><var>n</var>+1</sub> = <var>v</var><sub><var>n</var>+½</sub> + <var>a</var><sub><var>n</var>+1</sub> Δ<var>t</var>/2</span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <div class={body}>
+              <p>
+                Bu yöntem simplektiktir: Hareketin geometrisini korur. Basit Euler yöntemi her turda yörüngeye biraz
+                enerji ekler ve Ay yavaş yavaş dışarı doğru sarmal çizerek uzaklaşır. Verlet’te ise toplam enerji
+                yalnızca çok az dalgalanır, zamanla birikmez. “Ölçümler” bölümündeki enerji kayması bunu sizin
+                gözünüzün önünde sınar: Dünya ve Ay sahnesinde milyonda birin çok altında kalır.
+              </p>
+              <p>
+                Bir adım, cisim çiftlerinin en kısa dinamik zamanının, yani √(<var>r</var>³/<var>G</var>(<var>m</var>
+                <sub>1</sub> + <var>m</var>
+                <sub>2</sub>)) değerinin {eta} katından uzun olmaz; bu, dairesel bir yörüngede tur başına yaklaşık 300
+                adım demektir. Çok yakın geçişlerde dev bir itki oluşmasın diye uzaklık √(<var>r</var>² + <var>ε</var>²)
+                olarak alınır (<var>ε</var> = {softening} km); bu yumuşatma, gerçek cisimler birbirine o kadar
+                yaklaşmadan çarpıştığı için pratikte hiçbir şeyi değiştirmez. İki cisim gerçek yarıçaplarıyla
+                (kütle ve yoğunluktan) birbirine değince tek cisim olur; toplam kütle ve momentum korunur.
+              </p>
+            </div>
+          ) : (
+            <div class={body}>
+              <p>
+                This method is symplectic: it keeps the geometry of the motion. The simple Euler method adds a little
+                energy every turn, and the Moon slowly spirals outward. With Verlet the total energy only wobbles
+                slightly and does not build up. The energy drift under “Measurements” checks that as you watch: in the
+                Earth and Moon scene it stays well below one part in a million.
+              </p>
+              <p>
+                A step is never longer than {eta} times the shortest dynamical time of any pair, √(<var>r</var>³/
+                <var>G</var>(<var>m</var>
+                <sub>1</sub> + <var>m</var>
+                <sub>2</sub>)), about 300 steps per circular orbit. So that a very close pass cannot give an enormous
+                kick, the distance is taken as √(<var>r</var>² + <var>ε</var>²) with <var>ε</var> = {softening} km;
+                real bodies collide long before this softening matters. When two bodies touch, using their real radii
+                from mass and density, they merge into one, keeping their total mass and momentum.
+              </p>
+            </div>
+          )
+        }
+
+        {
+          locale === 'tr' ? (
+            <>
+              <h3 class:list={[h3, 'mt-10']}>Dairesel yörünge ve periyot</h3>
+              <p class={body}>
+                <var>M</var> kütleli bir cismin çevresinde <var>r</var> uzaklıkta daire çizmek için çekim, dairesel
+                hareketin gerektirdiği <var>m</var>
+                <var>v</var>²/<var>r</var> kuvvetine eşit olmalıdır. Buradan dairesel hız çıkar:
+              </p>
+            </>
+          ) : (
+            <>
+              <h3 class:list={[h3, 'mt-10']}>Circular orbits and periods</h3>
+              <p class={body}>
+                To circle a body of mass <var>M</var> at distance <var>r</var>, gravity has to supply exactly the force
+                circular motion needs, <var>m</var>
+                <var>v</var>²/<var>r</var>. That gives the circular speed:
+              </p>
+            </>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.circular}>
+          <span><var>v</var> = √<span class={root}><var>G</var><var>M</var>/<var>r</var></span></span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <p class={body}>
+              “Dairesel yörünge” düğmesi bu hızı yarıçapa dik olarak verir (eklenen kütle de hesaba katılır:{' '}
+              <var>M</var> yerine <var>M</var> + <var>m</var>). Hız bunun √2 katını aşarsa cisim kaçar. Seçili cismin
+              periyodu, onu en güçlü çeken cisimle birlikte iki cisimli bir sistem gibi düşünülerek enerjisinden
+              (vis-viva) hesaplanır; burada <var>a</var> yörüngenin büyük yarı eksenidir:
+            </p>
+          ) : (
+            <p class={body}>
+              The “Circular orbit” button gives this speed at right angles to the radius (counting the added mass too,
+              with <var>M</var> + <var>m</var> for <var>M</var>). Faster than √2 times it, a body escapes. The period of
+              the selected body comes from its energy (vis-viva), treating it and the body that pulls on it hardest as
+              a pair on their own, with <var>a</var> the semi-major axis of the orbit:
+            </p>
+          )
+        }
+        <p class={formula} role="math" aria-label={say.period}>
+          <span><var>T</var> = 2π √<span class={root}><var>a</var>³/<var>G</var><var>M</var></span></span>
+        </p>
+        {
+          locale === 'tr' ? (
+            <p class={body}>
+              Görünümde cisimler olduklarından büyük çizilir. Gerçek ölçekte Ay, Dünya’ya olan uzaklığına göre bir
+              noktadan farksız olurdu; bu yüzden her cismin ekranda kütlesiyle büyüyen bir en küçük boyutu vardır.
+              Yakınlaştığınızda gerçek boyutlarına küçülürler. Uzaklıklar, kütleler ve hareket ise gerçektir.
+            </p>
+          ) : (
+            <p class={body}>
+              In the view, bodies are drawn larger than they are. To scale, the Moon would be a dot at its distance
+              from the Earth, so every body has a minimum size on screen that grows with its mass, and shrinks to its
+              real size when you zoom in. Distances, masses and motion are real.
+            </p>
+          )
+        }
+      </div>
+    </div>
+  </Section>
+
+  <ToolTips title={m.tips} tips={tips[locale]} columns={3} />
+</BaseLayout>
